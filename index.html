@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jerry's webpage</title>
+<style>
+  :root {
+    --bar-bg: rgb(40, 89, 156);
+    --bar-fg: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: #1c2733;
+    background: #f4f6f9;
+  }
+
+  /* ---- 上方栏 (top bar) ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 64px;
+    background: var(--bar-bg);
+    color: var(--bar-fg);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  }
+  .topbar .site-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .topbar .site-name:hover {
+    opacity: 0.88;
+  }
+
+  /* ---- 内容区 (content area, placeholder scaffold) ---- */
+  .content {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+  .content h1 {
+    font-size: 28px;
+    color: #15233b;
+    margin-bottom: 16px;
+  }
+  .content p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #44556a;
+    margin-bottom: 14px;
+  }
+  .card {
+    margin-top: 28px;
+    background: #ffffff;
+    border: 1px solid #e3e8ef;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+  }
+  .card h2 {
+    font-size: 18px;
+    color: #28599c;
+    margin-bottom: 10px;
+  }
+  .card ul {
+    margin: 8px 0 0 20px;
+    color: #44556a;
+    line-height: 1.8;
+  }
+
+  /* 产品链接 */
+  .prod-link {
+    color: #28599c;
+    font-size: 17px;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(40, 89, 156, 0.4);
+  }
+  .prod-link:hover { border-bottom-color: #28599c; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; }
+    .topbar .site-name { font-size: 17px; }
+    .content { padding: 36px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+  <!-- 上方栏：左上角站名作为主站链接 -->
+  <header class="topbar">
+    <a class="site-name" href="index.html">Jerry's webpage</a>
+  </header>
+
+  <!-- 内容区（起始脚手架，可继续扩展） -->
+  <main class="content">
+    <h1>欢迎来到 Jerry's webpage</h1>
+    <p>这是一个基于微软 GitHub 的网站，用于做各种各样有用的东西；也不知道想写些什么。</p>
+
+    <div class="card">
+      <h2>产品</h2>
+      <p><a class="prod-link" href="https://jerry-j-mc-creativer.github.io/daily-news/" target="_blank" rel="noopener">全球新闻</a></p>
+    </div>
+  </main>
+</body>
+</html>

@@ -9,7 +9,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>通知 · Jerry's webpage</title>
-<meta name="description" content="站内通知列表。" />
+<meta name="description" content="站内通知：系统、消息与评论。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>
@@ -64,11 +64,18 @@
   html[data-theme="dark"] .fab { background: rgba(255, 255, 255, 0.85); border-color: rgba(255, 255, 255, 0.9); }
 
   .content { max-width: 820px; margin: 0 auto; padding: 40px 24px 64px; }
-  .hero { margin-bottom: 24px; }
+  .hero { margin-bottom: 20px; }
   .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 8px; }
-  .hero p { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 600px; }
-  .card { margin-top: 26px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 24px; box-shadow: var(--card-shadow); }
-  .card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 14px; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tab { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text); border-radius: 999px; padding: 8px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .tab:hover { border-color: var(--accent); }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab .tb { background: var(--danger); color: #fff; border-radius: 999px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .tab.active .tb { background: #fff; color: var(--danger); }
+
+  .card { margin-top: 6px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px; box-shadow: var(--card-shadow); }
+  .card h2 { font-size: 1.1rem; color: var(--accent); margin-bottom: 12px; }
 
   .notice { border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; background: var(--card-bg); }
   .notice:last-child { margin-bottom: 0; }
@@ -77,24 +84,41 @@
   .notice p { font-size: 0.98rem; line-height: 1.7; color: var(--muted); white-space: pre-wrap; word-break: break-word; }
   .notice .del { float: right; border: none; background: transparent; color: var(--danger); font-size: 0.85rem; cursor: pointer; font-weight: 700; }
   .notice .del:hover { text-decoration: underline; }
-  .hint { color: var(--muted); opacity: 0.7; font-style: italic; font-size: 0.95rem; }
 
+  .cmt-notif { border: 1px solid var(--card-border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; background: var(--card-bg); display: flex; gap: 12px; align-items: flex-start; }
+  .cmt-notif:last-child { margin-bottom: 0; }
+  .cmt-notif .ico { font-size: 1.3rem; line-height: 1.4; flex: 0 0 auto; }
+  .cmt-notif .main { min-width: 0; flex: 1; }
+  .cmt-notif .title { font-size: 0.98rem; color: var(--text); font-weight: 600; }
+  .cmt-notif .title a { color: var(--accent); text-decoration: none; }
+  .cmt-notif .title a:hover { text-decoration: underline; }
+  .cmt-notif .snippet { font-size: 0.92rem; color: var(--muted); margin-top: 4px; white-space: pre-wrap; word-break: break-word; }
+  .cmt-notif .time { font-size: 0.74rem; color: var(--muted); margin-top: 4px; }
+
+  .msg { border: 1px solid var(--card-border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; background: var(--card-bg); }
+  .msg:last-child { margin-bottom: 0; }
+  .msg .from { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+  .msg h3 { font-size: 1.02rem; color: var(--text); margin: 4px 0 6px; }
+  .msg p { font-size: 0.95rem; line-height: 1.7; color: var(--muted); white-space: pre-wrap; word-break: break-word; }
+  .msg .time { font-size: 0.74rem; color: var(--muted); margin-top: 6px; }
+
+  .edit-label { display: block; font-size: 0.82rem; color: var(--muted); margin-top: 14px; font-weight: 600; }
   .edit-input, .edit-textarea { width: 100%; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; font-size: 1rem; font-family: inherit; color: var(--text); background: var(--panel-bg); margin-top: 6px; }
   .edit-input:focus, .edit-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
   .edit-textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
-  .edit-label { display: block; font-size: 0.82rem; color: var(--muted); margin-top: 14px; font-weight: 600; }
   .post-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 10px 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 14px; }
   .post-btn:hover { filter: brightness(1.08); }
 
-  .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
+  .mark-read { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-bottom: 14px; }
+  .mark-read:hover { border-color: var(--accent); color: var(--accent); }
+
+  .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; max-width: 90vw; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
   .toast.err { background: var(--danger); }
 
-  .site-footer { border-top: 1px solid var(--card-border); margin-top: 48px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
-  .site-footer a { color: var(--accent); text-decoration: none; }
-  .site-footer a:hover { text-decoration: underline; }
-  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
+  .hint { color: var(--muted); opacity: 0.75; font-style: italic; font-size: 0.95rem; padding: 10px 0; }
   [hidden] { display: none !important; }
+  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } .tab { padding: 7px 12px; font-size: 0.88rem; } }
 </style>
   <link rel="stylesheet" href="../common.css" />
 </head>
@@ -113,7 +137,7 @@
       <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
       <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
     </div>
   </header>
@@ -121,23 +145,64 @@
   <main class="content">
     <section class="hero">
       <h1 data-zh="通知" data-en="Notice">通知</h1>
-      <p data-zh="站内的公告与通知都会显示在这里。" data-en="Site announcements and notices appear here.">站内的公告与通知都会显示在这里。</p>
     </section>
 
-    <!-- 管理员发布表单（仅管理员可见） -->
-    <section class="card" id="adminPanel" hidden>
-      <h2 data-zh="发布通知（管理员）" data-en="Publish Notice (Admin)">发布通知（管理员）</h2>
-      <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
-      <input class="edit-input" id="nTitle" maxlength="120" placeholder="通知标题" />
-      <span class="edit-label" data-zh="内容" data-en="Body">内容</span>
-      <textarea class="edit-textarea auto-grow" id="nBody" maxlength="2000" placeholder="通知内容……"></textarea>
-      <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
+    <div class="tabs">
+      <button class="tab active" data-tab="system" data-zh="系统通知" data-en="System">系统通知<span class="tb" id="tbSystem" hidden></span></button>
+      <button class="tab" data-tab="message" data-zh="消息通知" data-en="Messages">消息通知<span class="tb" id="tbMessage" hidden></span></button>
+      <button class="tab" data-tab="comment" data-zh="评论通知" data-en="Comments">评论通知<span class="tb" id="tbComment" hidden></span></button>
+    </div>
+
+    <!-- 系统通知 -->
+    <section id="panelSystem">
+      <section class="card" id="adminPanel" hidden>
+        <h2 data-zh="发布系统通知（管理员）" data-en="Publish System Notice (Admin)">发布系统通知（管理员）</h2>
+        <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
+        <input class="edit-input" id="nTitle" maxlength="120" placeholder="通知标题" />
+        <span class="edit-label" data-zh="内容" data-en="Body">内容</span>
+        <textarea class="edit-textarea auto-grow" id="nBody" maxlength="2000" placeholder="通知内容……"></textarea>
+        <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
+      </section>
+
+      <button class="mark-read" id="markSystem" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
+      <div class="card">
+        <h2 data-zh="全部系统通知" data-en="All System Notices">全部系统通知</h2>
+        <div id="listSystem"></div>
+        <div id="emptySystem" class="hint" hidden data-zh="暂无系统通知。" data-en="No system notices.">暂无系统通知。</div>
+      </div>
     </section>
 
-    <section class="card">
-      <h2 data-zh="全部通知" data-en="All Notices">全部通知</h2>
-      <div id="list"></div>
-      <div id="empty" class="hint" hidden data-zh="暂无通知。" data-en="No notices yet.">暂无通知。</div>
+    <!-- 消息通知 -->
+    <section id="panelMessage" hidden>
+      <section class="card" id="msgAdminPanel" hidden>
+        <h2 data-zh="发送消息通知（管理员）" data-en="Send Message (Admin)">发送消息通知（管理员）</h2>
+        <span class="edit-label" data-zh="接收者用户名" data-en="Recipient username">接收者用户名</span>
+        <input class="edit-input" id="mTo" maxlength="39" placeholder="GitHub 用户名（不含 @）" />
+        <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
+        <input class="edit-input" id="mTitle" maxlength="120" placeholder="消息标题" />
+        <span class="edit-label" data-zh="内容" data-en="Body">内容</span>
+        <textarea class="edit-textarea auto-grow" id="mBody" maxlength="2000" placeholder="消息内容……（如：你的帖子已经过了审核）"></textarea>
+        <button class="post-btn" id="msgSendBtn" data-zh="发送" data-en="Send">发送</button>
+      </section>
+
+      <button class="mark-read" id="markMessage" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
+      <div class="card">
+        <h2 data-zh="我的消息通知" data-en="My Messages">我的消息通知</h2>
+        <div id="listMessage"></div>
+        <div id="emptyMessage" class="hint" hidden data-zh="暂无消息通知。" data-en="No messages.">暂无消息通知。</div>
+        <div id="needLoginMsg" class="hint" hidden data-zh="登录后可查看你的消息通知。" data-en="Sign in to view your messages.">登录后可查看你的消息通知。</div>
+      </div>
+    </section>
+
+    <!-- 评论通知 -->
+    <section id="panelComment" hidden>
+      <button class="mark-read" id="markComment" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
+      <div class="card">
+        <h2 data-zh="我的评论通知" data-en="My Comment Notifications">我的评论通知</h2>
+        <div id="listComment"></div>
+        <div id="emptyComment" class="hint" hidden data-zh="暂无评论通知。" data-en="No comment notifications.">暂无评论通知。</div>
+        <div id="needLoginCmt" class="hint" hidden data-zh="登录后可查看评论通知。" data-en="Sign in to view comment notifications.">登录后可查看评论通知。</div>
+      </div>
     </section>
   </main>
 
@@ -162,14 +227,7 @@
       var FORBIDDEN = ['fuck','shit','bitch','asshole','bastard','dick','cunt','whore','slut','nigger','faggot','retard','tranny','nazi','kill yourself','kys','傻逼','sb','草泥马','操你','日你','妈的','贱人','婊子','杂种','滚蛋','废青','支那','洋奴','汉奸','狗杂种','加微信','扫码领','免费送','刷单','博彩','赌博','色情','裸聊','办证','代开发票','点击领取','一元购','日赚','月入过万','私聊客服'];
       function findForbidden(t){ if(!t) return null; var low=String(t).toLowerCase(); for(var i=0;i<FORBIDDEN.length;i++){ if(low.indexOf(FORBIDDEN[i].toLowerCase())!==-1) return FORBIDDEN[i]; } return null; }
 
-      var listEl = document.getElementById('list');
-      var emptyEl = document.getElementById('empty');
-      var adminPanel = document.getElementById('adminPanel');
-      var nTitle = document.getElementById('nTitle');
-      var nBody = document.getElementById('nBody');
-      var postBtn = document.getElementById('postBtn');
       var toastEl = document.getElementById('toast');
-
       function toast(msg, isErr) {
         toastEl.textContent = msg;
         toastEl.className = 'toast show' + (isErr ? ' err' : '');
@@ -180,68 +238,177 @@
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
-      function render(notices, isAdmin) {
-        listEl.innerHTML = '';
-        if (!notices.length) { emptyEl.hidden = false; return; }
-        emptyEl.hidden = true;
-        notices.forEach(function (n) {
+      var data = { system: [], messages: [], comments: [], unread: { system: 0, message: 0, comment: 0 } };
+      var isAdmin = false;
+      var currentTab = 'system';
+
+      function refreshBadges() {
+        function setBadge(el, n) { if (n > 0) { el.textContent = n > 99 ? '99+' : String(n); el.hidden = false; } else { el.hidden = true; } }
+        setBadge(document.getElementById('tbSystem'), data.unread.system);
+        setBadge(document.getElementById('tbMessage'), data.unread.message);
+        setBadge(document.getElementById('tbComment'), data.unread.comment);
+        if (window.JW_REFRESH_BADGE) window.JW_REFRESH_BADGE();
+      }
+
+      function markSeen(type) {
+        fetch('/api/notif/seen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: type }) })
+          .then(function () { data.unread[type] = 0; refreshBadges(); })
+          .catch(function () {});
+      }
+
+      function renderSystem() {
+        var el = document.getElementById('listSystem');
+        var empty = document.getElementById('emptySystem');
+        el.innerHTML = '';
+        if (!data.system.length) { empty.hidden = false; return; }
+        empty.hidden = true;
+        data.system.forEach(function (n) {
           var card = document.createElement('div'); card.className = 'notice';
           var del = isAdmin ? '<button class="del" data-id="' + n.id + '">删除</button>' : '';
           card.innerHTML = del + '<h3></h3><div class="meta"></div><p></p>';
           card.querySelector('h3').textContent = n.title || '（无标题）';
           card.querySelector('.meta').textContent = fmtTime(n.ts);
           card.querySelector('p').textContent = n.body || '';
-          if (isAdmin) {
-            card.querySelector('.del').addEventListener('click', function () { delNotice(n.id); });
-          }
-          listEl.appendChild(card);
+          if (isAdmin) card.querySelector('.del').addEventListener('click', function () { delNotice(n.id); });
+          el.appendChild(card);
+        });
+      }
+
+      function renderMessage() {
+        var el = document.getElementById('listMessage');
+        var empty = document.getElementById('emptyMessage');
+        var need = document.getElementById('needLoginMsg');
+        el.innerHTML = '';
+        if (!window.JW_AUTH || !window.JW_AUTH.user) { empty.hidden = true; need.hidden = false; return; }
+        need.hidden = true;
+        if (!data.messages.length) { empty.hidden = false; return; }
+        empty.hidden = true;
+        data.messages.forEach(function (m) {
+          var card = document.createElement('div'); card.className = 'msg';
+          card.innerHTML =
+            '<div class="from"></div><h3></h3><p></p><div class="time"></div>';
+          card.querySelector('.from').textContent = '来自 @' + (m.from || '系统');
+          card.querySelector('h3').textContent = m.title || '（无标题）';
+          card.querySelector('p').textContent = m.body || '';
+          card.querySelector('.time').textContent = fmtTime(m.ts);
+          el.appendChild(card);
+        });
+      }
+
+      function renderComment() {
+        var el = document.getElementById('listComment');
+        var empty = document.getElementById('emptyComment');
+        var need = document.getElementById('needLoginCmt');
+        el.innerHTML = '';
+        if (!window.JW_AUTH || !window.JW_AUTH.user) { empty.hidden = true; need.hidden = false; return; }
+        need.hidden = true;
+        if (!data.comments.length) { empty.hidden = false; return; }
+        empty.hidden = true;
+        data.comments.forEach(function (c) {
+          var card = document.createElement('div'); card.className = 'cmt-notif';
+          var ico = c.type === 'mention' ? '📣' : (c.type === 'reply' ? '↩️' : '💬');
+          var txt;
+          if (c.type === 'mention') txt = '<a href="../post/detail/?post=' + encodeURIComponent(c.postId) + '">@' + esc(c.fromLogin) + '</a> 在评论中 @ 了你';
+          else if (c.type === 'reply') txt = '<a href="../post/detail/?post=' + encodeURIComponent(c.postId) + '">@' + esc(c.fromLogin) + '</a> 回复了你的评论';
+          else txt = '<a href="../post/detail/?post=' + encodeURIComponent(c.postId) + '">@' + esc(c.fromLogin) + '</a> 评论了你的帖子《' + esc(c.postTitle) + '》';
+          card.innerHTML =
+            '<div class="ico">' + ico + '</div>' +
+            '<div class="main">' +
+              '<div class="title">' + txt + '</div>' +
+              (c.text ? '<div class="snippet"></div>' : '') +
+              '<div class="time"></div>' +
+            '</div>';
+          if (c.text) card.querySelector('.snippet').textContent = c.text;
+          card.querySelector('.time').textContent = fmtTime(c.ts);
+          el.appendChild(card);
         });
       }
 
       function load() {
-        fetch('/api/notice')
-          .then(function (r) { return r.ok ? r.json() : { notices: [] }; })
+        fetch('/api/notif')
+          .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (d) {
-            var isAdmin = !!(window.JW_AUTH && window.JW_AUTH.isAdmin);
-            render(d.notices || [], isAdmin);
-            if (isAdmin) adminPanel.hidden = false;
+            if (!d) return;
+            data.system = d.system || [];
+            data.messages = d.messages || [];
+            data.comments = d.comments || [];
+            data.unread = d.unread || { system: 0, message: 0, comment: 0 };
+            isAdmin = !!(window.JW_AUTH && window.JW_AUTH.isAdmin);
+            if (isAdmin) { document.getElementById('adminPanel').hidden = false; document.getElementById('msgAdminPanel').hidden = false; }
+            renderSystem(); renderMessage(); renderComment(); refreshBadges();
           })
-          .catch(function () { render([], false); });
+          .catch(function () {});
       }
 
-      function post() {
-        var title = nTitle.value.trim();
-        var body = nBody.value.trim();
+      // 切换标签
+      function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === tab); });
+        document.getElementById('panelSystem').hidden = tab !== 'system';
+        document.getElementById('panelMessage').hidden = tab !== 'message';
+        document.getElementById('panelComment').hidden = tab !== 'comment';
+        if (data.unread[tab] > 0) markSeen(tab);
+      }
+      document.querySelectorAll('.tab').forEach(function (t) {
+        t.addEventListener('click', function () { switchTab(t.getAttribute('data-tab')); });
+      });
+      ['System','Message','Comment'].forEach(function (k) {
+        document.getElementById('mark' + k).addEventListener('click', function () { markSeen(k.toLowerCase()); });
+      });
+
+      // 系统通知：发布 / 删除
+      function postNotice() {
+        var title = document.getElementById('nTitle').value.trim();
+        var body = document.getElementById('nBody').value.trim();
         if (!title && !body) { toast('标题和内容不能都为空', true); return; }
         var w = findForbidden(title) || findForbidden(body);
         if (w) { toast('含违禁词：「' + w + '」', true); return; }
         fetch('/api/notice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, body: body }) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
-            if (res.ok) { nTitle.value = ''; nBody.value = ''; toast('已发布 ✓'); load(); }
+            if (res.ok) { document.getElementById('nTitle').value = ''; document.getElementById('nBody').value = ''; toast('已发布 ✓'); load(); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else { toast('发布失败', true); }
           })
           .catch(function () { toast('发布失败（网络错误）', true); });
       }
-
       function delNotice(id) {
         if (!confirm('确定删除这条通知？')) return;
         fetch('/api/notice?id=' + encodeURIComponent(id), { method: 'DELETE' })
-          .then(function (r) { return r.ok ? r.json() : null; })
           .then(function () { load(); })
           .catch(function () { toast('删除失败', true); });
       }
+      document.getElementById('postBtn').addEventListener('click', postNotice);
 
-      postBtn.addEventListener('click', post);
+      // 消息通知：发送（管理员）
+      function sendMessage() {
+        var to = document.getElementById('mTo').value.trim();
+        var title = document.getElementById('mTitle').value.trim();
+        var body = document.getElementById('mBody').value.trim();
+        if (!to) { toast('请填写接收者用户名', true); return; }
+        if (!title && !body) { toast('标题和内容不能都为空', true); return; }
+        var w = findForbidden(title) || findForbidden(body);
+        if (w) { toast('含违禁词：「' + w + '」', true); return; }
+        fetch('/api/notif/message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: to, title: title, body: body }) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            if (res.ok) { document.getElementById('mTo').value=''; document.getElementById('mTitle').value=''; document.getElementById('mBody').value=''; toast('已发送给 @' + to + ' ✓'); load(); }
+            else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
+            else if (res.body && res.body.error === 'missing_to') { toast('请填写接收者', true); }
+            else { toast('发送失败', true); }
+          })
+          .catch(function () { toast('发送失败（网络错误）', true); });
+      }
+      document.getElementById('msgSendBtn').addEventListener('click', sendMessage);
 
-      // 进入页面即标记已读（清空红点）
+      // 进入页面即尝试登录态（用于判断管理员 / 显示定向通知）
       fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
-        if (me && me.login) {
-          fetch('/api/notice/seen', { method: 'POST' }).catch(function () {}).finally(load);
-        } else {
-          load();
-        }
+        if (me && me.login) { window.JW_AUTH = window.JW_AUTH || {}; window.JW_AUTH.user = me; window.JW_AUTH.isAdmin = !!me.isAdmin; }
+        load();
+        // 默认标签：优先展示有未读的分类
+        var first = data.unread.comment > 0 ? 'comment' : (data.unread.message > 0 ? 'message' : 'system');
+        // 等 load 完成后再切（load 是异步，简单延时）
+        setTimeout(function () { switchTab(first); }, 350);
       }).catch(load);
     })();
   </script>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<script>
+  // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
+  // pages.dev 域名下不触发，避免循环。
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname);
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>个人主页 - Jerry's webpage</title>
+<meta name="description" content="Jerry 的个人主页：关于我、技能、项目作品与联系方式。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Jerry 的个人主页" />
+<meta property="og:description" content="关于我、技能、项目作品与联系方式。" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<style>
+  :root {
+    --bar-top: rgb(40, 89, 156);
+    --bar-bottom: rgb(0, 120, 212);
+    --accent: #0078d4;
+    --font-scale: 1;
+    --radius: 14px;
+    --bg: #f4f6f9;
+    --text: #1c2733;
+    --muted: #44556a;
+    --card-bg: #ffffff;
+    --card-border: #e3e8ef;
+    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+    --bar-fg: #ffffff;
+    --panel-bg: #ffffff;
+    --panel-border: #e3e8ef;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f1720;
+    --text: #e6edf5;
+    --muted: #9fb0c3;
+    --card-bg: #16212e;
+    --card-border: #243244;
+    --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    --panel-bg: #16212e;
+    --panel-border: #243244;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 0;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
+
+  /* ---- 底部浮动操作按钮（Liquid Glass） ---- */
+  .float-actions { position: fixed; right: 20px; bottom: 20px; z-index: 150; display: flex; gap: 12px; }
+  .fab {
+    width: 50px; height: 42px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 14px; font-size: 1.25rem; line-height: 1;
+    color: #111; background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    cursor: pointer; text-decoration: none; transition: background 0.18s, transform 0.12s;
+  }
+  .fab:hover { background: rgba(255, 255, 255, 0.78); transform: translateY(-1px); }
+  .fab:active { transform: translateY(0); }
+  html[data-theme="dark"] .fab { background: rgba(255, 255, 255, 0.85); border-color: rgba(255, 255, 255, 0.9); }
+
+  /* ---- 内容区 ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 40px 24px 64px; }
+  .card {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 12px; }
+  .card p { font-size: 1rem; line-height: 1.75; color: var(--muted); margin-bottom: 12px; }
+  .card p:last-child { margin-bottom: 0; }
+  .card a.inline-link {
+    color: var(--accent); text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .card a.inline-link:hover { border-bottom-color: var(--accent); }
+
+  /* ---- 个人主页专属 ---- */
+  .profile-head { display: flex; align-items: center; gap: 22px; margin-bottom: 8px; flex-wrap: wrap; }
+  .avatar {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom));
+    color: #fff; font-size: 2.4rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: var(--card-shadow);
+    /* 替换为你自己的头像：把下面这行注释去掉并改路径，例如 background-image: url('img/avatar.jpg'); background-size: cover; */
+  }
+  .profile-name { font-size: 1.9rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .profile-tagline { font-size: 1.05rem; color: var(--muted); margin-top: 6px; max-width: 560px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .tag {
+    background: color-mix(in srgb, var(--accent) 10%, var(--card-bg));
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--card-border));
+    border-radius: 999px; padding: 6px 14px; font-size: 0.92rem; font-weight: 600;
+  }
+  .social-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .social-list li { display: flex; align-items: center; gap: 10px; }
+  .social-list a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .social-list a:hover { text-decoration: underline; }
+  .social-ico { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.8; }
+
+  .project-link {
+    display: block; text-decoration: none; color: inherit; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .project-link:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 6px 18px rgba(20, 35, 59, 0.12); }
+  .project-link h3 { font-size: 1.05rem; color: var(--text); margin-bottom: 6px; }
+  .project-link p { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+  .project-link .project-go { display: inline-block; margin-top: 12px; color: var(--accent); font-weight: 700; font-size: 0.95rem; }
+  .project-link:hover .project-go { text-decoration: underline; }
+  .more-link { display: inline-block; margin-top: 16px; color: var(--accent); font-weight: 700; text-decoration: none; }
+  .more-link:hover { text-decoration: underline; }
+
+  .draft-note {
+    font-size: 0.82rem; color: var(--muted); margin-top: 10px;
+    border-left: 3px solid var(--accent); padding: 4px 12px; background: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--card-border); margin-top: 48px; padding: 24px;
+    text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .content { padding: 28px 16px 48px; }
+    .profile-name { font-size: 1.6rem; }
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a id="bcMain" href="index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" data-zh="个人主页" data-en="Profile">个人主页</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" href="helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- Hero：头像 + 名字 + 一句话（草稿文案，待你修改） -->
+    <section class="hero">
+      <div class="profile-head">
+        <div class="avatar" aria-label="avatar">J</div>
+        <div>
+          <div class="profile-name" data-zh="Jerry" data-en="Jerry">Jerry</div>
+          <div class="profile-tagline" data-zh="独立开发者，热爱用技术把想法变成产品，专注 AI 资讯、个人知识管理与实用工具。"
+               data-en="Independent developer who loves turning ideas into products — focused on AI news, personal knowledge management and handy tools.">独立开发者，热爱用技术把想法变成产品，专注 AI 资讯、个人知识管理与实用工具。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. 关于我 -->
+    <section class="card" id="about">
+      <h2 data-zh="关于我" data-en="About Me">关于我</h2>
+      <p data-zh="这里写一段自我介绍（草稿）：我是一名独立开发者，喜欢把日常痛点做成小工具，也持续关注 AI 与自动化领域。平时会在站点里沉淀一些长期有价值的内容——项目、写作与实用工具。"
+         data-en="A short self-intro (draft): I'm an independent developer who enjoys turning everyday friction into small tools, and I keep a close eye on AI and automation. I use this site to accumulate long-term, useful content — projects, writing and handy tools.">这里写一段自我介绍（草稿）：我是一名独立开发者，喜欢把日常痛点做成小工具，也持续关注 AI 与自动化领域。平时会在站点里沉淀一些长期有价值的内容——项目、写作与实用工具。</p>
+      <div class="draft-note" data-zh="※ 以上为草稿文案，告诉我想怎么写，我来改。" data-en="※ Draft copy — tell me how you'd like it and I'll revise.">※ 以上为草稿文案，告诉我想怎么写，我来改。</div>
+    </section>
+
+    <!-- 4. 联系方式 / 社交 -->
+    <section class="card" id="contact">
+      <h2 data-zh="联系方式 / 社交" data-en="Contact / Social">联系方式 / 社交</h2>
+      <ul class="social-list">
+        <li>
+          <svg class="social-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4.4-8 5-8-5V6l8 5 8-5z"/></svg>
+          <a href="mailto:jerryjwx@163.com" data-zh="邮箱：jerryjwx@163.com" data-en="Email: jerryjwx@163.com">邮箱：jerryjwx@163.com</a>
+        </li>
+        <li>
+          <svg class="social-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5A11.5 11.5 0 0 0 .5 12 11.5 11.5 0 0 0 12 23.5 11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5zM8.8 19.1c-.4.1-.6-.2-.6-.4v-3.3c0-.2 0-.5-.1-.6-1.1.2-1.3-.5-.1-1.1 1.2-.5 2.5-1.6 3-2.7.2-.6.1-1.1-.4-1.4-.6-.2-1.4-.2-2.1.1-.3.1-.5.4-.4.6.3.7.9 1.2.9 1.2s-.4.1-.8-.1c-.2-.1-.4-.2-.6-.1-.1.1 0 .3.1.4.3.4.7.8 1.2 1.1-.9.1-1.7.5-1.6 1.6.4 1.4 2.6 1 3.7.7.1.4.4.7.8.7v2.1c0 .2-.2.5-.6.4z"/></svg>
+          <a href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a>
+        </li>
+        <li>
+          <svg class="social-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 3v2.2c-.4-.1-.9-.2-1.3-.2-2 0-3.2 1.4-3.2 3.4v2.2H8.2v2.6h2.3V21h2.8v-5.6h2.2v-2.6h-2.2V10c0-.8.3-1.2 1.1-1.2.3 0 .6 0 .8.1z"/></svg>
+          <a href="https://space.bilibili.com/" target="_blank" rel="noopener" data-zh="哔哩哔哩（待补账号主页）" data-en="Bilibili (profile TBD)">哔哩哔哩（待补账号主页）</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 2. 技能 / 专长 -->
+    <section class="card" id="skills">
+      <h2 data-zh="技能 / 专长" data-en="Skills">技能 / 专长</h2>
+      <div class="tags">
+        <span class="tag" data-zh="前端开发" data-en="Front-end">前端开发</span>
+        <span class="tag" data-zh="AI 应用" data-en="AI Apps">AI 应用</span>
+        <span class="tag" data-zh="内容创作" data-en="Content">内容创作</span>
+        <span class="tag" data-zh="自动化" data-en="Automation">自动化</span>
+        <span class="tag" data-zh="个人知识管理" data-en="PKM">个人知识管理</span>
+      </div>
+    </section>
+
+    <!-- 3. 项目 / 作品 -->
+    <section class="card" id="projects">
+      <h2 data-zh="项目 / 作品" data-en="Projects">项目 / 作品</h2>
+
+      <a class="project-link" href="products.html">
+        <h3 data-zh="每日全球要闻" data-en="Daily Global News">每日全球要闻</h3>
+        <p data-zh="自动聚合并排版全球要闻的日报站点，支持中英双语与本地化部署。"
+           data-en="An automated daily news digest site with bilingual support and local-friendly deployment.">自动聚合并排版全球要闻的日报站点，支持中英双语与本地化部署。</p>
+        <span class="project-go" data-zh="查看详情 →" data-en="View details →">查看详情 →</span>
+      </a>
+
+      <a class="project-link" href="products.html" style="margin-top:18px">
+        <h3 data-zh="小蓝页（本站点）" data-en="Jerry's webpage (this site)">小蓝页（本站点）</h3>
+        <p data-zh="聚合新闻、项目与工具的个人的门面站点，支持 GitHub 登录与云端设置同步。"
+           data-en="A personal hub aggregating news, projects and tools, with GitHub sign-in and cloud-synced settings.">聚合新闻、项目与工具的个人的门面站点，支持 GitHub 登录与云端设置同步。</p>
+        <span class="project-go" data-zh="查看详情 →" data-en="View details →">查看详情 →</span>
+      </a>
+
+      <a class="more-link" href="products.html" data-zh="查看全部项目 →" data-en="All projects →">查看全部项目 →</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry · <span data-zh="基于 GitHub Pages 与 Cloudflare 构建" data-en="Built with GitHub Pages & Cloudflare">基于 GitHub Pages 与 Cloudflare 构建</span></div>
+  </footer>
+
+  <!-- 底部浮动操作按钮（Liquid Glass） -->
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var en = cur.lang === 'en';
+        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+
+      applyAll();
+    })();
+  </script>
+</body>
+</html>

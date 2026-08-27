@@ -128,7 +128,7 @@
       <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
       <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
     </div>
   </header>
@@ -173,7 +173,7 @@
 
     <section class="card" id="authCard">
       <h2 data-zh="账户" data-en="Account">账户</h2>
-      <button class="seg" id="settingsAuthBtn" type="button">GitHub 登录</button>
+      <button class="seg" id="settingsAuthBtn" type="button">登录</button>
     </section>
 
     <a class="back-home" href="../index.html" data-zh="返回主页" data-en="Back to homepage">返回主页</a>
@@ -279,7 +279,7 @@
           settingsAuthBtn.textContent = en ? 'Sign out' : '退出登录';
           settingsAuthBtn.onclick = function () { if (window.JW_LOGOUT) window.JW_LOGOUT(); };
         } else {
-          settingsAuthBtn.textContent = en ? 'Sign in with GitHub' : 'GitHub 登录';
+          settingsAuthBtn.textContent = en ? 'Sign in' : '登录';
           settingsAuthBtn.onclick = function () { if (window.JW_LOGIN) window.JW_LOGIN(); };
         }
       };

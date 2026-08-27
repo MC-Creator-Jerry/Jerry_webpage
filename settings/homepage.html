@@ -125,6 +125,8 @@
     <div class="bar-right">
       <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
     </div>
   </header>
 
@@ -159,6 +161,10 @@
         <span class="set-label" data-zh="圆角" data-en="Corner radius">圆角</span>
         <input type="range" id="optRadius" min="0" max="28" step="2" value="14" />
         <div class="set-hint" id="radiusHint">14px</div>
+      </div>
+      <div class="set-row" style="margin-top: 6px;">
+        <button class="seg" id="syncCloudBtn" data-zh="同步到云端" data-en="Sync to cloud">同步到云端</button>
+        <span class="set-hint" id="syncCloudStatus"></span>
       </div>
     </section>
 
@@ -205,7 +211,8 @@
           if (txt != null) n.textContent = txt;
         }
       }
-      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      window.applyAll = function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      function syncCloud() { if (window.saveUserPrefs) window.saveUserPrefs(cur); }
       function segActive(groupId, val) {
         var btns = document.querySelectorAll('#' + groupId + ' .seg');
         for (var i = 0; i < btns.length; i++) {
@@ -226,24 +233,36 @@
       document.getElementById('optLang').addEventListener('click', function (e) {
         var b = e.target.closest('.seg'); if (!b) return;
         cur.lang = b.getAttribute('data-val');
-        set(K.lang, cur.lang); segActive('optLang', cur.lang); applyLang();
+        set(K.lang, cur.lang); segActive('optLang', cur.lang); applyLang(); syncCloud();
       });
       document.getElementById('optTheme').addEventListener('click', function (e) {
         var b = e.target.closest('.seg'); if (!b) return;
         cur.theme = b.getAttribute('data-val');
-        set(K.theme, cur.theme); segActive('optTheme', cur.theme); applyTheme();
+        set(K.theme, cur.theme); segActive('optTheme', cur.theme); applyTheme(); syncCloud();
       });
       document.getElementById('optFont').addEventListener('input', function (e) {
         cur.font = e.target.value;
-        set(K.font, cur.font); applyFont();
+        set(K.font, cur.font); applyFont(); syncCloud();
         document.getElementById('fontHint').textContent = (parseFloat(cur.font)).toFixed(2) + '×';
       });
       document.getElementById('optRadius').addEventListener('input', function (e) {
         cur.radius = e.target.value;
-        set(K.radius, cur.radius); applyRadius();
+        set(K.radius, cur.radius); applyRadius(); syncCloud();
         document.getElementById('radiusHint').textContent = cur.radius + 'px';
+      });
+
+      document.getElementById('syncCloudBtn').addEventListener('click', function () {
+        var status = document.getElementById('syncCloudStatus');
+        var en = document.documentElement.lang === 'en';
+        if (!window.JW_AUTH || !window.JW_AUTH.user) {
+          status.textContent = en ? 'Please sign in first' : '请先登录';
+          return;
+        }
+        if (window.saveUserPrefs) window.saveUserPrefs(cur);
+        status.textContent = en ? 'Saved' : '已同步';
       });
     })();
   </script>
+<script src="../auth.js"></script>
 </body>
 </html>

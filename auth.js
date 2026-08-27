@@ -5,7 +5,33 @@
 (function () {
   var loginBtn = document.getElementById('loginBtn');
   var logoutBtn = document.getElementById('logoutBtn');
-  window.JW_AUTH = { user: null };
+  window.JW_AUTH = { user: null, isAdmin: false };
+
+  // 注入通知红点样式（避免给每个页面单独加 CSS）
+  (function injectBadgeStyle() {
+    var s = document.createElement('style');
+    s.textContent =
+      '.bar-btn{position:relative}' +
+      '.bar-btn .badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:6px;background:#d13438;color:#fff;border-radius:999px;font-size:.7rem;font-weight:700;line-height:1}';
+    document.head.appendChild(s);
+  })();
+
+  // 蓝条「通知」红点：拉取未读数量并刷新
+  function updateNoticeBadge() {
+    var badge = document.getElementById('noticeBadge');
+    if (!badge) return;
+    fetch('/api/notice')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && d.unread > 0) {
+          badge.textContent = d.unread > 99 ? '99+' : String(d.unread);
+          badge.hidden = false;
+        } else {
+          badge.hidden = true;
+        }
+      })
+      .catch(function () { badge.hidden = true; });
+  }
 
   // ← 填入 GitHub OAuth App 的 Client ID；为空则视为未配置（按钮隐藏）
   var CLIENT_ID = 'Ov23ctu9zRxIQ0o0uxiJ';
@@ -25,18 +51,22 @@
 
   function setLoggedIn(user) {
     window.JW_AUTH.user = user;
+    window.JW_AUTH.isAdmin = !!(user && user.isAdmin);
     if (loginBtn) loginBtn.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = '';
     fetch('/api/usersettings')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { if (d && d.prefs) applyUserPrefs(d.prefs); })
       .catch(function () {});
+    updateNoticeBadge();
   }
 
   function setLoggedOut() {
     window.JW_AUTH.user = null;
+    window.JW_AUTH.isAdmin = false;
     if (loginBtn) loginBtn.style.display = '';
     if (logoutBtn) logoutBtn.style.display = 'none';
+    updateNoticeBadge();
   }
 
   // 暴露给设置页：把当前设置保存到云端（用户身份由后端 cookie 识别）

@@ -227,6 +227,7 @@
   }
   [hidden] { display: none !important; }
 </style>
+  <link rel="stylesheet" href="common.css" />
 </head>
 <body>
   <header class="topbar">
@@ -266,7 +267,7 @@
     <section class="card" id="about">
       <h2 data-zh="关于我" data-en="About Me">关于我</h2>
       <p id="aboutDisplay"></p>
-      <textarea class="edit-textarea" id="aboutInput" hidden maxlength="2000" placeholder="写一段自我介绍……"></textarea>
+      <textarea class="edit-textarea auto-grow" id="aboutInput" hidden maxlength="2000" placeholder="写一段自我介绍……"></textarea>
     </section>
 
     <!-- 4. 联系方式 / 社交（静态，不在本次编辑范围） -->
@@ -569,5 +570,6 @@
         .catch(function () {});
     })();
   </script>
+  <script src="common.js"></script>
 </body>
 </html>

@@ -240,6 +240,7 @@
     </div>
     <div class="bar-right">
       <button class="bar-btn" id="editBtn" hidden data-zh="编辑" data-en="Edit">编辑</button>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="通知" data-en="Notice">通知<span class="badge" id="noticeBadge" hidden></span></a>
       <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
       <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
@@ -510,7 +511,7 @@
         skillsDisplay.hidden = false; skillsEdit.hidden = true;
         projectsDisplay.hidden = false; projectsEdit.hidden = true;
         editBar.hidden = true;
-        if (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login === OWNER) editBtn.hidden = false;
+        if (window.JW_AUTH && window.JW_AUTH.isAdmin) editBtn.hidden = false;
       }
 
       function checkForbidden(c) {
@@ -562,7 +563,7 @@
       fetch('/api/me')
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
-          if (d && d.login && d.login === OWNER) editBtn.hidden = false;
+          if (d && d.isAdmin) editBtn.hidden = false;
         })
         .catch(function () {});
     })();

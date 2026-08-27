@@ -131,3 +131,42 @@ input, textarea, select { font-family: inherit; }
 
 /* ============ 10. 头像弹层不溢出屏幕 ============ */
 .user-popup { max-width: calc(100vw - 24px); box-sizing: border-box; }
+
+/* ============ 11. 竖屏特殊布局：浮动按钮放蓝条上方，蓝条按钮放蓝条下方 ============ */
+@media (orientation: portrait) {
+  /* 浮动操作按钮移到小蓝条上方（小蓝条外） */
+  body { padding-top: 58px; }
+  .float-actions {
+    position: fixed;
+    top: 8px;
+    right: 16px;
+    bottom: auto;
+    left: auto;
+    z-index: 200;
+    gap: 10px;
+  }
+  .topbar { top: 58px; }
+
+  /* 小蓝条内按钮过多时整行放到小蓝条下方 */
+  .topbar {
+    flex-wrap: wrap;
+    padding: 8px 14px;
+    min-height: 0;
+    gap: 6px 10px;
+  }
+  .bar-left { width: 100%; flex: 0 0 auto; min-width: 0; }
+  .bar-right {
+    width: 100%;
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    order: 3;
+    margin-top: 2px;
+  }
+  .bar-btn { padding: 7px 10px; font-size: .82rem; white-space: nowrap; }
+}
+@media (orientation: portrait) and (max-width: 400px) {
+  .bar-btn { padding: 6px 8px; font-size: .76rem; }
+  .site-name { font-size: 1rem; }
+}

@@ -103,6 +103,32 @@
   .site-footer a { color: var(--accent); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
 
+  /* 账户危险操作区 */
+  .account-manage { margin-top: 18px; border-top: 1px dashed var(--card-border); padding-top: 16px; }
+  .account-status { font-size: 0.85rem; color: var(--muted); margin-bottom: 12px; min-height: 1.2em; }
+  .danger-btn {
+    display: block; width: 100%; margin-top: 10px; padding: 12px 14px; border: none; border-radius: 10px;
+    background: #d13438; color: #fff; font-size: 0.95rem; font-weight: 700; cursor: pointer; text-align: center;
+  }
+  .danger-btn:hover { background: #b62b2f; }
+  .danger-btn:disabled { background: #c9c9c9; cursor: not-allowed; }
+  .neutral-btn {
+    display: block; width: 100%; margin-top: 10px; padding: 12px 14px; border: 1px solid var(--card-border);
+    border-radius: 10px; background: var(--card-bg); color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: center;
+  }
+  .neutral-btn:hover { background: var(--panel-bg); }
+  .neutral-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* 二次确认弹窗 */
+  .modal-mask { position: fixed; inset: 0; background: rgba(10, 18, 30, .55); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+  .modal-box { background: var(--card-bg); color: var(--text); width: 100%; max-width: 380px; border-radius: 16px; padding: 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, .3); }
+  .modal-box h3 { font-size: 1.1rem; margin-bottom: 12px; }
+  .modal-box p { font-size: 0.95rem; line-height: 1.7; color: var(--muted); margin-bottom: 20px; white-space: pre-wrap; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions .seg { flex: 1; justify-content: center; padding: 11px; }
+  .modal-actions .seg.danger { background: #d13438; color: #fff; border-color: #d13438; }
+  .modal-actions .seg.danger:hover { background: #b62b2f; }
+
   @media (max-width: 560px) {
     .topbar { padding: 0 14px; min-height: 56px; }
     .site-name { font-size: 1.05rem; }
@@ -174,6 +200,11 @@
     <section class="card" id="authCard">
       <h2 data-zh="账户" data-en="Account">账户</h2>
       <button class="seg" id="settingsAuthBtn" type="button">登录</button>
+      <div class="account-manage" id="accountManage" hidden>
+        <div class="account-status" id="accountStatus"></div>
+        <button class="danger-btn" id="closeAccountBtn" type="button">注销该账户</button>
+        <button class="danger-btn" id="lockAccountBtn" type="button">将此账户不可注销</button>
+      </div>
     </section>
 
     <a class="back-home" href="../index.html" data-zh="返回主页" data-en="Back to homepage">返回主页</a>
@@ -182,6 +213,18 @@
   <footer class="site-footer">
     <div>© 2026 Jerry · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a></div>
   </footer>
+
+  <!-- 二次确认弹窗 -->
+  <div class="modal-mask" id="confirmMask" hidden>
+    <div class="modal-box">
+      <h3 id="confirmTitle"></h3>
+      <p id="confirmMsg"></p>
+      <div class="modal-actions">
+        <button class="seg" id="confirmCancel" type="button" data-zh="取消" data-en="Cancel">取消</button>
+        <button class="seg" id="confirmNext" type="button">继续</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 底部浮动操作按钮（Liquid Glass：白色玻璃 + 黑色图标） -->
   <div class="float-actions">
@@ -272,15 +315,129 @@
 
       // 设置页底部：登出 / 登录（由 auth.js 在登录态变化时回调）
       var settingsAuthBtn = document.getElementById('settingsAuthBtn');
+      var accountManage = document.getElementById('accountManage');
+      var accountStatus = document.getElementById('accountStatus');
+      var closeAccountBtn = document.getElementById('closeAccountBtn');
+      var lockAccountBtn = document.getElementById('lockAccountBtn');
+      var accountLocked = false;
+
+      // 二次确认弹窗：返回 Promise<boolean>（第一步「继续」-> 第二步「最终确认」）
+      function twoStepConfirm(title, msg1, msg2, finalLabel) {
+        return new Promise(function (resolve) {
+          var mask = document.getElementById('confirmMask');
+          var titleEl = document.getElementById('confirmTitle');
+          var msgEl = document.getElementById('confirmMsg');
+          var nextBtn = document.getElementById('confirmNext');
+          var cancelBtn = document.getElementById('confirmCancel');
+          var en = document.documentElement.lang === 'en';
+          titleEl.textContent = title;
+          msgEl.textContent = msg1;
+          nextBtn.textContent = en ? 'Continue' : '继续';
+          nextBtn.classList.remove('danger');
+          mask.hidden = false;
+          function cleanup() {
+            mask.hidden = true;
+            nextBtn.removeEventListener('click', onNext);
+            nextBtn.removeEventListener('click', onFinal);
+            cancelBtn.removeEventListener('click', onCancel);
+            mask.removeEventListener('click', onMask);
+          }
+          function onCancel() { cleanup(); resolve(false); }
+          function onMask(e) { if (e.target === mask) onCancel(); }
+          function onNext() {
+            msgEl.textContent = msg2;
+            nextBtn.textContent = finalLabel;
+            nextBtn.classList.add('danger');
+            nextBtn.removeEventListener('click', onNext);
+            nextBtn.addEventListener('click', onFinal);
+          }
+          function onFinal() { cleanup(); resolve(true); }
+          cancelBtn.addEventListener('click', onCancel);
+          mask.addEventListener('click', onMask);
+          nextBtn.addEventListener('click', onNext);
+        });
+      }
+
+      function refreshAccountStatus() {
+        fetch('/api/account/status')
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!d || !d.login) { accountManage.hidden = true; return; }
+            accountManage.hidden = false;
+            accountLocked = !!d.locked;
+            var en = document.documentElement.lang === 'en';
+            if (accountLocked) {
+              accountStatus.textContent = en ? 'This account is set non-cancelable.' : '该账户已设为不可注销。';
+              closeAccountBtn.disabled = true;
+              closeAccountBtn.textContent = en ? 'Account locked' : '账户已锁定';
+              lockAccountBtn.disabled = false;
+              lockAccountBtn.textContent = en ? 'Remove non-cancelable' : '解除不可注销';
+              lockAccountBtn.classList.remove('danger-btn');
+              lockAccountBtn.classList.add('neutral-btn');
+            } else {
+              accountStatus.textContent = '';
+              closeAccountBtn.disabled = false;
+              closeAccountBtn.textContent = en ? 'Close account' : '注销该账户';
+              lockAccountBtn.disabled = false;
+              lockAccountBtn.textContent = en ? 'Make account non-cancelable' : '将此账户不可注销';
+              lockAccountBtn.classList.add('danger-btn');
+              lockAccountBtn.classList.remove('neutral-btn');
+            }
+          })
+          .catch(function () { accountManage.hidden = true; });
+      }
+
+      closeAccountBtn.addEventListener('click', function () {
+        if (closeAccountBtn.disabled) return;
+        var en = document.documentElement.lang === 'en';
+        twoStepConfirm(
+          en ? 'Close account' : '注销账户',
+          en ? 'Are you sure you want to close this account? This cannot be undone. All your profile, posts and comments will be deleted.' : '确定要注销该账户吗？此操作不可恢复，将删除你的所有资料、帖子和评论。',
+          en ? 'Confirm again: after closing, the account cannot be recovered and you will be signed out immediately.' : '再次确认：账户注销后无法恢复，你将立即退出登录。',
+          en ? 'Confirm close' : '确认注销'
+        ).then(function (ok) {
+          if (!ok) return;
+          fetch('/api/account/close', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })
+            .then(function (r) { return r.ok ? r.json() : r.json().then(function (e) { throw e; }); })
+            .then(function () {
+              accountStatus.textContent = en ? 'Account closed.' : '账户已注销。';
+              setTimeout(function () { window.location.href = '../index.html'; }, 800);
+            })
+            .catch(function (e) {
+              accountStatus.textContent = (e && e.message) ? ('错误：' + e.message) : (e && e.error) ? ('错误：' + e.error) : '操作失败';
+            });
+        });
+      });
+
+      lockAccountBtn.addEventListener('click', function () {
+        if (lockAccountBtn.disabled) return;
+        var en = document.documentElement.lang === 'en';
+        var lock = !accountLocked;
+        twoStepConfirm(
+          lock ? (en ? 'Lock account' : '锁定账户') : (en ? 'Unlock account' : '解除锁定'),
+          lock ? (en ? 'Set this account as non-cancelable?' : '确定要将此账户设为不可注销吗？') : (en ? 'Remove the non-cancelable flag?' : '确定要解除不可注销吗？'),
+          lock ? (en ? 'Confirm again: once set, you cannot close this account unless you remove it first.' : '再次确认：设置后你将无法注销此账户，除非先解除。') : (en ? 'Confirm again: after removal you may close this account at any time.' : '再次确认：解除后你可以随时注销此账户。'),
+          lock ? (en ? 'Confirm lock' : '确认锁定') : (en ? 'Confirm remove' : '确认解除')
+        ).then(function (ok) {
+          if (!ok) return;
+          fetch('/api/account/lock', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ lock: lock }) })
+            .then(function (r) { return r.ok ? r.json() : r.json().then(function (e) { throw e; }); })
+            .then(function () { refreshAccountStatus(); })
+            .catch(function (e) { accountStatus.textContent = (e && e.error) ? ('错误：' + e.error) : '操作失败'; });
+        });
+      });
+
       window.onAuthState = function (auth) {
         if (!settingsAuthBtn) return;
         var en = document.documentElement.lang === 'en';
         if (auth && auth.user) {
           settingsAuthBtn.textContent = en ? 'Sign out' : '退出登录';
           settingsAuthBtn.onclick = function () { if (window.JW_LOGOUT) window.JW_LOGOUT(); };
+          refreshAccountStatus();
         } else {
           settingsAuthBtn.textContent = en ? 'Sign in' : '登录';
           settingsAuthBtn.onclick = function () { if (window.JW_LOGIN) window.JW_LOGIN(); };
+          accountManage.hidden = true;
         }
       };
       if (window.JW_AUTH) window.onAuthState(window.JW_AUTH);

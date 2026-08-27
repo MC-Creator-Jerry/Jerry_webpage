@@ -89,6 +89,12 @@
   }
   .breadcrumb .bc-sep { opacity: 0.6; }
   .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a {
+    color: var(--bar-fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
   .bar-right { display: flex; align-items: center; gap: 8px; }
   .bar-btn {
     border: 1px solid rgba(255, 255, 255, 0.45);
@@ -262,7 +268,7 @@
     <div class="bar-left">
       <a class="site-name" href="index.html">Jerry's webpage</a>
       <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
-        <span id="bcMain" data-zh="主页" data-en="Home">主页</span>
+        <a id="bcMain" href="index.html" data-zh="主页" data-en="Home">主页</a>
         <span class="bc-sep" id="bcSep" hidden>›</span>
         <span class="bc-sub" id="bcSub" hidden data-zh="设置" data-en="Settings">设置</span>
       </nav>

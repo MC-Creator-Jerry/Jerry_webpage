@@ -1,38 +1,75 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jerry's webpage</title>
+<meta name="description" content="Jerry 的个人网站，聚合全球新闻、项目作品与常用工具。基于 GitHub Pages 构建。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Jerry's webpage" />
+<meta property="og:description" content="Jerry 的个人网站：全球新闻、项目作品与常用工具的聚合入口。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Jerry's webpage" />
+<meta name="twitter:description" content="Jerry 的个人网站：全球新闻、项目作品与常用工具的聚合入口。" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <style>
   :root {
-    --bar-bg: rgb(40, 89, 156);
+    --bar-top: rgb(40, 89, 156);
+    --bar-bottom: rgb(0, 120, 212);
+    --accent: #0078d4;
+    --font-scale: 1;
+    --radius: 14px;
+    --bg: #f4f6f9;
+    --text: #1c2733;
+    --muted: #44556a;
+    --card-bg: #ffffff;
+    --card-border: #e3e8ef;
+    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
     --bar-fg: #ffffff;
+    --panel-bg: #ffffff;
+    --panel-border: #e3e8ef;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
-    color: #1c2733;
-    background: #f4f6f9;
+  html[data-theme="dark"] {
+    --bg: #0f1720;
+    --text: #e6edf5;
+    --muted: #9fb0c3;
+    --card-bg: #16212e;
+    --card-border: #243244;
+    --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    --panel-bg: #16212e;
+    --panel-border: #243244;
   }
 
-  /* ---- 上方栏 (top bar) ---- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
   .topbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    height: 64px;
-    background: var(--bar-bg);
-    color: var(--bar-fg);
+    min-height: 64px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 24px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
   }
-  .topbar .site-name {
-    font-size: 20px;
+  .bar-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: 0.3px;
     color: var(--bar-fg);
@@ -40,78 +77,421 @@
     text-decoration: none;
     cursor: pointer;
   }
-  .topbar .site-name:hover {
-    opacity: 0.88;
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.95;
   }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
 
-  /* ---- 内容区 (content area, placeholder scaffold) ---- */
-  .content {
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 56px 24px 80px;
-  }
-  .content h1 {
-    font-size: 28px;
-    color: #15233b;
-    margin-bottom: 16px;
-  }
-  .content p {
-    font-size: 16px;
-    line-height: 1.7;
-    color: #44556a;
+  /* ---- 内容区 ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 36px; }
+  .hero h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--text);
     margin-bottom: 14px;
   }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+  }
   .card {
-    margin-top: 28px;
-    background: #ffffff;
-    border: 1px solid #e3e8ef;
-    border-radius: 14px;
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
     padding: 24px;
-    box-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+    box-shadow: var(--card-shadow);
   }
   .card h2 {
-    font-size: 18px;
-    color: #28599c;
-    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 12px;
   }
-  .card ul {
-    margin: 8px 0 0 20px;
-    color: #44556a;
+  .card p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .card p:last-child { margin-bottom: 0; }
+  .card a.inline-link {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .card a.inline-link:hover { border-bottom-color: var(--accent); }
+
+  /* 产品卡片网格 */
+  .prod-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .prod-card {
+    display: block;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .prod-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 6px 18px rgba(20, 35, 59, 0.12);
+  }
+  .prod-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .prod-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .prod-desc { font-size: 0.92rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .prod-soon { font-size: 0.8rem; color: var(--accent); margin-top: 8px; font-weight: 600; }
+
+  /* ---- 页脚 ---- */
+  .site-footer {
+    border-top: 1px solid var(--card-border);
+    margin-top: 48px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
     line-height: 1.8;
   }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
 
-  /* 产品链接 */
-  .prod-link {
-    color: #28599c;
-    font-size: 17px;
-    font-weight: 600;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(40, 89, 156, 0.4);
+  /* ---- 设置面板 ---- */
+  .settings-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 200;
   }
-  .prod-link:hover { border-bottom-color: #28599c; }
+  .settings-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: 340px; max-width: 90vw;
+    height: 100%;
+    background: var(--panel-bg);
+    color: var(--text);
+    border-left: 1px solid var(--panel-border);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.18);
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+  }
+  .settings-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px;
+    font-size: 1.1rem; font-weight: 700;
+    border-bottom: 1px solid var(--panel-border);
+    flex-shrink: 0;
+  }
+  .panel-close {
+    border: none; background: transparent; color: var(--muted);
+    font-size: 1.2rem; cursor: pointer; line-height: 1;
+  }
+  .settings-scroll { padding: 18px; overflow-y: auto; flex: 1; }
+  .set-row { margin-bottom: 22px; }
+  .set-label { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; display: block; }
+  .set-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .seg {
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .seg.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .set-row input[type="color"] {
+    width: 100%; height: 38px; border: 1px solid var(--card-border);
+    border-radius: 8px; background: var(--card-bg); cursor: pointer;
+  }
+  .set-row input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .set-hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+  .settings-footer {
+    display: flex; gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--panel-border);
+    flex-shrink: 0;
+  }
+  .settings-footer button {
+    flex: 1; padding: 10px; border-radius: 8px; font-size: 0.92rem; cursor: pointer;
+    border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text);
+  }
+  .settings-footer button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 
   @media (max-width: 560px) {
-    .topbar { padding: 0 14px; }
-    .topbar .site-name { font-size: 17px; }
-    .content { padding: 36px 16px 60px; }
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
   }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
-  <!-- 上方栏：左上角站名作为主站链接 -->
   <header class="topbar">
-    <a class="site-name" href="index.html">Jerry's webpage</a>
+    <div class="bar-left">
+      <a class="site-name" href="index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
+        <span id="bcMain" data-zh="主页" data-en="Home">主页</span>
+        <span class="bc-sep" id="bcSep" hidden>›</span>
+        <span class="bc-sub" id="bcSub" hidden data-zh="设置" data-en="Settings">设置</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <button class="bar-btn" id="langBtn" aria-label="切换语言">EN</button>
+      <button class="bar-btn icon" id="settingsBtn" aria-label="设置">⚙</button>
+    </div>
   </header>
 
-  <!-- 内容区（起始脚手架，可继续扩展） -->
   <main class="content">
-    <h1>欢迎来到 Jerry's webpage</h1>
-    <p>这是一个基于微软 GitHub 的网站，用于做各种各样有用的东西；也不知道想写些什么。</p>
+    <section class="hero">
+      <h1 data-zh="欢迎来到 Jerry's webpage" data-en="Welcome to Jerry's webpage">欢迎来到 Jerry's webpage</h1>
+      <p data-zh="这是一个基于 GitHub Pages 的个人网站，用来聚合各种各样有用的东西——全球新闻、项目作品与常用工具，都在这里入口直达。"
+         data-en="A personal site built on GitHub Pages, bringing together useful things — global news, projects and handy tools, all reachable from here.">这是一个基于 GitHub Pages 的个人网站，用来聚合各种各样有用的东西——全球新闻、项目作品与常用工具，都在这里入口直达。</p>
+    </section>
 
-    <div class="card">
-      <h2>产品</h2>
-      <p><a class="prod-link" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener">全球新闻</a></p>
-    </div>
+    <section class="card">
+      <h2 data-zh="产品" data-en="Products">产品</h2>
+      <div class="prod-grid">
+        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener">
+          <div class="prod-icon">📰</div>
+          <div class="prod-name" data-zh="全球新闻" data-en="Global News">全球新闻</div>
+          <div class="prod-desc" data-zh="每日双语全球要闻，10 大领域实时更新。" data-en="Daily bilingual world news across 10 fields, updated every day.">每日双语全球要闻，10 大领域实时更新。</div>
+        </a>
+        <a class="prod-card" href="#about">
+          <div class="prod-icon">🧭</div>
+          <div class="prod-name" data-zh="关于本站" data-en="About">关于本站</div>
+          <div class="prod-desc" data-zh="这个网站是用来做什么的。" data-en="What this site is for.">这个网站是用来做什么的。</div>
+        </a>
+        <a class="prod-card" href="#contact">
+          <div class="prod-icon">✉️</div>
+          <div class="prod-name" data-zh="联系方式" data-en="Contact">联系方式</div>
+          <div class="prod-desc" data-zh="如何找到我。" data-en="How to reach me.">如何找到我。</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="card" id="about">
+      <h2 data-zh="关于" data-en="About">关于</h2>
+      <p data-zh="这里会逐步放上具有长期价值的内容：个人项目、写作与一些实用小工具。现阶段以聚合入口为主，后续会随想法慢慢填充。"
+         data-en="Long-term, useful content will land here over time: personal projects, writing and small handy tools. For now it is mostly an aggregation hub, and will grow as ideas come.">这里会逐步放上具有长期价值的内容：个人项目、写作与一些实用小工具。现阶段以聚合入口为主，后续会随想法慢慢填充。</p>
+    </section>
+
+    <section class="card" id="contact">
+      <h2 data-zh="联系" data-en="Contact">联系</h2>
+      <p data-zh="欢迎通过 GitHub 与我交流：">Welcome to reach me on GitHub:</p>
+      <p><a class="inline-link" href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a></p>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry · <span data-zh="基于 GitHub Pages 构建" data-en="Built on GitHub Pages">基于 GitHub Pages 构建</span></div>
+    <div>
+      <a href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener" data-zh="新闻主页" data-en="News">新闻主页</a>
+      · <a href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </footer>
+
+  <!-- 设置面板 -->
+  <div class="settings-backdrop" id="settingsBackdrop" hidden></div>
+  <aside class="settings-panel" id="settingsPanel" aria-hidden="true">
+    <div class="settings-header">
+      <span data-zh="设置" data-en="Settings">设置</span>
+      <button class="panel-close" id="panelClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="settings-scroll">
+      <div class="set-row">
+        <span class="set-label" data-zh="语言" data-en="Language">语言</span>
+        <div class="set-opts" id="optLang">
+          <button class="seg" data-val="zh">中文</button>
+          <button class="seg" data-val="en">English</button>
+        </div>
+      </div>
+      <div class="set-row">
+        <span class="set-label" data-zh="主题" data-en="Theme">主题</span>
+        <div class="set-opts" id="optTheme">
+          <button class="seg" data-val="light">浅色</button>
+          <button class="seg" data-val="dark">深色</button>
+        </div>
+      </div>
+      <div class="set-row">
+        <span class="set-label" data-zh="主题色" data-en="Accent">主题色</span>
+        <input type="color" id="optAccent" value="#0078d4" />
+      </div>
+      <div class="set-row">
+        <span class="set-label" data-zh="字号" data-en="Font size">字号</span>
+        <input type="range" id="optFont" min="0.85" max="1.3" step="0.05" value="1" />
+        <div class="set-hint" id="fontHint">1.00×</div>
+      </div>
+      <div class="set-row">
+        <span class="set-label" data-zh="圆角" data-en="Corner radius">圆角</span>
+        <input type="range" id="optRadius" min="0" max="28" step="2" value="14" />
+        <div class="set-hint" id="radiusHint">14px</div>
+      </div>
+    </div>
+    <div class="settings-footer">
+      <button id="settingsCancel" data-zh="不保存退出" data-en="Exit">不保存退出</button>
+      <button id="settingsSave" class="primary" data-zh="保存并退出" data-en="Save & exit">保存并退出</button>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', accent: 'xl_accent', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+      function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        accent: get(K.accent, '#0078d4'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+      var draft = Object.assign({}, cur);
+
+      function applyTheme() {
+        document.documentElement.setAttribute('data-theme', cur.theme);
+      }
+      function applyAccent() {
+        document.documentElement.style.setProperty('--accent', cur.accent);
+      }
+      function applyFont() {
+        document.documentElement.style.setProperty('--font-scale', cur.font);
+      }
+      function applyRadius() {
+        document.documentElement.style.setProperty('--radius', cur.radius + 'px');
+      }
+      function applyLang() {
+        var en = cur.lang === 'en';
+        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          if (txt != null) n.textContent = txt;
+        }
+        var lb = document.getElementById('langBtn');
+        if (lb) lb.textContent = en ? '中' : 'EN';
+      }
+      function applyAll() { applyTheme(); applyAccent(); applyFont(); applyRadius(); applyLang(); }
+
+      // ---- 面包屑 ----
+      function setBreadcrumb(sub) {
+        var sep = document.getElementById('bcSep');
+        var subEl = document.getElementById('bcSub');
+        if (sub) {
+          sep.hidden = false; subEl.hidden = false;
+          subEl.textContent = cur.lang === 'en' ? (subEl.getAttribute('data-en') || sub) : subEl.getAttribute('data-zh');
+        } else {
+          sep.hidden = true; subEl.hidden = true;
+        }
+      }
+
+      // ---- 设置面板 ----
+      var panel = document.getElementById('settingsPanel');
+      var backdrop = document.getElementById('settingsBackdrop');
+      function syncDraftUI() {
+        segActive('optLang', draft.lang);
+        segActive('optTheme', draft.theme);
+        document.getElementById('optAccent').value = draft.accent;
+        document.getElementById('optFont').value = draft.font;
+        document.getElementById('optRadius').value = draft.radius;
+        document.getElementById('fontHint').textContent = (parseFloat(draft.font)).toFixed(2) + '×';
+        document.getElementById('radiusHint').textContent = draft.radius + 'px';
+      }
+      function segActive(groupId, val) {
+        var btns = document.querySelectorAll('#' + groupId + ' .seg');
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].classList.toggle('active', btns[i].getAttribute('data-val') === val);
+        }
+      }
+      function openPanel() {
+        draft = Object.assign({}, cur);
+        syncDraftUI();
+        panel.hidden = false; backdrop.hidden = false;
+        panel.setAttribute('aria-hidden', 'false');
+        setBreadcrumb('设置');
+      }
+      function closePanel() {
+        panel.hidden = true; backdrop.hidden = true;
+        panel.setAttribute('aria-hidden', 'true');
+        setBreadcrumb(null);
+      }
+      function savePanel() {
+        cur = Object.assign({}, draft);
+        set(K.lang, cur.lang); set(K.theme, cur.theme); set(K.accent, cur.accent);
+        set(K.font, cur.font); set(K.radius, cur.radius);
+        applyAll();
+        closePanel();
+      }
+
+      document.getElementById('settingsBtn').addEventListener('click', openPanel);
+      document.getElementById('panelClose').addEventListener('click', closePanel);
+      document.getElementById('settingsBackdrop').addEventListener('click', closePanel);
+      document.getElementById('settingsCancel').addEventListener('click', closePanel);
+      document.getElementById('settingsSave').addEventListener('click', savePanel);
+
+      document.getElementById('optLang').addEventListener('click', function (e) {
+        var b = e.target.closest('.seg'); if (!b) return;
+        draft.lang = b.getAttribute('data-val'); syncDraftUI();
+      });
+      document.getElementById('optTheme').addEventListener('click', function (e) {
+        var b = e.target.closest('.seg'); if (!b) return;
+        draft.theme = b.getAttribute('data-val'); syncDraftUI();
+      });
+      document.getElementById('optAccent').addEventListener('input', function (e) {
+        draft.accent = e.target.value;
+      });
+      document.getElementById('optFont').addEventListener('input', function (e) {
+        draft.font = e.target.value;
+        document.getElementById('fontHint').textContent = (parseFloat(draft.font)).toFixed(2) + '×';
+      });
+      document.getElementById('optRadius').addEventListener('input', function (e) {
+        draft.radius = e.target.value;
+        document.getElementById('radiusHint').textContent = draft.radius + 'px';
+      });
+
+      // ---- 语言按钮（即时切换） ----
+      document.getElementById('langBtn').addEventListener('click', function () {
+        cur.lang = cur.lang === 'en' ? 'zh' : 'en';
+        set(K.lang, cur.lang);
+        applyLang();
+        setBreadcrumb(panel.hidden ? null : '设置');
+      });
+
+      applyAll();
+    })();
+  </script>
 </body>
 </html>

@@ -33,6 +33,7 @@
     --bar-fg: #ffffff;
     --panel-bg: #ffffff;
     --panel-border: #e3e8ef;
+    --danger: #d13438;
   }
   html[data-theme="dark"] {
     --bg: #0f1720;
@@ -74,43 +75,21 @@
   }
   .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
   .site-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: var(--bar-fg);
-    white-space: nowrap;
-    text-decoration: none;
-    cursor: pointer;
+    font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px;
+    color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer;
   }
   .site-name:hover { opacity: 0.9; }
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.78rem;
-    color: var(--bar-fg);
-    white-space: nowrap;
-    opacity: 0.9;
-  }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9; }
   .breadcrumb .bc-sep { opacity: 0.6; }
   .breadcrumb .bc-sub { opacity: 0.85; }
   .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
   .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
   .bar-right { display: flex; align-items: center; gap: 8px; }
   .bar-btn {
-    border: none;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--bar-fg);
-    border-radius: 0;
-    padding: 6px 11px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    line-height: 1;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    border: none; background: rgba(255, 255, 255, 0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; line-height: 1; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
   }
   .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
   .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
@@ -118,12 +97,9 @@
   /* ---- 底部浮动操作按钮（Liquid Glass） ---- */
   .float-actions { position: fixed; right: 20px; bottom: 20px; z-index: 150; display: flex; gap: 12px; }
   .fab {
-    width: 50px; height: 42px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 14px; font-size: 1.25rem; line-height: 1;
-    color: #111; background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(14px) saturate(180%);
-    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    width: 50px; height: 42px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 14px; font-size: 1.25rem; line-height: 1; color: #111; background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     cursor: pointer; text-decoration: none; transition: background 0.18s, transform 0.12s;
@@ -135,20 +111,13 @@
   /* ---- 内容区 ---- */
   .content { max-width: 920px; margin: 0 auto; padding: 40px 24px 64px; }
   .card {
-    margin-top: 26px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: var(--card-shadow);
+    margin-top: 26px; background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--card-shadow);
   }
   .card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 12px; }
   .card p { font-size: 1rem; line-height: 1.75; color: var(--muted); margin-bottom: 12px; }
   .card p:last-child { margin-bottom: 0; }
-  .card a.inline-link {
-    color: var(--accent); text-decoration: none;
-    border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  }
+  .card a.inline-link { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
   .card a.inline-link:hover { border-bottom-color: var(--accent); }
 
   /* ---- 个人主页专属 ---- */
@@ -167,8 +136,7 @@
   .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
   .tag {
     background: color-mix(in srgb, var(--accent) 10%, var(--card-bg));
-    color: var(--accent);
-    border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--card-border));
+    color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--card-border));
     border-radius: 999px; padding: 6px 14px; font-size: 0.92rem; font-weight: 600;
   }
   .social-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
@@ -186,13 +154,8 @@
   .project-link p { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
   .project-link .project-go { display: inline-block; margin-top: 12px; color: var(--accent); font-weight: 700; font-size: 0.95rem; }
   .project-link:hover .project-go { text-decoration: underline; }
-  .more-link { display: inline-block; margin-top: 16px; color: var(--accent); font-weight: 700; text-decoration: none; }
-  .more-link:hover { text-decoration: underline; }
 
-  .draft-note {
-    font-size: 0.82rem; color: var(--muted); margin-top: 10px;
-    border-left: 3px solid var(--accent); padding: 4px 12px; background: color-mix(in srgb, var(--accent) 6%, transparent);
-  }
+  .hint { color: var(--muted); opacity: 0.7; font-style: italic; font-size: 0.95rem; }
 
   .site-footer {
     border-top: 1px solid var(--card-border); margin-top: 48px; padding: 24px;
@@ -200,6 +163,61 @@
   }
   .site-footer a { color: var(--accent); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
+
+  /* ---- 编辑态 ---- */
+  .edit-input, .edit-textarea, .add-input, .proj-input, .proj-textarea {
+    width: 100%; border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 10px 12px; font-size: 1rem; font-family: inherit; color: var(--text);
+    background: var(--panel-bg); margin-top: 6px;
+  }
+  .edit-input:focus, .edit-textarea:focus, .add-input:focus, .proj-input:focus, .proj-textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .edit-textarea, .proj-textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
+  .edit-label { display: block; font-size: 0.82rem; color: var(--muted); margin-top: 14px; font-weight: 600; }
+
+  .tag.editable { display: inline-flex; align-items: center; gap: 6px; }
+  .tag-x { cursor: pointer; font-weight: 700; opacity: 0.7; }
+  .tag-x:hover { opacity: 1; color: var(--danger); }
+  .skills-add { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .skills-add .add-input { margin-top: 0; }
+  .add-btn {
+    border: none; background: var(--accent); color: #fff; border-radius: 10px;
+    padding: 10px 16px; font-size: 0.92rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+  .add-btn:hover { filter: brightness(1.08); }
+
+  .proj-row {
+    border: 1px solid var(--card-border); border-radius: 12px; padding: 14px;
+    margin-bottom: 12px; background: color-mix(in srgb, var(--card-bg) 100%, transparent);
+  }
+  .proj-row .row-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .proj-del { border: none; background: transparent; color: var(--danger); font-size: 0.9rem; cursor: pointer; font-weight: 700; }
+  .proj-del:hover { text-decoration: underline; }
+
+  /* 底部编辑工具条 */
+  .edit-bar {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 200;
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    background: color-mix(in srgb, var(--panel-bg) 86%, transparent);
+    border: 1px solid var(--panel-border); border-radius: 14px;
+    backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  }
+  .edit-bar .eb-info { font-size: 0.88rem; color: var(--muted); margin-right: 4px; }
+  .edit-bar .save { background: var(--accent); color: #fff; }
+  .edit-bar .save:hover { filter: brightness(1.08); }
+  .edit-bar .cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); }
+
+  /* 轻提示 */
+  .toast {
+    position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300;
+    background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
+  .toast.err { background: var(--danger); }
 
   @media (max-width: 560px) {
     .topbar { padding: 0 14px; min-height: 56px; }
@@ -221,6 +239,7 @@
       </nav>
     </div>
     <div class="bar-right">
+      <button class="bar-btn" id="editBtn" hidden data-zh="编辑" data-en="Edit">编辑</button>
       <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
       <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
@@ -229,27 +248,26 @@
   </header>
 
   <main class="content">
-    <!-- Hero：头像 + 名字 + 一句话（草稿文案，待你修改） -->
+    <!-- Hero：头像 + 名字 + 一句话（简介留空，登录后可自行填写） -->
     <section class="hero">
       <div class="profile-head">
         <div class="avatar" aria-label="avatar">J</div>
         <div>
           <div class="profile-name" data-zh="Jerry" data-en="Jerry">Jerry</div>
-          <div class="profile-tagline" data-zh="独立开发者，热爱用技术把想法变成产品，专注 AI 资讯、个人知识管理与实用工具。"
-               data-en="Independent developer who loves turning ideas into products — focused on AI news, personal knowledge management and handy tools.">独立开发者，热爱用技术把想法变成产品，专注 AI 资讯、个人知识管理与实用工具。</div>
+          <div class="profile-tagline" id="bioDisplay"></div>
+          <input class="edit-input" id="bioInput" hidden maxlength="120" placeholder="一句话简介，例如：独立开发者，专注 AI 与自动化" />
         </div>
       </div>
     </section>
 
-    <!-- 1. 关于我 -->
+    <!-- 1. 关于我（留空，登录后可自行填写） -->
     <section class="card" id="about">
       <h2 data-zh="关于我" data-en="About Me">关于我</h2>
-      <p data-zh="这里写一段自我介绍（草稿）：我是一名独立开发者，喜欢把日常痛点做成小工具，也持续关注 AI 与自动化领域。平时会在站点里沉淀一些长期有价值的内容——项目、写作与实用工具。"
-         data-en="A short self-intro (draft): I'm an independent developer who enjoys turning everyday friction into small tools, and I keep a close eye on AI and automation. I use this site to accumulate long-term, useful content — projects, writing and handy tools.">这里写一段自我介绍（草稿）：我是一名独立开发者，喜欢把日常痛点做成小工具，也持续关注 AI 与自动化领域。平时会在站点里沉淀一些长期有价值的内容——项目、写作与实用工具。</p>
-      <div class="draft-note" data-zh="※ 以上为草稿文案，告诉我想怎么写，我来改。" data-en="※ Draft copy — tell me how you'd like it and I'll revise.">※ 以上为草稿文案，告诉我想怎么写，我来改。</div>
+      <p id="aboutDisplay"></p>
+      <textarea class="edit-textarea" id="aboutInput" hidden maxlength="2000" placeholder="写一段自我介绍……"></textarea>
     </section>
 
-    <!-- 4. 联系方式 / 社交 -->
+    <!-- 4. 联系方式 / 社交（静态，不在本次编辑范围） -->
     <section class="card" id="contact">
       <h2 data-zh="联系方式 / 社交" data-en="Contact / Social">联系方式 / 社交</h2>
       <ul class="social-list">
@@ -268,43 +286,33 @@
       </ul>
     </section>
 
-    <!-- 2. 技能 / 专长 -->
+    <!-- 2. 技能 / 专长（预生成若干，登录后可增删，含违禁词校验） -->
     <section class="card" id="skills">
       <h2 data-zh="技能 / 专长" data-en="Skills">技能 / 专长</h2>
-      <div class="tags">
-        <span class="tag" data-zh="前端开发" data-en="Front-end">前端开发</span>
-        <span class="tag" data-zh="AI 应用" data-en="AI Apps">AI 应用</span>
-        <span class="tag" data-zh="内容创作" data-en="Content">内容创作</span>
-        <span class="tag" data-zh="自动化" data-en="Automation">自动化</span>
-        <span class="tag" data-zh="个人知识管理" data-en="PKM">个人知识管理</span>
-      </div>
+      <div class="tags" id="skillsDisplay"></div>
+      <div id="skillsEdit" hidden></div>
     </section>
 
-    <!-- 3. 项目 / 作品 -->
+    <!-- 3. 项目 / 作品（登录后可增删，支持作者链接） -->
     <section class="card" id="projects">
       <h2 data-zh="项目 / 作品" data-en="Projects">项目 / 作品</h2>
-
-      <a class="project-link" href="products.html">
-        <h3 data-zh="每日全球要闻" data-en="Daily Global News">每日全球要闻</h3>
-        <p data-zh="自动聚合并排版全球要闻的日报站点，支持中英双语与本地化部署。"
-           data-en="An automated daily news digest site with bilingual support and local-friendly deployment.">自动聚合并排版全球要闻的日报站点，支持中英双语与本地化部署。</p>
-        <span class="project-go" data-zh="查看详情 →" data-en="View details →">查看详情 →</span>
-      </a>
-
-      <a class="project-link" href="products.html" style="margin-top:18px">
-        <h3 data-zh="小蓝页（本站点）" data-en="Jerry's webpage (this site)">小蓝页（本站点）</h3>
-        <p data-zh="聚合新闻、项目与工具的个人的门面站点，支持 GitHub 登录与云端设置同步。"
-           data-en="A personal hub aggregating news, projects and tools, with GitHub sign-in and cloud-synced settings.">聚合新闻、项目与工具的个人的门面站点，支持 GitHub 登录与云端设置同步。</p>
-        <span class="project-go" data-zh="查看详情 →" data-en="View details →">查看详情 →</span>
-      </a>
-
-      <a class="more-link" href="products.html" data-zh="查看全部项目 →" data-en="All projects →">查看全部项目 →</a>
+      <div id="projectsDisplay"></div>
+      <div id="projectsEdit" hidden></div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div>© 2026 Jerry · <span data-zh="基于 GitHub Pages 与 Cloudflare 构建" data-en="Built with GitHub Pages & Cloudflare">基于 GitHub Pages 与 Cloudflare 构建</span></div>
   </footer>
+
+  <!-- 编辑工具条 -->
+  <div class="edit-bar" id="editBar" hidden>
+    <span class="eb-info" data-zh="编辑模式" data-en="Editing">编辑模式</span>
+    <button class="bar-btn save" id="saveBtn" data-zh="保存" data-en="Save">保存</button>
+    <button class="bar-btn cancel" id="cancelBtn" data-zh="取消" data-en="Cancel">取消</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
 
   <!-- 底部浮动操作按钮（Liquid Glass） -->
   <div class="float-actions">
@@ -316,6 +324,7 @@
     </a>
   </div>
 
+  <script src="auth.js"></script>
   <script>
     (function () {
       var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
@@ -342,8 +351,220 @@
         }
       }
       function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
-
+      window.applyAll = applyAll;
       applyAll();
+    })();
+
+    // ---- 个人主页：可编辑 + 违禁词系统 ----
+    (function () {
+      var OWNER = 'MC-Creator-Jerry'; // 仅站主可编辑
+
+      var DEFAULT_CONTENT = {
+        bio: '',
+        about: '',
+        skills: ['前端开发', 'AI 应用', '内容创作', '自动化', '个人知识管理'],
+        projects: [
+          { title: '每日全球要闻', desc: '自动聚合并排版全球要闻的日报站点，支持中英双语与本地化部署。', link: 'products.html' },
+          { title: '小蓝页（本站点）', desc: '聚合新闻、项目与工具的个人的门面站点，支持 GitHub 登录与云端设置同步。', link: 'products.html' }
+        ]
+      };
+
+      // 违禁词（前端即时拦截；后端另有兜底校验）
+      var FORBIDDEN = [
+        'fuck','shit','bitch','asshole','bastard','dick','cunt','whore','slut',
+        'nigger','faggot','retard','tranny','nazi','kill yourself','kys',
+        '傻逼','草泥马','操你','日你','妈的','贱人','婊子','杂种','滚蛋',
+        '废青','支那','洋奴','汉奸','狗杂种',
+        '加微信','扫码领','免费送','刷单','博彩','赌博','色情','裸聊','办证','代开发票',
+        '点击领取','一元购','日赚','月入过万','私聊客服'
+      ];
+      function findForbidden(text) {
+        if (!text) return null;
+        var low = String(text).toLowerCase();
+        for (var i = 0; i < FORBIDDEN.length; i++) {
+          if (low.indexOf(FORBIDDEN[i].toLowerCase()) !== -1) return FORBIDDEN[i];
+        }
+        return null;
+      }
+
+      var state = { content: null, editing: false, edit: null };
+      function deepCopy(o) { return JSON.parse(JSON.stringify(o)); }
+      function currentContent() {
+        var d = deepCopy(DEFAULT_CONTENT);
+        var c = state.content;
+        if (c) {
+          if (typeof c.bio === 'string') d.bio = c.bio;
+          if (typeof c.about === 'string') d.about = c.about;
+          if (Array.isArray(c.skills)) d.skills = c.skills;
+          if (Array.isArray(c.projects)) d.projects = c.projects;
+        }
+        return d;
+      }
+
+      var $ = function (id) { return document.getElementById(id); };
+      var bioDisplay = $('bioDisplay'), bioInput = $('bioInput');
+      var aboutDisplay = $('aboutDisplay'), aboutInput = $('aboutInput');
+      var skillsDisplay = $('skillsDisplay'), skillsEdit = $('skillsEdit');
+      var projectsDisplay = $('projectsDisplay'), projectsEdit = $('projectsEdit');
+      var editBtn = $('editBtn'), editBar = $('editBar'), saveBtn = $('saveBtn'), cancelBtn = $('cancelBtn');
+      var toastEl = $('toast');
+
+      function toast(msg, isErr) {
+        toastEl.textContent = msg;
+        toastEl.className = 'toast show' + (isErr ? ' err' : '');
+        setTimeout(function () { toastEl.className = 'toast' + (isErr ? ' err' : ''); }, 2600);
+      }
+
+      function renderDisplay() {
+        var c = currentContent();
+        // bio
+        if (c.bio) { bioDisplay.textContent = c.bio; bioDisplay.className = 'profile-tagline'; }
+        else { bioDisplay.textContent = '（点击右上角「编辑」填写你的一句话简介）'; bioDisplay.className = 'profile-tagline hint'; }
+        // about
+        if (c.about) { aboutDisplay.textContent = c.about; aboutDisplay.style.display = ''; }
+        else { aboutDisplay.textContent = '（点击「编辑」填写关于我的介绍）'; aboutDisplay.className = 'hint'; }
+        // skills
+        skillsDisplay.innerHTML = '';
+        if (!c.skills.length) { var hs = document.createElement('span'); hs.className = 'hint'; hs.textContent = '（暂无，点击「编辑」添加）'; skillsDisplay.appendChild(hs); }
+        else c.skills.forEach(function (s) { var t = document.createElement('span'); t.className = 'tag'; t.textContent = s; skillsDisplay.appendChild(t); });
+        // projects
+        projectsDisplay.innerHTML = '';
+        if (!c.projects.length) { var hp = document.createElement('p'); hp.className = 'hint'; hp.textContent = '（暂无，点击「编辑」添加你的项目/作品）'; projectsDisplay.appendChild(hp); }
+        else c.projects.forEach(function (p) {
+          var a = document.createElement('a');
+          if (p.link) { a.href = p.link; a.className = 'project-link'; a.target = '_blank'; a.rel = 'noopener'; }
+          else { a.className = 'project-link'; }
+          var h3 = document.createElement('h3'); h3.textContent = p.title || '未命名项目';
+          var desc = document.createElement('p'); desc.textContent = p.desc || '';
+          a.appendChild(h3); a.appendChild(desc);
+          if (p.link) { var go = document.createElement('span'); go.className = 'project-go'; go.textContent = '查看详情 →'; a.appendChild(go); }
+          projectsDisplay.appendChild(a);
+        });
+      }
+
+      function renderSkillsEdit() {
+        skillsEdit.innerHTML = '';
+        state.edit.skills.forEach(function (s, idx) {
+          var span = document.createElement('span'); span.className = 'tag editable';
+          span.textContent = s;
+          var x = document.createElement('span'); x.className = 'tag-x'; x.textContent = '×';
+          x.onclick = function () { state.edit.skills.splice(idx, 1); renderSkillsEdit(); };
+          span.appendChild(x); skillsEdit.appendChild(span);
+        });
+        var addWrap = document.createElement('div'); addWrap.className = 'skills-add';
+        var input = document.createElement('input'); input.className = 'add-input'; input.placeholder = '添加技能，回车或点「添加」'; input.maxLength = 30;
+        var btn = document.createElement('button'); btn.className = 'add-btn'; btn.textContent = '添加';
+        function add() {
+          var v = input.value.trim();
+          if (!v) return;
+          var w = findForbidden(v);
+          if (w) { toast('技能含违禁词：「' + w + '」', true); return; }
+          state.edit.skills.push(v); input.value = ''; renderSkillsEdit();
+        }
+        btn.onclick = add;
+        input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); add(); } };
+        addWrap.appendChild(input); addWrap.appendChild(btn); skillsEdit.appendChild(addWrap);
+      }
+
+      function renderProjectsEdit() {
+        projectsEdit.innerHTML = '';
+        state.edit.projects.forEach(function (p, idx) {
+          var row = document.createElement('div'); row.className = 'proj-row';
+          var head = document.createElement('div'); head.className = 'row-head';
+          var tlabel = document.createElement('b'); tlabel.textContent = '项目 ' + (idx + 1);
+          var del = document.createElement('button'); del.className = 'proj-del'; del.textContent = '删除';
+          del.onclick = function () { state.edit.projects.splice(idx, 1); renderProjectsEdit(); };
+          head.appendChild(tlabel); head.appendChild(del); row.appendChild(head);
+
+          var ti = document.createElement('input'); ti.className = 'proj-input'; ti.placeholder = '标题'; ti.value = p.title || '';
+          var de = document.createElement('textarea'); de.className = 'proj-textarea'; de.placeholder = '简介'; de.value = p.desc || '';
+          var li = document.createElement('input'); li.className = 'proj-input'; li.placeholder = '链接（可空，如 https://...）'; li.value = p.link || '';
+          row.appendChild(ti); row.appendChild(de); row.appendChild(li);
+          p._ti = ti; p._de = de; p._li = li;
+          projectsEdit.appendChild(row);
+        });
+        var addBtn = document.createElement('button'); addBtn.className = 'add-btn'; addBtn.textContent = '+ 添加项目';
+        addBtn.onclick = function () { state.edit.projects.push({ title: '', desc: '', link: '' }); renderProjectsEdit(); };
+        projectsEdit.appendChild(addBtn);
+      }
+
+      function enterEdit() {
+        state.editing = true;
+        state.edit = currentContent();
+        bioInput.value = state.edit.bio || '';
+        aboutInput.value = state.edit.about || '';
+        renderSkillsEdit();
+        renderProjectsEdit();
+        bioDisplay.hidden = true; bioInput.hidden = false;
+        aboutDisplay.hidden = true; aboutInput.hidden = false;
+        skillsDisplay.hidden = true; skillsEdit.hidden = false;
+        projectsDisplay.hidden = true; projectsEdit.hidden = false;
+        editBar.hidden = false;
+        editBtn.hidden = true;
+      }
+
+      function exitEdit() {
+        state.editing = false;
+        bioDisplay.hidden = false; bioInput.hidden = true;
+        aboutDisplay.hidden = false; aboutInput.hidden = true;
+        skillsDisplay.hidden = false; skillsEdit.hidden = true;
+        projectsDisplay.hidden = false; projectsEdit.hidden = true;
+        editBar.hidden = true;
+        if (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login === OWNER) editBtn.hidden = false;
+      }
+
+      function checkForbidden(c) {
+        var fields = [c.bio, c.about];
+        (c.skills || []).forEach(function (s) { fields.push(s); });
+        (c.projects || []).forEach(function (p) { fields.push(p.title); fields.push(p.desc); });
+        for (var i = 0; i < fields.length; i++) { var w = findForbidden(fields[i]); if (w) return w; }
+        return null;
+      }
+
+      function save() {
+        // 同步表单最新值（skills/projects 已在 state.edit 中）
+        state.edit.bio = bioInput.value.trim();
+        state.edit.about = aboutInput.value.trim();
+        state.edit.projects.forEach(function (p) {
+          if (p._ti) p.title = p._ti.value.trim();
+          if (p._de) p.desc = p._de.value.trim();
+          if (p._li) { var l = p._li.value.trim(); p.link = /^https?:\/\//i.test(l) ? l : (l ? 'https://' + l.replace(/^\/+/, '') : ''); }
+        });
+        var w = checkForbidden(state.edit);
+        if (w) { toast('内容含违禁词：「' + w + '」，请修改后再保存。', true); return; }
+        // 清理空白项目
+        state.edit.projects = state.edit.projects.filter(function (p) { return p.title || p.desc || p.link; });
+        fetch('/api/homecontent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: state.edit })
+        })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            if (res.ok) { state.content = deepCopy(state.edit); exitEdit(); renderDisplay(); toast('已保存到云端 ✓'); }
+            else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
+            else { toast('保存失败，请重试', true); }
+          })
+          .catch(function () { toast('保存失败（网络错误）', true); });
+      }
+
+      editBtn.onclick = enterEdit;
+      saveBtn.onclick = save;
+      cancelBtn.onclick = function () { exitEdit(); renderDisplay(); };
+
+      // 公开读取已发布内容
+      fetch('/api/homecontent')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { state.content = (d && d.content) ? d.content : null; renderDisplay(); })
+        .catch(function () { renderDisplay(); });
+
+      // 仅站主登录后显示「编辑」
+      fetch('/api/me')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.login && d.login === OWNER) editBtn.hidden = false;
+        })
+        .catch(function () {});
     })();
   </script>
 </body>

@@ -2,19 +2,49 @@
 // 完全免费组合：Cloudflare Pages/Workers/KV 免费层 + GitHub OAuth App（免费）。
 // secret 由 /api/callback 后端持有，浏览器只拿不到 token 的 httpOnly cookie。
 // 未配置 CLIENT_ID 时静默降级（隐藏登录入口），不会在 GitHub Pages 上崩溃。
+//
+// 账户菜单（头像）也在此集中处理：蓝条最右侧头像 -> 下拉「个人主页 / 设置」
+// （未登录时额外显示「GitHub 登录」）；登出入口放在设置页底部。
 (function () {
   var loginBtn = document.getElementById('loginBtn');
   var logoutBtn = document.getElementById('logoutBtn');
   window.JW_AUTH = { user: null, isAdmin: false };
 
-  // 注入通知红点样式（避免给每个页面单独加 CSS）
-  (function injectBadgeStyle() {
+  // 注入样式（通知红点 + 头像菜单 + 铃铛），避免给每个页面单独加 CSS
+  (function injectStyles() {
     var s = document.createElement('style');
-    s.textContent =
-      '.bar-btn{position:relative}' +
-      '.bar-btn .badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:6px;background:#d13438;color:#fff;border-radius:999px;font-size:.7rem;font-weight:700;line-height:1}';
+    s.textContent = [
+      '.bar-btn{position:relative}',
+      '.bar-btn .badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:6px;background:#d13438;color:#fff;border-radius:999px;font-size:.7rem;font-weight:700;line-height:1}',
+      '.bar-btn.icon{padding:6px 9px}',
+      '.bar-btn.icon .badge{position:absolute;top:-6px;right:-8px;margin-left:0}',
+      '.bar-right{position:relative}',
+      '.bar-avatar{border:none;background:rgba(255,255,255,.12);width:36px;height:36px;border-radius:50%;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(255,255,255,.7);flex:0 0 auto}',
+      '.bar-avatar:hover{background:rgba(255,255,255,.22)}',
+      '.bar-avatar img{width:100%;height:100%;object-fit:cover;display:block}',
+      '.user-popup{position:absolute;top:calc(100% + 8px);right:0;min-width:184px;background:#fff;color:#1c2733;border:1px solid #e3e8ef;border-radius:12px;box-shadow:0 10px 30px rgba(20,35,59,.18);padding:6px;z-index:200}',
+      '.user-popup .up-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;color:#1c2733;text-decoration:none;font-size:.95rem;font-weight:600}',
+      '.user-popup .up-item:hover{background:#f1f5fa}',
+      '.user-popup .up-ico{width:18px;height:18px;display:inline-flex;flex:0 0 auto}',
+      '[hidden]{display:none!important}'
+    ].join('\n');
     document.head.appendChild(s);
   })();
+
+  // 默认头像（未登录：灰底白人形）
+  function defaultAvatarSvg() {
+    return "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='#c9d3df'/><path d='M12 12.6a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' fill='#fff'/><path d='M12 14c-3.3 0-6 1.8-6 4v.6h12v-.6c0-2.2-2.7-4-6-4z' fill='#fff'/></svg>";
+  }
+  var DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent(defaultAvatarSvg());
+
+  // 计算相对路径前缀（依据当前页面所在目录深度）
+  function relBase() {
+    var p = location.pathname;
+    var dir = p.endsWith('/') ? p : p.substring(0, p.lastIndexOf('/') + 1);
+    var segs = dir.split('/').filter(function (s) { return s.length > 0; });
+    return segs.map(function () { return '..'; }).join('/') + (segs.length ? '/' : '');
+  }
+  var BASE = relBase();
 
   // 蓝条「通知」红点：拉取未读数量并刷新
   function updateNoticeBadge() {
@@ -49,25 +79,121 @@
     if (typeof window.applyAll === 'function') window.applyAll();
   }
 
+  // 移除蓝条上不应出现的按钮（个人主页、退出）——集中在此处理，避免改 11 个页面
+  function cleanupBar() {
+    if (logoutBtn && logoutBtn.parentNode) logoutBtn.parentNode.removeChild(logoutBtn);
+    var ph = document.querySelector('.bar-right a.bar-btn[href="home.html"]');
+    if (ph && ph.parentNode) ph.parentNode.removeChild(ph);
+  }
+  cleanupBar();
+
+  function setAvatar(src) {
+    var img = document.getElementById('userAvatarImg');
+    if (img) img.src = src || DEFAULT_AVATAR;
+  }
+  function setLoginItem(show) {
+    var li = document.getElementById('upLogin');
+    if (li) li.hidden = !show;
+  }
+
   function setLoggedIn(user) {
     window.JW_AUTH.user = user;
     window.JW_AUTH.isAdmin = !!(user && user.isAdmin);
     if (loginBtn) loginBtn.style.display = 'none';
-    if (logoutBtn) logoutBtn.style.display = '';
+    setAvatar((user && user.avatar_url) || ('https://github.com/' + user.login + '.png'));
+    setLoginItem(false);
     fetch('/api/usersettings')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { if (d && d.prefs) applyUserPrefs(d.prefs); })
       .catch(function () {});
     updateNoticeBadge();
+    if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
 
   function setLoggedOut() {
     window.JW_AUTH.user = null;
     window.JW_AUTH.isAdmin = false;
     if (loginBtn) loginBtn.style.display = '';
-    if (logoutBtn) logoutBtn.style.display = 'none';
+    setAvatar(DEFAULT_AVATAR);
+    setLoginItem(true);
     updateNoticeBadge();
+    if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
+
+  // 暴露给设置页：登出 / 登录
+  window.JW_LOGOUT = function () {
+    fetch('/api/logout').then(function () { setLoggedOut(); }).catch(function () { setLoggedOut(); });
+  };
+  function doLogin() {
+    var state = randState();
+    try { sessionStorage.setItem('gh_oauth_state', state); } catch (x) {}
+    var url = 'https://github.com/login/oauth/authorize?client_id=' + encodeURIComponent(CLIENT_ID) +
+      '&redirect_uri=' + encodeURIComponent(REDIRECT) +
+      '&scope=' + encodeURIComponent('read:user user:email') +
+      '&state=' + encodeURIComponent(state);
+    window.location.href = url;
+  }
+  window.JW_LOGIN = doLogin;
+
+  // 注入头像按钮 + 下拉菜单（蓝条最右侧）
+  (function buildAvatarMenu() {
+    var right = document.querySelector('.bar-right');
+    if (!right) return;
+    var personIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='12' cy='7' r='4'/></svg>";
+    var gearIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'/></svg>";
+    var ghIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='currentColor'><path d='M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.6 18 4.9 18 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z'/></svg>";
+
+    var btn = document.createElement('button');
+    btn.className = 'bar-avatar';
+    btn.id = 'userAvatarBtn';
+    btn.setAttribute('aria-label', '账户');
+    btn.innerHTML = '<img id="userAvatarImg" src="' + DEFAULT_AVATAR + '" alt="">';
+
+    var pop = document.createElement('div');
+    pop.className = 'user-popup';
+    pop.id = 'userPopup';
+    pop.hidden = true;
+    pop.innerHTML =
+      '<a class="up-item" id="upProfile" href="' + BASE + 'personal_profile/">' +
+        '<span class="up-ico">' + personIco + '</span><span data-zh="个人主页" data-en="Profile">个人主页</span></a>' +
+      '<a class="up-item" id="upSettings" href="' + BASE + 'settings/homepage.html">' +
+        '<span class="up-ico">' + gearIco + '</span><span data-zh="设置" data-en="Settings">设置</span></a>' +
+      '<a class="up-item" id="upLogin" href="#" hidden>' +
+        '<span class="up-ico">' + ghIco + '</span><span data-zh="GitHub 登录" data-en="Sign in">GitHub 登录</span></a>';
+
+    right.appendChild(btn);
+    right.appendChild(pop);
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      pop.hidden = !pop.hidden;
+    });
+    document.addEventListener('click', function (e) {
+      if (!pop.hidden && e.target !== btn && !pop.contains(e.target)) pop.hidden = true;
+    });
+    var loginItem = document.getElementById('upLogin');
+    if (loginItem) loginItem.addEventListener('click', function (e) {
+      e.preventDefault();
+      pop.hidden = true;
+      doLogin();
+    });
+
+    // 让下拉项跟随当前语言
+    if (typeof window.applyAll === 'function') window.applyAll();
+  })();
+
+  // 通知按钮统一换成铃铛图标（避免改 11 个页面）
+  (function bellifyNotice() {
+    var nb = document.getElementById('noticeBtn');
+    if (!nb) return;
+    var badge = nb.querySelector('#noticeBadge');
+    var bell = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/></svg>";
+    nb.classList.add('icon');
+    nb.setAttribute('aria-label', '通知');
+    nb.removeAttribute('data-zh');
+    nb.removeAttribute('data-en');
+    nb.innerHTML = bell + (badge ? badge.outerHTML : '');
+  })();
 
   // 暴露给设置页：把当前设置保存到云端（用户身份由后端 cookie 识别）
   window.saveUserPrefs = function (prefs) {
@@ -80,7 +206,6 @@
 
   if (!CLIENT_ID) {
     if (loginBtn) loginBtn.style.display = 'none';
-    if (logoutBtn) logoutBtn.style.display = 'none';
     return;
   }
 
@@ -99,17 +224,6 @@
 
   if (loginBtn) loginBtn.addEventListener('click', function (e) {
     e.preventDefault();
-    var state = randState();
-    try { sessionStorage.setItem('gh_oauth_state', state); } catch (x) {}
-    var url = 'https://github.com/login/oauth/authorize?client_id=' + encodeURIComponent(CLIENT_ID) +
-      '&redirect_uri=' + encodeURIComponent(REDIRECT) +
-      '&scope=' + encodeURIComponent('read:user user:email') +
-      '&state=' + encodeURIComponent(state);
-    window.location.href = url;
-  });
-
-  if (logoutBtn) logoutBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    fetch('/api/logout').then(function () { setLoggedOut(); }).catch(function () { setLoggedOut(); });
+    doLogin();
   });
 })();

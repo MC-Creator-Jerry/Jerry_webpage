@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
+<script>
+  // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
+  // pages.dev 域名下不触发，避免循环。
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname);
+  }
+</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jerry's webpage</title>
@@ -253,6 +260,8 @@
     <div class="bar-right">
       <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
     </div>
   </header>
 
@@ -340,5 +349,6 @@
       applyAll();
     })();
   </script>
+<script src="auth.js"></script>
 </body>
 </html>

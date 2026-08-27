@@ -191,10 +191,6 @@
         <div>
           <div class="profile-name" id="nameDisplay"></div>
           <div class="profile-meta" id="loginDisplay"></div>
-          <div>
-            <span class="profile-tagline" id="bioDisplay"></span><span class="hint-empty" id="bioEmpty" hidden></span>
-            <button class="change-btn inline" data-sec="bio" hidden>更改</button>
-          </div>
           <div style="margin-top:10px">
             <button class="change-btn" data-sec="avatar" hidden>更改头像</button>
           </div>
@@ -204,12 +200,12 @@
 
     <section class="card" id="aboutCard">
       <div class="card-head">
-        <h2 data-zh="关于我" data-en="About Me">关于我</h2>
+        <h2 data-zh="简介" data-en="Bio">简介</h2>
         <button class="change-btn" data-sec="about" hidden>更改</button>
       </div>
       <div id="aboutView">
         <p id="aboutDisplay"></p>
-        <p class="hint-empty" id="aboutEmpty" hidden>（还没有介绍）</p>
+        <p class="hint-empty" id="aboutEmpty" hidden>（还没有简介）</p>
       </div>
       <div id="aboutEditor" hidden>
         <textarea class="edit-textarea auto-grow" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……"></textarea>
@@ -307,7 +303,6 @@
 
       var $ = function (id) { return document.getElementById(id); };
       var avatar = $('avatar'), nameDisplay = $('nameDisplay'), loginDisplay = $('loginDisplay');
-      var bioDisplay = $('bioDisplay'), bioEmpty = $('bioEmpty'), bioInput = $('bioInput');
       var aboutDisplay = $('aboutDisplay'), aboutEmpty = $('aboutEmpty'), aboutInput = $('aboutInput');
       var aboutView = $('aboutView'), aboutEditor = $('aboutEditor');
       var skillsDisplay = $('skillsDisplay'), skillsEmpty = $('skillsEmpty'), skillsEditList = $('skillsEditList');
@@ -341,10 +336,7 @@
           nameDisplay.appendChild(ob);
         }
         loginDisplay.textContent = d.login ? '@' + d.login : '';
-        // bio
-        if (d.bio) { bioDisplay.textContent = d.bio; bioDisplay.hidden = false; bioEmpty.hidden = true; }
-        else { bioDisplay.hidden = true; bioEmpty.hidden = false; bioEmpty.textContent = '（还没有简介）'; }
-        // about
+        // 简介（about）
         if (d.about) { aboutDisplay.textContent = d.about; aboutDisplay.hidden = false; aboutEmpty.hidden = true; }
         else { aboutDisplay.hidden = true; aboutEmpty.hidden = false; }
         // skills
@@ -369,7 +361,6 @@
 
       /* ---------- 编辑器开关 ---------- */
       function openEditor(sec) {
-        if (sec === 'bio') { bioInput.value = (state.data && state.data.bio) || ''; bioDisplay.parentNode.hidden = false; }
         if (sec === 'about') { aboutInput.value = (state.data && state.data.about) || ''; aboutView.hidden = true; aboutEditor.hidden = false; aboutInput.focus(); }
         if (sec === 'skills') { state.draft = { skills: ((state.data && state.data.skills) || []).slice() }; skillsView.hidden = true; skillsEditor.hidden = false; renderSkillsEdit(); }
         if (sec === 'links') { state.draft = { links: ((state.data && state.data.links) || []).map(function (l) { return { label: l.label || '', url: l.url || '' }; }) }; linksView.hidden = true; linksEditor.hidden = false; renderLinksEdit(); }
@@ -444,12 +435,12 @@
         var d = JSON.parse(JSON.stringify(state.data || {}));
         Object.assign(d, patch);
         var payload = {
-          name: d.name || '', bio: d.bio || '', about: d.about || '',
+          name: d.name || '', about: d.about || '',
           skills: d.skills || [],
           links: (d.links || []).filter(function (l) { return l.url; }),
           avatar: d.avatar || ''
         };
-        var bad = findForbidden(payload.bio) || findForbidden(payload.about) || findForbidden(payload.name) ||
+        var bad = findForbidden(payload.about) || findForbidden(payload.name) ||
           payload.skills.map(findForbidden).find(Boolean) ||
           payload.links.map(function (l) { return findForbidden(l.label + ' ' + l.url); }).find(Boolean);
         if (bad) { toast('内容含违禁词：「' + bad + '」，请修改后再保存。', true); return; }
@@ -469,8 +460,7 @@
       document.querySelectorAll('[data-save]').forEach(function (btn) {
         btn.onclick = function () {
           var sec = btn.getAttribute('data-save');
-          if (sec === 'bio') { saveProfile({ bio: bioInput.value.trim() }, function () { closeEditor('bio'); }); }
-          else if (sec === 'about') { saveProfile({ about: aboutInput.value.trim() }, function () { closeEditor('about'); }); }
+          if (sec === 'about') { saveProfile({ about: aboutInput.value.trim() }, function () { closeEditor('about'); }); }
           else if (sec === 'skills') { saveProfile({ skills: state.draft.skills }, function () { closeEditor('skills'); }); }
           else if (sec === 'links') {
             state.draft.links.forEach(function (l) { l.label = l._label ? l._label.value.trim() : l.label; l.url = l._url ? l._url.value.trim() : l.url; });

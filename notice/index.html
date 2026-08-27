@@ -96,6 +96,7 @@
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
   [hidden] { display: none !important; }
 </style>
+  <link rel="stylesheet" href="../common.css" />
 </head>
 <body>
   <header class="topbar">
@@ -129,7 +130,7 @@
       <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
       <input class="edit-input" id="nTitle" maxlength="120" placeholder="通知标题" />
       <span class="edit-label" data-zh="内容" data-en="Body">内容</span>
-      <textarea class="edit-textarea" id="nBody" maxlength="2000" placeholder="通知内容……"></textarea>
+      <textarea class="edit-textarea auto-grow" id="nBody" maxlength="2000" placeholder="通知内容……"></textarea>
       <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
     </section>
 
@@ -244,5 +245,6 @@
       }).catch(load);
     })();
   </script>
+  <script src="../common.js"></script>
 </body>
 </html>

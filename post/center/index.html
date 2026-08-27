@@ -79,6 +79,10 @@
   .post .author:hover { color: var(--accent); }
   .post .meta { font-size: 0.76rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
   .post h3 { font-size: 1.05rem; color: var(--text); margin-bottom: 6px; }
+  .post h3 a.ptitle { color: var(--text); text-decoration: none; }
+  .post h3 a.ptitle:hover { color: var(--accent); }
+  .post .cmlink { display: inline-block; margin-top: 10px; font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600; }
+  .post .cmlink:hover { text-decoration: underline; }
   .post p { font-size: 0.98rem; line-height: 1.7; color: var(--muted); white-space: pre-wrap; word-break: break-word; }
   .post .del { border: none; background: transparent; color: var(--danger); font-size: 0.82rem; cursor: pointer; font-weight: 700; margin-top: 8px; padding: 0; }
   .post .del:hover { text-decoration: underline; }
@@ -113,7 +117,7 @@
       <a class="bar-btn" href="../" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
       <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="../../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
     </div>
   </header>
@@ -167,7 +171,7 @@
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
-      function render(posts) {
+      function render(posts, counts) {
         listEl.innerHTML = '';
         if (!posts.length) { emptyEl.hidden = false; return; }
         emptyEl.hidden = true;
@@ -176,27 +180,42 @@
           var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
           var canDel = meIsAdmin || (meLogin && p.login === meLogin);
           var del = canDel ? '<button class="del" data-id="' + p.id + '">删除</button>' : '';
+          var cnt = (counts && counts[p.id]) || 0;
           card.innerHTML =
             '<div class="head">' +
               '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
               '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
               '<span class="meta">' + fmtTime(p.ts) + '</span>' +
             '</div>' +
-            '<h3></h3><p></p>' + del;
-          card.querySelector('h3').textContent = p.title || '（无标题）';
+            '<h3><a class="ptitle" href="../detail/?post=' + encodeURIComponent(p.id) + '"></a></h3>' +
+            '<p></p>' +
+            '<a class="cmlink" href="../detail/?post=' + encodeURIComponent(p.id) + '">💬 <span class="cmcount">' + cnt + '</span> ' +
+              '<span data-zh="条评论" data-en="comments">条评论</span></a>' + del;
+          card.querySelector('.ptitle').textContent = p.title || '（无标题）';
           card.querySelector('p').textContent = p.body || '';
           if (canDel) {
             card.querySelector('.del').addEventListener('click', function () { delPost(p.id); });
           }
           listEl.appendChild(card);
         });
+        if (typeof window.applyAll === 'function') window.applyAll();
       }
 
       function load() {
         fetch('/api/post')
           .then(function (r) { return r.ok ? r.json() : { posts: [] }; })
-          .then(function (d) { render(d.posts || []); })
-          .catch(function () { render([]); });
+          .then(function (d) {
+            var posts = d.posts || [];
+            render(posts, {});
+            if (posts.length) {
+              var ids = posts.map(function (p) { return p.id; }).join(',');
+              fetch('/api/comment/counts?posts=' + encodeURIComponent(ids))
+                .then(function (r) { return r.ok ? r.json() : { counts: {} }; })
+                .then(function (c) { render(posts, c.counts || {}); })
+                .catch(function () {});
+            }
+          })
+          .catch(function () { render([], {}); });
       }
 
       function delPost(id) {

@@ -162,6 +162,7 @@
   }
   [hidden] { display: none !important; }
 </style>
+  <link rel="stylesheet" href="../common.css" />
 </head>
 <body>
   <header class="topbar">
@@ -211,7 +212,7 @@
         <p class="hint-empty" id="aboutEmpty" hidden>（还没有介绍）</p>
       </div>
       <div id="aboutEditor" hidden>
-        <textarea class="edit-textarea" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……"></textarea>
+        <textarea class="edit-textarea auto-grow" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……"></textarea>
         <div class="sec-actions">
           <button class="save" data-save="about">保存</button>
           <button class="cancel" data-cancel="about">取消</button>
@@ -509,5 +510,6 @@
         .catch(function () { if (VIEW_USER) loadPublic(VIEW_USER); else loginPrompt.hidden = false; });
     })();
   </script>
+  <script src="../common.js"></script>
 </body>
 </html>

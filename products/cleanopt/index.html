@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CleanOpt · 产品 · Jerry's webpage</title>
+<meta name="description" content="CleanOpt - Windows 系统清理与内存优化小工具。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="CleanOpt · Jerry's webpage" />
+<meta property="og:description" content="Windows 系统清理与内存优化小工具。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="CleanOpt · Jerry's webpage" />
+<meta name="twitter:description" content="Windows 系统清理与内存优化小工具。" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+<style>
+  :root {
+    --bar-top: rgb(40, 89, 156);
+    --bar-bottom: rgb(0, 120, 212);
+    --accent: #0078d4;
+    --font-scale: 1;
+    --radius: 14px;
+    --bg: #f4f6f9;
+    --text: #1c2733;
+    --muted: #44556a;
+    --card-bg: #ffffff;
+    --card-border: #e3e8ef;
+    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+    --bar-fg: #ffffff;
+    --danger: #d32f2f;
+    --danger-bg: #fde8e8;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f1720;
+    --text: #e6edf5;
+    --muted: #9fb0c3;
+    --card-bg: #16212e;
+    --card-border: #243244;
+    --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    --danger: #ff6b6b;
+    --danger-bg: #3a1c1c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px;
+    color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none; background: rgba(255,255,255,0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; line-height: 1; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255,255,255,0.18); }
+
+  .float-actions {
+    position: fixed; right: 20px; bottom: 20px; z-index: 150;
+    display: flex; gap: 12px;
+  }
+  .fab {
+    width: 50px; height: 42px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 14px; font-size: 1.25rem; line-height: 1; color: #111;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
+    cursor: pointer; text-decoration: none; transition: background 0.18s, transform 0.12s;
+  }
+  .fab:hover { background: rgba(255,255,255,0.78); transform: translateY(-1px); }
+  .fab:active { transform: translateY(0); }
+  html[data-theme="dark"] .fab { background: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.9); }
+
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+
+  .hero {
+    display: flex; align-items: flex-start; gap: 18px;
+    margin-bottom: 32px; flex-wrap: wrap;
+  }
+  .hero-icon { font-size: 3.2rem; line-height: 1; }
+  .hero-text { flex: 1; min-width: 220px; }
+  .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 10px; }
+  .version-badge {
+    display: inline-block; font-size: 0.82rem; font-weight: 700;
+    color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: 999px; padding: 3px 12px; margin-left: 8px; vertical-align: middle;
+  }
+  .hero p { font-size: 1.05rem; line-height: 1.7; color: var(--muted); max-width: 640px; }
+
+  .card {
+    margin-top: 22px; background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 12px; }
+  .card p { font-size: 1rem; line-height: 1.75; color: var(--muted); margin-bottom: 12px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  .download-wrap { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 18px; }
+  .download-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff; font-weight: 700;
+    border-radius: 999px; padding: 12px 26px; text-decoration: none;
+    border: none; cursor: pointer; font-size: 1rem;
+    transition: background 0.18s, transform 0.12s;
+  }
+  .download-btn:hover { background: #005a9e; transform: translateY(-1px); }
+  .download-btn:active { transform: translateY(0); }
+  .download-meta { font-size: 0.9rem; color: var(--muted); }
+
+  .disclaimer {
+    background: var(--danger-bg); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+    border-radius: var(--radius); padding: 18px 20px;
+  }
+  .disclaimer h2 { color: var(--danger); margin-bottom: 10px; }
+  .disclaimer p { color: var(--text); margin-bottom: 0; }
+
+  .admin-only { display: none; }
+  body.is-admin .admin-only { display: block; }
+
+  .edit-label { display: block; font-size: 0.85rem; color: var(--muted); margin: 14px 0 6px; }
+  .edit-input, .edit-textarea {
+    width: 100%; border: 1px solid var(--card-border); border-radius: 10px;
+    background: var(--bg); color: var(--text); padding: 10px 12px; font-size: 1rem;
+  }
+  .edit-textarea { min-height: 90px; resize: vertical; }
+  .edit-input:focus, .edit-textarea:focus { outline: none; border-color: var(--accent); }
+  .save-btn {
+    margin-top: 14px; background: var(--accent); color: #fff; border: none;
+    border-radius: 999px; padding: 10px 22px; font-weight: 700; cursor: pointer;
+  }
+  .save-btn:hover { background: #005a9e; }
+
+  .site-footer {
+    border-top: 1px solid var(--card-border); margin-top: 48px;
+    padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 86px; transform: translateX(-50%);
+    background: var(--text); color: var(--bg); padding: 10px 18px;
+    border-radius: 999px; font-size: 0.95rem; z-index: 300;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2); opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.55rem; }
+    .hero-icon { font-size: 2.6rem; }
+    .download-btn { width: 100%; justify-content: center; }
+  }
+  [hidden] { display: none !important; }
+</style>
+  <link rel="stylesheet" href="../../common.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <a href="../products.html" data-zh="产品" data-en="Products">产品</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub">CleanOpt</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../../notice/" data-zh="通知" data-en="Notice">通知<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" href="../../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero" id="hero">
+      <div class="hero-icon" id="pIcon">🧹</div>
+      <div class="hero-text">
+        <h1><span id="pName">CleanOpt</span><span class="version-badge" id="pVersion">v1.0.0</span></h1>
+        <p id="pDesc">Windows 系统清理与内存优化小工具。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="下载" data-en="Download">下载</h2>
+      <p data-zh="下载后解压即可使用。建议先阅读下方的免责声明。" data-en="Download and extract to use. Please read the disclaimer below first.">下载后解压即可使用。建议先阅读下方的免责声明。</p>
+      <div class="download-wrap">
+        <a class="download-btn" id="pDownload" href="../../downloads/useful_files.zip" download>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-zh="下载 CleanOpt" data-en="Download CleanOpt">下载 CleanOpt</span>
+        </a>
+        <span class="download-meta" id="downloadMeta">.zip · ~30 KB</span>
+      </div>
+    </section>
+
+    <section class="card disclaimer">
+      <h2 data-zh="免责声明" data-en="Disclaimer">免责声明</h2>
+      <p id="pDisclaimer">本软件按“原样”提供，作者不对因使用本软件导致的任何数据丢失、系统异常或硬件损坏承担责任。请在下载和使用前自行备份重要数据，并确认您了解相关风险。</p>
+    </section>
+
+    <section class="card admin-only" id="adminEditor">
+      <h2 data-zh="管理员编辑" data-en="Admin Editor">管理员编辑</h2>
+      <span class="edit-label" data-zh="版本号" data-en="Version">版本号</span>
+      <input class="edit-input" id="editVersion" />
+      <span class="edit-label" data-zh="简介" data-en="Description">简介</span>
+      <textarea class="edit-textarea auto-grow" id="editDesc"></textarea>
+      <span class="edit-label" data-zh="下载链接" data-en="Download URL">下载链接</span>
+      <input class="edit-input" id="editDownload" />
+      <span class="edit-label" data-zh="免责声明" data-en="Disclaimer">免责声明</span>
+      <textarea class="edit-textarea auto-grow" id="editDisclaimer"></textarea>
+      <button class="save-btn" id="saveBtn" data-zh="保存" data-en="Save">保存</button>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry · <a href="../products.html" data-zh="返回产品页" data-en="Back to products">返回产品页</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" href="../../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="../../settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+      var cur = { lang: get(K.lang, 'zh'), theme: get(K.theme, 'light'), font: get(K.font, '1'), radius: get(K.radius, '14') };
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var en = cur.lang === 'en'; document.documentElement.lang = en ? 'en' : 'zh-CN';
+        document.querySelectorAll('[data-zh]').forEach(function (n) {
+          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          if (txt != null) n.textContent = txt;
+        });
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      applyAll();
+
+      var product = null;
+      var isAdmin = false;
+
+      function esc(s) { return (s || '').replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+      function toast(msg) {
+        var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+        setTimeout(function () { t.classList.remove('show'); }, 2200);
+      }
+      function fill(p) {
+        product = p;
+        document.getElementById('pIcon').textContent = p.icon || '🧹';
+        document.getElementById('pName').textContent = p.name || 'CleanOpt';
+        document.getElementById('pVersion').textContent = 'v' + (p.version || '1.0.0');
+        document.getElementById('pDesc').textContent = p.desc || '';
+        document.getElementById('pDisclaimer').textContent = p.disclaimer || '';
+        var dl = document.getElementById('pDownload');
+        dl.href = p.downloadUrl || '../../downloads/useful_files.zip';
+        if (isAdmin) {
+          document.getElementById('editVersion').value = p.version || '';
+          document.getElementById('editDesc').value = p.desc || '';
+          document.getElementById('editDownload').value = p.downloadUrl || '';
+          document.getElementById('editDisclaimer').value = p.disclaimer || '';
+        }
+      }
+
+      function load() {
+        fetch('/api/product-meta?id=cleanopt')
+          .then(function (r) { return r.json(); })
+          .then(function (d) { if (d.ok && d.product) fill(d.product); })
+          .catch(function () {});
+      }
+
+      function checkAdmin() {
+        fetch('/api/me')
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.isAdmin) {
+              isAdmin = true; document.body.classList.add('is-admin');
+              if (product) fill(product);
+            }
+          })
+          .catch(function () {});
+      }
+
+      document.getElementById('saveBtn').addEventListener('click', function () {
+        var body = {
+          id: 'cleanopt',
+          version: document.getElementById('editVersion').value.trim(),
+          desc: document.getElementById('editDesc').value.trim(),
+          downloadUrl: document.getElementById('editDownload').value.trim(),
+          disclaimer: document.getElementById('editDisclaimer').value.trim()
+        };
+        fetch('/api/product-meta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.ok) { fill(d.product); toast('已保存'); }
+            else { toast(d.error || '保存失败'); }
+          })
+          .catch(function () { toast('保存失败'); });
+      });
+
+      load(); checkAdmin();
+    })();
+  </script>
+<script src="../../auth.js"></script>
+  <script src="../../common.js"></script>
+</body>
+</html>

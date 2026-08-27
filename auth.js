@@ -46,15 +46,15 @@
   }
   var BASE = relBase();
 
-  // 蓝条「通知」红点：拉取未读数量并刷新
+  // 蓝条「通知」红点：拉取未读总数（系统+消息+评论）并刷新
   function updateNoticeBadge() {
     var badge = document.getElementById('noticeBadge');
     if (!badge) return;
-    fetch('/api/notice')
+    fetch('/api/notif')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (d && d.unread > 0) {
-          badge.textContent = d.unread > 99 ? '99+' : String(d.unread);
+        if (d && d.total > 0) {
+          badge.textContent = d.total > 99 ? '99+' : String(d.total);
           badge.hidden = false;
         } else {
           badge.hidden = true;
@@ -62,6 +62,7 @@
       })
       .catch(function () { badge.hidden = true; });
   }
+  window.JW_REFRESH_BADGE = updateNoticeBadge;
 
   // ← 填入 GitHub OAuth App 的 Client ID；为空则视为未配置（按钮隐藏）
   var CLIENT_ID = 'Ov23ctu9zRxIQ0o0uxiJ';
@@ -159,7 +160,7 @@
       '<a class="up-item" id="upSettings" href="' + BASE + 'settings/homepage.html">' +
         '<span class="up-ico">' + gearIco + '</span><span data-zh="设置" data-en="Settings">设置</span></a>' +
       '<a class="up-item" id="upLogin" href="#" hidden>' +
-        '<span class="up-ico">' + ghIco + '</span><span data-zh="GitHub 登录" data-en="Sign in">GitHub 登录</span></a>';
+        '<span class="up-ico">' + ghIco + '</span><span data-zh="登录" data-en="Sign in">登录</span></a>';
 
     right.appendChild(btn);
     right.appendChild(pop);

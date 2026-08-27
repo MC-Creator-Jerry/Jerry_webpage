@@ -109,8 +109,11 @@
   .post-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 10px 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 14px; }
   .post-btn:hover { filter: brightness(1.08); }
 
-  .mark-read { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-bottom: 14px; }
-  .mark-read:hover { border-color: var(--accent); color: var(--accent); }
+  .panel-tools { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tool-btn { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 7px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+  .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tool-btn.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--card-border)); }
+  .tool-btn.danger:hover { background: color-mix(in srgb, var(--danger) 10%, var(--card-bg)); }
 
   .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; max-width: 90vw; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
@@ -155,6 +158,10 @@
 
     <!-- 系统通知 -->
     <section id="panelSystem">
+      <div class="panel-tools" id="toolsSystem" hidden>
+        <button class="tool-btn danger" data-clear="system" data-zh="清除所有" data-en="Clear all">清除所有</button>
+        <button class="tool-btn" data-read="system" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
+      </div>
       <section class="card" id="adminPanel" hidden>
         <h2 data-zh="发布系统通知（管理员）" data-en="Publish System Notice (Admin)">发布系统通知（管理员）</h2>
         <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
@@ -164,7 +171,6 @@
         <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
       </section>
 
-      <button class="mark-read" id="markSystem" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
       <div class="card">
         <h2 data-zh="全部系统通知" data-en="All System Notices">全部系统通知</h2>
         <div id="listSystem"></div>
@@ -174,6 +180,10 @@
 
     <!-- 消息通知 -->
     <section id="panelMessage" hidden>
+      <div class="panel-tools" id="toolsMessage" hidden>
+        <button class="tool-btn danger" data-clear="message" data-zh="清除所有" data-en="Clear all">清除所有</button>
+        <button class="tool-btn" data-read="message" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
+      </div>
       <section class="card" id="msgAdminPanel" hidden>
         <h2 data-zh="发送消息通知（管理员）" data-en="Send Message (Admin)">发送消息通知（管理员）</h2>
         <span class="edit-label" data-zh="接收者用户名" data-en="Recipient username">接收者用户名</span>
@@ -185,7 +195,6 @@
         <button class="post-btn" id="msgSendBtn" data-zh="发送" data-en="Send">发送</button>
       </section>
 
-      <button class="mark-read" id="markMessage" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
       <div class="card">
         <h2 data-zh="我的消息通知" data-en="My Messages">我的消息通知</h2>
         <div id="listMessage"></div>
@@ -196,7 +205,10 @@
 
     <!-- 评论通知 -->
     <section id="panelComment" hidden>
-      <button class="mark-read" id="markComment" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
+      <div class="panel-tools" id="toolsComment" hidden>
+        <button class="tool-btn danger" data-clear="comment" data-zh="清除所有" data-en="Clear all">清除所有</button>
+        <button class="tool-btn" data-read="comment" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
+      </div>
       <div class="card">
         <h2 data-zh="我的评论通知" data-en="My Comment Notifications">我的评论通知</h2>
         <div id="listComment"></div>
@@ -335,6 +347,8 @@
             data.unread = d.unread || { system: 0, message: 0, comment: 0 };
             isAdmin = !!(window.JW_AUTH && window.JW_AUTH.isAdmin);
             if (isAdmin) { document.getElementById('adminPanel').hidden = false; document.getElementById('msgAdminPanel').hidden = false; }
+            var loggedIn = !!(window.JW_AUTH && window.JW_AUTH.user);
+            ['System', 'Message', 'Comment'].forEach(function (k) { document.getElementById('tools' + k).hidden = !loggedIn; });
             renderSystem(); renderMessage(); renderComment(); refreshBadges();
           })
           .catch(function () {});
@@ -352,8 +366,19 @@
       document.querySelectorAll('.tab').forEach(function (t) {
         t.addEventListener('click', function () { switchTab(t.getAttribute('data-tab')); });
       });
-      ['System','Message','Comment'].forEach(function (k) {
-        document.getElementById('mark' + k).addEventListener('click', function () { markSeen(k.toLowerCase()); });
+      // 每个分类右上角：全部标为已读 + 清除所有
+      function clearAll(type) {
+        if (!window.JW_AUTH || !window.JW_AUTH.user) { toast('请先登录', true); return; }
+        if (!confirm('确定清除该分类下的所有通知？')) return;
+        fetch('/api/notif/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: type, action: 'clear' }) })
+          .then(function (r) { if (r.ok) { load(); toast('已清除 ✓'); } else { throw new Error('fail'); } })
+          .catch(function () { toast('清除失败', true); });
+      }
+      document.querySelectorAll('[data-read]').forEach(function (b) {
+        b.addEventListener('click', function () { markSeen(b.getAttribute('data-read')); });
+      });
+      document.querySelectorAll('[data-clear]').forEach(function (b) {
+        b.addEventListener('click', function () { clearAll(b.getAttribute('data-clear')); });
       });
 
       // 系统通知：发布 / 删除

@@ -170,6 +170,11 @@
       </div>
     </section>
 
+    <section class="card" id="authCard">
+      <h2 data-zh="账户" data-en="Account">账户</h2>
+      <button class="seg" id="settingsAuthBtn" type="button">GitHub 登录</button>
+    </section>
+
     <a class="back-home" href="../index.html" data-zh="返回主页" data-en="Back to homepage">返回主页</a>
   </main>
 
@@ -263,6 +268,21 @@
         if (window.saveUserPrefs) window.saveUserPrefs(cur);
         status.textContent = en ? 'Saved' : '已同步';
       });
+
+      // 设置页底部：登出 / 登录（由 auth.js 在登录态变化时回调）
+      var settingsAuthBtn = document.getElementById('settingsAuthBtn');
+      window.onAuthState = function (auth) {
+        if (!settingsAuthBtn) return;
+        var en = document.documentElement.lang === 'en';
+        if (auth && auth.user) {
+          settingsAuthBtn.textContent = en ? 'Sign out' : '退出登录';
+          settingsAuthBtn.onclick = function () { if (window.JW_LOGOUT) window.JW_LOGOUT(); };
+        } else {
+          settingsAuthBtn.textContent = en ? 'Sign in with GitHub' : 'GitHub 登录';
+          settingsAuthBtn.onclick = function () { if (window.JW_LOGIN) window.JW_LOGIN(); };
+        }
+      };
+      if (window.JW_AUTH) window.onAuthState(window.JW_AUTH);
     })();
   </script>
 <script src="../auth.js"></script>

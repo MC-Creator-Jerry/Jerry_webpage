@@ -134,15 +134,16 @@ input, textarea, select { font-family: inherit; }
 
 /* ============ 11. 竖屏特殊布局：浮动按钮放蓝条上方，蓝条按钮放蓝条下方 ============ */
 @media (orientation: portrait) {
-  /* 浮动操作按钮移到小蓝条上方（小蓝条外） */
+  /* 浮动操作按钮移到小蓝条正上方（小蓝条之外），并置于最顶层 */
   body { padding-top: 58px; }
   .float-actions {
     position: fixed;
-    top: 8px;
-    right: 16px;
+    top: 6px;
+    right: 12px;
     bottom: auto;
     left: auto;
-    z-index: 200;
+    z-index: 1000;
+    flex-direction: row;
     gap: 10px;
   }
   .topbar { top: 58px; }

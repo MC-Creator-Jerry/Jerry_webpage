@@ -222,6 +222,51 @@
   }
   a.product-link:hover .product-go { text-decoration: underline; }
 
+  /* 可编辑主页入口 */
+  .feature-card { position: relative; }
+  .feature-tag {
+    display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.4px; color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 999px; padding: 3px 10px; margin-bottom: 10px;
+  }
+  .feature-card h2 { margin-bottom: 8px; }
+  .feature-card p { margin-bottom: 14px; }
+  .feature-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .feature-actions a { margin-right: auto; }
+  .feature-actions .admin-only { display: none; }
+  body.is-admin .feature-actions .admin-only { display: inline-flex; }
+  .edit-feature-btn {
+    border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted);
+    border-radius: 999px; padding: 6px 14px; font-size: 0.85rem; cursor: pointer;
+  }
+  .edit-feature-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .modal-mask {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: center; justify-content: center; z-index: 500; padding: 16px;
+  }
+  .modal-mask.show { display: flex; }
+  .modal {
+    background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius);
+    width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 22px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+  }
+  .modal h3 { margin-bottom: 14px; color: var(--accent); }
+  .modal .edit-label { display: block; font-size: 0.85rem; color: var(--muted); margin: 12px 0 6px; }
+  .modal .edit-input, .modal .edit-textarea {
+    width: 100%; border: 1px solid var(--card-border); border-radius: 10px;
+    background: var(--bg); color: var(--text); padding: 10px 12px; font-size: 1rem;
+  }
+  .modal .edit-textarea { min-height: 80px; resize: vertical; }
+  .modal .check-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+  .modal .check-row input { width: 18px; height: 18px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+  .modal-actions button { border-radius: 999px; padding: 9px 18px; font-weight: 600; cursor: pointer; border: none; }
+  .modal-actions .primary { background: var(--accent); color: #fff; }
+  .modal-actions .secondary { background: var(--card-border); color: var(--text); }
+
   /* ---- 页脚 ---- */
   .site-footer {
     border-top: 1px solid var(--card-border);
@@ -282,6 +327,38 @@
          data-en="A roundup of projects I'm building and shipping — global news, writing, and handy tools. Tap to open the full products page.">这里汇总了我正在做和已经上线的项目：全球新闻、写作与实用小工具等。点击进入产品页查看完整列表。</p>
       <span class="product-go" data-zh="前往产品页 →" data-en="Go to products →">前往产品页 →</span>
     </a>
+
+    <section class="card feature-card" id="featureCard" hidden>
+      <span class="feature-tag" data-zh="精选" data-en="Featured">精选</span>
+      <h2 id="featureTitle">新发布：CleanOpt</h2>
+      <p id="featureDesc">Windows 清理与内存优化小工具，后台静默监控，游戏免打扰。</p>
+      <div class="feature-actions">
+        <a class="product-go" id="featureLink" href="products/cleanopt/">查看详情 →</a>
+        <button class="edit-feature-btn admin-only" id="editFeatureBtn" data-zh="编辑入口" data-en="Edit feature">编辑入口</button>
+      </div>
+    </section>
+
+    <div class="modal-mask" id="featureModal">
+      <div class="modal">
+        <h3 data-zh="编辑主页入口" data-en="Edit homepage feature">编辑主页入口</h3>
+        <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
+        <input class="edit-input" id="fTitle" />
+        <span class="edit-label" data-zh="描述" data-en="Description">描述</span>
+        <textarea class="edit-textarea" id="fDesc"></textarea>
+        <span class="edit-label" data-zh="链接" data-en="Link">链接</span>
+        <input class="edit-input" id="fLink" />
+        <span class="edit-label" data-zh="按钮文字" data-en="Button text">按钮文字</span>
+        <input class="edit-input" id="fLabel" />
+        <label class="check-row">
+          <input type="checkbox" id="fEnabled" />
+          <span data-zh="显示该入口" data-en="Show this feature">显示该入口</span>
+        </label>
+        <div class="modal-actions">
+          <button class="secondary" id="cancelFeature" data-zh="取消" data-en="Cancel">取消</button>
+          <button class="primary" id="saveFeature" data-zh="保存" data-en="Save">保存</button>
+        </div>
+      </div>
+    </div>
 
     <section class="card" id="about">
       <h2 data-zh="关于" data-en="About">关于</h2>
@@ -347,6 +424,73 @@
       function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
 
       // ---- 设置已迁至 settings/homepage.html（点右下角齿轮在新标签打开） ----
+
+      // ---- 主页可编辑入口 ----
+      var isAdmin = false;
+      var featureData = null;
+      function esc(s) { return (s || '').replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+      function fillFeature(f) {
+        featureData = f;
+        var card = document.getElementById('featureCard');
+        if (!f || !f.enabled) { card.hidden = true; return; }
+        card.hidden = false;
+        document.getElementById('featureTitle').textContent = f.title || '';
+        document.getElementById('featureDesc').textContent = f.desc || '';
+        var link = document.getElementById('featureLink');
+        link.href = f.link || '#';
+        link.textContent = (f.label || '查看详情') + ' →';
+      }
+      function loadFeature() {
+        fetch('/api/home-feature')
+          .then(function (r) { return r.json(); })
+          .then(function (d) { if (d.ok && d.feature) fillFeature(d.feature); })
+          .catch(function () {});
+      }
+      function checkAdmin() {
+        fetch('/api/me')
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.isAdmin) {
+              isAdmin = true; document.body.classList.add('is-admin');
+              if (featureData) openFeatureEditor(featureData);
+            }
+          })
+          .catch(function () {});
+      }
+      function openFeatureEditor(f) {
+        document.getElementById('fTitle').value = f.title || '';
+        document.getElementById('fDesc').value = f.desc || '';
+        document.getElementById('fLink').value = f.link || '';
+        document.getElementById('fLabel').value = f.label || '';
+        document.getElementById('fEnabled').checked = !!f.enabled;
+        document.getElementById('featureModal').classList.add('show');
+      }
+      document.getElementById('editFeatureBtn').addEventListener('click', function () {
+        if (featureData) openFeatureEditor(featureData);
+      });
+      document.getElementById('cancelFeature').addEventListener('click', function () {
+        document.getElementById('featureModal').classList.remove('show');
+      });
+      document.getElementById('featureModal').addEventListener('click', function (e) {
+        if (e.target === this) this.classList.remove('show');
+      });
+      document.getElementById('saveFeature').addEventListener('click', function () {
+        var body = {
+          title: document.getElementById('fTitle').value.trim(),
+          desc: document.getElementById('fDesc').value.trim(),
+          link: document.getElementById('fLink').value.trim(),
+          label: document.getElementById('fLabel').value.trim(),
+          enabled: document.getElementById('fEnabled').checked
+        };
+        fetch('/api/home-feature', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.ok) { fillFeature(d.feature); document.getElementById('featureModal').classList.remove('show'); }
+            else { alert((d.error || '保存失败')); }
+          })
+          .catch(function () { alert('保存失败'); });
+      });
+      loadFeature(); checkAdmin();
 
       // ---- 语言按钮：指向 language.html 的 <a>，由浏览器处理跳转，无需 JS 监听 ----
 

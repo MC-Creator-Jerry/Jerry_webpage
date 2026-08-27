@@ -66,6 +66,7 @@
     background: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-bottom) 33.33%);
     color: var(--bar-fg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0 0 var(--radius) var(--radius);
   }
   .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
   .site-name {
@@ -209,6 +210,7 @@
     z-index: 201;
     display: flex;
     flex-direction: column;
+    border-radius: var(--radius) 0 0 var(--radius);
   }
   .settings-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -330,7 +332,7 @@
 
   <!-- 设置面板 -->
   <div class="settings-backdrop" id="settingsBackdrop" hidden></div>
-  <aside class="settings-panel" id="settingsPanel" aria-hidden="true">
+  <aside class="settings-panel" id="settingsPanel" aria-hidden="true" hidden>
     <div class="settings-header">
       <span data-zh="设置" data-en="Settings">设置</span>
       <button class="panel-close" id="panelClose" aria-label="关闭">✕</button>

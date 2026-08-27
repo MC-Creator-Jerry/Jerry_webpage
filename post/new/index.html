@@ -86,9 +86,10 @@
   .site-footer { border-top: 1px solid var(--card-border); margin-top: 48px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
   .site-footer a { color: var(--accent); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
-  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
+  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } .post-btn { width: 100%; } }
   [hidden] { display: none !important; }
 </style>
+  <link rel="stylesheet" href="../../common.css" />
 </head>
 <body>
   <header class="topbar">
@@ -119,10 +120,12 @@
     </section>
 
     <section class="card" id="formCard" hidden>
-      <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
+      <label class="edit-label" for="pTitle" data-zh="标题" data-en="Title">标题</label>
       <input class="edit-input" id="pTitle" maxlength="200" placeholder="帖子标题" />
-      <span class="edit-label" data-zh="正文" data-en="Body">正文</span>
-      <textarea class="edit-textarea" id="pBody" maxlength="5000" placeholder="帖子内容……（违禁词会被拦截）"></textarea>
+      <span class="char-count" data-for="pTitle">0 / 200</span>
+      <label class="edit-label" for="pBody" data-zh="正文" data-en="Body">正文</label>
+      <textarea class="edit-textarea auto-grow" id="pBody" maxlength="5000" placeholder="帖子内容……（违禁词会被拦截）"></textarea>
+      <span class="char-count" data-for="pBody">0 / 5000</span>
       <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
     </section>
 
@@ -194,5 +197,6 @@
       postBtn.addEventListener('click', post);
     })();
   </script>
+  <script src="../../common.js"></script>
 </body>
 </html>

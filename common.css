@@ -1,0 +1,133 @@
+/* common.css — 小蓝页全站响应式 + 输入优化层
+ * 本文件在每页内联 <style> 之后加载，因此同权重下响应式规则优先生效。
+ * 目标：所有系统（桌面/平板/手机）+ 横屏/竖屏 均可用；所有文字输入自适应。
+ */
+
+/* ============ 1. 文字输入基础优化（全站生效） ============ */
+input, textarea, select { font-family: inherit; }
+
+.edit-input, .edit-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--card-border, #e3e8ef);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text, #1c2733);
+  background: var(--panel-bg, #fff);
+  font-family: inherit;
+  margin-top: 6px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.edit-input:focus, .edit-textarea:focus {
+  outline: none;
+  border-color: var(--accent, #0078d4);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #0078d4) 18%, transparent);
+}
+.edit-textarea { min-height: 150px; resize: vertical; overflow: hidden; }
+.auto-grow { overflow: hidden; }            /* 由 common.js 自动增高 */
+
+/* 字数计数器 */
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: .78rem;
+  color: var(--muted, #44556a);
+  opacity: .85;
+  margin-top: 4px;
+}
+.char-count.over { color: var(--danger, #d13438); font-weight: 700; }
+
+/* ============ 2. 顶部蓝条响应式 ============ */
+@media (max-width: 720px) {
+  .topbar {
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 8px 14px;
+    min-height: 0;
+    gap: 6px 10px;
+  }
+  .bar-left { flex: 1 1 auto; min-width: 0; }
+  .site-name { font-size: 1.1rem; max-width: 58vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .breadcrumb { font-size: .72rem; max-width: 68vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-right {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    order: 3;
+    margin-top: 2px;
+  }
+  .bar-btn { padding: 7px 10px; font-size: .82rem; white-space: nowrap; }
+}
+@media (max-width: 400px) {
+  .bar-btn { padding: 6px 8px; font-size: .76rem; }
+  .site-name { font-size: 1rem; }
+}
+
+/* ============ 3. 主体内容与卡片流式 ============ */
+.content { width: 100%; box-sizing: border-box; }
+@media (max-width: 720px) {
+  .content { padding: 26px 16px 84px; }
+  .hero h1 { font-size: 1.55rem; }
+  .hero p { font-size: .98rem; }
+  .card { padding: 18px; margin-top: 14px; }
+  .hero { align-items: flex-start; }
+}
+@media (max-width: 380px) {
+  .content { padding: 22px 12px 84px; }
+  .card { padding: 14px; border-radius: 12px; }
+}
+
+/* ============ 4. 帖子/用户网格自适应 ============ */
+.user-grid, .prod-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+@media (max-width: 480px) {
+  .user-grid, .prod-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+.post .head { flex-wrap: wrap; }
+@media (max-width: 560px) {
+  .post .meta { margin-left: 0; width: 100%; }
+}
+
+/* ============ 5. 右下浮动按钮 + 安全区 ============ */
+.float-actions { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); gap: 10px; }
+@media (max-width: 560px) {
+  .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+  .fab { width: 46px; height: 40px; border-radius: 12px; }
+  .fab svg { width: 20px; height: 20px; }
+}
+
+/* ============ 6. 防止 iOS 点击输入框自动放大（移动端字号≥16px） ============ */
+@media (max-width: 560px) {
+  input, textarea, select, .edit-input, .edit-textarea, .search-input { font-size: 16px; }
+}
+
+/* ============ 7. 横屏（矮高度手机）收紧纵向间距 ============ */
+@media (orientation: landscape) and (max-height: 480px) {
+  .topbar { min-height: 46px; padding-top: 4px; padding-bottom: 4px; }
+  .content { padding-top: 18px; padding-bottom: 44px; }
+  .hero { margin-bottom: 14px; }
+  .hero h1 { font-size: 1.4rem; }
+  .card { margin-top: 12px; }
+  .site-footer { margin-top: 28px; padding: 16px; }
+  .float-actions { right: 12px; bottom: 12px; }
+  .fab { width: 42px; height: 38px; }
+}
+
+/* ============ 8. 页脚响应 ============ */
+@media (max-width: 560px) {
+  .site-footer { padding: 20px 14px; font-size: .82rem; }
+}
+
+/* ============ 9. 搜索框触屏友好 ============ */
+@media (max-width: 560px) {
+  .search-input { padding-top: 12px; padding-bottom: 12px; }
+}
+
+/* ============ 10. 头像弹层不溢出屏幕 ============ */
+.user-popup { max-width: calc(100vw - 24px); box-sizing: border-box; }

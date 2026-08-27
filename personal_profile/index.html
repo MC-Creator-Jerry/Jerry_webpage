@@ -154,6 +154,48 @@
   .site-footer a { color: var(--accent); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
 
+  /* ---- 个人主页背景 ---- */
+  .profile-banner {
+    width: 100%;
+    height: 22vh;
+    min-height: 140px;
+    max-height: 240px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: color-mix(in srgb, var(--accent) 12%, var(--card-bg));
+    border-radius: 0 0 var(--radius) var(--radius);
+    margin-bottom: 22px;
+  }
+  .profile-tools { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+  .bg-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--card-border));
+    background: var(--card-bg); color: var(--accent);
+    border-radius: 999px; padding: 7px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer;
+    box-shadow: var(--card-shadow);
+  }
+  .bg-btn:hover { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); }
+  .content.has-bigbg {
+    background-image: var(--bigbg);
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+  }
+  /* 背景编辑弹窗 */
+  .bg-modal { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; background: rgba(10, 18, 30, 0.5); padding: 20px; }
+  .bg-sheet { width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+  .bg-sheet h3 { font-size: 1.02rem; color: var(--accent); margin: 16px 0 6px; }
+  .bg-sheet h3:first-child { margin-top: 0; }
+  .bg-preview { width: 100%; height: 110px; border-radius: 10px; background-size: cover; background-position: center; background-color: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); border: 1px dashed var(--card-border); margin-top: 8px; }
+  .bg-preview.empty { opacity: 0.45; }
+  .bg-sec-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .bg-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
+  .bg-save:hover { filter: brightness(1.08); }
+  .bg-cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); border: none; border-radius: 10px; padding: 9px 18px; cursor: pointer; }
+  .bg-clear { background: transparent; color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--card-border)); border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 700; }
+  .bg-clear:hover { background: color-mix(in srgb, var(--danger) 10%, var(--card-bg)); }
+
   @media (max-width: 560px) {
     .topbar { padding: 0 14px; min-height: 56px; }
     .site-name { font-size: 1.05rem; }
@@ -184,7 +226,12 @@
     </div>
   </header>
 
+  <div class="profile-banner" id="profileBanner" hidden></div>
+
   <main class="content">
+    <div class="profile-tools" id="profileTools" hidden>
+      <button class="bg-btn" id="openBgBtn" type="button"><span aria-hidden="true">🖼️</span> <span data-zh="设置背景" data-en="Set background">设置背景</span></button>
+    </div>
     <section class="hero">
       <div class="profile-head">
         <img class="avatar" id="avatar" alt="avatar" src="" />
@@ -285,6 +332,33 @@
 
   <div class="toast" id="toast"></div>
 
+  <div class="bg-modal" id="bgModal" hidden>
+    <div class="bg-sheet">
+      <h3 data-zh="超长背景（主页顶部长条）" data-en="Banner (top strip)">超长背景（主页顶部长条）</h3>
+      <input type="file" id="bannerFile" accept="image/*" />
+      <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
+      <input class="edit-input" id="bannerUrl" placeholder="https://..." />
+      <div class="bg-preview empty" id="bannerPreview"></div>
+      <div class="bg-sec-actions">
+        <button class="bg-clear" id="bannerClear" type="button" data-zh="清除超长背景" data-en="Clear banner">清除超长背景</button>
+      </div>
+
+      <h3 data-zh="大背景（正文下方）" data-en="Big background (behind content)">大背景（正文下方）</h3>
+      <input type="file" id="bgFile" accept="image/*" />
+      <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
+      <input class="edit-input" id="bgUrl" placeholder="https://..." />
+      <div class="bg-preview empty" id="bgPreview"></div>
+      <div class="bg-sec-actions">
+        <button class="bg-clear" id="bgClear" type="button" data-zh="清除大背景" data-en="Clear background">清除大背景</button>
+      </div>
+
+      <div class="bg-sec-actions" style="margin-top:18px; justify-content:flex-end;">
+        <button class="bg-cancel" id="bgCancel" type="button" data-zh="取消" data-en="Cancel">取消</button>
+        <button class="bg-save" id="bgSave" type="button" data-zh="保存" data-en="Save">保存</button>
+      </div>
+    </div>
+  </div>
+
   <div class="float-actions">
     <a class="fab" id="langBtn" href="../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
@@ -314,7 +388,7 @@
 
       var MY_LOGIN = null;
       var VIEW_USER = new URLSearchParams(location.search).get('user');
-      var state = { data: null, draft: null };
+      var state = { data: null, draft: null, bg: { banner: null, bg: null } };
 
       function isOwn() { return MY_LOGIN && state.data && MY_LOGIN === state.data.login; }
 
@@ -325,6 +399,75 @@
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
       function gh(login){ return 'https://github.com/' + encodeURIComponent(login || '') + '.png'; }
+
+      /* ---------- 个人主页背景（banner 超长背景 + bg 大背景） ---------- */
+      var bgModal = $('bgModal'), openBgBtn = $('openBgBtn');
+      var bannerFile = $('bannerFile'), bannerUrl = $('bannerUrl'), bannerPreview = $('bannerPreview'), bannerClear = $('bannerClear');
+      var bgFile = $('bgFile'), bgUrl = $('bgUrl'), bgPreview = $('bgPreview'), bgClear = $('bgClear');
+      var bgSave = $('bgSave'), bgCancel = $('bgCancel');
+      var bgDraft = { bannerCleared: false, bgCleared: false };
+
+      function applyBg() {
+        var b = state.bg || {};
+        var bannerEl = $('profileBanner');
+        if (b.banner) { bannerEl.style.backgroundImage = 'url("' + b.banner + '")'; bannerEl.hidden = false; }
+        else { bannerEl.style.backgroundImage = ''; bannerEl.hidden = true; }
+        var contentEl = document.querySelector('.content');
+        if (b.bg) { contentEl.style.setProperty('--bigbg', 'url("' + b.bg + '")'); contentEl.classList.add('has-bigbg'); }
+        else { contentEl.style.removeProperty('--bigbg'); contentEl.classList.remove('has-bigbg'); }
+      }
+      function loadBg(login) {
+        if (!login) return;
+        fetch('/api/bg?user=' + encodeURIComponent(login))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { if (d) { state.bg = { banner: d.banner || null, bg: d.bg || null }; applyBg(); } })
+          .catch(function () {});
+      }
+      function setPreview(el, val) {
+        if (val) { el.style.backgroundImage = 'url("' + val + '")'; el.classList.remove('empty'); }
+        else { el.style.backgroundImage = ''; el.classList.add('empty'); }
+      }
+      function openBg() {
+        var b = state.bg || {};
+        bgDraft = { bannerCleared: false, bgCleared: false };
+        bannerUrl.value = ''; bgUrl.value = ''; bannerFile.value = ''; bgFile.value = '';
+        setPreview(bannerPreview, b.banner); setPreview(bgPreview, b.bg);
+        bgModal.hidden = false;
+      }
+      function fileToBg(fileInput, urlInput, previewEl, draftKey) {
+        var f = fileInput.files && fileInput.files[0]; if (!f) return;
+        if (f.size > 7 * 1024 * 1024) { toast('图片过大（>7MB），请压缩后再传', true); fileInput.value = ''; return; }
+        var r = new FileReader();
+        r.onload = function () { urlInput.value = r.result; setPreview(previewEl, r.result); bgDraft[draftKey] = false; };
+        r.readAsDataURL(f);
+      }
+      openBgBtn.onclick = openBg;
+      bannerFile.onchange = function () { fileToBg(bannerFile, bannerUrl, bannerPreview, 'bannerCleared'); };
+      bgFile.onchange = function () { fileToBg(bgFile, bgUrl, bgPreview, 'bgCleared'); };
+      bannerClear.onclick = function () { bgDraft.bannerCleared = true; bannerUrl.value = ''; setPreview(bannerPreview, null); };
+      bgClear.onclick = function () { bgDraft.bgCleared = true; bgUrl.value = ''; setPreview(bgPreview, null); };
+      bgCancel.onclick = function () { bgModal.hidden = true; };
+      bgModal.addEventListener('click', function (e) { if (e.target === bgModal) bgModal.hidden = true; });
+      bgSave.onclick = function () {
+        if (!state.data) return;
+        var p = { user: state.data.login };
+        var bv = bannerUrl.value.trim(), gv = bgUrl.value.trim();
+        if (bgDraft.bannerCleared) p.banner = '';
+        else if (bv) p.banner = bv;
+        if (bgDraft.bgCleared) p.bg = '';
+        else if (gv) p.bg = gv;
+        if (!('banner' in p) && !('bg' in p)) { toast('没有改动'); return; }
+        fetch('/api/bg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            if (res.ok) { state.bg = { banner: res.body.banner || null, bg: res.body.bg || null }; applyBg(); bgModal.hidden = true; toast('背景已保存 ✓'); }
+            else if (res.body && res.body.error === 'invalid_banner') toast('超长背景链接无效（需图片URL或上传图片）', true);
+            else if (res.body && res.body.error === 'invalid_bg') toast('大背景链接无效（需图片URL或上传图片）', true);
+            else if (res.body && res.body.error === 'forbidden') toast('无权限', true);
+            else toast('保存失败，请重试', true);
+          })
+          .catch(function () { toast('保存失败（网络错误）', true); });
+      };
 
       function renderDisplay() {
         var d = state.data || {};
@@ -357,6 +500,8 @@
         }
         // 编辑按钮可见性
         document.querySelectorAll('.change-btn[data-sec]').forEach(function (b) { b.hidden = !isOwn(); });
+        // 设置背景按钮：仅本人可见
+        $('profileTools').hidden = !isOwn();
       }
 
       /* ---------- 编辑器开关 ---------- */
@@ -477,13 +622,13 @@
       function loadOwn() {
         fetch('/api/profile')
           .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { state.data = d; renderDisplay(); })
+          .then(function (d) { state.data = d; renderDisplay(); loadBg(d.login); })
           .catch(function () { loginPrompt.hidden = false; });
       }
       function loadPublic(login) {
         fetch('/api/profile?user=' + encodeURIComponent(login))
           .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { state.data = d; renderDisplay(); })
+          .then(function (d) { state.data = d; renderDisplay(); loadBg(d.login); })
           .catch(function () {});
       }
 

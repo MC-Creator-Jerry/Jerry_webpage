@@ -107,6 +107,10 @@
     font-weight: 600;
     cursor: pointer;
     line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
   .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
@@ -276,7 +280,7 @@
       </nav>
     </div>
     <div class="bar-right">
-      <button class="bar-btn" id="langBtn" aria-label="切换语言">EN</button>
+      <a class="bar-btn icon" id="langBtn" href="language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">🌐</a>
       <button class="bar-btn icon" id="settingsBtn" aria-label="设置">⚙</button>
     </div>
   </header>
@@ -478,13 +482,8 @@
         document.getElementById('radiusHint').textContent = draft.radius + 'px';
       });
 
-      // ---- 语言按钮（即时切换） ----
-      document.getElementById('langBtn').addEventListener('click', function () {
-        cur.lang = cur.lang === 'en' ? 'zh' : 'en';
-        set(K.lang, cur.lang);
-        applyLang();
-        setBreadcrumb(panel.hidden ? null : '设置');
-      });
+      // ---- 语言按钮：改为打开独立语言页（language.html），不再原地切换 ----
+      // langBtn 现为指向 language.html 的 <a>，由浏览器处理跳转，无需 JS 监听。
 
       applyAll();
     })();

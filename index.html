@@ -191,31 +191,29 @@
   }
   .card a.inline-link:hover { border-bottom-color: var(--accent); }
 
-  /* 产品卡片网格 */
-  .prod-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  .prod-card {
+  /* 产品卡片（整张可点，指向 products.html） */
+  a.product-link {
     display: block;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 18px;
     text-decoration: none;
     color: inherit;
+    cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   }
-  .prod-card:hover {
+  a.product-link:hover {
     transform: translateY(-3px);
     border-color: var(--accent);
     box-shadow: 0 6px 18px rgba(20, 35, 59, 0.12);
   }
-  .prod-icon { font-size: 1.8rem; margin-bottom: 8px; }
-  .prod-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
-  .prod-desc { font-size: 0.92rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
-  .prod-soon { font-size: 0.8rem; color: var(--accent); margin-top: 8px; font-weight: 600; }
+  a.product-link h2 { margin: 0 0 10px; }
+  a.product-link .product-teaser { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin: 0; }
+  a.product-link .product-go {
+    display: inline-block;
+    margin-top: 14px;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.98rem;
+  }
+  a.product-link:hover .product-go { text-decoration: underline; }
 
   /* ---- 页脚 ---- */
   .site-footer {
@@ -264,26 +262,12 @@
          data-en="A personal site built on GitHub Pages, bringing together useful things — global news, projects and handy tools, all reachable from here.">这是一个基于 GitHub Pages 的个人网站，用来聚合各种各样有用的东西——全球新闻、项目作品与常用工具，都在这里入口直达。</p>
     </section>
 
-    <section class="card">
-      <h2><a href="products.html" data-zh="产品" data-en="Products">产品</a></h2>
-      <div class="prod-grid">
-        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener">
-          <div class="prod-icon">📰</div>
-          <div class="prod-name" data-zh="全球新闻" data-en="Global News">全球新闻</div>
-          <div class="prod-desc" data-zh="每日双语全球要闻，10 大领域实时更新。" data-en="Daily bilingual world news across 10 fields, updated every day.">每日双语全球要闻，10 大领域实时更新。</div>
-        </a>
-        <a class="prod-card" href="#about">
-          <div class="prod-icon">🧭</div>
-          <div class="prod-name" data-zh="关于本站" data-en="About">关于本站</div>
-          <div class="prod-desc" data-zh="这个网站是用来做什么的。" data-en="What this site is for.">这个网站是用来做什么的。</div>
-        </a>
-        <a class="prod-card" href="contact.html">
-          <div class="prod-icon">✉️</div>
-          <div class="prod-name" data-zh="联系方式" data-en="Contact">联系方式</div>
-          <div class="prod-desc" data-zh="如何找到我。" data-en="How to reach me.">如何找到我。</div>
-        </a>
-      </div>
-    </section>
+    <a class="card product-link" href="products.html">
+      <h2 data-zh="产品" data-en="Products">产品</h2>
+      <p class="product-teaser" data-zh="这里汇总了我正在做和已经上线的项目：全球新闻、写作与实用小工具等。点击进入产品页查看完整列表。"
+         data-en="A roundup of projects I'm building and shipping — global news, writing, and handy tools. Tap to open the full products page.">这里汇总了我正在做和已经上线的项目：全球新闻、写作与实用小工具等。点击进入产品页查看完整列表。</p>
+      <span class="product-go" data-zh="前往产品页 →" data-en="Go to products →">前往产品页 →</span>
+    </a>
 
     <section class="card" id="about">
       <h2 data-zh="关于" data-en="About">关于</h2>

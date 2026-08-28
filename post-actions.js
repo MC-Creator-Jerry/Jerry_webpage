@@ -25,16 +25,35 @@
       .then(function (d) { return d.states || {}; });
   }
 
-  function mkBtn(label, cls) {
+  function mkBtn(label, cls, icon) {
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'pa-btn ' + cls;
-    b.textContent = label;
+    if (icon) {
+      var img = document.createElement('img');
+      img.className = 'ico';
+      img.src = '../../icons/' + icon;
+      img.alt = '';
+      b.appendChild(img);
+    }
+    var span = document.createElement('span');
+    span.className = 'pa-label';
+    span.textContent = label;
+    b.appendChild(span);
     return b;
   }
 
   function currentLogin() {
     return (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login) || null;
+  }
+
+  function setLabel(btn, text) {
+    var s = btn.querySelector('.pa-label');
+    if (s) s.textContent = text; else btn.textContent = text;
+  }
+  function setIcon(btn, icon) {
+    var im = btn.querySelector('img.ico');
+    if (im) im.src = '../../icons/' + icon;
   }
 
   function initBar(container, postId, state, opts) {
@@ -44,16 +63,16 @@
     container.innerHTML = '';
     container.className = (container.className || '').replace(/\bpost-actions\b/g, '').trim() + ' post-actions';
 
-    var followBtn = mkBtn(state.followed ? '已关注' : '关注', 'pa-follow' + (state.followed ? ' on' : ''));
-    var blockBtn = mkBtn(state.blocked ? '已屏蔽' : '屏蔽', 'pa-block' + (state.blocked ? ' on' : ''));
-    var reportBtn = mkBtn(state.reported ? '已举报' : '举报', 'pa-report' + (state.reported ? ' on' : ''));
+    var followBtn = mkBtn(state.followed ? '已关注' : '关注', 'pa-follow' + (state.followed ? ' on' : ''), state.followed ? 'follow-on.svg' : 'plus.svg');
+    var blockBtn = mkBtn(state.blocked ? '已屏蔽' : '屏蔽', 'pa-block' + (state.blocked ? ' on' : ''), 'ban.svg');
+    var reportBtn = mkBtn(state.reported ? '已举报' : '举报', 'pa-report' + (state.reported ? ' on' : ''), 'flag.svg');
 
     // 自己的帖：关注按钮禁用（不能自己关注自己）
     var isSelf = opts.authorLogin && currentLogin() && opts.authorLogin === currentLogin();
     if (isSelf) {
       followBtn.disabled = true;
       followBtn.classList.add('pa-self');
-      followBtn.textContent = '自己的帖';
+      var lbl = followBtn.querySelector('.pa-label'); if (lbl) lbl.textContent = '自己的帖';
     }
 
     followBtn.addEventListener('click', function () { doFollow(postId, followBtn, opts); });
@@ -85,7 +104,8 @@
     apiPost({ post: postId, action: willFollow ? 'follow' : 'unfollow' }).then(function (res) {
       if (res && res.ok) {
         btn.classList.toggle('on', !!res.followed);
-        btn.textContent = res.followed ? '已关注' : '关注';
+        setLabel(btn, res.followed ? '已关注' : '关注');
+        setIcon(btn, res.followed ? 'follow-on.svg' : 'plus.svg');
         if (opts.onFollow) opts.onFollow(postId, !!res.followed);
         if (opts.toast) opts.toast(res.followed ? '已关注 ✓' : '已取消关注');
       } else if (opts.toast) opts.toast('操作失败', true);
@@ -98,7 +118,7 @@
     apiPost({ post: postId, action: willBlock ? 'block' : 'unblock' }).then(function (res) {
       if (res && res.ok) {
         btn.classList.toggle('on', !!res.blocked);
-        btn.textContent = res.blocked ? '已屏蔽' : '屏蔽';
+        setLabel(btn, res.blocked ? '已屏蔽' : '屏蔽');
         if (opts.onBlock) opts.onBlock(postId, !!res.blocked);
         if (opts.toast) opts.toast(res.blocked ? '已屏蔽 ✓' : '已取消屏蔽');
       } else if (opts.toast) opts.toast('操作失败', true);
@@ -113,7 +133,7 @@
     apiPost({ post: postId, action: 'report', reason: reason }).then(function (res) {
       if (res && res.ok) {
         btn.classList.add('on');
-        btn.textContent = '已举报';
+        setLabel(btn, '已举报');
         if (opts.toast) opts.toast('举报已提交，感谢反馈');
       } else if (opts.toast) opts.toast('操作失败', true);
     });

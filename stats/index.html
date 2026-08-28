@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>流量看板 · Jerry's webpage</title>
+  <style>
+    .hero { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 8px; }
+    .hero p { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 600px; }
+    .hero-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .range-tabs { display: flex; gap: 6px; }
+    .range-tab { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: 0.88rem; cursor: pointer; }
+    .range-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .range-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .refresh-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 16px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    .refresh-btn:hover { filter: brightness(1.08); }
+    .refresh-btn:disabled { opacity: .6; cursor: default; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 16px 18px; }
+    .stat-card .sk { font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+    .stat-card .sv { font-size: 1.9rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+    .stat-card .sd { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+    @media (max-width: 760px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .stat-grid { grid-template-columns: 1fr; } }
+
+    .chart { display: flex; align-items: flex-end; gap: 4px; height: 180px; padding: 10px 2px 0; }
+    .chart .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; }
+    .chart .bar { width: 100%; max-width: 34px; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; transition: height .35s ease; }
+    .chart .bar.zero { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+    .chart .lb { font-size: 0.66rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .chart-wrap { overflow-x: auto; }
+    .chart-legend { display: flex; gap: 16px; font-size: 0.8rem; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+
+    table.rank { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    table.rank th, table.rank td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--card-border); }
+    table.rank th { color: var(--muted); font-weight: 600; font-size: 0.82rem; }
+    table.rank td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+    table.rank td.path { word-break: break-all; color: var(--text); }
+    table.rank tr:last-child td { border-bottom: none; }
+    .bar-inline { height: 6px; background: var(--accent); border-radius: 3px; min-width: 2px; }
+
+    .hint { color: var(--muted); }
+    .err-box { color: #c0392b; }
+    [hidden] { display: none !important; }
+    @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
+  </style>
+  <link rel="stylesheet" href="../../common.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <a href="./" data-zh="流量看板" data-en="Traffic">流量看板</a>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="通知" data-en="Notice">通知<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../../post/center/" data-zh="帖子中心" data-en="Posts">帖子中心</a>
+      <a class="bar-btn" href="../../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <div>
+        <h1 data-zh="流量看板" data-en="Traffic Dashboard">流量看板</h1>
+        <p id="subHint" data-zh="站点访问统计（仅管理员可见）。" data-en="Site traffic stats (admin only).">站点访问统计（仅管理员可见）。</p>
+      </div>
+      <div class="hero-actions">
+        <div class="range-tabs" id="rangeTabs">
+          <button class="range-tab" type="button" data-days="7">7 天</button>
+          <button class="range-tab" type="button" data-days="14">14 天</button>
+          <button class="range-tab active" type="button" data-days="30">30 天</button>
+        </div>
+        <button class="refresh-btn" id="refreshBtn" type="button" data-zh="刷新" data-en="Refresh">刷新</button>
+      </div>
+    </section>
+
+    <section class="card" id="denyCard" hidden>
+      <h2 data-zh="无访问权限" data-en="No access">无访问权限</h2>
+      <p class="hint" id="denyMsg" data-zh="流量看板仅站主与管理员可见。" data-en="This dashboard is for admins only.">流量看板仅站主与管理员可见。</p>
+    </section>
+
+    <div id="dash" hidden>
+      <section class="stat-grid">
+        <div class="stat-card">
+          <div class="sk" data-zh="今日浏览量 PV" data-en="Today PV">今日浏览量 PV</div>
+          <div class="sv" id="kTodayPv">–</div>
+          <div class="sd" id="kTodayDate"></div>
+        </div>
+        <div class="stat-card">
+          <div class="sk" data-zh="今日访客 UV" data-en="Today UV">今日访客 UV</div>
+          <div class="sv" id="kTodayUv">–</div>
+          <div class="sd" data-zh="按浏览器独立访客 ID 去重" data-en="Unique visitors by browser ID">按浏览器独立访客 ID 去重</div>
+        </div>
+        <div class="stat-card">
+          <div class="sk" id="kRangeLabel" data-zh="近 30 天 PV" data-en="Last 30 days PV">近 30 天 PV</div>
+          <div class="sv" id="kRangePv">–</div>
+          <div class="sd" id="kRangeUv"></div>
+        </div>
+        <div class="stat-card">
+          <div class="sk" data-zh="累计浏览量" data-en="Total PV">累计浏览量</div>
+          <div class="sv" id="kTotalPv">–</div>
+          <div class="sd" id="kTotalRange"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 data-zh="每日浏览量" data-en="Daily page views">每日浏览量</h2>
+        <div class="chart-wrap">
+          <div class="chart" id="chart"></div>
+        </div>
+        <div class="chart-legend">
+          <span id="chartHint">–</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 data-zh="热门页面" data-en="Top pages">热门页面</h2>
+        <table class="rank">
+          <thead><tr><th style="width:44px">#</th><th data-zh="页面" data-en="Page">页面</th><th style="width:120px" data-zh="浏览量" data-en="Views">浏览量</th></tr></thead>
+          <tbody id="topPathsBody"></tbody>
+        </table>
+        <p class="hint" id="topPathsEmpty" hidden data-zh="暂无数据。" data-en="No data yet.">暂无数据。</p>
+      </section>
+
+      <section class="card">
+        <h2 data-zh="来源" data-en="Referrers">来源</h2>
+        <table class="rank">
+          <thead><tr><th style="width:44px">#</th><th data-zh="来源" data-en="Source">来源</th><th style="width:120px" data-zh="次数" data-en="Visits">次数</th></tr></thead>
+          <tbody id="topRefsBody"></tbody>
+        </table>
+        <p class="hint" id="topRefsEmpty" hidden data-zh="暂无外部来源（多是直接访问）。" data-en="No external referrers (mostly direct visits).">暂无外部来源（多是直接访问）。</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry · <a href="../../index.html" data-zh="返回主页" data-en="Home">返回主页</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" href="../../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="../../settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script src="../../auth.js"></script>
+  <script>
+    (function () {
+      var dash = document.getElementById('dash');
+      var denyCard = document.getElementById('denyCard');
+      var denyMsg = document.getElementById('denyMsg');
+      var refreshBtn = document.getElementById('refreshBtn');
+      var rangeTabs = document.getElementById('rangeTabs');
+      var days = 30;
+
+      function fmt(n) {
+        try { return Number(n || 0).toLocaleString('zh-CN'); } catch (e) { return String(n || 0); }
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+      function showDeny(msg) {
+        denyCard.hidden = false;
+        dash.hidden = true;
+        if (msg) denyMsg.textContent = msg;
+      }
+
+      function renderChart(list) {
+        var chart = document.getElementById('chart');
+        if (!chart) return;
+        chart.innerHTML = '';
+        if (!list.length) { chart.innerHTML = '<span class="hint">暂无数据</span>'; return; }
+        var max = list.reduce(function (m, d) { return Math.max(m, d.pv || 0); }, 0);
+        if (max <= 0) max = 1;
+        list.forEach(function (d) {
+          var col = document.createElement('div');
+          col.className = 'col';
+          var bar = document.createElement('div');
+          bar.className = 'bar' + ((d.pv || 0) ? '' : ' zero');
+          bar.style.height = Math.max(2, Math.round(((d.pv || 0) / max) * 100)) + '%';
+          bar.title = d.date + ' · PV ' + (d.pv || 0) + ' · UV ' + (d.uv || 0);
+          var lb = document.createElement('div');
+          lb.className = 'lb';
+          lb.textContent = String(d.date || '').slice(5);
+          col.appendChild(bar);
+          col.appendChild(lb);
+          chart.appendChild(col);
+        });
+        var peak = list.reduce(function (a, b) { return (b.pv || 0) > (a.pv || 0) ? b : a; }, list[0]);
+        setText('chartHint', '峰值 ' + peak.date + '（' + fmt(peak.pv) + ' PV / ' + fmt(peak.uv) + ' UV），共 ' + list.length + ' 天');
+      }
+
+      function renderRanks(tbodyId, emptyId, rows, isRef) {
+        var tbody = document.getElementById(tbodyId);
+        var empty = document.getElementById(emptyId);
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!rows || !rows.length) { if (empty) empty.hidden = false; return; }
+        if (empty) empty.hidden = true;
+        var max = rows.reduce(function (m, r) { return Math.max(m, r.count || 0); }, 0) || 1;
+        rows.forEach(function (r, i) {
+          var tr = document.createElement('tr');
+          var label = isRef ? r.key : r.key;
+          tr.innerHTML =
+            '<td>' + (i + 1) + '</td>' +
+            '<td class="path"><div>' + esc(label) + '</div>' +
+              '<div class="bar-inline" style="width:' + Math.max(2, Math.round((r.count / max) * 100)) + '%"></div></td>' +
+            '<td class="num">' + fmt(r.count) + '</td>';
+          tbody.appendChild(tr);
+        });
+      }
+
+      function load() {
+        if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.textContent = '加载中…'; }
+        fetch('/api/stats?days=' + encodeURIComponent(days), { credentials: 'same-origin' })
+          .then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, body: j }; });
+          })
+          .then(function (res) {
+            if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = '刷新'; }
+            if (res.status === 401) { showDeny('请先登录后再查看流量看板。'); return; }
+            if (res.status === 403) { showDeny('流量看板仅站主与管理员可见。'); return; }
+            var d = res.body || {};
+            if (!d.ok) { showDeny('统计数据加载失败。'); return; }
+
+            denyCard.hidden = true;
+            dash.hidden = false;
+
+            var today = d.today || { date: '', pv: 0, uv: 0 };
+            setText('kTodayPv', fmt(today.pv));
+            setText('kTodayUv', fmt(today.uv));
+            setText('kTodayDate', today.date || '');
+            setText('kRangePv', fmt(d.rangePv));
+            setText('kRangeUv', '访客 ' + fmt(d.rangeUv));
+            setText('kTotalPv', fmt(d.total && d.total.pv));
+            var tr = d.total || {};
+            setText('kTotalRange', tr.firstDay ? (tr.firstDay + ' 起 · 共 ' + (tr.days || 0) + ' 天有数据') : '');
+            var rl = document.getElementById('kRangeLabel');
+            if (rl) rl.textContent = '近 ' + days + ' 天 PV';
+
+            renderChart(d.days || []);
+            renderRanks('topPathsBody', 'topPathsEmpty', d.topPaths || [], false);
+            renderRanks('topRefsBody', 'topRefsEmpty', d.topRefs || [], true);
+          })
+          .catch(function () {
+            if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = '刷新'; }
+            showDeny('网络错误，无法加载统计数据。');
+          });
+      }
+
+      if (rangeTabs) {
+        Array.prototype.forEach.call(rangeTabs.querySelectorAll('.range-tab'), function (tab) {
+          tab.addEventListener('click', function () {
+            days = parseInt(tab.getAttribute('data-days') || '30', 10) || 30;
+            Array.prototype.forEach.call(rangeTabs.querySelectorAll('.range-tab'), function (t) {
+              t.classList.toggle('active', t === tab);
+            });
+            load();
+          });
+        });
+      }
+      if (refreshBtn) refreshBtn.addEventListener('click', load);
+      load();
+    })();
+  </script>
+  <script src="../../common.js"></script>
+</body>
+</html>

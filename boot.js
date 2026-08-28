@@ -73,7 +73,7 @@
         '<div class="xl-prog-v-pct">0%</div>' +
       '</div>' +
       '<div class="xl-sqs"></div>' +
-      '<div class="xl-load-text">小蓝页</div>';
+      '<div class="xl-load-text">欢迎来到<br>小蓝页<br>Jerry&#39;s Webpage</div>';
     doc.body.appendChild(loader);
     return loader;
   }

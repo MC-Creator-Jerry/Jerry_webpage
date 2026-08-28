@@ -102,6 +102,14 @@ input, textarea, select { font-family: inherit; }
   .fab svg { width: 20px; height: 20px; }
 }
 
+/* ============ 7b. 图片图标（<img class="ico">，替代 emoji / inline-svg） ============ */
+img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain; flex: 0 0 auto; }
+.bar-btn img.ico { width: 16px; height: 16px; margin-right: 5px; }
+.fab img.ico { width: 20px; height: 20px; }
+.foot-btn img.ico { width: 1.1em; height: 1.1em; }
+.pa-btn img.ico { width: 14px; height: 14px; margin-right: 4px; vertical-align: -2px; }
+.ico-btn img.ico, button img.ico { width: 18px; height: 18px; }
+
 /* ============ 6. 防止 iOS 点击输入框自动放大（移动端字号≥16px） ============ */
 @media (max-width: 560px) {
   input, textarea, select, .edit-input, .edit-textarea, .search-input { font-size: 16px; }

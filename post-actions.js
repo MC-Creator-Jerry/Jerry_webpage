@@ -112,17 +112,95 @@
     });
   }
 
-  function doBlock(postId, btn, opts) {
-    if (!requireLogin(opts)) return;
-    var willBlock = !btn.classList.contains('on');
-    apiPost({ post: postId, action: willBlock ? 'block' : 'unblock' }).then(function (res) {
+  var activeBlockMenu = null;
+  var blockMenuCleanup = null;
+
+  function closeBlockMenu() {
+    if (activeBlockMenu && activeBlockMenu.parentNode) activeBlockMenu.parentNode.removeChild(activeBlockMenu);
+    activeBlockMenu = null;
+    if (blockMenuCleanup) { blockMenuCleanup(); blockMenuCleanup = null; }
+  }
+
+  function onBlockMenuOutside(e) {
+    if (activeBlockMenu && !activeBlockMenu.contains(e.target)) closeBlockMenu();
+  }
+
+  function openBlockMenu(postId, blockBtn, opts) {
+    closeBlockMenu();
+    var menu = document.createElement('div');
+    menu.className = 'pa-block-menu';
+    menu.setAttribute('role', 'menu');
+
+    var head = document.createElement('div');
+    head.className = 'pa-block-menu-head';
+    head.textContent = '选择屏蔽原因';
+    menu.appendChild(head);
+
+    var reasons = ['不喜欢ta的内容', '不想看到该作者', '内容重复 / 已看过'];
+    reasons.forEach(function (label) {
+      var item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'pa-block-menu-item';
+      item.textContent = label;
+      item.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeBlockMenu();
+        execBlock(postId, blockBtn, opts, label);
+      });
+      menu.appendChild(item);
+    });
+
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'pa-block-menu-item pa-block-cancel';
+    cancel.textContent = '取消';
+    cancel.addEventListener('click', function (e) { e.stopPropagation(); closeBlockMenu(); });
+    menu.appendChild(cancel);
+
+    document.body.appendChild(menu);
+    var rect = blockBtn.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.left = rect.left + 'px';
+    menu.style.top = (rect.bottom + 6) + 'px';
+    if (menu.offsetLeft + menu.offsetWidth > window.innerWidth - 8) {
+      menu.style.left = Math.max(8, window.innerWidth - menu.offsetWidth - 8) + 'px';
+    }
+    activeBlockMenu = menu;
+    document.addEventListener('click', onBlockMenuOutside, true);
+    window.addEventListener('scroll', closeBlockMenu, true);
+    blockMenuCleanup = function () {
+      document.removeEventListener('click', onBlockMenuOutside, true);
+      window.removeEventListener('scroll', closeBlockMenu, true);
+    };
+  }
+
+  function execBlock(postId, btn, opts, reason) {
+    apiPost({ post: postId, action: 'block', reason: reason }).then(function (res) {
       if (res && res.ok) {
-        btn.classList.toggle('on', !!res.blocked);
-        setLabel(btn, res.blocked ? '已屏蔽' : '屏蔽');
-        if (opts.onBlock) opts.onBlock(postId, !!res.blocked);
-        if (opts.toast) opts.toast(res.blocked ? '已屏蔽 ✓' : '已取消屏蔽');
+        btn.classList.add('on');
+        setLabel(btn, '已屏蔽');
+        if (opts.onBlock) opts.onBlock(postId, true);
+        if (opts.toast) opts.toast('我们将不再推送该内容');
       } else if (opts.toast) opts.toast('操作失败', true);
     });
+  }
+
+  function doBlock(postId, btn, opts) {
+    if (!requireLogin(opts)) return;
+    if (btn.classList.contains('on')) {
+      // 已屏蔽 -> 直接取消
+      apiPost({ post: postId, action: 'unblock' }).then(function (res) {
+        if (res && res.ok) {
+          btn.classList.remove('on');
+          setLabel(btn, '屏蔽');
+          if (opts.onBlock) opts.onBlock(postId, false);
+          if (opts.toast) opts.toast('已取消屏蔽');
+        } else if (opts.toast) opts.toast('操作失败', true);
+      });
+      return;
+    }
+    if (activeBlockMenu) { closeBlockMenu(); return; }
+    openBlockMenu(postId, btn, opts);
   }
 
   function doReport(postId, btn, opts) {

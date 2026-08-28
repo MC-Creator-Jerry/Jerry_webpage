@@ -264,7 +264,9 @@
           '<h1></h1><div class="post-body"></div><div class="att-wrap"></div>' +
           '<div class="post-actions" id="postActions" data-post="'+p.id+'"></div>' + del;
         postBox.querySelector('h1').textContent = p.title || '（无标题）';
-        postBox.querySelector('.post-body').innerHTML = p.body || '';
+        var dBody = postBox.querySelector('.post-body');
+        dBody.innerHTML = p.body || '';
+        if (window.XLTopics) window.XLTopics.linkify(dBody);
         var hasText = !!(p.body && p.body.trim());
         var attWrap = postBox.querySelector('.att-wrap');
         if (attWrap) attWrap.innerHTML = XLMedia.build(p.files, { videoOnly: XLMedia.isVideoOnly(p.files, hasText) });

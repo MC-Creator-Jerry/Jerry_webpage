@@ -45,3 +45,47 @@
   if (document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
 })();
+
+/* common.js — 流畅动画：滚动揭示 + 图片淡入
+ * 与 common.css 配套：仅用透明度过渡（opacity-only），避免与悬浮位移冲突；
+ * 排除弹层（.modal / .settings-panel 等）内部元素，避免永久隐藏。
+ */
+(function () {
+  'use strict';
+  var d = document;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SKIP = '.modal-overlay,.settings-overlay,.modal,.settings-panel,.pop-menu,.user-popup,.dropdown,.modal-card,.tab-pane';
+
+  function tag() {
+    var sel = '.section-card,.prod-card,.feature-card,.card,.post,.user-card,.product-card,.notice-item,.comment-item';
+    d.querySelectorAll(sel).forEach(function (el) {
+      if (el.closest && el.closest(SKIP)) return;            // 弹层内部不揭示
+      if (el.classList.contains('xl-reveal') || el.classList.contains('in')) return;
+      el.classList.add('xl-reveal');
+    });
+  }
+  tag();
+
+  if (reduce) {
+    d.querySelectorAll('.xl-reveal,.section-card,.prod-card,.feature-card').forEach(function (e) { e.classList.add('in'); });
+    return;
+  }
+
+  var els = d.querySelectorAll('.xl-reveal,.section-card,.prod-card,.feature-card');
+  if (!('IntersectionObserver' in window) || !els.length) {
+    els.forEach(function (e) { e.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
+  els.forEach(function (e) { io.observe(e); });
+
+  // 图片淡入
+  d.querySelectorAll('img').forEach(function (img) {
+    if (img.complete) img.classList.add('loaded');
+    else img.addEventListener('load', function () { img.classList.add('loaded'); });
+  });
+})();

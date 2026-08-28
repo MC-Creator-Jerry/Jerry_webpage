@@ -82,6 +82,16 @@
   .post h3 { font-size: 1.05rem; color: var(--text); margin-bottom: 6px; }
   .post h3 a.ptitle { color: var(--text); text-decoration: none; }
   .post h3 a.ptitle:hover { color: var(--accent); }
+  /* 帖子底部操作条：评论图标按钮 + 点赞图标按钮（右下角） */
+  .post-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .post-foot .foot-spacer { flex: 1; }
+  .foot-btn { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 10px; padding: 6px 13px; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; line-height: 1; transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.1s; }
+  .foot-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .foot-btn:active { transform: scale(0.96); }
+  .foot-btn .ico { font-size: 1.1rem; line-height: 1; }
+  .foot-btn .cnt { font-weight: 700; font-size: 0.85rem; }
+  .foot-btn.like-btn.on { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
+  .foot-btn[disabled] { opacity: 0.55; cursor: default; }
   .post .cmlink { display: inline-block; margin-top: 10px; font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600; }
   .post .cmlink:hover { text-decoration: underline; }
   .post p { font-size: 0.98rem; line-height: 1.7; color: var(--muted); white-space: pre-wrap; word-break: break-word; }
@@ -307,6 +317,8 @@
           var canDel = meIsAdmin || (meLogin && p.login === meLogin);
           var del = canDel ? '<button class="del" data-id="' + p.id + '">删除</button>' : '';
           var cnt = (counts && counts[p.id]) || 0;
+          var st = states[p.id] || {};
+          var lc = (st && st.likeCount) || 0;
           card.innerHTML =
             '<div class="head">' +
               '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
@@ -315,17 +327,25 @@
             '</div>' +
             '<h3><a class="ptitle" href="../detail/?post=' + encodeURIComponent(p.id) + '"></a></h3>' +
             '<p></p>' +
-            '<a class="cmlink" href="../detail/?post=' + encodeURIComponent(p.id) + '">💬 <span class="cmcount">' + cnt + '</span> ' +
-              '<span data-zh="条评论" data-en="comments">条评论</span></a>' +
+            '<div class="post-foot">' +
+              '<button class="foot-btn comment-btn" type="button" data-id="' + p.id + '" title="评论">' +
+                '<span class="ico">💬</span><span class="cnt">' + cnt + '</span>' +
+              '</button>' +
+              '<span class="foot-spacer"></span>' +
+              '<button class="foot-btn like-btn' + (st && st.liked ? ' on' : '') + '" type="button" data-id="' + p.id + '" title="点赞">' +
+                '<span class="ico">👍</span><span class="like-count">' + lc + '</span>' +
+              '</button>' +
+            '</div>' +
             '<div class="post-actions" data-post="' + p.id + '"></div>' + del;
           card.querySelector('.ptitle').textContent = p.title || '（无标题）';
           card.querySelector('p').textContent = p.body || '';
           if (canDel) {
             card.querySelector('.del').addEventListener('click', function (e) { e.stopPropagation(); delPost(p.id); });
           }
-          // 点击卡片（标题/评论链接）在帖子中心内打开查看，不再跳转详情页
+          // 点击标题 / 评论按钮：在帖子中心内打开查看；点赞按钮独立处理
           card.querySelector('.ptitle').addEventListener('click', function (e) { e.preventDefault(); openPost(p.id); });
-          card.querySelector('.cmlink').addEventListener('click', function (e) { e.preventDefault(); openPost(p.id); });
+          card.querySelector('.comment-btn').addEventListener('click', function (e) { e.preventDefault(); openPost(p.id); });
+          card.querySelector('.like-btn').addEventListener('click', function (e) { e.stopPropagation(); toggleLike(p, this); });
           listEl.appendChild(card);
         });
         if (typeof window.applyAll === 'function') window.applyAll();
@@ -370,6 +390,28 @@
               });
           })
           .catch(function () { render([], {}); });
+      }
+
+      function toggleLike(p, btn) {
+        if (!meLogin) { toast('请先登录', true); if (window.JW_LOGIN) window.JW_LOGIN(); return; }
+        var st = states[p.id] || {};
+        var action = st.liked ? 'unlike' : 'like';
+        btn.disabled = true;
+        fetch('/api/post-actions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post: p.id, action: action })
+        }).then(function (r) { return r.ok ? r.json() : { error: 'net' }; })
+          .then(function (res) {
+            btn.disabled = false;
+            if (res && res.ok) {
+              st.liked = res.liked; st.likeCount = res.likeCount;
+              btn.classList.toggle('on', !!res.liked);
+              var c = btn.querySelector('.like-count'); if (c) c.textContent = res.likeCount;
+            } else if (res && res.error === 'unauthorized') { toast('请先登录', true); }
+            else { toast('操作失败', true); }
+          })
+          .catch(function () { btn.disabled = false; toast('网络错误', true); });
       }
 
       function delPost(id) {
@@ -431,6 +473,7 @@
         renderModalPost(p);
       }
       function renderModalPost(p) {
+        var st = (states[p.id] || {});
         var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
         var canDel = meIsAdmin || (meLogin && p.login === meLogin);
         var del = canDel ? '<button class="del" id="mDelPost">删除帖子</button>' : '';
@@ -441,18 +484,25 @@
             '<span class="meta">' + fmtTime(p.ts) + '</span>' +
           '</div>' +
           '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><p style="font-size:1.02rem;line-height:1.8;color:var(--muted);white-space:pre-wrap;word-break:break-word"></p>' +
-          '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' + del;
+          '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' +
+          '<div class="post-foot" style="margin-top:10px">' +
+            '<span class="foot-spacer"></span>' +
+            '<button class="foot-btn like-btn' + (st.liked ? ' on' : '') + '" id="mLikeBtn" type="button" data-id="' + p.id + '" title="点赞">' +
+              '<span class="ico">👍</span><span class="like-count">' + (st.likeCount || 0) + '</span>' +
+            '</button>' +
+          '</div>' + del;
         mPost.querySelector('h1').textContent = p.title || '（无标题）';
         mPost.querySelector('p').textContent = p.body || '';
         mPost.hidden = false;
         if (canDel) document.getElementById('mDelPost').addEventListener('click', function () { delPost(p.id); });
-        var st = (states[p.id] || {});
         if (st.blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; return; }
         XLPostActions.initBar(document.getElementById('mPostActions'), p.id, st, {
           loggedIn: !!meLogin,
           toast: toast,
           onBlock: function (postId, blocked) { if (states[postId]) states[postId].blocked = blocked; if (blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; } else { loadModalPost(); } }
         });
+        var mLike = document.getElementById('mLikeBtn');
+        if (mLike) mLike.addEventListener('click', function () { toggleLike(p, this); });
       }
 
       function renderModalComments(list) {

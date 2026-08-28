@@ -452,7 +452,7 @@
           .then(function (d) {
             if (d && d.isAdmin) {
               isAdmin = true; document.body.classList.add('is-admin');
-              if (featureData) openFeatureEditor(featureData);
+              // 仅显示「编辑入口」按钮；刷新时不再自动弹出编辑弹窗
             }
           })
           .catch(function () {});

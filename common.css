@@ -251,3 +251,54 @@ img.xl-fade.loaded { opacity: 1; }
   * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .xl-reveal, .section-card, .prod-card, .feature-card { opacity: 1 !important; }
 }
+
+/* ============================================================
+   终末地风格加载动画（刷新 / 首访显示；站内跳转不重播）
+   白底蓝字 + 随机蓝色方块，约 1.5s 内完成并揭晓内容
+   ============================================================ */
+/* 加载期间隐藏真实内容，避免闪烁（loader 自身例外） */
+html.xl-booting { background: #ffffff; }
+html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
+
+.xl-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity .35s ease;
+}
+.xl-loader.xl-hide { opacity: 0; pointer-events: none; }
+
+.xl-load-text {
+  color: rgb(0, 120, 212);
+  font-weight: 700;
+  font-size: clamp(30px, 8vw, 60px);
+  letter-spacing: .22em;
+  padding-left: .22em;            /* 补偿字距，视觉居中 */
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .45s ease, transform .45s ease;
+  user-select: none;
+}
+.xl-loader.xl-show .xl-load-text { opacity: 1; transform: none; }
+
+.xl-sqs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.xl-sq {
+  position: absolute;
+  background: rgb(0, 120, 212);
+  border-radius: 5px;
+  opacity: 0;
+  transform: scale(.2);
+  transition: opacity .32s ease, transform .34s cubic-bezier(.2, .8, .3, 1.25);
+}
+.xl-sq.xl-in { opacity: 1; transform: scale(1); }
+.xl-sq.xl-out { opacity: 0; transform: scale(.2); }
+
+@media (prefers-reduced-motion: reduce) {
+  html.xl-booting body > *:not(#xlLoader) { visibility: visible; }
+  .xl-loader { display: none !important; }
+}

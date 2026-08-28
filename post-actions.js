@@ -5,6 +5,9 @@
 //       opts: { loggedIn:bool, toast:fn(msg,err), onBlock:fn(postId,blocked), onFollow:fn(postId,followed), authorLogin:str }
 //   window.XLPostActions.unblockPost(postId, opts) -> Promise<res>
 (function () {
+  // 站主账号：其帖子不允许任何人屏蔽（前端不显示屏蔽钮，后端另有硬校验）
+  var OWNER = 'MC-Creator-Jerry';
+
   function apiGet(path) {
     return fetch('/api/' + path)
       .then(function (r) { return r.ok ? r.json() : {}; })
@@ -75,12 +78,15 @@
       var lbl = followBtn.querySelector('.pa-label'); if (lbl) lbl.textContent = '自己的帖';
     }
 
+    // 站主的帖：不提供屏蔽入口（后端也会拒绝）
+    var isOwnerPost = !!opts.authorLogin && opts.authorLogin === OWNER;
+
     followBtn.addEventListener('click', function () { doFollow(postId, followBtn, opts); });
-    blockBtn.addEventListener('click', function () { doBlock(postId, blockBtn, opts); });
+    if (!isOwnerPost) blockBtn.addEventListener('click', function () { doBlock(postId, blockBtn, opts); });
     reportBtn.addEventListener('click', function () { doReport(postId, reportBtn, opts); });
 
     container.appendChild(followBtn);
-    container.appendChild(blockBtn);
+    if (!isOwnerPost) container.appendChild(blockBtn);
     container.appendChild(reportBtn);
   }
 
@@ -187,6 +193,11 @@
 
   function doBlock(postId, btn, opts) {
     if (!requireLogin(opts)) return;
+    // 硬校验：站主的帖子任何人都不能屏蔽
+    if (opts.authorLogin && opts.authorLogin === OWNER) {
+      if (opts.toast) opts.toast('站主的帖子不能屏蔽', true);
+      return;
+    }
     if (btn.classList.contains('on')) {
       // 已屏蔽 -> 直接取消
       apiPost({ post: postId, action: 'unblock' }).then(function (res) {

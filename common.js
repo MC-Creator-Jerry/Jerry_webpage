@@ -155,3 +155,56 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 })();
+
+/* ============ 帖子附件渲染（视频/音频/图片/其他），video-only 自动预览 ============ */
+window.XLMedia = (function () {
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function humanSize(n) {
+    n = Number(n) || 0;
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1024 / 1024).toFixed(1) + ' MB';
+  }
+  function url(key) { return '/api/file?key=' + encodeURIComponent(key); }
+
+  function isVideoOnly(files, hasText) {
+    return !!(files && files.length === 1 && /^video\//.test(files[0].type || '') && !hasText);
+  }
+
+  function build(files, opts) {
+    opts = opts || {};
+    if (!files || !files.length) return '';
+    if (opts.videoOnly) {
+      var f = files[0];
+      return '<div class="att att-video-only">' +
+        '<video class="att-video-auto" src="' + url(f.key) + '" autoplay muted loop playsinline controls preload="metadata"></video>' +
+        '</div>';
+    }
+    var tiles = files.map(function (f) {
+      var u = url(f.key);
+      var t = f.type || '';
+      if (/^image\//.test(t)) {
+        return '<a class="att-tile att-img" href="' + u + '" target="_blank" rel="noopener">' +
+          '<img src="' + u + '" alt="' + esc(f.name) + '" loading="lazy"></a>';
+      }
+      if (/^video\//.test(t)) {
+        return '<video class="att-tile att-video" src="' + u + '" controls playsinline preload="metadata"></video>';
+      }
+      if (/^audio\//.test(t)) {
+        return '<div class="att-tile att-audio"><audio controls src="' + u + '"></audio></div>';
+      }
+      var ext = (String(f.name).split('.').pop() || 'FILE').toUpperCase().slice(0, 5);
+      return '<a class="att-tile att-file" href="' + u + '" download="' + esc(f.name) + '">' +
+        '<span class="att-ext">' + esc(ext) + '</span>' +
+        '<span class="att-meta"><span class="att-name">' + esc(f.name) + '</span>' +
+        '<span class="att-size">' + humanSize(f.size) + '</span></span></a>';
+    }).join('');
+    return '<div class="att att-grid count-' + Math.min(files.length, 4) + '">' + tiles + '</div>';
+  }
+
+  return { url: url, isVideoOnly: isVideoOnly, build: build };
+})();

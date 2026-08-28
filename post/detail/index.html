@@ -255,10 +255,10 @@
             '<a class="author" href="../../personal_profile/?user='+encodeURIComponent(p.login)+'">@'+esc(p.login)+'</a>' +
             '<span class="meta">'+fmtTime(p.ts)+'</span>' +
           '</div>' +
-          '<h1></h1><p></p>' +
+          '<h1></h1><div class="post-body"></div>' +
           '<div class="post-actions" id="postActions" data-post="'+p.id+'"></div>' + del;
         postBox.querySelector('h1').textContent = p.title || '（无标题）';
-        postBox.querySelector('p').textContent = p.body || '';
+        postBox.querySelector('.post-body').innerHTML = p.body || '';
         postBox.hidden = false;
         if (canDel) {
           document.getElementById('delPost').addEventListener('click', function () { delPost(); });

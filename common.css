@@ -352,7 +352,8 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
   position: absolute;
   left: 0; right: 0; top: 0;
   height: 0%;
-  background: rgb(0, 120, 212);
+  /* 右上角 rgb(0,120,212) → 左下角蓝色，半透明 */
+  background: linear-gradient(225deg, rgba(0, 120, 212, 0.72) 0%, rgba(0, 86, 150, 0.52) 100%);
   border-radius: 4px;
   transition: height .1s linear;
 }

@@ -240,10 +240,20 @@
       function place() {
         var r = trigger.getBoundingClientRect();
         var w = card.offsetWidth || 240;
+        var h = card.offsetHeight || 180;
         var left = r.right - w - 4;
         if (left < 8) left = 8;
         if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
-        card.style.top = (r.bottom + 8) + 'px';
+        // 如果触发器在屏幕下半部、下方空间不足，就把卡片显示在触发器上方
+        var spaceBelow = window.innerHeight - r.bottom;
+        var top;
+        if (spaceBelow >= h + 12) {
+          top = r.bottom + 8;
+        } else {
+          top = r.top - h - 8;
+          if (top < 8) top = 8;
+        }
+        card.style.top = top + 'px';
         card.style.left = left + 'px';
       }
       function show() {

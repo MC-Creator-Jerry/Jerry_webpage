@@ -89,3 +89,69 @@
     else img.addEventListener('load', function () { img.classList.add('loaded'); });
   });
 })();
+
+/* ============ 按钮图标：用图片图标（<img class="ico">）替代文字/emoji ============ */
+(function () {
+  function iconPrefix() {
+    var sc = document.querySelector('script[src$="common.js"]');
+    var src = sc ? (sc.getAttribute('src') || '') : '';
+    var m = src.match(/^((?:\.\.\/)*)/);
+    return (m ? m[1] : '') + 'icons/';
+  }
+  function makeImg(file) {
+    var img = document.createElement('img');
+    img.className = 'ico';
+    img.src = iconPrefix() + file;
+    img.alt = '';
+    return img;
+  }
+  function addIcon(el, file) {
+    if (!el || el.querySelector(':scope > img.ico')) return;
+    el.insertBefore(makeImg(file), el.firstChild);
+  }
+
+  // 顶部蓝条按钮 -> 白色图标
+  var BAR = [
+    { re: /通知/, f: 'w-bell.svg' },
+    { re: /帮助/, f: 'w-help.svg' },
+    { re: /个人主页|主页/, f: 'w-user.svg' },
+    { re: /帖子中心/, f: 'w-posts.svg' },
+    { re: /产品/, f: 'w-products.svg' },
+    { re: /登录/, f: 'w-user.svg' },
+    { re: /退出/, f: 'w-logout.svg' },
+    { re: /新加帖子/, f: 'w-edit.svg' }
+  ];
+  // 浮动按钮（语言/设置）-> 深色图标，替换内联 svg
+  var FAB = [
+    { re: /语言|language/i, f: 'globe.svg' },
+    { re: /设置|settings/i, f: 'gear.svg' }
+  ];
+  // 通用文字按钮 -> 深色图标
+  var GEN = [
+    { re: /^发送$/, f: 'send.svg' }
+  ];
+
+  function run() {
+    document.querySelectorAll('.bar-btn').forEach(function (b) {
+      var t = (b.getAttribute('data-zh') || b.textContent || '').trim();
+      for (var i = 0; i < BAR.length; i++) {
+        if (BAR[i].re.test(t)) { addIcon(b, BAR[i].f); break; }
+      }
+    });
+    document.querySelectorAll('.fab').forEach(function (f) {
+      var label = (f.getAttribute('aria-label') || f.getAttribute('title') || '').trim();
+      for (var j = 0; j < FAB.length; j++) {
+        if (FAB[j].re.test(label)) { f.innerHTML = ''; f.appendChild(makeImg(FAB[j].f)); break; }
+      }
+    });
+    document.querySelectorAll('button, .btn').forEach(function (b) {
+      if (b.querySelector(':scope > img.ico')) return;
+      var t = (b.getAttribute('data-zh') || b.textContent || '').trim();
+      for (var k = 0; k < GEN.length; k++) {
+        if (GEN[k].re.test(t)) { addIcon(b, GEN[k].f); break; }
+      }
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();

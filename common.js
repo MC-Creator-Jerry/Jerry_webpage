@@ -208,3 +208,145 @@ window.XLMedia = (function () {
 
   return { url: url, isVideoOnly: isVideoOnly, build: build };
 })();
+
+/* ============ 话题（#hashtag）：把正文里的 #话题 渲染成可点击标签 ============ */
+window.XLTopics = (function () {
+  var STOP = /[\s#,.!?;:，。！？；：、)\]【】{}（）「」『』"'“”‘’《》<>|\\/~^$&*+=`]/;
+  var WORDISH = /[A-Za-z0-9_\/]/;
+  var TRAILING = /[.,!?;:，。！？；：、]+$/;
+  var MAX_LEN = 30;
+
+  function basePrefix() {
+    var sc = document.querySelector('script[src$="common.js"]');
+    var src = sc ? (sc.getAttribute('src') || '') : '';
+    var m = src.match(/^((?:\.\.\/)*)/);
+    return m ? m[1] : '';
+  }
+
+  function extract(text, limit) {
+    limit = limit || 10;
+    var s = String(text || '');
+    var out = [], seen = {};
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] !== '#') continue;
+      var prev = i > 0 ? s[i - 1] : '';
+      if (prev && WORDISH.test(prev)) continue; // URL 锚点等
+      var j = i + 1, name = '';
+      while (j < s.length && name.length < MAX_LEN) {
+        if (STOP.test(s[j])) break;
+        name += s[j]; j++;
+      }
+      name = name.replace(TRAILING, '');
+      if (!name) continue;
+      var key = name.toLowerCase();
+      if (!seen[key]) {
+        seen[key] = 1;
+        out.push(name);
+        if (out.length >= limit) break;
+      }
+      i = j - 1;
+    }
+    return out;
+  }
+
+  function topicHref(name) {
+    return basePrefix() + 'post/center/?topic=' + encodeURIComponent(name);
+  }
+
+  function makeLink(name) {
+    var a = document.createElement('a');
+    a.className = 'topic-link';
+    a.href = topicHref(name);
+    a.textContent = '#' + name;
+    return a;
+  }
+
+  function replaceInTextNode(node) {
+    var s = node.nodeValue || '';
+    var frag = document.createDocumentFragment();
+    var last = 0, changed = false;
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] !== '#') continue;
+      var prev = i > 0 ? s[i - 1] : '';
+      if (prev && WORDISH.test(prev)) continue;
+      var j = i + 1, name = '';
+      while (j < s.length && name.length < MAX_LEN) {
+        if (STOP.test(s[j])) break;
+        name += s[j]; j++;
+      }
+      name = name.replace(TRAILING, '');
+      if (!name) continue;
+      if (last < i) frag.appendChild(document.createTextNode(s.slice(last, i)));
+      frag.appendChild(makeLink(name));
+      last = j; changed = true;
+      i = j - 1;
+    }
+    if (!changed) return;
+    if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  }
+
+  // 遍历文本节点做替换（用 DOM API 构造，天然防 XSS）
+  function linkify(root) {
+    if (!root || !document.createTreeWalker) return;
+    var targets = [];
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    while (walker.nextNode()) {
+      var node = walker.currentNode;
+      if (node.nodeValue.indexOf('#') === -1) continue;
+      var p = node.parentElement;
+      if (!p) continue;
+      if (p.className && String(p.className).indexOf('topic-link') !== -1) continue;
+      if (p.closest && p.closest('a, code, pre, script, style, textarea')) continue;
+      targets.push(node);
+    }
+    targets.forEach(replaceInTextNode);
+  }
+
+  return { extract: extract, linkify: linkify, href: topicHref };
+})();
+
+/* ============ 流量埋点：页面加载后上报一次 PV/UV ============ */
+(function () {
+  function getVid() {
+    try {
+      var v = localStorage.getItem('xl_vid');
+      if (!v) {
+        v = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('xl_vid', v);
+      }
+      return v;
+    } catch (e) {
+      return '';
+    }
+  }
+  function shouldTrack() {
+    var p = location.pathname || '';
+    // 不统计看板页自身与接口，避免自干扰
+    if (/^\/stats\//.test(p) || /^\/api\//.test(p)) return false;
+    return true;
+  }
+  function send() {
+    if (!shouldTrack()) return;
+    var payload = JSON.stringify({
+      path: (location.pathname || '/') + (location.search || ''),
+      title: document.title || '',
+      ref: document.referrer || '',
+      vid: getVid()
+    });
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' }));
+      } else {
+        fetch('/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        }).catch(function () {});
+      }
+    } catch (e) { /* 埋点失败不影响页面 */ }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(send, 0); });
+  else setTimeout(send, 0);
+})();

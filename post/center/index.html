@@ -365,7 +365,7 @@
               '<span class="meta">' + fmtTime(p.ts) + '</span>' +
             '</div>' +
             '<h3><a class="ptitle" href="../detail/?post=' + encodeURIComponent(p.id) + '"></a></h3>' +
-            '<p></p>' +
+            '<div class="post-body"></div>' +
             '<div class="post-foot">' +
               '<span class="foot-spacer"></span>' +
               '<button class="foot-btn comment-btn" type="button" data-id="' + p.id + '" title="评论">' +
@@ -377,7 +377,7 @@
             '</div>' +
             '<div class="post-actions" data-post="' + p.id + '"></div>' + del;
           card.querySelector('.ptitle').textContent = p.title || '（无标题）';
-          card.querySelector('p').textContent = p.body || '';
+          card.querySelector('.post-body').innerHTML = p.body || '';
           if (canDel) {
             card.querySelector('.del').addEventListener('click', function (e) { e.stopPropagation(); delPost(p.id); });
           }
@@ -545,7 +545,7 @@
             '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
             '<span class="meta">' + fmtTime(p.ts) + '</span>' +
           '</div>' +
-          '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><p style="font-size:1.02rem;line-height:1.8;color:var(--muted);white-space:pre-wrap;word-break:break-word"></p>' +
+          '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><div class="post-body" style="font-size:1.02rem;line-height:1.8;color:var(--text)"></div>' +
           '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' +
           '<div class="post-foot" style="margin-top:10px">' +
             '<span class="foot-spacer"></span>' +
@@ -557,7 +557,7 @@
             '</button>' +
           '</div>' + del;
         mPost.querySelector('h1').textContent = p.title || '（无标题）';
-        mPost.querySelector('p').textContent = p.body || '';
+        mPost.querySelector('.post-body').innerHTML = p.body || '';
         mPost.hidden = false;
         if (canDel) document.getElementById('mDelPost').addEventListener('click', function () { delPost(p.id); });
         if (st.blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; return; }

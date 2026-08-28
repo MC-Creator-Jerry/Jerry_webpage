@@ -263,6 +263,24 @@ a.xl-link:hover::after, .nav-link:hover::after, .bar-btn.link:hover::after { tra
 .post-body pre { background: color-mix(in srgb, var(--text) 6%, transparent); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 10px 0; }
 .post-body pre code { background: none; padding: 0; }
 
+/* 帖子附件 */
+.att { margin-top: 12px; }
+.att-video-only video.att-video-auto { width: 100%; max-height: 540px; border-radius: 12px; background: #000; display: block; }
+.att-grid { display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr); }
+.att-grid.count-1 { grid-template-columns: 1fr; }
+.att-tile { border: 1px solid var(--card-border); border-radius: 10px; overflow: hidden; background: var(--card-bg); display: block; text-decoration: none; }
+.att-img { aspect-ratio: 16 / 10; }
+.att-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.att-video { width: 100%; max-height: 380px; background: #000; display: block; }
+.att-audio { padding: 10px; }
+.att-audio audio { width: 100%; }
+.att-file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--text); }
+.att-file:hover { border-color: var(--accent); }
+.att-ext { flex: 0 0 auto; min-width: 44px; height: 44px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; padding: 0 4px; text-align: center; line-height: 1.1; }
+.att-meta { display: flex; flex-direction: column; min-width: 0; }
+.att-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.att-size { font-size: 0.72rem; color: var(--muted); }
+
 /* 蓝条站点名 + 右下浮动按钮 入场（不动画 .topbar，避免影响固定导航条定位） */
 .bar-left, .float-actions { animation: xlFade var(--xl-t-slow) var(--xl-ease) both; }
 

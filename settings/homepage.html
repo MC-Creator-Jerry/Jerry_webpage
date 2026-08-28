@@ -119,6 +119,17 @@
   .neutral-btn:hover { background: var(--panel-bg); }
   .neutral-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+  /* 自动保存开关（iOS 风格） */
+  .set-row-switch { display: flex; align-items: center; gap: 12px; }
+  .set-row-switch .set-label { margin-bottom: 0; }
+  .xl-switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: 0 0 auto; cursor: pointer; }
+  .xl-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .xl-switch-track { position: absolute; inset: 0; background: #cdd5df; border-radius: 999px; transition: background .2s ease; }
+  .xl-switch-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s ease; }
+  .xl-switch input:checked + .xl-switch-track { background: var(--accent); }
+  .xl-switch input:checked + .xl-switch-track .xl-switch-thumb { transform: translateX(20px); }
+  html[data-theme="dark"] .xl-switch-track { background: #3a4760; }
+
   /* 二次确认弹窗 */
   .modal-mask { position: fixed; inset: 0; background: rgba(10, 18, 30, .55); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
   .modal-box { background: var(--card-bg); color: var(--text); width: 100%; max-width: 380px; border-radius: 16px; padding: 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, .3); }
@@ -162,7 +173,7 @@
   <main class="content">
     <section class="hero">
       <h1 data-zh="主页设置" data-en="Homepage Settings">主页设置</h1>
-      <p data-zh="调整小蓝页的显示偏好，修改会立即生效并自动保存。" data-en="Adjust how the site looks. Changes apply instantly and are saved automatically.">调整小蓝页的显示偏好，修改会立即生效并自动保存。</p>
+      <p data-zh="调整小蓝页的显示偏好，修改会立即生效。可在下方开关选择是否自动同步到云端。" data-en="Adjust how the site looks. Changes apply instantly. Toggle auto-sync to the cloud below.">调整小蓝页的显示偏好，修改会立即生效。可在下方开关选择是否自动同步到云端。</p>
     </section>
 
     <section class="card">
@@ -190,6 +201,14 @@
         <span class="set-label" data-zh="圆角" data-en="Corner radius">圆角</span>
         <input type="range" id="optRadius" min="0" max="28" step="2" value="14" />
         <div class="set-hint" id="radiusHint">14px</div>
+      </div>
+      <div class="set-row set-row-switch">
+        <span class="set-label" data-zh="自动保存小蓝页" data-en="Auto-save homepage">自动保存小蓝页</span>
+        <label class="xl-switch">
+          <input type="checkbox" id="optAutoSave" />
+          <span class="xl-switch-track"><span class="xl-switch-thumb"></span></span>
+        </label>
+        <span class="set-hint" data-zh="开启后设置实时同步到云端；关闭后仅本机保存，需手动同步" data-en="On: settings sync to cloud in real time. Off: local only until you sync manually">开启后设置实时同步到云端；关闭后仅本机保存，需手动同步</span>
       </div>
       <div class="set-row" style="margin-top: 6px;">
         <button class="seg" id="syncCloudBtn" data-zh="同步到云端" data-en="Sync to cloud">同步到云端</button>
@@ -238,7 +257,7 @@
 
   <script>
     (function () {
-      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave' };
       function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
       function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
@@ -246,7 +265,8 @@
         lang: get(K.lang, 'zh'),
         theme: get(K.theme, 'light'),
         font: get(K.font, '1'),
-        radius: get(K.radius, '14')
+        radius: get(K.radius, '14'),
+        autosave: get(K.autosave, 'on')
       };
 
       function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
@@ -263,7 +283,8 @@
         }
       }
       window.applyAll = function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
-      function syncCloud() { if (window.saveUserPrefs) window.saveUserPrefs(cur); }
+      function syncCloud() { if (cur.autosave !== 'on') return; if (window.saveUserPrefs) window.saveUserPrefs(cur); }
+      function syncCloudForce() { if (window.saveUserPrefs) window.saveUserPrefs(cur); }
       function segActive(groupId, val) {
         var btns = document.querySelectorAll('#' + groupId + ' .seg');
         for (var i = 0; i < btns.length; i++) {
@@ -279,6 +300,17 @@
       document.getElementById('fontHint').textContent = (parseFloat(cur.font)).toFixed(2) + '×';
       document.getElementById('radiusHint').textContent = cur.radius + 'px';
       applyAll();
+
+      // 自动保存开关：开启=实时同步云端；关闭=仅本机（需手动同步）。开关自身始终持久化。
+      var autoSaveEl = document.getElementById('optAutoSave');
+      if (autoSaveEl) {
+        autoSaveEl.checked = cur.autosave === 'on';
+        autoSaveEl.addEventListener('change', function () {
+          cur.autosave = autoSaveEl.checked ? 'on' : 'off';
+          set(K.autosave, cur.autosave);
+          syncCloudForce();
+        });
+      }
 
       // 即时应用 + 持久化
       document.getElementById('optLang').addEventListener('click', function (e) {

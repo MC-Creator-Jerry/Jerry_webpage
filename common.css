@@ -290,7 +290,7 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
   transition: opacity .45s ease, transform .45s ease;
   user-select: none;
 }
-.xl-loader.xl-show .xl-load-text { opacity: 1; transform: none; }
+.xl-loader.xl-msg .xl-load-text { opacity: 1; transform: none; }
 
 .xl-sqs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .xl-sq {

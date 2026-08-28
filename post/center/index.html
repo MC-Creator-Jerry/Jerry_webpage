@@ -111,6 +111,12 @@
   .pa-btn.pa-report.on { background: var(--danger); border-color: var(--danger); }
   .pa-btn.pa-block.on { background: var(--muted); border-color: var(--muted); }
   .pa-btn[disabled] { opacity: .5; cursor: not-allowed; border-color: var(--card-border) !important; color: var(--muted) !important; background: var(--card-bg) !important; }
+  .pa-block-menu { position: fixed; z-index: 1000; min-width: 184px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; box-shadow: 0 8px 28px rgba(0,0,0,.16); padding: 6px; display: flex; flex-direction: column; gap: 2px; animation: xlPopIn .14s ease; }
+  .pa-block-menu-head { font-size: .72rem; color: var(--muted); padding: 4px 10px 6px; }
+  .pa-block-menu-item { text-align: left; border: none; background: transparent; padding: 9px 10px; border-radius: 7px; font-size: .85rem; color: var(--text); cursor: pointer; font-family: inherit; }
+  .pa-block-menu-item:hover { background: rgba(0,120,212,.08); color: var(--accent); }
+  .pa-block-menu-item.pa-block-cancel { color: var(--muted); border-top: 1px solid var(--card-border); margin-top: 2px; border-radius: 0 0 7px 7px; }
+  @keyframes xlPopIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
   .post-blocked { display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 14px; background: var(--card-bg); border: 1px dashed var(--card-border); border-radius: var(--radius); color: var(--muted); font-size: 0.9rem; }
   .post-blocked .pb-text { flex: 1; }
 

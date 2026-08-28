@@ -134,8 +134,8 @@ input, textarea, select { font-family: inherit; }
 
 /* ============ 11. 竖屏特殊布局：浮动按钮放蓝条上方，蓝条按钮放蓝条下方 ============ */
 @media (orientation: portrait) {
-  /* 小蓝条保持贴顶，不因浮动按钮而被推下 */
-  body { padding-top: 124px; }
+  /* 小蓝条保持贴顶，不因浮动按钮而被推下；预留空间 = 小蓝条 64px + 下方导航行（一行 60px / 两行 ~90px） */
+  body { padding-top: 156px; }
   .topbar { top: 0; }
 
   /* 浮动操作按钮（语言/设置）覆盖在小蓝条上方，置于最顶层 */
@@ -172,8 +172,7 @@ input, textarea, select { font-family: inherit; }
     gap: 6px 10px;
     padding: 8px 14px;
     min-height: 44px;
-    background-color: var(--bar-top);
-    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    background: var(--bar-bottom);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
   }
   .bar-btn { padding: 7px 10px; font-size: .82rem; white-space: nowrap; }

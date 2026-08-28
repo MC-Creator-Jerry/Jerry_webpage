@@ -227,6 +227,12 @@
       </div>
     </section>
 
+    <section class="card" id="statsCard" hidden>
+      <h2 data-zh="站点数据" data-en="Site data">站点数据</h2>
+      <p class="set-hint" data-zh="查看站点访问量、热门页面与来源（仅管理员）。" data-en="View page views, top pages and referrers (admin only).">查看站点访问量、热门页面与来源（仅管理员）。</p>
+      <a class="seg" href="../stats/" data-zh="打开流量看板" data-en="Open dashboard" style="display:inline-block;text-decoration:none;margin-top:10px">打开流量看板</a>
+    </section>
+
     <a class="back-home" href="../index.html" data-zh="返回主页" data-en="Back to homepage">返回主页</a>
   </main>
 
@@ -474,6 +480,16 @@
         }
       };
       if (window.JW_AUTH) window.onAuthState(window.JW_AUTH);
+
+      // 流量看板入口：仅管理员可见
+      (function () {
+        var statsCard = document.getElementById('statsCard');
+        if (!statsCard) return;
+        fetch('/api/me', { credentials: 'same-origin' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (me) { if (me && me.isAdmin) statsCard.hidden = false; })
+          .catch(function () {});
+      })();
     })();
   </script>
 <script src="../auth.js"></script>

@@ -110,6 +110,7 @@
   .pa-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
   .pa-btn.pa-report.on { background: var(--danger); border-color: var(--danger); }
   .pa-btn.pa-block.on { background: var(--muted); border-color: var(--muted); }
+  .pa-btn[disabled] { opacity: .5; cursor: not-allowed; border-color: var(--card-border) !important; color: var(--muted) !important; background: var(--card-bg) !important; }
   .post-blocked { display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 14px; background: var(--card-bg); border: 1px dashed var(--card-border); border-radius: var(--radius); color: var(--muted); font-size: 0.9rem; }
   .post-blocked .pb-text { flex: 1; }
 
@@ -414,6 +415,7 @@
           if (el) XLPostActions.initBar(el, p.id, states[p.id] || {}, {
             loggedIn: !!meLogin,
             toast: toast,
+            authorLogin: p.login,
             onBlock: function (postId, blocked) {
               if (blocked) blockedSet.add(postId); else blockedSet.delete(postId);
               if (states[postId]) states[postId].blocked = blocked;
@@ -561,6 +563,7 @@
         XLPostActions.initBar(document.getElementById('mPostActions'), p.id, st, {
           loggedIn: !!meLogin,
           toast: toast,
+          authorLogin: p.login,
           onBlock: function (postId, blocked) { if (states[postId]) states[postId].blocked = blocked; if (blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; } else { loadModalPost(); } }
         });
         var mLike = document.getElementById('mLikeBtn');

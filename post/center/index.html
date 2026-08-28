@@ -328,12 +328,12 @@
             '<h3><a class="ptitle" href="../detail/?post=' + encodeURIComponent(p.id) + '"></a></h3>' +
             '<p></p>' +
             '<div class="post-foot">' +
-              '<button class="foot-btn comment-btn" type="button" data-id="' + p.id + '" title="评论">' +
-                '<span class="ico">💬</span><span class="cnt">' + cnt + '</span>' +
-              '</button>' +
-              '<span class="foot-spacer"></span>' +
               '<button class="foot-btn like-btn' + (st && st.liked ? ' on' : '') + '" type="button" data-id="' + p.id + '" title="点赞">' +
                 '<span class="ico">👍</span><span class="like-count">' + lc + '</span>' +
+              '</button>' +
+              '<span class="foot-spacer"></span>' +
+              '<button class="foot-btn comment-btn" type="button" data-id="' + p.id + '" title="评论">' +
+                '<span class="ico">💬</span><span class="cnt">' + cnt + '</span>' +
               '</button>' +
             '</div>' +
             '<div class="post-actions" data-post="' + p.id + '"></div>' + del;
@@ -486,9 +486,12 @@
           '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><p style="font-size:1.02rem;line-height:1.8;color:var(--muted);white-space:pre-wrap;word-break:break-word"></p>' +
           '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' +
           '<div class="post-foot" style="margin-top:10px">' +
-            '<span class="foot-spacer"></span>' +
             '<button class="foot-btn like-btn' + (st.liked ? ' on' : '') + '" id="mLikeBtn" type="button" data-id="' + p.id + '" title="点赞">' +
               '<span class="ico">👍</span><span class="like-count">' + (st.likeCount || 0) + '</span>' +
+            '</button>' +
+            '<span class="foot-spacer"></span>' +
+            '<button class="foot-btn comment-btn" id="mCommentBtn" type="button" data-id="' + p.id + '" title="评论">' +
+              '<span class="ico">💬</span><span class="like-count" id="mCommentCnt">' + (st.commentCount || 0) + '</span>' +
             '</button>' +
           '</div>' + del;
         mPost.querySelector('h1').textContent = p.title || '（无标题）';
@@ -503,6 +506,12 @@
         });
         var mLike = document.getElementById('mLikeBtn');
         if (mLike) mLike.addEventListener('click', function () { toggleLike(p, this); });
+        var mCommentBtn = document.getElementById('mCommentBtn');
+        if (mCommentBtn) mCommentBtn.addEventListener('click', function () {
+          if (mComposer.hidden) { toast('评论需要登录', true); return; }
+          mComposer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          mBody.focus();
+        });
       }
 
       function renderModalComments(list) {
@@ -533,6 +542,8 @@
           if (delBtn) delBtn.addEventListener('click', function () { delModalComment(c.id); });
           mComments.appendChild(row);
         });
+        var mc = document.getElementById('mCommentCnt');
+        if (mc) mc.textContent = list.length;
       }
       function loadModalComments() {
         fetch('/api/comment?post=' + encodeURIComponent(curPostId))

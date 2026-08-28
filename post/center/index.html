@@ -89,6 +89,15 @@
   .post .del:hover { text-decoration: underline; }
   .hint { color: var(--muted); opacity: 0.7; font-style: italic; font-size: 0.95rem; }
 
+  .post-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .pa-btn { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 8px; padding: 5px 13px; font-size: 0.82rem; font-weight: 600; cursor: pointer; line-height: 1.2; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+  .pa-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pa-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .pa-btn.pa-report.on { background: var(--danger); border-color: var(--danger); }
+  .pa-btn.pa-block.on { background: var(--muted); border-color: var(--muted); }
+  .post-blocked { display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 14px; background: var(--card-bg); border: 1px dashed var(--card-border); border-radius: var(--radius); color: var(--muted); font-size: 0.9rem; }
+  .post-blocked .pb-text { flex: 1; }
+
   .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
   .toast.err { background: var(--danger); }
@@ -115,8 +124,7 @@
     </div>
     <div class="bar-right">
       <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="通知" data-en="Notice">通知<span class="badge" id="noticeBadge" hidden></span></a>
-      <a class="bar-btn" href="../" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
-      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" id="newPostBtn" href="../new/" data-zh="新加帖子" data-en="New Post">新加帖子</a>
       <a class="bar-btn" href="../../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
       <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
@@ -154,6 +162,7 @@
   </div>
 
   <script src="../../auth.js"></script>
+  <script src="../../post-actions.js"></script>
   <script>
     (function () {
       var listEl = document.getElementById('list');
@@ -172,12 +181,27 @@
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
+      var states = {};
+      var blockedSet = new Set();
+
       function render(posts, counts) {
         listEl.innerHTML = '';
         if (!posts.length) { emptyEl.hidden = false; return; }
         emptyEl.hidden = true;
         posts.forEach(function (p) {
-          var card = document.createElement('div'); card.className = 'post';
+          if (blockedSet.has(p.id)) {
+            var blk = document.createElement('div'); blk.className = 'post-blocked';
+            blk.innerHTML = '<span class="pb-text">已屏蔽此帖</span>' +
+              '<button class="pa-btn pa-unblock" type="button" data-id="' + p.id + '">取消屏蔽</button>';
+            blk.querySelector('.pa-unblock').addEventListener('click', function () {
+              XLPostActions.unblockPost(p.id, { toast: toast }).then(function (res) {
+                if (res && res.ok) { blockedSet.delete(p.id); if (states[p.id]) states[p.id].blocked = false; renderAndBind(posts, counts); }
+              });
+            });
+            listEl.appendChild(blk);
+            return;
+          }
+          var card = document.createElement('div'); card.className = 'post'; card.dataset.id = p.id;
           var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
           var canDel = meIsAdmin || (meLogin && p.login === meLogin);
           var del = canDel ? '<button class="del" data-id="' + p.id + '">删除</button>' : '';
@@ -191,7 +215,8 @@
             '<h3><a class="ptitle" href="../detail/?post=' + encodeURIComponent(p.id) + '"></a></h3>' +
             '<p></p>' +
             '<a class="cmlink" href="../detail/?post=' + encodeURIComponent(p.id) + '">💬 <span class="cmcount">' + cnt + '</span> ' +
-              '<span data-zh="条评论" data-en="comments">条评论</span></a>' + del;
+              '<span data-zh="条评论" data-en="comments">条评论</span></a>' +
+            '<div class="post-actions" data-post="' + p.id + '"></div>' + del;
           card.querySelector('.ptitle').textContent = p.title || '（无标题）';
           card.querySelector('p').textContent = p.body || '';
           if (canDel) {
@@ -202,19 +227,41 @@
         if (typeof window.applyAll === 'function') window.applyAll();
       }
 
+      function renderAndBind(posts, counts) {
+        render(posts, counts);
+        posts.forEach(function (p) {
+          if (blockedSet.has(p.id)) return;
+          var el = listEl.querySelector('.post-actions[data-post="' + p.id + '"]');
+          if (el) XLPostActions.initBar(el, p.id, states[p.id] || {}, {
+            loggedIn: !!meLogin,
+            toast: toast,
+            onBlock: function (postId, blocked) {
+              if (blocked) blockedSet.add(postId); else blockedSet.delete(postId);
+              if (states[postId]) states[postId].blocked = blocked;
+              renderAndBind(posts, counts);
+            }
+          });
+        });
+      }
+
       function load() {
         fetch('/api/post')
           .then(function (r) { return r.ok ? r.json() : { posts: [] }; })
           .then(function (d) {
             var posts = d.posts || [];
-            render(posts, {});
-            if (posts.length) {
-              var ids = posts.map(function (p) { return p.id; }).join(',');
-              fetch('/api/comment/counts?posts=' + encodeURIComponent(ids))
-                .then(function (r) { return r.ok ? r.json() : { counts: {} }; })
-                .then(function (c) { render(posts, c.counts || {}); })
-                .catch(function () {});
-            }
+            if (!posts.length) { render(posts, {}); return; }
+            var ids = posts.map(function (p) { return p.id; });
+            fetch('/api/comment/counts?posts=' + encodeURIComponent(ids.join(',')))
+              .then(function (r) { return r.ok ? r.json() : { counts: {} }; })
+              .then(function (c) { return c.counts || {}; })
+              .catch(function () { return {}; })
+              .then(function (counts) {
+                return XLPostActions.getStates(ids).then(function (s) {
+                  states = s || {};
+                  blockedSet = new Set(ids.filter(function (id) { return states[id] && states[id].blocked; }));
+                  renderAndBind(posts, counts);
+                });
+              });
           })
           .catch(function () { render([], {}); });
       }

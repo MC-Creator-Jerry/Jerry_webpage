@@ -94,6 +94,11 @@
   .foot-btn[disabled] { opacity: 0.55; cursor: default; }
   .post .cmlink { display: inline-block; margin-top: 10px; font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600; }
   .post .cmlink:hover { text-decoration: underline; }
+  /* 排布方式切换：从新到旧 / 关注优先 */
+  .sort-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .sort-tab { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+  .sort-tab:hover { border-color: var(--accent); color: var(--accent); }
+  .sort-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .post p { font-size: 0.98rem; line-height: 1.7; color: var(--muted); white-space: pre-wrap; word-break: break-word; }
   .post .del { border: none; background: transparent; color: var(--danger); font-size: 0.82rem; cursor: pointer; font-weight: 700; margin-top: 8px; padding: 0; }
   .post .del:hover { text-decoration: underline; }
@@ -193,12 +198,16 @@
     <section class="hero">
       <div>
         <h1 data-zh="帖子中心" data-en="Post Center">帖子中心</h1>
-        <p data-zh="站内所有帖子，按发布时间从新到旧排列。" data-en="All posts, newest first.">站内所有帖子，按发布时间从新到旧排列。</p>
+        <p id="sortHint" data-zh="站内所有帖子，按发布时间从新到旧排列。" data-en="All posts, newest first.">站内所有帖子，按发布时间从新到旧排列。</p>
       </div>
       <a class="post-link" href="../new/" data-zh="发布帖子" data-en="Publish Post">发布帖子</a>
     </section>
 
     <section class="card">
+      <div class="sort-bar" id="sortBar">
+        <button class="sort-tab active" data-mode="new" type="button" data-zh="从新到旧" data-en="Newest first">从新到旧</button>
+        <button class="sort-tab" data-mode="follow" type="button" data-zh="关注优先" data-en="Followed first">关注优先</button>
+      </div>
       <div id="list"></div>
       <div id="empty" class="hint" hidden data-zh="还没有帖子，去发布第一条吧。" data-en="No posts yet. Publish the first one!">还没有帖子，去发布第一条吧。</div>
     </section>
@@ -256,8 +265,35 @@
       var listEl = document.getElementById('list');
       var emptyEl = document.getElementById('empty');
       var toastEl = document.getElementById('toast');
+      var sortBar = document.getElementById('sortBar');
       var meLogin = null;
       var meIsAdmin = false;
+
+      // 排布方式切换：从新到旧 / 关注优先
+      var sortHint = document.getElementById('sortHint');
+      var SORT_HINTS = {
+        new: { zh: '站内所有帖子，按发布时间从新到旧排列。', en: 'All posts, newest first.' },
+        follow: { zh: '已关注的帖子排在最前，其余按发布时间从新到旧排列。', en: 'Followed posts first, then newest.' }
+      };
+      function applySortHint() {
+        if (!sortHint) return;
+        var h = SORT_HINTS[sortMode] || SORT_HINTS.new;
+        sortHint.textContent = h.zh;
+        sortHint.setAttribute('data-zh', h.zh);
+        sortHint.setAttribute('data-en', h.en);
+      }
+      if (sortBar) {
+        Array.prototype.forEach.call(sortBar.querySelectorAll('.sort-tab'), function (tab) {
+          tab.addEventListener('click', function () {
+            sortMode = tab.getAttribute('data-mode') || 'new';
+            Array.prototype.forEach.call(sortBar.querySelectorAll('.sort-tab'), function (t) {
+              t.classList.toggle('active', t === tab);
+            });
+            applySortHint();
+            renderAndBind(allPosts, curCounts);
+          });
+        });
+      }
 
       // ---- 弹层元素 ----
       var overlay = document.getElementById('postModal');
@@ -293,6 +329,8 @@
       var states = {};
       var blockedSet = new Set();
       var allPosts = [];
+      var curCounts = {};
+      var sortMode = 'new'; // 'new' = 从新到旧, 'follow' = 关注优先
       var curPostId = null, replyTo = null, replyToLogin = null;
 
       function render(posts, counts) {
@@ -351,9 +389,26 @@
         if (typeof window.applyAll === 'function') window.applyAll();
       }
 
+      function sortPosts(list) {
+        var arr = list.slice();
+        if (sortMode === 'follow') {
+          arr.sort(function (a, b) {
+            var fa = (states[a.id] && states[a.id].followed) ? 1 : 0;
+            var fb = (states[b.id] && states[b.id].followed) ? 1 : 0;
+            if (fa !== fb) return fb - fa;            // 已关注的排前面
+            return (b.ts || 0) - (a.ts || 0);        // 同组内从新到旧
+          });
+        } else {
+          arr.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+        }
+        return arr;
+      }
+
       function renderAndBind(posts, counts) {
-        render(posts, counts);
-        posts.forEach(function (p) {
+        curCounts = counts || {};
+        var sorted = sortPosts(posts);
+        render(sorted, curCounts);
+        sorted.forEach(function (p) {
           if (blockedSet.has(p.id)) return;
           var el = listEl.querySelector('.post-actions[data-post="' + p.id + '"]');
           if (el) XLPostActions.initBar(el, p.id, states[p.id] || {}, {
@@ -362,6 +417,10 @@
             onBlock: function (postId, blocked) {
               if (blocked) blockedSet.add(postId); else blockedSet.delete(postId);
               if (states[postId]) states[postId].blocked = blocked;
+              renderAndBind(posts, counts);
+            },
+            onFollow: function (postId, followed) {
+              if (states[postId]) states[postId].followed = followed;
               renderAndBind(posts, counts);
             }
           });

@@ -111,6 +111,8 @@
 
     // ---- 阶段三：衔接「之前的」终末地动画（蓝字 + 随机方块 + 白 → 揭晓）----
     function phasePrev() {
+      // 进度条阶段不显示三行字，进入阶段三（方块）才淡入
+      loader.classList.add('xl-msg');
       var sqs = loader.querySelector('.xl-sqs');
       var count = 4 + Math.floor(Math.random() * 5); // 4~8 个
       var squares = [];

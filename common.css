@@ -264,7 +264,7 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: #ffffff;
+  background: linear-gradient(to bottom, rgb(0, 120, 212) 0%, rgb(0, 120, 212) 20%, #ffffff 52%);
   display: flex;
   align-items: center;
   justify-content: center;

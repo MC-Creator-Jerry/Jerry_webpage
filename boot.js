@@ -20,6 +20,8 @@
     }
     // 露出正文
     doc.documentElement.classList.remove('xl-booting');
+    // 正文轻微入场（从下往上淡入 + 极轻微缩放）
+    doc.documentElement.classList.add('xl-entered');
     // 整块加载层（白底 + 蓝色长方块 + 「小蓝页」文字）一起淡出 —— 三者同时消失
     if (loader && loader.parentNode) {
       loader.classList.add('xl-hide');
@@ -68,12 +70,19 @@
     loader.className = 'xl-loader';
     loader.innerHTML =
       '<div class="xl-intro">' +
+        '<div class="xl-glow">' +
+          '<i class="xl-spark s1"></i><i class="xl-spark s2"></i><i class="xl-spark s3"></i><i class="xl-spark s4"></i>' +
+        '</div>' +
         '<div class="xl-intro-title"><span class="t1">Jerry\'s webpage</span><span class="t2">小蓝页</span></div>' +
-        '<div class="xl-prog-v"><div class="xl-prog-v-fill"></div></div>' +
+        '<div class="xl-prog-v"><div class="xl-prog-v-fill"></div><div class="xl-prog-v-dot"></div></div>' +
         '<div class="xl-prog-v-pct">0%</div>' +
       '</div>' +
       '<div class="xl-sqs"></div>' +
-      '<div class="xl-load-text">欢迎来到<br>小蓝页<br>Jerry&#39;s Webpage</div>';
+      '<div class="xl-load-text">' +
+        '<span class="xl-line">欢迎来到</span>' +
+        '<span class="xl-line">小蓝页</span>' +
+        '<span class="xl-line">Jerry&#39;s Webpage</span>' +
+      '</div>';
     doc.body.appendChild(loader);
     return loader;
   }
@@ -92,6 +101,7 @@
     var intro = loader.querySelector('.xl-intro');
     var fill = intro.querySelector('.xl-prog-v-fill');
     var pct = intro.querySelector('.xl-prog-v-pct');
+    var dot = intro.querySelector('.xl-prog-v-dot');
     var PROG_MS = 1100;
     var t0 = (performance && performance.now) ? performance.now() : Date.now();
     (function tick() {
@@ -99,6 +109,7 @@
       var p = Math.min(100, Math.round((n - t0) / PROG_MS * 100));
       if (fill) fill.style.height = p + '%';
       if (pct) pct.textContent = p + '%';
+      if (dot) dot.style.top = p + '%';
       if (p < 100) requestAnimationFrame(tick);
       else phaseSlide();
     })();

@@ -9,7 +9,7 @@
 </script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>查看帖子 · Jerry's webpage</title>
+<title>帖子中心 · Jerry's webpage</title>
 <meta name="description" content="站内帖子列表。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
@@ -106,6 +106,56 @@
   .site-footer a { color: var(--accent); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
+  /* ---- 帖子查看弹层（把“查看帖子”功能搬进帖子中心） ---- */
+  .post-card.clickable { cursor: pointer; }
+  .post-card.clickable:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(0,120,212,0.12); }
+
+  .modal-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(15, 23, 32, 0.55); display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; }
+  .modal-overlay[hidden] { display: none !important; }
+  .modal { position: relative; width: 100%; max-width: 820px; background: var(--bg); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); padding: 26px 26px 32px; margin: auto; }
+  .modal-close { position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border: none; border-radius: 50%; background: var(--card-border); color: var(--text); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+  .modal-close:hover { background: var(--muted); color: #fff; }
+  .modal .back-link { display: inline-block; margin-bottom: 14px; color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.92rem; }
+  .modal .back-link:hover { text-decoration: underline; }
+
+  .comments-title { font-size: 1.2rem; color: var(--accent); margin: 22px 0 12px; }
+  .comment { display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--card-border); }
+  .comment:last-child { border-bottom: none; }
+  .comment .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: var(--card-border); flex: 0 0 auto; }
+  .comment .body-wrap { min-width: 0; flex: 1; }
+  .comment .row1 { display: flex; align-items: baseline; gap: 8px; }
+  .comment .author { font-weight: 700; color: var(--text); font-size: 0.92rem; text-decoration: none; }
+  .comment .author:hover { color: var(--accent); }
+  .comment .time { font-size: 0.72rem; color: var(--muted); }
+  .comment .reply-to { font-size: 0.74rem; color: var(--accent); margin-top: 2px; }
+  .comment .text { font-size: 0.97rem; line-height: 1.7; color: var(--text); white-space: pre-wrap; word-break: break-word; margin-top: 3px; }
+  .comment .text .mention { color: var(--accent); font-weight: 700; text-decoration: none; }
+  .comment .text .mention:hover { text-decoration: underline; }
+  .comment .actions { margin-top: 6px; display: flex; gap: 14px; }
+  .comment .act { border: none; background: transparent; color: var(--muted); font-size: 0.82rem; cursor: pointer; padding: 0; font-weight: 600; }
+  .comment .act:hover { color: var(--accent); }
+  .comment .act.del { color: var(--danger); }
+
+  .composer { margin-top: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--card-shadow); position: relative; }
+  .composer .reply-note { font-size: 0.82rem; color: var(--accent); margin-bottom: 8px; display: none; }
+  .composer .reply-note b { font-weight: 700; }
+  .composer .reply-note .cancel { color: var(--muted); cursor: pointer; margin-left: 8px; text-decoration: underline; }
+  .edit-textarea { width: 100%; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; font-size: 1rem; font-family: inherit; color: var(--text); background: var(--panel-bg); resize: vertical; line-height: 1.6; min-height: 90px; }
+  .edit-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .composer .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 12px; }
+  .composer .hint { font-size: 0.8rem; color: var(--muted); }
+  .composer .hint code { background: var(--panel-border); padding: 1px 5px; border-radius: 5px; font-size: 0.78rem; }
+  .post-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 9px 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+  .post-btn:hover { filter: brightness(1.08); }
+  .post-btn:disabled { opacity: 0.55; cursor: default; }
+  .mention-pop { position: absolute; z-index: 50; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; box-shadow: 0 8px 24px rgba(20, 35, 59, 0.18); max-width: 280px; max-height: 220px; overflow-y: auto; display: none; }
+  .mention-pop .mi { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; font-size: 0.9rem; }
+  .mention-pop .mi:hover, .mention-pop .mi.active { background: var(--bg); }
+  .mention-pop .mi img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
+  .mention-pop .mi .ml { font-weight: 700; color: var(--text); }
+  .mention-pop .mi .mn { color: var(--muted); font-size: 0.8rem; }
+  .hint-empty { color: var(--muted); opacity: 0.8; font-style: italic; font-size: 0.95rem; padding: 14px 0; }
+  body.modal-open { overflow: hidden; }
   [hidden] { display: none !important; }
 </style>
   <link rel="stylesheet" href="../../common.css" />
@@ -118,8 +168,6 @@
         <a href="../../index.html" data-zh="主页" data-en="Home">主页</a>
         <span class="bc-sep">›</span>
         <a href="../" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
-        <span class="bc-sep">›</span>
-        <span class="bc-sub" data-zh="查看帖子" data-en="View Posts">查看帖子</span>
       </nav>
     </div>
     <div class="bar-right">
@@ -134,7 +182,7 @@
   <main class="content">
     <section class="hero">
       <div>
-        <h1 data-zh="查看帖子" data-en="View Posts">查看帖子</h1>
+        <h1 data-zh="帖子中心" data-en="Post Center">帖子中心</h1>
         <p data-zh="站内所有帖子，按发布时间从新到旧排列。" data-en="All posts, newest first.">站内所有帖子，按发布时间从新到旧排列。</p>
       </div>
       <a class="post-link" href="../new/" data-zh="发布帖子" data-en="Publish Post">发布帖子</a>
@@ -161,6 +209,36 @@
     </a>
   </div>
 
+  <!-- 帖子查看弹层：把“查看帖子 / 评论”功能搬进帖子中心 -->
+  <div class="modal-overlay" id="postModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="帖子详情">
+      <button class="modal-close" id="modalClose" type="button" aria-label="关闭">×</button>
+      <section id="mPost" class="post" hidden></section>
+
+      <h2 class="comments-title" id="mCTitle" data-zh="评论" data-en="Comments">评论</h2>
+      <section class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
+        <div id="mComments"></div>
+        <div id="mEmpty" class="hint-empty" hidden data-zh="还没有评论，来抢沙发吧。" data-en="No comments yet. Be the first!">还没有评论，来抢沙发吧。</div>
+      </section>
+
+      <section class="composer" id="mComposer" hidden>
+        <div class="reply-note" id="mReplyNote"></div>
+        <textarea class="edit-textarea auto-grow" id="mBody" maxlength="2000" placeholder="写下你的评论……（输入 @ 可提及他人，违禁词会被拦截）"></textarea>
+        <div class="mention-pop" id="mMentionPop"></div>
+        <div class="foot">
+          <span class="hint" data-zh="支持 @提及：输入 @ 加用户名" data-en="Use @ to mention someone">支持 <code>@</code> 提及：输入 @ 加用户名</span>
+          <button class="post-btn" id="mSend" data-zh="发表评论" data-en="Comment">发表评论</button>
+        </div>
+      </section>
+
+      <section class="composer" id="mLoginHint" hidden>
+        <p class="hint" style="opacity:.85;line-height:1.7" data-zh="评论需要登录。" data-en="You need to sign in to comment.">评论需要登录。<br />
+          <a href="#" id="mLoginLink" data-zh="点此登录" data-en="Sign in">点此登录</a>。
+        </p>
+      </section>
+    </div>
+  </div>
+
   <script src="../../auth.js"></script>
   <script src="../../post-actions.js"></script>
   <script>
@@ -171,6 +249,19 @@
       var meLogin = null;
       var meIsAdmin = false;
 
+      // ---- 弹层元素 ----
+      var overlay = document.getElementById('postModal');
+      var mPost = document.getElementById('mPost');
+      var mComments = document.getElementById('mComments');
+      var mEmpty = document.getElementById('mEmpty');
+      var mComposer = document.getElementById('mComposer');
+      var mLoginHint = document.getElementById('mLoginHint');
+      var mReplyNote = document.getElementById('mReplyNote');
+      var mBody = document.getElementById('mBody');
+      var mSend = document.getElementById('mSend');
+      var mMentionPop = document.getElementById('mMentionPop');
+      var modalClose = document.getElementById('modalClose');
+
       function toast(msg, isErr) {
         toastEl.textContent = msg;
         toastEl.className = 'toast show' + (isErr ? ' err' : '');
@@ -180,9 +271,19 @@
         try { return new Date(ts).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+      function linkify(s){
+        return esc(s).replace(/@([A-Za-z0-9-]+)/g, function(_,u){
+          return '<a class="mention" href="../../personal_profile/?user='+encodeURIComponent(u)+'">@'+u+'</a>';
+        });
+      }
+
+      var FORBIDDEN = ['fuck','shit','bitch','asshole','bastard','dick','cunt','whore','slut','nigger','faggot','retard','tranny','nazi','kill yourself','kys','傻逼','sb','草泥马','操你','日你','妈的','贱人','婊子','杂种','滚蛋','废青','支那','洋奴','汉奸','狗杂种','加微信','扫码领','免费送','刷单','博彩','赌博','色情','裸聊','办证','代开发票','点击领取','一元购','日赚','月入过万','私聊客服'];
+      function findForbidden(t){ if(!t) return null; var low=String(t).toLowerCase(); for(var i=0;i<FORBIDDEN.length;i++){ if(low.indexOf(FORBIDDEN[i].toLowerCase())!==-1) return FORBIDDEN[i]; } return null; }
 
       var states = {};
       var blockedSet = new Set();
+      var allPosts = [];
+      var curPostId = null, replyTo = null, replyToLogin = null;
 
       function render(posts, counts) {
         listEl.innerHTML = '';
@@ -201,7 +302,7 @@
             listEl.appendChild(blk);
             return;
           }
-          var card = document.createElement('div'); card.className = 'post'; card.dataset.id = p.id;
+          var card = document.createElement('div'); card.className = 'post post-card clickable'; card.dataset.id = p.id;
           var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
           var canDel = meIsAdmin || (meLogin && p.login === meLogin);
           var del = canDel ? '<button class="del" data-id="' + p.id + '">删除</button>' : '';
@@ -220,8 +321,11 @@
           card.querySelector('.ptitle').textContent = p.title || '（无标题）';
           card.querySelector('p').textContent = p.body || '';
           if (canDel) {
-            card.querySelector('.del').addEventListener('click', function () { delPost(p.id); });
+            card.querySelector('.del').addEventListener('click', function (e) { e.stopPropagation(); delPost(p.id); });
           }
+          // 点击卡片（标题/评论链接）在帖子中心内打开查看，不再跳转详情页
+          card.querySelector('.ptitle').addEventListener('click', function (e) { e.preventDefault(); openPost(p.id); });
+          card.querySelector('.cmlink').addEventListener('click', function (e) { e.preventDefault(); openPost(p.id); });
           listEl.appendChild(card);
         });
         if (typeof window.applyAll === 'function') window.applyAll();
@@ -249,6 +353,7 @@
           .then(function (r) { return r.ok ? r.json() : { posts: [] }; })
           .then(function (d) {
             var posts = d.posts || [];
+            allPosts = posts;
             if (!posts.length) { render(posts, {}); return; }
             var ids = posts.map(function (p) { return p.id; });
             fetch('/api/comment/counts?posts=' + encodeURIComponent(ids.join(',')))
@@ -260,6 +365,7 @@
                   states = s || {};
                   blockedSet = new Set(ids.filter(function (id) { return states[id] && states[id].blocked; }));
                   renderAndBind(posts, counts);
+                  maybeOpenFromUrl();
                 });
               });
           })
@@ -270,14 +376,211 @@
         if (!confirm('确定删除这条帖子？')) return;
         fetch('/api/post?id=' + encodeURIComponent(id), { method: 'DELETE' })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
-          .then(function (res) { if (res.ok) { toast('已删除 ✓'); load(); } else { toast('删除失败', true); } })
+          .then(function (res) { if (res.ok) { toast('已删除 ✓'); closeModal(); load(); } else { toast('删除失败', true); } })
           .catch(function () { toast('删除失败（网络错误）', true); });
       }
 
+      // ===================== 弹层：在帖子中心内查看帖子 + 评论 =====================
+      var openedViaPush = false;
+      function openPost(id) {
+        curPostId = id;
+        overlay.hidden = false;
+        document.body.classList.add('modal-open');
+        replyTo = null; replyToLogin = null;
+        if (location.search.indexOf('post=') === -1) {
+          history.pushState({ post: id }, '', '?post=' + encodeURIComponent(id));
+          openedViaPush = true;
+        } else {
+          history.replaceState({ post: id }, '', '?post=' + encodeURIComponent(id));
+        }
+        loadModalPost();
+        loadModalComments();
+      }
+      function closeModal() {
+        overlay.hidden = true;
+        document.body.classList.remove('modal-open');
+        curPostId = null; replyTo = null; replyToLogin = null;
+        if (openedViaPush) { openedViaPush = false; history.back(); }
+        else { history.replaceState({}, '', location.pathname); }
+      }
+      modalClose.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
+      window.addEventListener('popstate', function () {
+        var p = new URLSearchParams(location.search).get('post');
+        if (p && p !== curPostId) { openPost(p); }
+        else if (!p && !overlay.hidden) { overlay.hidden = true; document.body.classList.remove('modal-open'); curPostId = null; openedViaPush = false; }
+      });
+      function maybeOpenFromUrl() {
+        var p = new URLSearchParams(location.search).get('post');
+        if (p) openPost(p);
+      }
+      document.getElementById('mLoginLink').addEventListener('click', function (e) {
+        e.preventDefault(); if (window.JW_LOGIN) window.JW_LOGIN(); else location.href = '../../index.html';
+      });
+
+      function loadModalPost() {
+        var p = allPosts.find(function (x) { return x.id === curPostId; });
+        if (!p) {
+          fetch('/api/post').then(function (r){return r.ok?r.json():{posts:[]};}).then(function (d){
+            p = (d.posts||[]).find(function(x){return x.id===curPostId;});
+            if (p) renderModalPost(p); else { mPost.innerHTML = '<p class="hint">帖子不存在或已被删除。</p>'; mPost.hidden = false; }
+          }).catch(function(){ mPost.innerHTML = '<p class="hint">加载失败。</p>'; mPost.hidden = false; });
+          return;
+        }
+        renderModalPost(p);
+      }
+      function renderModalPost(p) {
+        var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
+        var canDel = meIsAdmin || (meLogin && p.login === meLogin);
+        var del = canDel ? '<button class="del" id="mDelPost">删除帖子</button>' : '';
+        mPost.innerHTML =
+          '<div class="head">' +
+            '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+            '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
+            '<span class="meta">' + fmtTime(p.ts) + '</span>' +
+          '</div>' +
+          '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><p style="font-size:1.02rem;line-height:1.8;color:var(--muted);white-space:pre-wrap;word-break:break-word"></p>' +
+          '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' + del;
+        mPost.querySelector('h1').textContent = p.title || '（无标题）';
+        mPost.querySelector('p').textContent = p.body || '';
+        mPost.hidden = false;
+        if (canDel) document.getElementById('mDelPost').addEventListener('click', function () { delPost(p.id); });
+        var st = (states[p.id] || {});
+        if (st.blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; return; }
+        XLPostActions.initBar(document.getElementById('mPostActions'), p.id, st, {
+          loggedIn: !!meLogin,
+          toast: toast,
+          onBlock: function (postId, blocked) { if (states[postId]) states[postId].blocked = blocked; if (blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; } else { loadModalPost(); } }
+        });
+      }
+
+      function renderModalComments(list) {
+        mComments.innerHTML = '';
+        if (!list.length) { mEmpty.hidden = false; return; }
+        mEmpty.hidden = true;
+        list.forEach(function (c) {
+          var avatar = 'https://github.com/' + encodeURIComponent(c.login) + '.png';
+          var row = document.createElement('div'); row.className = 'comment';
+          var canDel = meIsAdmin || (meLogin && c.login === meLogin);
+          row.innerHTML =
+            '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+            '<div class="body-wrap">' +
+              '<div class="row1">' +
+                '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(c.login) + '">@' + esc(c.login) + '</a>' +
+                '<span class="time">' + fmtTime(c.ts) + '</span>' +
+              '</div>' +
+              (c.replyTo ? '<div class="reply-to" data-zh="回复" data-en="replied">回复</div>' : '') +
+              '<div class="text"></div>' +
+              '<div class="actions">' +
+                '<button class="act reply" data-id="' + c.id + '" data-login="' + esc(c.login) + '" data-zh="回复" data-en="Reply">回复</button>' +
+                (canDel ? '<button class="act del" data-id="' + c.id + '">删除</button>' : '') +
+              '</div>' +
+            '</div>';
+          row.querySelector('.text').innerHTML = linkify(c.body);
+          row.querySelector('.reply').addEventListener('click', function () { startReply(c.id, c.login); });
+          var delBtn = row.querySelector('.act.del');
+          if (delBtn) delBtn.addEventListener('click', function () { delModalComment(c.id); });
+          mComments.appendChild(row);
+        });
+      }
+      function loadModalComments() {
+        fetch('/api/comment?post=' + encodeURIComponent(curPostId))
+          .then(function (r) { return r.ok ? r.json() : { comments: [] }; })
+          .then(function (d) { renderModalComments(d.comments || []); })
+          .catch(function () { renderModalComments([]); });
+      }
+      function delModalComment(id) {
+        if (!confirm('确定删除这条评论？')) return;
+        fetch('/api/comment?post=' + encodeURIComponent(curPostId) + '&id=' + encodeURIComponent(id), { method: 'DELETE' })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) { if (res.ok) { toast('已删除 ✓'); loadModalComments(); } else { toast('删除失败', true); } })
+          .catch(function () { toast('删除失败（网络错误）', true); });
+      }
+
+      function startReply(id, login) {
+        replyTo = id; replyToLogin = login;
+        mReplyNote.hidden = false;
+        mReplyNote.innerHTML = '回复 <b>@' + esc(login) + '</b><span class="cancel" id="mCancelReply" data-zh="取消" data-en="Cancel">取消</span>';
+        document.getElementById('mCancelReply').addEventListener('click', cancelReply);
+        if (mBody.value && !/(\s|^)@/.test(mBody.value)) mBody.value = mBody.value.replace(/\s*$/, ' ');
+        mBody.value = mBody.value.replace(/(^|\s)@([A-Za-z0-9-]*)$/, '$1') + '@' + login + ' ';
+        mBody.focus();
+      }
+      function cancelReply() { replyTo = null; replyToLogin = null; mReplyNote.hidden = true; mReplyNote.innerHTML = ''; }
+
+      function sendComment() {
+        var body = mBody.value.trim();
+        if (!body) { toast('评论不能为空', true); return; }
+        var w = findForbidden(body);
+        if (w) { toast('含违禁词：「' + w + '」', true); return; }
+        mSend.disabled = true;
+        fetch('/api/comment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post: curPostId, body: body, replyTo: replyTo })
+        }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            mSend.disabled = false;
+            if (res.ok) { mBody.value = ''; cancelReply(); hideMention(); toast('已发表 ✓'); loadModalComments(); }
+            else if (res.body && res.body.error === 'unauthorized') { toast('请先登录', true); }
+            else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
+            else if (res.body && res.body.error === 'post_not_found') { toast('帖子不存在', true); }
+            else { toast('发表失败', true); }
+          })
+          .catch(function () { mSend.disabled = false; toast('发表失败（网络错误）', true); });
+      }
+
+      // ---- @ 提及自动补全（弹层内） ----
+      var mentionItems = [], mentionActive = -1;
+      function onModalInput() {
+        var m = /(^|\s)@([A-Za-z0-9-]*)$/.exec(mBody.value);
+        if (m) {
+          fetch('/api/users?q=' + encodeURIComponent(m[2]))
+            .then(function (r) { return r.ok ? r.json() : { users: [] }; })
+            .then(function (d) { showMention(d.users || []); })
+            .catch(function () { hideMention(); });
+        } else hideMention();
+        if (typeof window.autoGrow === 'function') window.autoGrow(mBody);
+      }
+      function showMention(users) {
+        if (!users.length) { hideMention(); return; }
+        mentionItems = users.slice(0, 6); mentionActive = -1; mMentionPop.innerHTML = '';
+        mentionItems.forEach(function (u, i) {
+          var el = document.createElement('div'); el.className = 'mi';
+          el.innerHTML = '<img src="' + (u.avatar || '') + '" onerror="this.style.visibility=\'hidden\'"><span class="ml">@' + esc(u.login) + '</span><span class="mn">' + esc(u.name || '') + '</span>';
+          el.addEventListener('mousedown', function (e) { e.preventDefault(); pickMention(u.login); });
+          mMentionPop.appendChild(el);
+        });
+        var rect = mBody.getBoundingClientRect();
+        mMentionPop.style.left = rect.left + 'px';
+        mMentionPop.style.top = (window.scrollY + rect.bottom + 4) + 'px';
+        mMentionPop.style.display = 'block';
+      }
+      function hideMention() { mMentionPop.style.display = 'none'; mentionItems = []; mentionActive = -1; }
+      function pickMention(login) {
+        mBody.value = mBody.value.replace(/(^|\s)@([A-Za-z0-9-]*)$/, '$1@' + login + ' ');
+        hideMention(); mBody.focus();
+      }
+      mBody.addEventListener('input', onModalInput);
+      mBody.addEventListener('keydown', function (e) {
+        if (mMentionPop.style.display === 'block' && mentionItems.length) {
+          if (e.key === 'ArrowDown') { e.preventDefault(); mentionActive = (mentionActive + 1) % mentionItems.length; updateActive(); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); mentionActive = (mentionActive - 1 + mentionItems.length) % mentionItems.length; updateActive(); }
+          else if (e.key === 'Enter' && mentionActive >= 0) { e.preventDefault(); pickMention(mentionItems[mentionActive].login); }
+          else if (e.key === 'Escape') { hideMention(); }
+        }
+      });
+      function updateActive() {
+        Array.prototype.forEach.call(mMentionPop.children, function (el, i) { el.classList.toggle('active', i === mentionActive); });
+      }
+      mSend.addEventListener('click', sendComment);
+
       fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
-        if (me && me.login) { meLogin = me.login; meIsAdmin = !!me.isAdmin; }
+        if (me && me.login) { meLogin = me.login; meIsAdmin = !!me.isAdmin; mComposer.hidden = false; }
+        else { mLoginHint.hidden = false; }
         load();
-      }).catch(load);
+      }).catch(function () { mLoginHint.hidden = false; load(); });
     })();
   </script>
   <script src="../../common.js"></script>

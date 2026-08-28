@@ -211,6 +211,11 @@
     </section>
 
     <section class="card">
+      <div class="topic-bar" id="topicBar"></div>
+      <div class="topic-filter" id="topicFilter" hidden>
+        <span class="tf-label" id="tfLabel"></span>
+        <button class="tf-clear" id="tfClear" type="button" data-zh="清除筛选" data-en="Clear filter">清除筛选</button>
+      </div>
       <div class="sort-bar" id="sortBar">
         <button class="sort-tab active" data-mode="new" type="button" data-zh="从新到旧" data-en="Newest first">从新到旧</button>
         <button class="sort-tab" data-mode="follow" type="button" data-zh="关注优先" data-en="Followed first">关注优先</button>
@@ -273,8 +278,88 @@
       var emptyEl = document.getElementById('empty');
       var toastEl = document.getElementById('toast');
       var sortBar = document.getElementById('sortBar');
+      var topicBar = document.getElementById('topicBar');
+      var topicFilter = document.getElementById('topicFilter');
+      var tfLabel = document.getElementById('tfLabel');
+      var tfClear = document.getElementById('tfClear');
       var meLogin = null;
       var meIsAdmin = false;
+
+      // ---- 话题：URL 参数 ?topic=xxx ----
+      function urlWith(updates) {
+        var sp = new URLSearchParams(location.search);
+        Object.keys(updates || {}).forEach(function (k) {
+          if (updates[k] == null) sp.delete(k); else sp.set(k, updates[k]);
+        });
+        var q = sp.toString();
+        return location.pathname + (q ? '?' + q : '');
+      }
+      function filterByTopic(list) {
+        if (!curTopic) return list;
+        var want = String(curTopic).toLowerCase();
+        return list.filter(function (p) {
+          var ts = Array.isArray(p.topics) ? p.topics : [];
+          return ts.some(function (t) { return String(t).toLowerCase() === want; });
+        });
+      }
+      function applyTopicFilter() {
+        if (!topicFilter || !tfLabel) return;
+        if (curTopic) {
+          tfLabel.textContent = '#' + curTopic;
+          topicFilter.hidden = false;
+        } else {
+          topicFilter.hidden = true;
+        }
+      }
+      if (tfClear) {
+        tfClear.addEventListener('click', function () {
+          curTopic = null;
+          history.replaceState({}, '', urlWith({ topic: null }));
+          applyTopicFilter();
+          renderAndBind(allPosts, curCounts);
+          loadTopicBar();
+        });
+      }
+      function loadTopicBar() {
+        if (!topicBar) return;
+        fetch('/api/topics').then(function (r) { return r.ok ? r.json() : { topics: [] }; })
+          .then(function (d) { return d.topics || []; })
+          .catch(function () { return []; })
+          .then(function (topics) {
+            topicBar.innerHTML = '';
+            if (!topics.length) {
+              topicBar.innerHTML = '<span class="topic-empty">还没有话题，发帖时用 #话题 就能创建。</span>';
+              return;
+            }
+            var all = document.createElement('button');
+            all.type = 'button';
+            all.className = 'topic-chip' + (curTopic ? '' : ' active');
+            all.textContent = '全部';
+            all.addEventListener('click', function () {
+              if (!curTopic) return;
+              curTopic = null;
+              history.replaceState({}, '', urlWith({ topic: null }));
+              applyTopicFilter();
+              renderAndBind(allPosts, curCounts);
+              loadTopicBar();
+            });
+            topicBar.appendChild(all);
+            topics.slice(0, 12).forEach(function (t) {
+              var chip = document.createElement('button');
+              chip.type = 'button';
+              chip.className = 'topic-chip' + (curTopic && curTopic.toLowerCase() === String(t.name).toLowerCase() ? ' active' : '');
+              chip.textContent = '#' + t.name + ' ' + t.count;
+              chip.addEventListener('click', function () {
+                curTopic = t.name;
+                history.replaceState({}, '', urlWith({ topic: t.name }));
+                applyTopicFilter();
+                renderAndBind(allPosts, curCounts);
+                loadTopicBar();
+              });
+              topicBar.appendChild(chip);
+            });
+          });
+      }
 
       // 排布方式切换：从新到旧 / 关注优先
       var sortHint = document.getElementById('sortHint');
@@ -338,11 +423,18 @@
       var allPosts = [];
       var curCounts = {};
       var sortMode = 'new'; // 'new' = 从新到旧, 'follow' = 关注优先
+      var curTopic = null;  // 当前话题筛选（来自 ?topic=）
       var curPostId = null, replyTo = null, replyToLogin = null;
 
       function render(posts, counts) {
         listEl.innerHTML = '';
-        if (!posts.length) { emptyEl.hidden = false; return; }
+        if (!posts.length) {
+          emptyEl.hidden = false;
+          emptyEl.textContent = curTopic
+            ? '话题 #' + curTopic + ' 下还没有帖子。'
+            : '还没有帖子，去发布第一条吧。';
+          return;
+        }
         emptyEl.hidden = true;
         posts.forEach(function (p) {
           if (blockedSet.has(p.id)) {
@@ -384,7 +476,9 @@
             '</div>' +
             '<div class="post-actions" data-post="' + p.id + '"></div>' + del;
           card.querySelector('.ptitle').textContent = p.title || '（无标题）';
-          card.querySelector('.post-body').innerHTML = p.body || '';
+          var bodyEl = card.querySelector('.post-body');
+          bodyEl.innerHTML = p.body || '';
+          if (window.XLTopics) window.XLTopics.linkify(bodyEl);
           var hasText = !!(p.body && p.body.trim());
           var attWrap = card.querySelector('.att-wrap');
           if (attWrap) attWrap.innerHTML = XLMedia.build(p.files, { videoOnly: XLMedia.isVideoOnly(p.files, hasText) });
@@ -417,7 +511,7 @@
 
       function renderAndBind(posts, counts) {
         curCounts = counts || {};
-        var sorted = sortPosts(posts);
+        var sorted = sortPosts(filterByTopic(posts));
         render(sorted, curCounts);
         sorted.forEach(function (p) {
           if (blockedSet.has(p.id)) return;
@@ -440,6 +534,10 @@
       }
 
       function load() {
+        // 话题筛选：支持 ?topic=xxx 直接进入
+        curTopic = new URLSearchParams(location.search).get('topic') || null;
+        applyTopicFilter();
+        loadTopicBar();
         fetch('/api/post')
           .then(function (r) { return r.ok ? r.json() : { posts: [] }; })
           .then(function (d) {
@@ -502,10 +600,10 @@
         document.body.classList.add('modal-open');
         replyTo = null; replyToLogin = null;
         if (location.search.indexOf('post=') === -1) {
-          history.pushState({ post: id }, '', '?post=' + encodeURIComponent(id));
+          history.pushState({ post: id }, '', urlWith({ post: id }));
           openedViaPush = true;
         } else {
-          history.replaceState({ post: id }, '', '?post=' + encodeURIComponent(id));
+          history.replaceState({ post: id }, '', urlWith({ post: id }));
         }
         loadModalPost();
         loadModalComments();
@@ -515,13 +613,20 @@
         document.body.classList.remove('modal-open');
         curPostId = null; replyTo = null; replyToLogin = null;
         if (openedViaPush) { openedViaPush = false; history.back(); }
-        else { history.replaceState({}, '', location.pathname); }
+        else { history.replaceState({}, '', urlWith({ post: null })); }
       }
       modalClose.addEventListener('click', closeModal);
       overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
       window.addEventListener('popstate', function () {
-        var p = new URLSearchParams(location.search).get('post');
+        var sp = new URLSearchParams(location.search);
+        var p = sp.get('post');
+        var t = sp.get('topic') || '';
+        if (t !== (curTopic || '')) {
+          curTopic = t || null;
+          applyTopicFilter();
+          renderAndBind(allPosts, curCounts);
+        }
         if (p && p !== curPostId) { openPost(p); }
         else if (!p && !overlay.hidden) { overlay.hidden = true; document.body.classList.remove('modal-open'); curPostId = null; openedViaPush = false; }
       });
@@ -567,7 +672,9 @@
             '</button>' +
           '</div>' + del;
         mPost.querySelector('h1').textContent = p.title || '（无标题）';
-        mPost.querySelector('.post-body').innerHTML = p.body || '';
+        var mBody = mPost.querySelector('.post-body');
+        mBody.innerHTML = p.body || '';
+        if (window.XLTopics) window.XLTopics.linkify(mBody);
         var mHasText = !!(p.body && p.body.trim());
         var mAtt = mPost.querySelector('.att-wrap');
         if (mAtt) mAtt.innerHTML = XLMedia.build(p.files, { videoOnly: XLMedia.isVideoOnly(p.files, mHasText) });

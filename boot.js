@@ -119,11 +119,19 @@
         (function (i) {
           var s = doc.createElement('div');
           s.className = 'xl-sq';
-          var size = 18 + Math.random() * 46;
-          s.style.width = size + 'px';
-          s.style.height = size + 'px';
-          s.style.left = (Math.random() * Math.max(0, (vw - size))) + 'px';
-          s.style.top = (Math.random() * Math.max(0, (vh - size))) + 'px';
+          // 相对大的长方形方块：宽高独立随机，形成矩形块
+          var w = 60 + Math.random() * 120;   // 60~180
+          var h = 34 + Math.random() * 80;    // 34~114
+          s.style.width = w + 'px';
+          s.style.height = h + 'px';
+          s.style.left = (Math.random() * Math.max(0, (vw - w))) + 'px';
+          s.style.top = (Math.random() * Math.max(0, (vh - h))) + 'px';
+          // 轻微随机旋转，更自然
+          s.style.setProperty('--xl-rot', (Math.random() * 24 - 12).toFixed(1) + 'deg');
+          // 随机赋予花纹 / 半透明（部分）
+          var r = Math.random();
+          if (r < 0.34) s.classList.add('pat');        // 约 1/3 带花纹
+          else if (r < 0.62) s.classList.add('dim');   // 约 1/4 半透明
           sqs.appendChild(s);
           squares.push(s);
           setTimeout(function () { s.classList.add('xl-in'); }, 180 + i * 70);

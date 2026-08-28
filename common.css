@@ -181,3 +181,66 @@ input, textarea, select { font-family: inherit; }
   .bar-btn { padding: 6px 8px; font-size: .76rem; }
   .site-name { font-size: 1rem; }
 }
+
+/* ============ 12. 流畅动画系统（全站通用，尊重减弱动画） ============ */
+:root{
+  --xl-ease: cubic-bezier(.22, 1, .36, 1);
+  --xl-t-fast: .18s;
+  --xl-t: .3s;
+  --xl-t-slow: .6s;
+}
+html { scroll-behavior: smooth; }
+
+@keyframes xlFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes xlFadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+@keyframes xlPop { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+
+/* 滚动揭示：仅透明度过渡，避免与悬浮位移冲突 */
+.xl-reveal { opacity: 0; transition: opacity var(--xl-t-slow) var(--xl-ease); }
+.xl-reveal.in { opacity: 1; }
+.section-card, .prod-card, .feature-card { opacity: 0; transition: opacity var(--xl-t-slow) var(--xl-ease); }
+.section-card.in, .prod-card.in, .feature-card.in { opacity: 1; }
+
+/* 卡片悬浮微交互 */
+.card, .news-card, .section-card, .prod-card, .feature-card, .post, .user-card {
+  transition: transform var(--xl-t) var(--xl-ease), box-shadow var(--xl-t) var(--xl-ease), border-color var(--xl-t) var(--xl-ease);
+}
+.card:hover, .news-card:hover, .section-card:hover, .prod-card:hover, .feature-card:hover, .post:hover, .user-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .14);
+}
+
+/* 按钮 / 浮动钮：悬浮上浮 + 按压回弹 */
+button, .bar-btn, .fab, .btn, .icon-btn {
+  transition: transform var(--xl-t-fast) var(--xl-ease), box-shadow var(--xl-t) var(--xl-ease),
+              background var(--xl-t) var(--xl-ease), color var(--xl-t) var(--xl-ease), border-color var(--xl-t) var(--xl-ease);
+}
+button:hover, .bar-btn:hover, .fab:hover, .btn:hover, .icon-btn:hover { transform: translateY(-2px); }
+button:active, .bar-btn:active, .fab:active, .btn:active, .icon-btn:active { transform: scale(.93); }
+
+/* 链接下划线滑入 */
+a.xl-link, .nav-link, .bar-btn.link { position: relative; }
+a.xl-link::after, .nav-link::after, .bar-btn.link::after {
+  content: ''; position: absolute; left: 0; bottom: -2px; width: 100%; height: 2px;
+  background: currentColor; transform: scaleX(0); transform-origin: left center;
+  transition: transform var(--xl-t) var(--xl-ease);
+}
+a.xl-link:hover::after, .nav-link:hover::after, .bar-btn.link:hover::after { transform: scaleX(1); }
+
+/* 模态 / 设置面板 / 下拉 / 弹层：淡入 + 弹出 */
+.modal-overlay, .settings-overlay, .pop-menu, .user-popup, .dropdown { animation: xlFade var(--xl-t) var(--xl-ease); }
+.modal-panel, .settings-panel, .modal-card, .pop-inner, .user-popup { animation: xlPop var(--xl-t) var(--xl-ease); }
+.tab-pane { animation: xlFade var(--xl-t) var(--xl-ease); }
+
+/* 蓝条站点名 + 右下浮动按钮 入场（不动画 .topbar，避免影响固定导航条定位） */
+.bar-left, .float-actions { animation: xlFade var(--xl-t-slow) var(--xl-ease) both; }
+
+/* 图片淡入（仅对带 .xl-fade 的图片生效） */
+img.xl-fade { opacity: 0; transition: opacity var(--xl-t) ease; }
+img.xl-fade.loaded { opacity: 1; }
+
+/* 无障碍：尊重减弱动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  .xl-reveal, .section-card, .prod-card, .feature-card { opacity: 1 !important; }
+}

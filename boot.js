@@ -10,16 +10,22 @@
   var doc = document;
 
   function safeReveal() {
-    // 揭晓前把进度条补满到 100%，保证视觉收尾连贯
-    var loader0 = doc.getElementById('xlLoader');
-    if (loader0) {
-      var pf = loader0.querySelector('.xl-prog-fill');
-      var pp = loader0.querySelector('.xl-prog-pct');
+    var loader = doc.getElementById('xlLoader');
+    if (loader) {
+      // 揭晓前把进度条补满到 100%，保证视觉收尾连贯
+      var pf = loader.querySelector('.xl-prog-v-fill');
+      var pp = loader.querySelector('.xl-prog-v-pct');
       if (pf) pf.style.height = '100%';
       if (pp) pp.textContent = '100%';
+      // 立即清掉所有蓝色方块，避免加载结束后盖住正文文字
+      var sqs = loader.querySelector('.xl-sqs');
+      if (sqs) {
+        var sqArr = sqs.querySelectorAll('.xl-sq');
+        for (var k = 0; k < sqArr.length; k++) sqArr[k].classList.add('xl-out');
+        sqs.style.display = 'none';
+      }
     }
     doc.documentElement.classList.remove('xl-booting');
-    var loader = doc.getElementById('xlLoader');
     if (loader && loader.parentNode) {
       loader.classList.add('xl-hide');
       setTimeout(function () {

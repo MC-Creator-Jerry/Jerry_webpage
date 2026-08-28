@@ -121,12 +121,18 @@
           var s = doc.createElement('div');
           s.className = 'xl-sq';
           // 相对大的长方形方块：宽高独立随机，形成矩形块
+          var pad = 16; // 边距，确保方块不出屏幕
           var w = 60 + Math.random() * 120;   // 60~180
           var h = 34 + Math.random() * 80;    // 34~114
+          if (w > vw - pad * 2) w = Math.max(20, vw - pad * 2);
+          if (h > vh - pad * 2) h = Math.max(20, vh - pad * 2);
           s.style.width = w + 'px';
           s.style.height = h + 'px';
-          s.style.left = (Math.random() * Math.max(0, (vw - w))) + 'px';
-          s.style.top = (Math.random() * Math.max(0, (vh - h))) + 'px';
+          // 限制在屏幕内（含边距），避免贴边或出屏
+          var availW = Math.max(0, vw - w - pad * 2);
+          var availH = Math.max(0, vh - h - pad * 2);
+          s.style.left = (pad + Math.random() * availW) + 'px';
+          s.style.top = (pad + Math.random() * availH) + 'px';
           // 随机赋予花纹 / 半透明（部分）
           var r = Math.random();
           if (r < 0.34) s.classList.add('pat');        // 约 1/3 带花纹

@@ -134,8 +134,11 @@ input, textarea, select { font-family: inherit; }
 
 /* ============ 11. 竖屏特殊布局：浮动按钮放蓝条上方，蓝条按钮放蓝条下方 ============ */
 @media (orientation: portrait) {
-  /* 浮动操作按钮移到小蓝条正上方（小蓝条之外），并置于最顶层 */
-  body { padding-top: 58px; }
+  /* 小蓝条保持贴顶，不因浮动按钮而被推下 */
+  body { padding-top: 124px; }
+  .topbar { top: 0; }
+
+  /* 浮动操作按钮（语言/设置）覆盖在小蓝条上方，置于最顶层 */
   .float-actions {
     position: fixed;
     top: 6px;
@@ -146,24 +149,32 @@ input, textarea, select { font-family: inherit; }
     flex-direction: row;
     gap: 10px;
   }
-  .topbar { top: 58px; }
 
-  /* 小蓝条内按钮过多时整行放到小蓝条下方 */
+  /* 小蓝条右侧导航按钮整行放到小蓝条下方，成为独立固定条 */
   .topbar {
-    flex-wrap: wrap;
-    padding: 8px 14px;
-    min-height: 0;
-    gap: 6px 10px;
+    flex-wrap: nowrap;
+    padding: 0 14px;
+    min-height: 64px;
+    gap: 0;
   }
-  .bar-left { width: 100%; flex: 0 0 auto; min-width: 0; }
+  .bar-left { width: auto; flex: 1 1 auto; min-width: 0; }
   .bar-right {
+    position: fixed !important;
+    top: 64px;
+    left: 0;
+    right: 0;
+    z-index: 99;
     width: 100%;
-    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 6px;
-    order: 3;
-    margin-top: 2px;
+    gap: 6px 10px;
+    padding: 8px 14px;
+    min-height: 44px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
   }
   .bar-btn { padding: 7px 10px; font-size: .82rem; white-space: nowrap; }
 }

@@ -2,7 +2,7 @@
 // 用法：<script src="../post-actions.js"></script>
 //   window.XLPostActions.getStates([id,...]) -> Promise<{ [id]: {followed,blocked,reported} }>
   //   window.XLPostActions.initBar(container, postId, state, opts)
-//       opts: { loggedIn:bool, toast:fn(msg,err), onBlock:fn(postId,blocked), onFollow:fn(postId,followed) }
+//       opts: { loggedIn:bool, toast:fn(msg,err), onBlock:fn(postId,blocked), onFollow:fn(postId,followed), authorLogin:str }
 //   window.XLPostActions.unblockPost(postId, opts) -> Promise<res>
 (function () {
   function apiGet(path) {
@@ -33,6 +33,10 @@
     return b;
   }
 
+  function currentLogin() {
+    return (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login) || null;
+  }
+
   function initBar(container, postId, state, opts) {
     opts = opts || {};
     state = state || {};
@@ -43,6 +47,14 @@
     var followBtn = mkBtn(state.followed ? '已关注' : '关注', 'pa-follow' + (state.followed ? ' on' : ''));
     var blockBtn = mkBtn(state.blocked ? '已屏蔽' : '屏蔽', 'pa-block' + (state.blocked ? ' on' : ''));
     var reportBtn = mkBtn(state.reported ? '已举报' : '举报', 'pa-report' + (state.reported ? ' on' : ''));
+
+    // 自己的帖：关注按钮禁用（不能自己关注自己）
+    var isSelf = opts.authorLogin && currentLogin() && opts.authorLogin === currentLogin();
+    if (isSelf) {
+      followBtn.disabled = true;
+      followBtn.classList.add('pa-self');
+      followBtn.textContent = '自己的帖';
+    }
 
     followBtn.addEventListener('click', function () { doFollow(postId, followBtn, opts); });
     blockBtn.addEventListener('click', function () { doBlock(postId, blockBtn, opts); });
@@ -64,6 +76,11 @@
 
   function doFollow(postId, btn, opts) {
     if (!requireLogin(opts)) return;
+    var me = currentLogin();
+    if (opts.authorLogin && me && opts.authorLogin === me) {
+      if (opts.toast) opts.toast('不能关注自己的帖子', true);
+      return;
+    }
     var willFollow = !btn.classList.contains('on');
     apiPost({ post: postId, action: willFollow ? 'follow' : 'unfollow' }).then(function (res) {
       if (res && res.ok) {

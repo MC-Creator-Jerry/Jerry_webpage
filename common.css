@@ -292,7 +292,7 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
   background: rgb(0, 120, 212);
   border-radius: 6px;
   opacity: 0;
-  transform: scale(.2) rotate(var(--xl-rot, 0deg));
+  transform: scale(.2);
   transition: opacity .32s ease, transform .34s cubic-bezier(.2, .8, .3, 1.25);
 }
 /* 部分方块带花纹（斜向条纹 + 圆点） */
@@ -311,8 +311,8 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
     repeating-linear-gradient(45deg, rgba(255, 255, 255, .22) 0 7px, transparent 7px 15px),
     radial-gradient(rgba(255, 255, 255, .24) 1.6px, transparent 2px);
 }
-.xl-sq.xl-in { opacity: 1; transform: scale(1) rotate(var(--xl-rot, 0deg)); }
-.xl-sq.xl-out { opacity: 0; transform: scale(.2) rotate(var(--xl-rot, 0deg)); }
+.xl-sq.xl-in { opacity: 1; transform: scale(1); }
+.xl-sq.xl-out { opacity: 0; transform: scale(.2); }
 
 /* 加载动画 · 新版：左上角标题 + 左侧竖直进度条（从上往下）+ 右滑衔接 */
 .xl-intro {

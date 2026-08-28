@@ -1,8 +1,8 @@
 // 小蓝页 · 帖子的关注 / 屏蔽 / 举报（前端共享模块）
 // 用法：<script src="../post-actions.js"></script>
 //   window.XLPostActions.getStates([id,...]) -> Promise<{ [id]: {followed,blocked,reported} }>
-//   window.XLPostActions.initBar(container, postId, state, opts)
-//       opts: { loggedIn:bool, toast:fn(msg,err), onBlock:fn(postId,blocked) }
+  //   window.XLPostActions.initBar(container, postId, state, opts)
+//       opts: { loggedIn:bool, toast:fn(msg,err), onBlock:fn(postId,blocked), onFollow:fn(postId,followed) }
 //   window.XLPostActions.unblockPost(postId, opts) -> Promise<res>
 (function () {
   function apiGet(path) {
@@ -69,6 +69,7 @@
       if (res && res.ok) {
         btn.classList.toggle('on', !!res.followed);
         btn.textContent = res.followed ? '已关注' : '关注';
+        if (opts.onFollow) opts.onFollow(postId, !!res.followed);
         if (opts.toast) opts.toast(res.followed ? '已关注 ✓' : '已取消关注');
       } else if (opts.toast) opts.toast('操作失败', true);
     });

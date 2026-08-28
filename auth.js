@@ -26,7 +26,30 @@
       '.user-popup .up-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;color:#1c2733;text-decoration:none;font-size:.95rem;font-weight:600}',
       '.user-popup .up-item:hover{background:#f1f5fa}',
       '.user-popup .up-ico{width:18px;height:18px;display:inline-flex;flex:0 0 auto}',
-      '[hidden]{display:none!important}'
+      '[hidden]{display:none!important}',
+      /* ===== 悬浮预览卡（B 站风格） ===== */
+      '.xl-hovercard{position:fixed;z-index:300;min-width:220px;max-width:360px;background:#fff;color:#1c2733;border:1px solid #e3e8ef;border-radius:14px;box-shadow:0 14px 38px rgba(20,35,59,.24);padding:14px;opacity:0;transform:translateY(-6px) scale(.98);transition:opacity .18s ease,transform .18s ease;pointer-events:none;visibility:hidden}',
+      '.xl-hovercard.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;visibility:visible}',
+      '.xl-hovercard.avatar-card{max-width:240px}',
+      '.xl-hovercard .hc-avatar{width:64px;height:64px;border-radius:50%;overflow:hidden;margin:0 auto 8px;background:#eef2f7}',
+      '.xl-hovercard .hc-avatar img{width:100%;height:100%;object-fit:cover;display:block}',
+      '.xl-hovercard .hc-name{text-align:center;font-size:1.02rem;font-weight:700}',
+      '.xl-hovercard .hc-login{text-align:center;font-size:.8rem;color:#6b7785;margin-top:2px}',
+      '.xl-hovercard .hc-actions{display:flex;gap:8px;margin-top:12px}',
+      '.xl-hovercard .hc-btn{flex:1;text-align:center;padding:8px 10px;border-radius:9px;background:#0078d4;color:#fff;text-decoration:none;font-size:.9rem;font-weight:600}',
+      '.xl-hovercard .hc-btn.ghost{background:#eef2f7;color:#1c2733}',
+      '.xl-hovercard .hc-btn:hover{filter:brightness(1.06)}',
+      '.xl-hovercard .hc-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:10px}',
+      '.xl-hovercard .hc-more{font-weight:600;font-size:.82rem;color:#0078d4;text-decoration:none}',
+      '.xl-hovercard .hc-cols{display:flex;gap:10px}',
+      '.xl-hovercard .hc-col{flex:1;min-width:0}',
+      '.xl-hovercard .hc-ct{font-size:.78rem;color:#6b7785;margin-bottom:4px}',
+      '.xl-hovercard .hc-ct b{color:#d13438;font-size:.85rem}',
+      '.xl-hovercard .hc-col ul{list-style:none;margin:0;padding:0;font-size:.76rem;line-height:1.4}',
+      '.xl-hovercard .hc-col li{padding:3px 0;border-top:1px solid #f0f3f7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '.xl-hovercard .hc-empty{color:#9aa6b2}',
+      '.xl-hovercard .hc-loading{font-size:.85rem;color:#6b7785;text-align:center;padding:8px}',
+      '@media (prefers-reduced-motion: reduce){.xl-hovercard{transition:none}}'
     ].join('\n');
     document.head.appendChild(s);
   })();
@@ -194,6 +217,121 @@
     nb.removeAttribute('data-zh');
     nb.removeAttribute('data-en');
     nb.innerHTML = bell + (badge ? badge.outerHTML : '');
+  })();
+
+  // 头像 / 通知 悬浮预览卡（B 站风格：鼠标悬停自动展开小型预览）
+  (function hoverPreview() {
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+    function curLang() { try { return localStorage.getItem('xl_lang') || 'zh'; } catch (e) { return 'zh'; } }
+    function t(zh, en) { return curLang() === 'en' ? en : zh; }
+    var notifCache = { data: null, ts: 0 };
+
+    // 通用：把 trigger 绑定到一个悬浮卡（卡挂到 body，用 fixed 定位，避免嵌套 <a> 与定位问题）
+    function makeHover(trigger, builder, extraClass) {
+      if (!trigger) return null;
+      var card = document.createElement('div');
+      card.className = 'xl-hovercard' + (extraClass ? ' ' + extraClass : '');
+      document.body.appendChild(card);
+      var showT, hideT;
+      function place() {
+        var r = trigger.getBoundingClientRect();
+        var w = card.offsetWidth || 240;
+        var left = r.right - w - 4;
+        if (left < 8) left = 8;
+        if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+        card.style.top = (r.bottom + 8) + 'px';
+        card.style.left = left + 'px';
+      }
+      function show() {
+        clearTimeout(hideT);
+        showT = setTimeout(function () {
+          builder(card);
+          place();
+          card.classList.add('show');
+        }, 200);
+      }
+      function hide() {
+        clearTimeout(showT);
+        hideT = setTimeout(function () { card.classList.remove('show'); }, 160);
+      }
+      trigger.addEventListener('mouseenter', show);
+      trigger.addEventListener('mouseleave', hide);
+      card.addEventListener('mouseenter', function () { clearTimeout(hideT); });
+      card.addEventListener('mouseleave', hide);
+      card.addEventListener('click', function (e) { e.stopPropagation(); });
+      return { card: card, show: show, hide: hide };
+    }
+
+    function buildAvatar(card) {
+      var u = window.JW_AUTH.user;
+      if (u && u.login) {
+        var av = u.avatar_url || ('https://github.com/' + u.login + '.png');
+        card.innerHTML =
+          '<div class="hc-avatar"><img src="' + av + '" alt=""></div>' +
+          '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +
+          '<div class="hc-login">@' + esc(u.login) + (u.isAdmin ? ' · ' + t('管理员', 'Admin') : '') + '</div>' +
+          '<div class="hc-actions">' +
+            '<a class="hc-btn" href="' + BASE + 'personal_profile/">' + t('个人主页', 'Profile') + '</a>' +
+            '<a class="hc-btn ghost" href="' + BASE + 'settings/homepage.html">' + t('设置', 'Settings') + '</a>' +
+          '</div>';
+      } else {
+        card.innerHTML =
+          '<div class="hc-avatar"><img src="' + DEFAULT_AVATAR + '" alt=""></div>' +
+          '<div class="hc-name">' + t('未登录', 'Not signed in') + '</div>' +
+          '<div class="hc-login">' + t('登录后可同步设置与数据', 'Sign in to sync settings & data') + '</div>' +
+          '<div class="hc-actions"><a class="hc-btn" href="#" id="hcLogin">' + t('登录', 'Sign in') + '</a></div>';
+        var lb = card.querySelector('#hcLogin');
+        if (lb) lb.addEventListener('click', function (e) { e.preventDefault(); if (window.JW_LOGIN) window.JW_LOGIN(); });
+      }
+    }
+
+    function buildNotice(card) {
+      card.innerHTML = '<div class="hc-loading">' + t('加载中…', 'Loading…') + '</div>';
+      var now = Date.now();
+      if (notifCache.data && now - notifCache.ts < 15000) { renderNotif(card, notifCache.data); return; }
+      fetch('/api/notif')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d) { notifCache.data = d; notifCache.ts = Date.now(); renderNotif(card, d); }
+          else card.innerHTML = '<div class="hc-loading">' + t('暂时无法加载', 'Unavailable') + '</div>';
+        })
+        .catch(function () { card.innerHTML = '<div class="hc-loading">' + t('网络错误', 'Network error') + '</div>'; });
+    }
+    function renderNotif(card, d) {
+      var sys = d.system || [], msg = d.messages || [], cm = d.comments || [];
+      function items(arr) {
+        var top = arr.slice(0, 3);
+        if (!top.length) return '<li class="hc-empty">' + t('暂无', 'None') + '</li>';
+        return top.map(function (it) {
+          var x = it.text || it.title || it.content || it.msg || t('通知', 'Notification');
+          return '<li title="' + esc(x) + '">' + esc(x) + '</li>';
+        }).join('');
+      }
+      card.innerHTML =
+        '<div class="hc-head"><span>' + t('通知预览', 'Notifications') + '</span>' +
+          '<a class="hc-more" href="' + BASE + 'notice/">' + t('查看全部 ›', 'View all ›') + '</a></div>' +
+        '<div class="hc-cols">' +
+          '<div class="hc-col"><div class="hc-ct">' + t('系统', 'System') + ' <b>' + (d.unread.system || 0) + '</b></div><ul>' + items(sys) + '</ul></div>' +
+          '<div class="hc-col"><div class="hc-ct">' + t('消息', 'Messages') + ' <b>' + (d.unread.message || 0) + '</b></div><ul>' + items(msg) + '</ul></div>' +
+          '<div class="hc-col"><div class="hc-ct">' + t('评论', 'Comments') + ' <b>' + (d.unread.comment || 0) + '</b></div><ul>' + items(cm) + '</ul></div>' +
+        '</div>';
+    }
+
+    var avatarHover = makeHover(document.getElementById('userAvatarBtn'), buildAvatar, 'avatar-card');
+    var noticeHover = makeHover(document.getElementById('noticeBtn'), buildNotice, 'notice-card');
+    window.__avatarHover = avatarHover;
+    window.__noticeHover = noticeHover;
+
+    // 避免头像的「悬浮预览」与原有「点击下拉菜单」互相冲突
+    var ab = document.getElementById('userAvatarBtn');
+    if (ab) {
+      ab.addEventListener('mouseenter', function () { var p = document.getElementById('userPopup'); if (p) p.hidden = true; });
+      ab.addEventListener('click', function () { if (avatarHover) avatarHover.hide(); });
+    }
   })();
 
   // 暴露给设置页：把当前设置保存到云端（用户身份由后端 cookie 识别）

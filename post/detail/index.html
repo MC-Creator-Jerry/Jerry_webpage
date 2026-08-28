@@ -261,10 +261,13 @@
             '<a class="author" href="../../personal_profile/?user='+encodeURIComponent(p.login)+'">@'+esc(p.login)+'</a>' +
             '<span class="meta">'+fmtTime(p.ts)+'</span>' +
           '</div>' +
-          '<h1></h1><div class="post-body"></div>' +
+          '<h1></h1><div class="post-body"></div><div class="att-wrap"></div>' +
           '<div class="post-actions" id="postActions" data-post="'+p.id+'"></div>' + del;
         postBox.querySelector('h1').textContent = p.title || '（无标题）';
         postBox.querySelector('.post-body').innerHTML = p.body || '';
+        var hasText = !!(p.body && p.body.trim());
+        var attWrap = postBox.querySelector('.att-wrap');
+        if (attWrap) attWrap.innerHTML = XLMedia.build(p.files, { videoOnly: XLMedia.isVideoOnly(p.files, hasText) });
         postBox.hidden = false;
         if (canDel) {
           document.getElementById('delPost').addEventListener('click', function () { delPost(); });

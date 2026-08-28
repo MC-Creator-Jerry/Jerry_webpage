@@ -10,6 +10,14 @@
   var doc = document;
 
   function safeReveal() {
+    // 揭晓前把进度条补满到 100%，保证视觉收尾连贯
+    var loader0 = doc.getElementById('xlLoader');
+    if (loader0) {
+      var pf = loader0.querySelector('.xl-prog-fill');
+      var pp = loader0.querySelector('.xl-prog-pct');
+      if (pf) pf.style.height = '100%';
+      if (pp) pp.textContent = '100%';
+    }
     doc.documentElement.classList.remove('xl-booting');
     var loader = doc.getElementById('xlLoader');
     if (loader && loader.parentNode) {
@@ -57,7 +65,11 @@
     loader = doc.createElement('div');
     loader.id = 'xlLoader';
     loader.className = 'xl-loader';
-    loader.innerHTML = '<div class="xl-sqs"></div><div class="xl-load-text">小蓝页</div>';
+    loader.innerHTML =
+      '<div class="xl-sqs"></div>' +
+      '<div class="xl-prog"><div class="xl-prog-fill"></div></div>' +
+      '<div class="xl-prog-pct">0%</div>' +
+      '<div class="xl-load-text">小蓝页</div>';
     doc.body.appendChild(loader);
     return loader;
   }
@@ -68,6 +80,19 @@
 
     var loader = buildLoader();
     requestAnimationFrame(function () { loader.classList.add('xl-show'); });
+
+    // 最左侧竖直进度条：0%→100% 在约 1.3s 内走完（先于揭晓收尾）
+    var progFill = loader.querySelector('.xl-prog-fill');
+    var progPct = loader.querySelector('.xl-prog-pct');
+    var PROG_MS = 1300;
+    var pStart = (performance && performance.now) ? performance.now() : Date.now();
+    (function tick() {
+      var now = (performance && performance.now) ? performance.now() : Date.now();
+      var p = Math.min(100, Math.round((now - pStart) / PROG_MS * 100));
+      if (progFill) progFill.style.height = p + '%';
+      if (progPct) progPct.textContent = p + '%';
+      if (p < 100) requestAnimationFrame(tick);
+    })();
 
     var sqs = loader.querySelector('.xl-sqs');
     var count = 4 + Math.floor(Math.random() * 5); // 4~8 个

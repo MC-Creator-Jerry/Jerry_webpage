@@ -368,11 +368,11 @@
             '<p></p>' +
             '<div class="post-foot">' +
               '<button class="foot-btn like-btn' + (st && st.liked ? ' on' : '') + '" type="button" data-id="' + p.id + '" title="点赞">' +
-                '<span class="ico">👍</span><span class="like-count">' + lc + '</span>' +
+                '<img class="ico" src="../../icons/' + (st && st.liked ? 'like-on' : 'like') + '.svg" alt="点赞"><span class="like-count">' + lc + '</span>' +
               '</button>' +
               '<span class="foot-spacer"></span>' +
               '<button class="foot-btn comment-btn" type="button" data-id="' + p.id + '" title="评论">' +
-                '<span class="ico">💬</span><span class="cnt">' + cnt + '</span>' +
+                '<img class="ico" src="../../icons/comment.svg" alt="评论"><span class="cnt">' + cnt + '</span>' +
               '</button>' +
             '</div>' +
             '<div class="post-actions" data-post="' + p.id + '"></div>' + del;
@@ -469,6 +469,7 @@
               st.liked = res.liked; st.likeCount = res.likeCount;
               btn.classList.toggle('on', !!res.liked);
               var c = btn.querySelector('.like-count'); if (c) c.textContent = res.likeCount;
+              var ic = btn.querySelector('img.ico'); if (ic) ic.src = '../../icons/' + (res.liked ? 'like-on' : 'like') + '.svg';
             } else if (res && res.error === 'unauthorized') { toast('请先登录', true); }
             else { toast('操作失败', true); }
           })
@@ -548,11 +549,11 @@
           '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' +
           '<div class="post-foot" style="margin-top:10px">' +
             '<button class="foot-btn like-btn' + (st.liked ? ' on' : '') + '" id="mLikeBtn" type="button" data-id="' + p.id + '" title="点赞">' +
-              '<span class="ico">👍</span><span class="like-count">' + (st.likeCount || 0) + '</span>' +
+              '<img class="ico" src="../../icons/' + (st.liked ? 'like-on' : 'like') + '.svg" alt="点赞"><span class="like-count">' + (st.likeCount || 0) + '</span>' +
             '</button>' +
             '<span class="foot-spacer"></span>' +
             '<button class="foot-btn comment-btn" id="mCommentBtn" type="button" data-id="' + p.id + '" title="评论">' +
-              '<span class="ico">💬</span><span class="like-count" id="mCommentCnt">' + (st.commentCount || 0) + '</span>' +
+              '<img class="ico" src="../../icons/comment.svg" alt="评论"><span class="like-count" id="mCommentCnt">' + (st.commentCount || 0) + '</span>' +
             '</button>' +
           '</div>' + del;
         mPost.querySelector('h1').textContent = p.title || '（无标题）';

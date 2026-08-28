@@ -118,6 +118,8 @@
   .att-add-btn { border: 1px dashed var(--card-border); background: var(--panel-bg); color: var(--muted); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; cursor: pointer; width: 100%; text-align: center; }
   .att-add-btn:hover { border-color: var(--accent); color: var(--accent); }
   .att-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .topic-tip { margin-top: 8px; font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+  .topic-tip b { color: var(--accent); }
   .att-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--card-border); border-radius: 10px; background: var(--panel-bg); }
   .att-thumb { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: color-mix(in srgb, var(--accent) 10%, transparent); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--accent); overflow: hidden; }
   .att-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -205,6 +207,7 @@
         <div class="editor" id="pBody" contenteditable="true" data-placeholder="帖子内容……（违禁词会被拦截，支持粗体/斜体/字体/颜色等排版）"></div>
       </div>
       <span class="char-count" data-for="pBody">0 / 5000</span>
+      <p class="topic-tip">用 <b>#话题</b> 可以给帖子打话题标签，例如「今天聊聊 #人工智能 」，发布后点话题即可看同话题的帖子。</p>
       <label class="edit-label" for="pFiles" data-zh="附件" data-en="Attachments">附件</label>
       <div class="att-uploader">
         <button type="button" class="att-add-btn" id="attAddBtn" data-zh="＋ 添加文件（视频 / 图片 / 音频 / 文档，单文件 ≤ 20MB）" data-en="Add files (video/image/audio/doc, ≤20MB each)">＋ 添加文件（视频 / 图片 / 音频 / 文档，单文件 ≤ 20MB）</button>

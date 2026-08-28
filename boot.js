@@ -66,9 +66,12 @@
     loader.id = 'xlLoader';
     loader.className = 'xl-loader';
     loader.innerHTML =
+      '<div class="xl-intro">' +
+        '<div class="xl-intro-title"><span class="t1">Jerry\'s webpage</span><span class="t2">小蓝页</span></div>' +
+        '<div class="xl-prog-v"><div class="xl-prog-v-fill"></div></div>' +
+        '<div class="xl-prog-v-pct">0%</div>' +
+      '</div>' +
       '<div class="xl-sqs"></div>' +
-      '<div class="xl-prog"><div class="xl-prog-fill"></div></div>' +
-      '<div class="xl-prog-pct">0%</div>' +
       '<div class="xl-load-text">小蓝页</div>';
     doc.body.appendChild(loader);
     return loader;
@@ -81,47 +84,59 @@
     var loader = buildLoader();
     requestAnimationFrame(function () { loader.classList.add('xl-show'); });
 
-    // 最左侧竖直进度条：0%→100% 在约 1.3s 内走完（先于揭晓收尾）
-    var progFill = loader.querySelector('.xl-prog-fill');
-    var progPct = loader.querySelector('.xl-prog-pct');
-    var PROG_MS = 1300;
-    var pStart = (performance && performance.now) ? performance.now() : Date.now();
+    // 整段序列兜底：比正常流程略长，保证异常时也能揭晓
+    safety = setTimeout(safeReveal, 3400);
+
+    // ---- 阶段一：左上角标题 + 左侧竖直进度条（从上往下）----
+    var intro = loader.querySelector('.xl-intro');
+    var fill = intro.querySelector('.xl-prog-v-fill');
+    var pct = intro.querySelector('.xl-prog-v-pct');
+    var PROG_MS = 1100;
+    var t0 = (performance && performance.now) ? performance.now() : Date.now();
     (function tick() {
-      var now = (performance && performance.now) ? performance.now() : Date.now();
-      var p = Math.min(100, Math.round((now - pStart) / PROG_MS * 100));
-      if (progFill) progFill.style.height = p + '%';
-      if (progPct) progPct.textContent = p + '%';
+      var n = (performance && performance.now) ? performance.now() : Date.now();
+      var p = Math.min(100, Math.round((n - t0) / PROG_MS * 100));
+      if (fill) fill.style.height = p + '%';
+      if (pct) pct.textContent = p + '%';
       if (p < 100) requestAnimationFrame(tick);
+      else phaseSlide();
     })();
 
-    var sqs = loader.querySelector('.xl-sqs');
-    var count = 4 + Math.floor(Math.random() * 5); // 4~8 个
-    var squares = [];
-    var vw = window.innerWidth, vh = window.innerHeight;
-
-    for (var i = 0; i < count; i++) {
-      (function (i) {
-        var s = doc.createElement('div');
-        s.className = 'xl-sq';
-        var size = 18 + Math.random() * 46;
-        s.style.width = size + 'px';
-        s.style.height = size + 'px';
-        s.style.left = (Math.random() * Math.max(0, (vw - size))) + 'px';
-        s.style.top = (Math.random() * Math.max(0, (vh - size))) + 'px';
-        sqs.appendChild(s);
-        squares.push(s);
-        // 在 1 秒内陆续出现（最后一颗 ≤ ~0.84s）
-        setTimeout(function () { s.classList.add('xl-in'); }, 280 + i * 80);
-      })(i);
+    // ---- 阶段二：整个面板往右滑 ----
+    function phaseSlide() {
+      intro.classList.add('xl-slide');
+      setTimeout(phasePrev, 460);
     }
 
-    var outAt = 1000; // 出现完毕后开始撤离
-    setTimeout(function () {
-      for (var j = 0; j < squares.length; j++) squares[j].classList.add('xl-out');
-    }, outAt);
+    // ---- 阶段三：衔接「之前的」终末地动画（蓝字 + 随机方块 + 白 → 揭晓）----
+    function phasePrev() {
+      var sqs = loader.querySelector('.xl-sqs');
+      var count = 4 + Math.floor(Math.random() * 5); // 4~8 个
+      var squares = [];
+      var vw = window.innerWidth, vh = window.innerHeight;
 
-    // 撤离后全白 → 揭晓内容（约 1.48s，满足 ≤2s）
-    setTimeout(safeReveal, outAt + 480);
+      for (var i = 0; i < count; i++) {
+        (function (i) {
+          var s = doc.createElement('div');
+          s.className = 'xl-sq';
+          var size = 18 + Math.random() * 46;
+          s.style.width = size + 'px';
+          s.style.height = size + 'px';
+          s.style.left = (Math.random() * Math.max(0, (vw - size))) + 'px';
+          s.style.top = (Math.random() * Math.max(0, (vh - size))) + 'px';
+          sqs.appendChild(s);
+          squares.push(s);
+          setTimeout(function () { s.classList.add('xl-in'); }, 180 + i * 70);
+        })(i);
+      }
+
+      var outAt = 820;
+      setTimeout(function () {
+        for (var j = 0; j < squares.length; j++) squares[j].classList.add('xl-out');
+      }, outAt);
+
+      setTimeout(safeReveal, outAt + 460); // 撤离后全白 → 揭晓内容
+    }
   }
 
   if (doc.readyState === 'loading') {

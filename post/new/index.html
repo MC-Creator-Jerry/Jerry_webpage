@@ -112,6 +112,21 @@
   .editor hr { border: none; border-top: 1px solid var(--card-border); margin: 12px 0; }
 
   [hidden] { display: none !important; }
+
+  /* ===== 附件上传 ===== */
+  .att-uploader { margin-top: 8px; }
+  .att-add-btn { border: 1px dashed var(--card-border); background: var(--panel-bg); color: var(--muted); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; cursor: pointer; width: 100%; text-align: center; }
+  .att-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .att-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .att-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--card-border); border-radius: 10px; background: var(--panel-bg); }
+  .att-thumb { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: color-mix(in srgb, var(--accent) 10%, transparent); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--accent); overflow: hidden; }
+  .att-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .att-info { flex: 1 1 auto; min-width: 0; }
+  .att-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .att-sub { font-size: 0.72rem; color: var(--muted); }
+  .att-remove { flex: 0 0 auto; border: none; background: transparent; color: var(--muted); font-size: 1.2rem; cursor: pointer; line-height: 1; padding: 4px 8px; border-radius: 6px; }
+  .att-remove:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+  .post-btn:disabled { opacity: 0.6; cursor: default; filter: none; }
 </style>
   <link rel="stylesheet" href="../../common.css" />
 </head>
@@ -190,6 +205,12 @@
         <div class="editor" id="pBody" contenteditable="true" data-placeholder="帖子内容……（违禁词会被拦截，支持粗体/斜体/字体/颜色等排版）"></div>
       </div>
       <span class="char-count" data-for="pBody">0 / 5000</span>
+      <label class="edit-label" for="pFiles" data-zh="附件" data-en="Attachments">附件</label>
+      <div class="att-uploader">
+        <button type="button" class="att-add-btn" id="attAddBtn" data-zh="＋ 添加文件（视频 / 图片 / 音频 / 文档，单文件 ≤ 20MB）" data-en="Add files (video/image/audio/doc, ≤20MB each)">＋ 添加文件（视频 / 图片 / 音频 / 文档，单文件 ≤ 20MB）</button>
+        <input type="file" id="pFiles" multiple hidden />
+        <div class="att-list" id="attList"></div>
+      </div>
       <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
     </section>
 
@@ -282,6 +303,62 @@
       pBody.addEventListener('keyup', refreshToolbarState);
       pBody.addEventListener('mouseup', refreshToolbarState);
 
+      // ===== 附件上传 =====
+      var MAX_FILE = 20 * 1024 * 1024;
+      var pFiles = document.getElementById('pFiles');
+      var attAddBtn = document.getElementById('attAddBtn');
+      var attList = document.getElementById('attList');
+      var selectedFiles = [];
+      function fmtSize(n) { if (n < 1024) return n + ' B'; if (n < 1048576) return (n / 1024).toFixed(1) + ' KB'; return (n / 1048576).toFixed(1) + ' MB'; }
+      function extOf(name) { var p = String(name).split('.').pop(); return (p ? p : 'FILE').toUpperCase().slice(0, 5); }
+      function renderAtt() {
+        attList.innerHTML = '';
+        selectedFiles.forEach(function (f, i) {
+          var item = document.createElement('div'); item.className = 'att-item';
+          var thumb = document.createElement('div'); thumb.className = 'att-thumb';
+          if (/^image\//.test(f.type || '')) {
+            var img = document.createElement('img');
+            img.src = URL.createObjectURL(f); img.alt = '';
+            img.onload = function () { URL.revokeObjectURL(img.src); };
+            thumb.appendChild(img);
+          } else {
+            thumb.textContent = extOf(f.name);
+          }
+          var info = document.createElement('div'); info.className = 'att-info';
+          var nm = document.createElement('div'); nm.className = 'att-name'; nm.textContent = f.name;
+          var sub = document.createElement('div'); sub.className = 'att-sub'; sub.textContent = fmtSize(f.size);
+          info.appendChild(nm); info.appendChild(sub);
+          var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'att-remove'; rm.textContent = '×'; rm.title = '移除';
+          rm.addEventListener('click', function () { selectedFiles.splice(i, 1); renderAtt(); });
+          item.appendChild(thumb); item.appendChild(info); item.appendChild(rm);
+          attList.appendChild(item);
+        });
+      }
+      attAddBtn.addEventListener('click', function () { pFiles.click(); });
+      pFiles.addEventListener('change', function () {
+        Array.prototype.forEach.call(pFiles.files, function (f) {
+          if (f.size > MAX_FILE) { toast('文件「' + f.name + '」超过 20MB 上限', true); return; }
+          if (selectedFiles.length >= 20) { toast('最多 20 个附件', true); return; }
+          selectedFiles.push(f);
+        });
+        pFiles.value = '';
+        renderAtt();
+      });
+
+      function uploadOne(file) {
+        return new Promise(function (resolve, reject) {
+          var fd = new FormData();
+          fd.append('file', file, file.name);
+          fetch('/api/upload', { method: 'POST', body: fd })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+            .then(function (res) {
+              if (res.ok && res.body.ok) resolve({ key: res.body.key, name: res.body.name, type: res.body.type, size: res.body.size });
+              else reject(new Error(res.body && res.body.error ? res.body.error : 'upload_failed'));
+            })
+            .catch(function () { reject(new Error('network')); });
+        });
+      }
+
       function post() {
         var title = pTitle.value.trim();
         var html = pBody.innerHTML.trim();
@@ -290,15 +367,29 @@
         if (text.length > BODY_MAX) { toast('正文过长（上限 ' + BODY_MAX + ' 字）', true); return; }
         var w = findForbidden(title) || findForbidden(text);
         if (w) { toast('含违禁词：「' + w + '」', true); return; }
-        fetch('/api/post', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, body: html }) })
+        if (!selectedFiles.length) { doPublish(title, html, []); return; }
+        postBtn.disabled = true; postBtn.textContent = '上传中 0/' + selectedFiles.length;
+        var done = 0;
+        Promise.all(selectedFiles.map(function (f) {
+          return uploadOne(f).then(function (meta) { done++; postBtn.textContent = '上传中 ' + done + '/' + selectedFiles.length; return meta; });
+        })).then(function (files) {
+          doPublish(title, html, files);
+        }).catch(function (err) {
+          postBtn.disabled = false; postBtn.textContent = '发布';
+          toast(err && err.message === 'too_large' ? '文件过大（上限 20MB）' : '附件上传失败，请重试', true);
+        });
+      }
+      function doPublish(title, html, files) {
+        fetch('/api/post', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, body: html, files: files }) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
-            if (res.ok) { toast('已发布 ✓'); setTimeout(function () { location.href = '../center/'; }, 700); }
+            postBtn.disabled = false; postBtn.textContent = '发布';
+            if (res.ok) { toast('已发布 ✓'); selectedFiles = []; setTimeout(function () { location.href = '../center/'; }, 700); }
             else if (res.body && res.body.error === 'unauthorized') { toast('请先登录', true); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else { toast('发布失败', true); }
           })
-          .catch(function () { toast('发布失败（网络错误）', true); });
+          .catch(function () { postBtn.disabled = false; postBtn.textContent = '发布'; toast('发布失败（网络错误）', true); });
       }
 
       fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {

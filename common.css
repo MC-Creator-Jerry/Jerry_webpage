@@ -274,11 +274,17 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
 .xl-loader.xl-hide { opacity: 0; pointer-events: none; }
 
 .xl-load-text {
+  position: relative;
+  z-index: 10;                   /* 置于最高图层：盖在蓝色长方块之上 */
   color: rgb(0, 120, 212);
   font-weight: 700;
-  font-size: clamp(30px, 8vw, 60px);
-  letter-spacing: .22em;
-  padding-left: .22em;            /* 补偿字距，视觉居中 */
+  font-size: clamp(26px, 6.5vw, 52px);
+  line-height: 1.55;
+  letter-spacing: .14em;
+  padding-left: .14em;            /* 补偿字距，视觉居中 */
+  text-align: center;
+  -webkit-text-stroke: 2px #fff;  /* 白边 */
+  text-shadow: 0 1px 2px rgba(255,255,255,.85), 0 0 5px rgba(255,255,255,.75);
   opacity: 0;
   transform: translateY(10px);
   transition: opacity .45s ease, transform .45s ease;

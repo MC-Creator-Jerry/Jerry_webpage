@@ -203,6 +203,37 @@
     .content { padding: 28px 16px 48px; }
     .profile-name { font-size: 1.6rem; }
   }
+  /* ---- 个人主页主题色条（小蓝条下方 6px） ---- */
+  .profile-theme-strip { width: 100%; height: 6px; background: var(--accent); }
+
+  /* 主题色弹窗（复用背景弹窗风格） */
+  .theme-modal { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; background: rgba(10, 18, 30, 0.5); padding: 20px; }
+  .theme-sheet { width: 100%; max-width: 460px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+  .theme-sheet h3 { font-size: 1.05rem; color: var(--accent); margin-bottom: 12px; }
+  .theme-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .theme-row input[type="color"] { width: 52px; height: 38px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--card-bg); cursor: pointer; padding: 2px; flex: 0 0 auto; }
+  .theme-row .edit-input { flex: 1; margin-top: 0; text-transform: uppercase; }
+  .theme-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .theme-swatch { width: 34px; height: 34px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+  .theme-swatch.active { border-color: #1c2733; }
+  .theme-sec-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; justify-content: flex-end; }
+  .theme-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
+  .theme-save:hover { filter: brightness(1.08); }
+  .theme-cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); border: none; border-radius: 10px; padding: 9px 18px; cursor: pointer; }
+  .theme-clear { background: transparent; color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--card-border)); border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 700; }
+  .theme-clear:hover { background: color-mix(in srgb, var(--danger) 10%, var(--card-bg)); }
+
+  /* iOS 风格开关（设置页同款，本页复用） */
+  .set-row-switch { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  .set-row-switch .set-label { margin-bottom: 0; }
+  .xl-switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: 0 0 auto; cursor: pointer; }
+  .xl-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .xl-switch-track { position: absolute; inset: 0; background: #cdd5df; border-radius: 999px; transition: background .2s ease; }
+  .xl-switch-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s ease; }
+  .xl-switch input:checked + .xl-switch-track { background: var(--accent); }
+  .xl-switch input:checked + .xl-switch-track .xl-switch-thumb { transform: translateX(20px); }
+  html[data-theme="dark"] .xl-switch-track { background: #3a4760; }
+
   [hidden] { display: none !important; }
 </style>
   <link rel="stylesheet" href="../common.css" />
@@ -227,11 +258,14 @@
     </div>
   </header>
 
+  <div class="profile-theme-strip" id="profileThemeStrip" hidden></div>
+
   <div class="profile-banner" id="profileBanner" hidden></div>
 
   <main class="content">
     <div class="profile-tools" id="profileTools" hidden>
       <button class="bg-btn" id="openBgBtn" type="button"><span aria-hidden="true">🖼️</span> <span data-zh="设置背景" data-en="Set background">设置背景</span></button>
+      <button class="bg-btn" id="openThemeBtn" type="button"><span aria-hidden="true">🎨</span> <span data-zh="设置主题色" data-en="Set theme color">设置主题色</span></button>
     </div>
     <section class="hero">
       <div class="profile-head">
@@ -310,11 +344,21 @@
         <h2 data-zh="自定义头像" data-en="Custom Avatar">自定义头像</h2>
         <button class="change-btn" data-sec="avatar-close">收起</button>
       </div>
-      <p class="file-note" data-zh="支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。" data-en="Upload an image or paste an image URL. Uploaded images are stored as data (keep under 1.5MB). Leave empty to restore the default GitHub avatar.">支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。</p>
-      <input type="file" id="avatarFile" accept="image/*" />
-      <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
-      <input class="edit-input" id="avatarUrl" placeholder="https://..." />
-      <img id="avatarPreview" class="avatar avatar-preview" alt="preview" />
+      <div class="set-row-switch">
+        <span class="set-label" data-zh="头像由 GitHub 同步" data-en="Sync avatar from GitHub">头像由 GitHub 同步</span>
+        <label class="xl-switch">
+          <input type="checkbox" id="ghAvatarSync" />
+          <span class="xl-switch-track"><span class="xl-switch-thumb"></span></span>
+        </label>
+        <span class="set-hint" id="ghSyncHint" data-zh="开启后始终使用 GitHub 头像，自定义头像不显示" data-en="On: always use the GitHub avatar; your custom avatar is hidden">开启后始终使用 GitHub 头像，自定义头像不显示</span>
+      </div>
+      <div id="avatarCustomWrap">
+        <p class="file-note" data-zh="支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。" data-en="Upload an image or paste an image URL. Uploaded images are stored as data (keep under 1.5MB). Leave empty to restore the default GitHub avatar.">支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。</p>
+        <input type="file" id="avatarFile" accept="image/*" />
+        <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
+        <input class="edit-input" id="avatarUrl" placeholder="https://..." />
+        <img id="avatarPreview" class="avatar avatar-preview" alt="preview" />
+      </div>
       <div class="sec-actions">
         <button class="save" data-save="avatar">保存</button>
         <button class="cancel" data-cancel="avatar">取消</button>
@@ -360,6 +404,23 @@
     </div>
   </div>
 
+  <div class="theme-modal" id="themeModal" hidden>
+    <div class="theme-sheet">
+      <h3 data-zh="个人主页主题色" data-en="Personal homepage theme color">个人主页主题色</h3>
+      <p class="file-note" data-zh="选择一条颜色，将显示在小蓝条下方（6px 高）。选「清除」可隐藏色条。" data-en="Pick a color shown below the blue bar (6px tall). Choose Clear to hide it.">选择一条颜色，将显示在小蓝条下方（6px 高）。选「清除」可隐藏色条。</p>
+      <div class="theme-row">
+        <input type="color" id="themeColorInput" value="#0078d4" />
+        <input class="edit-input" id="themeHexInput" placeholder="#0078d4" maxlength="7" />
+      </div>
+      <div class="theme-swatches" id="themeSwatches"></div>
+      <div class="theme-sec-actions">
+        <button class="theme-clear" id="themeClear" type="button" data-zh="清除" data-en="Clear">清除</button>
+        <button class="theme-cancel" id="themeCancel" type="button" data-zh="取消" data-en="Cancel">取消</button>
+        <button class="theme-save" id="themeSave" type="button" data-zh="保存" data-en="Save">保存</button>
+      </div>
+    </div>
+  </div>
+
   <div class="float-actions">
     <a class="fab" id="langBtn" href="../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
@@ -385,6 +446,7 @@
       var linksDisplay = $('linksDisplay'), linksEmpty = $('linksEmpty'), linksEditList = $('linksEditList');
       var linksView = $('linksView'), linksEditor = $('linksEditor'), linkAdd = $('linkAdd');
       var avatarEditor = $('avatarEditor'), avatarFile = $('avatarFile'), avatarUrl = $('avatarUrl'), avatarPreview = $('avatarPreview');
+      var ghAvatarSync = $('ghAvatarSync'), avatarCustomWrap = $('avatarCustomWrap');
       var loginPrompt = $('loginPrompt'), toastEl = $('toast');
 
       var MY_LOGIN = null;
@@ -472,7 +534,11 @@
 
       function renderDisplay() {
         var d = state.data || {};
-        avatar.src = d.avatar || gh(d.login);
+        avatar.src = d.ghAvatar ? gh(d.login) : (d.avatar || gh(d.login));
+        // 个人主页主题色条（小蓝条下方 6px）
+        var strip = $('profileThemeStrip');
+        if (d.themeColor) { strip.style.background = d.themeColor; strip.hidden = false; }
+        else { strip.style.background = ''; strip.hidden = true; }
         nameDisplay.innerHTML = '';
         nameDisplay.textContent = d.name || d.login || '';
         if (d.login === OWNER) {
@@ -510,7 +576,7 @@
         if (sec === 'about') { aboutInput.value = (state.data && state.data.about) || ''; aboutView.hidden = true; aboutEditor.hidden = false; aboutInput.focus(); }
         if (sec === 'skills') { state.draft = { skills: ((state.data && state.data.skills) || []).slice() }; skillsView.hidden = true; skillsEditor.hidden = false; renderSkillsEdit(); }
         if (sec === 'links') { state.draft = { links: ((state.data && state.data.links) || []).map(function (l) { return { label: l.label || '', url: l.url || '' }; }) }; linksView.hidden = true; linksEditor.hidden = false; renderLinksEdit(); }
-        if (sec === 'avatar') { avatarUrl.value = ''; avatarPreview.src = (state.data && state.data.avatar) || ''; avatarEditor.hidden = false; }
+        if (sec === 'avatar') { avatarUrl.value = ''; avatarPreview.src = (state.data && state.data.avatar) || ''; ghAvatarSync.checked = !!(state.data && state.data.ghAvatar); updateGhSyncUI(); avatarEditor.hidden = false; }
       }
       function closeEditor(sec) {
         if (sec === 'about') { aboutView.hidden = false; aboutEditor.hidden = true; }
@@ -576,6 +642,20 @@
         r.readAsDataURL(f);
       };
 
+      // 头像 GitHub 同步开关
+      function updateGhSyncUI() {
+        var on = ghAvatarSync.checked;
+        if (avatarCustomWrap) avatarCustomWrap.hidden = on;
+        var hint = $('ghSyncHint');
+        if (hint) {
+          var en = document.documentElement.lang === 'en';
+          hint.textContent = on
+            ? (en ? 'On: always uses the GitHub avatar' : '已开启：始终使用 GitHub 头像')
+            : (en ? 'Off: your custom avatar is used if set' : '关闭：使用自定义头像（若有）');
+        }
+      }
+      ghAvatarSync.onchange = updateGhSyncUI;
+
       /* ---------- 保存（整份资料） ---------- */
       function saveProfile(patch, done) {
         var d = JSON.parse(JSON.stringify(state.data || {}));
@@ -583,9 +663,10 @@
         var payload = {
           name: d.name || '', about: d.about || '',
           skills: d.skills || [],
-          links: (d.links || []).filter(function (l) { return l.url; }),
-          avatar: d.avatar || ''
+          links: (d.links || []).filter(function (l) { return l.url; })
         };
+        // 头像：仅在「关闭 GitHub 同步」时随资料保存；开启同步时不写头像，避免覆盖已有自定义头像
+        if (!d.ghAvatar) payload.avatar = d.avatar || '';
         var bad = findForbidden(payload.about) || findForbidden(payload.name) ||
           payload.skills.map(findForbidden).find(Boolean) ||
           payload.links.map(function (l) { return findForbidden(l.label + ' ' + l.url); }).find(Boolean);
@@ -612,12 +693,60 @@
             state.draft.links.forEach(function (l) { l.label = l._label ? l._label.value.trim() : l.label; l.url = l._url ? l._url.value.trim() : l.url; });
             saveProfile({ links: state.draft.links }, function () { closeEditor('links'); });
           }
-          else if (sec === 'avatar') { saveProfile({ avatar: avatarUrl.value.trim() }, function () { closeEditor('avatar'); }); }
+          else if (sec === 'avatar') {
+            var av = avatarUrl.value.trim();
+            var patch = { ghAvatar: ghAvatarSync.checked };
+            if (!ghAvatarSync.checked) patch.avatar = av; // 关闭同步时才写自定义头像；开启同步时不覆盖已有自定义头像
+            saveProfile(patch, function () { closeEditor('avatar'); });
+          }
         };
       });
       document.querySelectorAll('[data-cancel]').forEach(function (btn) {
         btn.onclick = function () { closeEditor(btn.getAttribute('data-cancel')); };
       });
+
+      /* ---------- 个人主页主题色 ---------- */
+      var themeModal = $('themeModal'), openThemeBtn = $('openThemeBtn');
+      var themeColorInput = $('themeColorInput'), themeHexInput = $('themeHexInput'), themeSwatches = $('themeSwatches');
+      var themeSave = $('themeSave'), themeCancel = $('themeCancel'), themeClear = $('themeClear');
+      var THEME_PRESETS = ['#0078d4', '#28599c', '#1f9d55', '#d13438', '#9b59b6', '#e67e22', '#16a2b8', '#2c3e50'];
+      var themeDraft = '';
+
+      function renderSwatches() {
+        themeSwatches.innerHTML = '';
+        THEME_PRESETS.forEach(function (c) {
+          var s = document.createElement('div');
+          s.className = 'theme-swatch' + (c.toLowerCase() === themeDraft.toLowerCase() ? ' active' : '');
+          s.style.background = c; s.title = c;
+          s.onclick = function () { setThemeValue(c); };
+          themeSwatches.appendChild(s);
+        });
+      }
+      function setThemeValue(c) {
+        themeDraft = c;
+        themeColorInput.value = c;
+        themeHexInput.value = c;
+        renderSwatches();
+      }
+      themeColorInput.oninput = function () { setThemeValue(themeColorInput.value); };
+      themeHexInput.oninput = function () {
+        var v = themeHexInput.value.trim();
+        if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) { themeDraft = v; themeColorInput.value = v; renderSwatches(); }
+      };
+      function openTheme() {
+        themeDraft = (state.data && state.data.themeColor) || '#0078d4';
+        setThemeValue(themeDraft);
+        themeModal.hidden = false;
+      }
+      openThemeBtn.onclick = openTheme;
+      themeCancel.onclick = function () { themeModal.hidden = true; };
+      themeModal.addEventListener('click', function (e) { if (e.target === themeModal) themeModal.hidden = true; });
+      themeClear.onclick = function () { themeModal.hidden = true; saveTheme(''); };
+      themeSave.onclick = function () { themeModal.hidden = true; saveTheme(themeDraft); };
+      function saveTheme(color) {
+        if (!state.data) return;
+        saveProfile({ themeColor: color || '' }, function () { renderDisplay(); });
+      }
 
       /* ---------- 加载 ---------- */
       function loadOwn() {

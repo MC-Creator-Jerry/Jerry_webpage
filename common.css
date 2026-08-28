@@ -290,13 +290,29 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
 .xl-sq {
   position: absolute;
   background: rgb(0, 120, 212);
-  border-radius: 5px;
+  border-radius: 6px;
   opacity: 0;
-  transform: scale(.2);
+  transform: scale(.2) rotate(var(--xl-rot, 0deg));
   transition: opacity .32s ease, transform .34s cubic-bezier(.2, .8, .3, 1.25);
 }
-.xl-sq.xl-in { opacity: 1; transform: scale(1); }
-.xl-sq.xl-out { opacity: 0; transform: scale(.2); }
+/* 部分方块带花纹（斜向条纹 + 圆点） */
+.xl-sq.pat {
+  background-color: rgb(0, 120, 212);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .28) 0 7px, transparent 7px 15px),
+    radial-gradient(rgba(255, 255, 255, .30) 1.6px, transparent 2px);
+  background-size: auto, 14px 14px;
+}
+/* 部分方块半透明（用背景 alpha 实现，不影响淡入淡出） */
+.xl-sq.dim { background: rgba(0, 120, 212, .38); }
+.xl-sq.dim.pat {
+  background-color: rgba(0, 120, 212, .38);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .22) 0 7px, transparent 7px 15px),
+    radial-gradient(rgba(255, 255, 255, .24) 1.6px, transparent 2px);
+}
+.xl-sq.xl-in { opacity: 1; transform: scale(1) rotate(var(--xl-rot, 0deg)); }
+.xl-sq.xl-out { opacity: 0; transform: scale(.2) rotate(var(--xl-rot, 0deg)); }
 
 /* 加载动画 · 新版：左上角标题 + 左侧竖直进度条（从上往下）+ 右滑衔接 */
 .xl-intro {

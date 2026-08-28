@@ -90,7 +90,7 @@
   // ← 填入 GitHub OAuth App 的 Client ID；为空则视为未配置（按钮隐藏）
   var CLIENT_ID = 'Ov23ctu9zRxIQ0o0uxiJ';
 
-  var KEYS = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+  var KEYS = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave' };
   function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
   function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
@@ -100,6 +100,7 @@
     if (p.theme) set(KEYS.theme, p.theme);
     if (p.font != null) set(KEYS.font, String(p.font));
     if (p.radius != null) set(KEYS.radius, String(p.radius));
+    if (p.autosave) set(KEYS.autosave, p.autosave);
     if (typeof window.applyAll === 'function') window.applyAll();
   }
 
@@ -335,6 +336,57 @@
     var noticeHover = makeHover(document.getElementById('noticeBtn'), buildNotice, 'notice-card');
     window.__avatarHover = avatarHover;
     window.__noticeHover = noticeHover;
+
+    // 其余蓝条按钮的悬浮预览（帖子中心 / 产品 / 帮助中心 / 登录）
+    function buildInfo(card, opts) {
+      var html =
+        '<div class="hc-name" style="text-align:left">' + esc(opts.title) + '</div>' +
+        '<div class="hc-login" style="text-align:left;margin-top:6px;line-height:1.55">' + esc(opts.desc) + '</div>';
+      if (opts.btnText) {
+        html += '<div class="hc-actions"><a class="hc-btn" href="' + (opts.href || '#') + '"' +
+          (opts.self ? ' target="_blank" rel="noopener"' : '') + '>' + esc(opts.btnText) + '</a></div>';
+      }
+      card.innerHTML = html;
+      if (opts.onClick) {
+        var b = card.querySelector('.hc-btn');
+        if (b) b.onclick = function (e) { if (opts.href === '#') e.preventDefault(); opts.onClick(); };
+      }
+    }
+    var postHover = makeHover(document.querySelector('.bar-right a[href$="post/"]'), function (c) {
+      buildInfo(c, {
+        title: t('帖子中心', 'Post Center'),
+        desc: t('浏览社区帖子，或发布你的内容。', 'Browse community posts or publish your own.'),
+        btnText: t('进入帖子中心 ›', 'Open Post Center ›'),
+        href: BASE + 'post/', self: true
+      });
+    });
+    var prodHover = makeHover(document.querySelector('.bar-right a[href*="products.html"]'), function (c) {
+      buildInfo(c, {
+        title: t('产品', 'Products'),
+        desc: t('浏览我发布的工具与软件。', 'Browse the tools and software I published.'),
+        btnText: t('查看产品 ›', 'View products ›'),
+        href: BASE + 'products.html', self: true
+      });
+    });
+    var helpHover = makeHover(document.querySelector('.bar-right a[href*="helpcenter/"]'), function (c) {
+      buildInfo(c, {
+        title: t('帮助中心', 'Help Center'),
+        desc: t('常见问题与使用指南。', 'FAQ and usage guides.'),
+        btnText: t('前往帮助中心 ›', 'Go to Help Center ›'),
+        href: BASE + 'helpcenter/', self: true
+      });
+    });
+    var loginHover = makeHover(document.getElementById('loginBtn'), function (c) {
+      buildInfo(c, {
+        title: t('登录', 'Sign in'),
+        desc: t('登录以同步你的设置与数据到云端。', 'Sign in to sync your settings and data to the cloud.'),
+        btnText: t('使用 GitHub 登录', 'Sign in with GitHub'),
+        href: '#',
+        onClick: function () { if (window.JW_LOGIN) window.JW_LOGIN(); }
+      });
+    });
+    window.__postHover = postHover; window.__prodHover = prodHover;
+    window.__helpHover = helpHover; window.__loginHover = loginHover;
 
     // 避免头像的「悬浮预览」与原有「点击下拉菜单」互相冲突
     var ab = document.getElementById('userAvatarBtn');

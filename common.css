@@ -247,6 +247,22 @@ a.xl-link:hover::after, .nav-link:hover::after, .bar-btn.link:hover::after { tra
 .modal-panel, .settings-panel, .modal-card, .pop-inner, .user-popup { animation: xlPop var(--xl-t) var(--xl-ease); }
 .tab-pane { animation: xlFade var(--xl-t) var(--xl-ease); }
 
+/* ===== 帖子正文（富文本渲染容器，兼容历史纯文本） ===== */
+.post-body { font-size: 1rem; line-height: 1.75; color: var(--text); white-space: pre-wrap; word-break: break-word; margin-top: 6px; }
+.post-body p { margin: 0 0 8px; }
+.post-body h1, .post-body h2, .post-body h3, .post-body h4 { margin: 12px 0 6px; line-height: 1.35; font-weight: 700; }
+.post-body h1 { font-size: 1.6rem; } .post-body h2 { font-size: 1.35rem; } .post-body h3 { font-size: 1.15rem; } .post-body h4 { font-size: 1.02rem; }
+.post-body ul, .post-body ol { margin: 6px 0 10px 22px; }
+.post-body li { margin: 3px 0; }
+.post-body blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); color: var(--muted); border-radius: 0 8px 8px 0; }
+.post-body a { color: var(--accent); text-decoration: underline; word-break: break-all; }
+.post-body mark { background: #fff3a0; padding: 0 2px; color: inherit; }
+.post-body hr { border: none; border-top: 1px solid var(--card-border); margin: 14px 0; }
+.post-body img { max-width: 100%; height: auto; border-radius: 8px; }
+.post-body code { font-family: "Courier New", monospace; background: color-mix(in srgb, var(--text) 8%, transparent); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+.post-body pre { background: color-mix(in srgb, var(--text) 6%, transparent); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 10px 0; }
+.post-body pre code { background: none; padding: 0; }
+
 /* 蓝条站点名 + 右下浮动按钮 入场（不动画 .topbar，避免影响固定导航条定位） */
 .bar-left, .float-actions { animation: xlFade var(--xl-t-slow) var(--xl-ease) both; }
 

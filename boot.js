@@ -17,15 +17,10 @@
       var pp = loader.querySelector('.xl-prog-v-pct');
       if (pf) pf.style.height = '100%';
       if (pp) pp.textContent = '100%';
-      // 立即清掉所有蓝色方块，避免加载结束后盖住正文文字
-      var sqs = loader.querySelector('.xl-sqs');
-      if (sqs) {
-        var sqArr = sqs.querySelectorAll('.xl-sq');
-        for (var k = 0; k < sqArr.length; k++) sqArr[k].classList.add('xl-out');
-        sqs.style.display = 'none';
-      }
     }
+    // 露出正文
     doc.documentElement.classList.remove('xl-booting');
+    // 整块加载层（白底 + 蓝色长方块 + 「小蓝页」文字）一起淡出 —— 三者同时消失
     if (loader && loader.parentNode) {
       loader.classList.add('xl-hide');
       setTimeout(function () {
@@ -132,8 +127,6 @@
           s.style.height = h + 'px';
           s.style.left = (Math.random() * Math.max(0, (vw - w))) + 'px';
           s.style.top = (Math.random() * Math.max(0, (vh - h))) + 'px';
-          // 轻微随机旋转，更自然
-          s.style.setProperty('--xl-rot', (Math.random() * 24 - 12).toFixed(1) + 'deg');
           // 随机赋予花纹 / 半透明（部分）
           var r = Math.random();
           if (r < 0.34) s.classList.add('pat');        // 约 1/3 带花纹
@@ -144,12 +137,8 @@
         })(i);
       }
 
-      var outAt = 820;
-      setTimeout(function () {
-        for (var j = 0; j < squares.length; j++) squares[j].classList.add('xl-out');
-      }, outAt);
-
-      setTimeout(safeReveal, outAt + 460); // 撤离后全白 → 揭晓内容
+      // 长方块保持显示，直到整块加载层淡出时与白底、「小蓝页」文字同时消失
+      setTimeout(safeReveal, 1280); // 方块出现后停留，再随整块一起淡出
     }
   }
 

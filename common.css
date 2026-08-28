@@ -298,34 +298,56 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
 .xl-sq.xl-in { opacity: 1; transform: scale(1); }
 .xl-sq.xl-out { opacity: 0; transform: scale(.2); }
 
-/* 最左侧竖直进度条 + 百分比 */
-.xl-prog {
+/* 加载动画 · 新版：左上角标题 + 左侧竖直进度条（从上往下）+ 右滑衔接 */
+.xl-intro {
   position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
+  inset: 0;
+  background: #ffffff;
+  z-index: 2;
+  transition: transform .45s cubic-bezier(.4, 0, .2, 1), opacity .45s ease;
+}
+.xl-intro.xl-slide { transform: translateX(100%); opacity: .35; }
+
+.xl-intro-title {
+  position: absolute;
+  left: 26px;
+  top: 26px;
+  color: rgb(0, 120, 212);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: .01em;
+  user-select: none;
+}
+.xl-intro-title .t1 { display: block; font-size: 20px; }
+.xl-intro-title .t2 { display: block; font-size: 14px; opacity: .82; padding-left: .04em; }
+
+/* 标题下方的剩余左侧空间：竖直进度条（从上往下填充） */
+.xl-prog-v {
+  position: absolute;
+  left: 26px;
+  top: 92px;
+  bottom: 40px;
   width: 6px;
-  height: 180px;
   background: rgba(0, 120, 212, 0.14);
   border-radius: 4px;
   overflow: hidden;
 }
-.xl-prog-fill {
+.xl-prog-v-fill {
   position: absolute;
-  left: 0; right: 0; bottom: 0;
+  left: 0; right: 0; top: 0;
   height: 0%;
   background: rgb(0, 120, 212);
   border-radius: 4px;
-  transition: height .12s linear;
+  transition: height .1s linear;
 }
-.xl-prog-pct {
+.xl-prog-v-pct {
   position: absolute;
-  left: 32px;
+  left: 40px;
   top: 50%;
   transform: translateY(-50%);
   color: rgb(0, 120, 212);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
   letter-spacing: .04em;
   user-select: none;

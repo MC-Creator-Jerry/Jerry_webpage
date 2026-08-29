@@ -91,6 +91,14 @@
   .hidden { display: none !important; }
   .empty { color: var(--muted); opacity: 0.8; font-style: italic; padding: 8px 4px; }
   .rule { font-size: 0.85rem; color: var(--muted); margin-top: 14px; line-height: 1.7; }
+  .board { margin-bottom: 18px; }
+  .board-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .board-head h2 { margin-bottom: 0; }
+  .prio { display: inline-flex; align-items: center; gap: 6px; }
+  .prio-label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .prio-sel { border: 1px solid var(--card-border); background: var(--panel-bg); color: var(--text); border-radius: 8px; padding: 5px 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+  .prio-sel:disabled { opacity: 0.5; cursor: not-allowed; }
+  .prio-note { font-size: 0.78rem; color: var(--muted); margin-top: 8px; }
   .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.3); opacity: 0; transition: opacity .25s; pointer-events: none; }
   .toast.show { opacity: 1; }
   .site-footer { border-top: 1px solid var(--card-border); margin-top: 40px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; }
@@ -125,20 +133,44 @@
       <p>发帖与登录都有排名。看看谁是本站最活跃的作者，谁又是出勤最稳定的老朋友。</p>
     </section>
 
-    <div class="card">
-      <div class="tabs">
-        <button class="tab active" id="tabPost" type="button">帖子榜</button>
-        <button class="tab" id="tabLogin" type="button">登录榜</button>
+    <section class="card board">
+      <div class="board-head">
+        <h2>帖子榜</h2>
+        <div class="prio">
+          <label class="prio-label" for="prioPost" data-zh="显示优先级" data-en="Priority">显示优先级</label>
+          <select class="prio-sel" id="prioPost">
+            <option value="none" data-zh="无" data-en="None">无</option>
+            <option value="follow" data-zh="关注" data-en="Followed">关注</option>
+            <option value="friend" data-zh="好友优先" data-en="Friends first">好友优先</option>
+          </select>
+        </div>
       </div>
-
       <div class="lb" id="lbPost"></div>
-      <div class="lb hidden" id="lbLogin"></div>
+      <p class="prio-note hidden" id="prioPostNote" data-zh="「关注 / 好友优先」会按你关注的人排序，登录后可用。" data-en="Follow/friends priority sorts by people you follow (requires sign-in).">「关注 / 好友优先」会按你关注的人排序，登录后可用。</p>
+    </section>
 
+    <section class="card board">
+      <div class="board-head">
+        <h2>登录榜</h2>
+        <div class="prio">
+          <label class="prio-label" for="prioLogin" data-zh="显示优先级" data-en="Priority">显示优先级</label>
+          <select class="prio-sel" id="prioLogin">
+            <option value="none" data-zh="无" data-en="None">无</option>
+            <option value="follow" data-zh="关注" data-en="Followed">关注</option>
+            <option value="friend" data-zh="好友优先" data-en="Friends first">好友优先</option>
+          </select>
+        </div>
+      </div>
+      <div class="lb" id="lbLogin"></div>
+    </section>
+
+    <section class="card">
       <p class="rule">
         帖子榜：每发布 1 篇帖子 = 10 分，按积分排序。<br>
-        登录榜：累计「活跃天数」（每天访问本站计 1 天）。等级越高，每升一级所需天数越多——Lv1→2 需 10 天，之后每升一级再 +5 天；最高 Lv.10，到顶即满级。进度条显示距下一级还需几天。
+        登录榜：累计「活跃天数」（每天访问本站计 1 天）。等级越高，每升一级所需天数越多——Lv1→2 需 10 天，之后每升一级再 +5 天；最高 Lv.10，到顶即满级。进度条显示距下一级还需几天。<br>
+        显示优先级：选「关注」把你关注的用户排在最前；选「好友优先」把互相关注（好友）的用户排在最前，其次是你关注的用户。
       </p>
-    </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -161,18 +193,14 @@
     (function () {
       var lbPost = document.getElementById('lbPost');
       var lbLogin = document.getElementById('lbLogin');
-      var tabPost = document.getElementById('tabPost');
-      var tabLogin = document.getElementById('tabLogin');
+      var prioPost = document.getElementById('prioPost');
+      var prioLogin = document.getElementById('prioLogin');
+      var prioPostNote = document.getElementById('prioPostNote');
 
-      function setTab(which) {
-        var postActive = which === 'post';
-        tabPost.classList.toggle('active', postActive);
-        tabLogin.classList.toggle('active', !postActive);
-        lbPost.classList.toggle('hidden', !postActive);
-        lbLogin.classList.toggle('hidden', postActive);
-      }
-      tabPost.addEventListener('click', function () { setTab('post'); });
-      tabLogin.addEventListener('click', function () { setTab('login'); });
+      var postBoard = [], loginBoard = [];
+      var followSet = new Set(), friendSet = new Set();
+      var ME = (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login) || null;
+      var loggedIn = !!ME;
 
       function rowEl(cls) {
         var el = document.createElement('div');
@@ -222,12 +250,54 @@
         });
       }
 
-      var ME = (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login) || null;
+      function weight(login, prio) {
+        if (prio === 'friend') { if (friendSet.has(login)) return 0; if (followSet.has(login)) return 1; return 2; }
+        if (prio === 'follow') { return followSet.has(login) ? 0 : 1; }
+        return 0;
+      }
+      function applyPriority(rows, prio) {
+        if (!rows.length || prio === 'none') return rows;
+        return rows.slice().sort(function (a, b) {
+          var wa = weight(a.login, prio), wb = weight(b.login, prio);
+          if (wa !== wb) return wa - wb;
+          return a.rank - b.rank;
+        });
+      }
+
+      function refresh() {
+        renderPost(applyPriority(postBoard, prioPost.value), ME);
+        renderLogin(applyPriority(loginBoard, prioLogin.value), ME);
+      }
+
+      prioPost.addEventListener('change', refresh);
+      prioLogin.addEventListener('change', refresh);
+
+      if (!loggedIn) {
+        prioPost.disabled = true; prioLogin.disabled = true;
+        prioPost.title = '登录后可用'; prioLogin.title = '登录后可用';
+        if (prioPostNote) prioPostNote.classList.remove('hidden');
+      }
+
       fetch('/api/points')
         .then(function (r) { return r.ok ? r.json() : { postBoard: [], loginBoard: [] }; })
         .then(function (d) {
-          renderPost(d.postBoard || [], ME);
-          renderLogin(d.loginBoard || [], ME);
+          postBoard = d.postBoard || [];
+          loginBoard = d.loginBoard || [];
+          if (loggedIn) {
+            fetch('/api/ufollow')
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (u) {
+                if (u && u.following) {
+                  followSet = new Set(u.following);
+                  var foll = new Set(u.followers || []);
+                  friendSet = new Set(u.following.filter(function (l) { return foll.has(l); }));
+                }
+                refresh();
+              })
+              .catch(function () { refresh(); });
+          } else {
+            refresh();
+          }
         })
         .catch(function () {
           lbPost.innerHTML = '<div class="empty">加载失败</div>';

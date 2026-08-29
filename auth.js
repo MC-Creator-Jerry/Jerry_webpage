@@ -219,7 +219,7 @@
     var badge = nb.querySelector('#noticeBadge');
     var bell = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/></svg>";
     nb.classList.add('icon');
-    nb.setAttribute('aria-label', '通知');
+    nb.setAttribute('aria-label', '消息中心');
     nb.removeAttribute('data-zh');
     nb.removeAttribute('data-en');
     nb.innerHTML = bell + (badge ? badge.outerHTML : '');
@@ -328,7 +328,7 @@
         }).join('');
       }
       card.innerHTML =
-        '<div class="hc-head"><span>' + t('通知预览', 'Notifications') + '</span>' +
+        '<div class="hc-head"><span>' + t('消息中心预览', 'Message Center') + '</span>' +
           '<a class="hc-more" href="' + BASE + 'notice/">' + t('查看全部 ›', 'View all ›') + '</a></div>' +
         '<div class="hc-cols">' +
           '<div class="hc-col"><div class="hc-ct">' + t('系统', 'System') + ' <b>' + (d.unread.system || 0) + '</b></div><ul>' + items(sys) + '</ul></div>' +

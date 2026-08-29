@@ -388,14 +388,19 @@ window.XLTopics = (function () {
       groupsLink.href = '/groups/';
       groupsLink.textContent = '群组';
 
+      var subLink = document.createElement('a');
+      subLink.className = 'bar-btn xl-subscribe';
+      subLink.href = '/subscribe/';
+      subLink.textContent = '订阅';
+
       var adminLink = document.createElement('a');
       adminLink.className = 'bar-btn admin-only';
       adminLink.href = '/admin/reports/';
       adminLink.textContent = '举报后台';
 
       var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
-      if (login) { bar.insertBefore(form, login); bar.insertBefore(dmLink, login); bar.insertBefore(groupsLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(adminLink, login); }
-      else { bar.appendChild(form); bar.appendChild(dmLink); bar.appendChild(groupsLink); bar.appendChild(pointsLink); bar.appendChild(adminLink); }
+      if (login) { bar.insertBefore(form, login); bar.insertBefore(dmLink, login); bar.insertBefore(groupsLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(subLink, login); bar.insertBefore(adminLink, login); }
+      else { bar.appendChild(form); bar.appendChild(dmLink); bar.appendChild(groupsLink); bar.appendChild(pointsLink); bar.appendChild(subLink); bar.appendChild(adminLink); }
     });
     updateDmBadge();
     // 实时刷新：后台轮询通知 / 私信徽标（免 VAPID，纯前端轮询）

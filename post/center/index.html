@@ -271,6 +271,7 @@
 
   <script src="../../auth.js"></script>
   <script src="../../post-actions.js"></script>
+  <script src="../../poll.js"></script>
   <script>
     (function () {
       var listEl = document.getElementById('list');
@@ -420,6 +421,7 @@
 
       var states = {};
       var blockedSet = new Set();
+      var pollsMap = {};
       var allPosts = [];
       var curCounts = {};
       var sortMode = 'new'; // 'new' = 从新到旧, 'follow' = 关注优先
@@ -471,6 +473,7 @@
             '<h3><a class="ptitle" href="../detail/?post=' + encodeURIComponent(p.id) + '"></a></h3>' +
             '<div class="post-body"></div>' +
             '<div class="att-wrap"></div>' +
+            '<div class="att-poll" id="poll-' + p.id + '" hidden></div>' +
             '<div class="post-foot">' +
               '<span class="foot-spacer"></span>' +
               '<button class="foot-btn comment-btn" type="button" data-id="' + p.id + '" title="评论">' +
@@ -551,6 +554,10 @@
               renderAndBind(posts, counts);
             }
           });
+          var pbox = listEl.querySelector('.att-poll[id="poll-' + p.id + '"]');
+          if (pbox && pollsMap[p.id] && window.XLPoll) {
+            window.XLPoll.render(pbox, Object.assign({}, pollsMap[p.id], { post: p.id }), { compact: true, canManage: false });
+          }
         });
       }
 
@@ -574,6 +581,12 @@
                 return XLPostActions.getStates(ids).then(function (s) {
                   states = s || {};
                   blockedSet = new Set(ids.filter(function (id) { return states[id] && states[id].blocked; }));
+                }).then(function () {
+                  return fetch('/api/poll?posts=' + encodeURIComponent(ids.join(',')))
+                    .then(function (r) { return r.ok ? r.json() : { polls: {} }; })
+                    .then(function (pd) { pollsMap = (pd && pd.polls) || {}; })
+                    .catch(function () { pollsMap = {}; });
+                }).then(function () {
                   renderAndBind(posts, counts);
                   maybeOpenFromUrl();
                 });
@@ -674,6 +687,7 @@
         var st = (states[p.id] || {});
         var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
         var canDel = meIsAdmin || (meLogin && p.login === meLogin);
+        var canEdit = meLogin && p.login === meLogin;
         var del = canDel ? '<button class="del" id="mDelPost">删除帖子</button>' : '';
         mPost.innerHTML =
           '<div class="head">' +
@@ -681,7 +695,7 @@
             '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
             '<span class="meta">' + fmtTime(p.ts) + '</span>' +
           '</div>' +
-          '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><div class="post-body" style="font-size:1.02rem;line-height:1.8;color:var(--text)"></div><div class="att-wrap"></div>' +
+          '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><div class="post-body" style="font-size:1.02rem;line-height:1.8;color:var(--text)"></div><div class="att-wrap"></div><div class="att-poll" id="mPoll" hidden></div>' +
           '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' +
           '<div class="post-foot" style="margin-top:10px">' +
             '<span class="foot-spacer"></span>' +
@@ -691,7 +705,7 @@
             '<button class="foot-btn like-btn' + (st.liked ? ' on' : '') + '" id="mLikeBtn" type="button" data-id="' + p.id + '" title="点赞">' +
               '<img class="ico" src="../../icons/' + (st.liked ? 'like-on' : 'like') + '.svg" alt="点赞"><span class="like-count">' + (st.likeCount || 0) + '</span>' +
             '</button>' +
-          '</div>' + del;
+          '</div>' + del + (canEdit ? '<button class="pa-btn poll-add-btn" id="mAddPollBtn" hidden>添加投票</button>' : '');
         mPost.querySelector('h1').textContent = p.title || '（无标题）';
         var mBody = mPost.querySelector('.post-body');
         mBody.innerHTML = p.body || '';
@@ -708,6 +722,7 @@
           authorLogin: p.login,
           onBlock: function (postId, blocked) { if (states[postId]) states[postId].blocked = blocked; if (blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; } else { loadModalPost(); } }
         });
+        loadModalPoll(p, canEdit);
         var mLike = document.getElementById('mLikeBtn');
         if (mLike) mLike.addEventListener('click', function () { toggleLike(p, this); });
         var mCommentBtn = document.getElementById('mCommentBtn');
@@ -716,6 +731,31 @@
           mComposer.scrollIntoView({ behavior: 'smooth', block: 'center' });
           mBody.focus();
         });
+      }
+
+      function loadModalPoll(p, canEdit) {
+        var box = document.getElementById('mPoll');
+        if (!box || !window.XLPoll) return;
+        fetch('/api/poll?post=' + encodeURIComponent(p.id))
+          .then(function (r) { return r.ok ? r.json() : { error: 'none' }; })
+          .then(function (d) {
+            if (d && !d.error && d.question) {
+              window.XLPoll.render(box, Object.assign({}, d, { post: p.id }), {
+                canManage: !!canEdit,
+                onDeleted: function () { var b = document.getElementById('mAddPollBtn'); if (b) b.hidden = false; }
+              });
+            } else if (canEdit) {
+              var addBtn = document.getElementById('mAddPollBtn');
+              if (addBtn) {
+                addBtn.hidden = false;
+                addBtn.onclick = function () {
+                  addBtn.hidden = true;
+                  window.XLPoll.renderComposer(box, p.id, function () { loadModalPoll(p, canEdit); });
+                };
+              }
+            }
+          })
+          .catch(function () {});
       }
 
       function renderModalComments(list) {

@@ -235,6 +235,11 @@
   html[data-theme="dark"] .xl-switch-track { background: #3a4760; }
 
   [hidden] { display: none !important; }
+
+  /* 我的：消息与私信入口 */
+  .my-msg-card .my-msg-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .my-msg-card .msg-entry-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--accent); border-radius: 999px; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; text-decoration: none; }
+  .my-msg-card .msg-entry-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); }
 </style>
   <link rel="stylesheet" href="../common.css" />
 </head>
@@ -249,7 +254,7 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="通知" data-en="Notice">通知<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
       <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
@@ -277,6 +282,16 @@
             <button class="change-btn" data-sec="avatar" hidden>更改头像</button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="card my-msg-card" id="myMessagesCard">
+      <div class="card-head">
+        <h2 data-zh="消息与私信" data-en="Messages & Chat">消息与私信</h2>
+      </div>
+      <div class="my-msg-actions">
+        <a class="msg-entry-btn" href="../notice/" data-zh="消息中心" data-en="Message Center">消息中心</a>
+        <a class="msg-entry-btn" href="../messages/" data-zh="私信" data-en="Direct Messages">私信</a>
       </div>
     </section>
 

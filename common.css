@@ -176,26 +176,29 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
   /* 底部导航条：固定屏幕底部，单行横向滚动，不折行 */
   .bar-right {
     position: fixed !important;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 99;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    gap: 8px;
-    padding: 8px calc(14px + env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) calc(14px + env(safe-area-inset-left, 0px));
-    min-height: 52px;
-    background: var(--bar-bottom);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.18);
-    border-radius: 12px 12px 0 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    flex: none !important;
+    order: 0 !important;
+    margin-top: 0 !important;
+    gap: 8px !important;
+    padding: 8px calc(14px + env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) calc(14px + env(safe-area-inset-left, 0px)) !important;
+    min-height: 52px !important;
+    background: var(--bar-bottom) !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.18) !important;
+    border-radius: 12px 12px 0 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
   }
   .bar-right::-webkit-scrollbar { display: none; }
   .bar-right > * { flex: 0 0 auto; }

@@ -428,7 +428,7 @@ window.XLTopics = (function () {
   var OWNER = 'MC-Creator-Jerry';
   var SUN = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>';
   var MOON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
-  var EDIT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>';
+  var EDIT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
 
   function getTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
   function setTheme(t) {
@@ -461,21 +461,20 @@ window.XLTopics = (function () {
     }
     var landscape = false;
     try { landscape = window.matchMedia('(orientation: landscape)').matches; } catch (e) {}
-    if (landscape) {
-      fa.style.position = 'fixed';
-      fa.style.top = 'auto';
-      fa.style.left = 'auto';
-      fa.style.right = '20px';
-      fa.style.bottom = '20px';
-      fa.style.zIndex = '150';
-    } else {
-      fa.style.position = '';
-      fa.style.top = '';
-      fa.style.left = '';
-      fa.style.right = '';
-      fa.style.bottom = '';
-      fa.style.zIndex = '';
-    }
+    var small = false;
+    try { small = window.innerWidth <= 560; } catch (e) {}
+    // 用 !important 内联样式兜底，确保任何 CSS 规则都无法把它推到页面底部
+    var right = landscape ? (small ? '12px' : '20px') : '12px';
+    var bottom = landscape
+      ? (small ? 'calc(12px + env(safe-area-inset-bottom, 0px))' : 'calc(20px + env(safe-area-inset-bottom, 0px))')
+      : 'calc(86px + env(safe-area-inset-bottom, 0px))';
+    var z = landscape ? '150' : '1000';
+    fa.style.setProperty('position', 'fixed', 'important');
+    fa.style.setProperty('top', 'auto', 'important');
+    fa.style.setProperty('left', 'auto', 'important');
+    fa.style.setProperty('right', right, 'important');
+    fa.style.setProperty('bottom', bottom, 'important');
+    fa.style.setProperty('z-index', z, 'important');
   }
 
   function injectFloat() {
@@ -529,6 +528,7 @@ window.XLTopics = (function () {
     var ref = fa.querySelector('#themeToggle') || fa.querySelector('#langBtn');
     if (ref) fa.insertBefore(btn, ref);
     else fa.appendChild(btn);
+    pinFloat();
   }
 
   // 登录态变化（auth.js 在解析完成后回调）-> 站主时补插布局按钮

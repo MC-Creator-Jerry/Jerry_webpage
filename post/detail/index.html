@@ -252,6 +252,8 @@
         post = p;
         var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
         var canDel = meIsAdmin || (meLogin && p.login === meLogin);
+        var canEdit = meLogin && p.login === meLogin;
+        var edit = canEdit ? '<a class="del" id="editPost" href="../new/?edit=' + encodeURIComponent(p.id) + '">编辑帖子</a>' : '';
         var del = canDel ? '<button class="del" id="delPost">删除帖子</button>' : '';
         postBox.innerHTML =
           '<div class="head">' +
@@ -260,7 +262,7 @@
             '<span class="meta">'+fmtTime(p.ts)+'</span>' +
           '</div>' +
           '<h1></h1><div class="post-body"></div><div class="att-wrap"></div>' +
-          '<div class="post-actions" id="postActions" data-post="'+p.id+'"></div>' + del;
+          '<div class="post-actions" id="postActions" data-post="'+p.id+'"></div>' + edit + del;
         postBox.querySelector('h1').textContent = p.title || '（无标题）';
         var dBody = postBox.querySelector('.post-body');
         dBody.innerHTML = p.body || '';

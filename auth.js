@@ -28,11 +28,16 @@
       .catch(function () { cb(null); });
   }
   // 返回等级块的内部内容（外层 .hc-level 由占位 div 提供，避免空数据时显示空盒子）
-  function renderLevelBlock(lv) {
+  // opts.points: 是否在右下角显示「积分榜 ›」入口（仅头像悬浮卡片使用）
+  function renderLevelBlock(lv, opts) {
+    opts = opts || {};
     var pct = Math.round((lv.lvProgress || 0) * 100);
     var hint = lv.lvCapped
       ? jwT('已达最高等级', 'Max level reached')
       : jwT('还需 ', 'Need ') + (lv.lvDaysLeft || 0) + jwT(' 天升级', ' days to next level');
+    var more = opts.points
+      ? '<a class="hc-lv-more" href="' + BASE + 'points/">' + jwT('积分榜 ›', 'Points ›') + '</a>'
+      : '';
     return '<div class="hc-level-row">' +
         '<span class="hc-lv-name">' + jwT('等级', 'Level') + '</span>' +
         '<span class="hc-lv-val">Lv.' + lv.lv + '</span>' +
@@ -40,7 +45,10 @@
       '<div class="hc-progress" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100">' +
         '<div class="hc-progress-bar" style="width:' + pct + '%"></div>' +
       '</div>' +
-      '<div class="hc-lv-hint">' + jwEsc(hint) + '</div>';
+      '<div class="hc-lv-hint-row">' +
+        '<span class="hc-lv-hint">' + jwEsc(hint) + '</span>' +
+        more +
+      '</div>';
   }
 
   // 注入样式（通知红点 + 头像菜单 + 铃铛），避免给每个页面单独加 CSS
@@ -91,7 +99,13 @@
       '.hc-lv-val{font-size:.92rem;font-weight:800;color:#0078d4}',
       '.hc-progress{height:7px;background:#e1e8f0;border-radius:999px;overflow:hidden}',
       '.hc-progress-bar{height:100%;background:linear-gradient(90deg,#0078d4,#4eb1ff);border-radius:999px;transition:width .3s ease}',
-      '.hc-lv-hint{margin-top:5px;font-size:.72rem;color:#8a96a3;text-align:center}',
+      '.hc-lv-hint{margin-top:5px;font-size:.72rem;color:#8a96a3}',
+      '.hc-lv-hint-row{display:flex;justify-content:space-between;align-items:center;margin-top:5px;gap:8px}',
+      '.hc-lv-hint-row .hc-lv-hint{margin-top:0}',
+      '.hc-lv-more{font-size:.72rem;color:#0078d4;text-decoration:none;font-weight:600;white-space:nowrap}',
+      '.hc-lv-more:hover{text-decoration:underline}',
+      '.user-popup .up-divider{height:1px;background:#e3e8ef;margin:6px 4px}',
+      '.user-popup .up-item.admin-only[hidden]{display:none!important}',
       '@media (prefers-reduced-motion: reduce){.xl-hovercard{transition:none}}'
     ].join('\n');
     document.head.appendChild(s);
@@ -177,6 +191,8 @@
       .then(function (d) { if (d && d.prefs) applyUserPrefs(d.prefs); })
       .catch(function () {});
     updateNoticeBadge();
+    var upReports = document.getElementById('upReports');
+    if (upReports) upReports.hidden = !window.JW_AUTH.isAdmin;
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
 
@@ -189,6 +205,8 @@
     setAvatar(DEFAULT_AVATAR);
     setLoginItem(true);
     updateNoticeBadge();
+    var upReports = document.getElementById('upReports');
+    if (upReports) upReports.hidden = true;
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
 
@@ -214,6 +232,8 @@
     var personIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='12' cy='7' r='4'/></svg>";
     var gearIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'/></svg>";
     var ghIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='currentColor'><path d='M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.6 18 4.9 18 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z'/></svg>";
+    var helpIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>";
+    var flagIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/><line x1='4' y1='22' x2='4' y2='15'/></svg>";
 
     var btn = document.createElement('button');
     btn.className = 'bar-avatar';
@@ -233,7 +253,12 @@
       '<a class="up-item" id="upSettings" href="' + BASE + 'settings/homepage.html">' +
         '<span class="up-ico">' + gearIco + '</span><span data-zh="设置" data-en="Settings">设置</span></a>' +
       '<a class="up-item" id="upLogin" href="#" hidden>' +
-        '<span class="up-ico">' + ghIco + '</span><span data-zh="登录" data-en="Sign in">登录</span></a>';
+        '<span class="up-ico">' + ghIco + '</span><span data-zh="登录" data-en="Sign in">登录</span></a>' +
+      '<div class="up-divider"></div>' +
+      '<a class="up-item" id="upHelp" href="' + BASE + 'helpcenter/">' +
+        '<span class="up-ico">' + helpIco + '</span><span data-zh="帮助中心" data-en="Help Center">帮助中心</span></a>' +
+      '<a class="up-item admin-only" id="upReports" href="' + BASE + 'admin/reports/" hidden>' +
+        '<span class="up-ico">' + flagIco + '</span><span data-zh="举报后台" data-en="Reports">举报后台</span></a>';
 
     right.appendChild(btn);
     right.appendChild(pop);
@@ -241,6 +266,8 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       pop.hidden = !pop.hidden;
+      var ur = document.getElementById('upReports');
+      if (ur) ur.hidden = !(window.JW_AUTH.user && window.JW_AUTH.user.isAdmin);
       if (!pop.hidden) {
         var uu = window.JW_AUTH.user;
         if (uu && uu.login) {
@@ -352,7 +379,7 @@
         loadLevel(u.login, function (lv) {
           var box = card.querySelector('#hcLevel');
           if (!box || !box.isConnected) return;
-          if (lv) { box.hidden = false; box.innerHTML = renderLevelBlock(lv); }
+          if (lv) { box.hidden = false; box.innerHTML = renderLevelBlock(lv, { points: true }); }
         });
       } else {
         card.innerHTML =

@@ -93,7 +93,7 @@
 /* ============ 按钮图标：用图片图标（<img class="ico">）替代文字/emoji ============ */
 (function () {
   function iconPrefix() {
-    var sc = document.querySelector('script[src$="common.js"]');
+    var sc = document.querySelector('script[src*="common.js"]');
     var src = sc ? (sc.getAttribute('src') || '') : '';
     var m = src.match(/^((?:\.\.\/)*)/);
     return (m ? m[1] : '') + 'icons/';
@@ -208,7 +208,7 @@ window.XLTopics = (function () {
   var MAX_LEN = 30;
 
   function basePrefix() {
-    var sc = document.querySelector('script[src$="common.js"]');
+    var sc = document.querySelector('script[src*="common.js"]');
     var src = sc ? (sc.getAttribute('src') || '') : '';
     var m = src.match(/^((?:\.\.\/)*)/);
     return m ? m[1] : '';
@@ -544,7 +544,7 @@ window.XLTopics = (function () {
     var m = src.match(/^((?:\.\.\/)*)/);
     var prefix = m ? m[1] : '';
     var s = document.createElement('script');
-    s.src = prefix + 'editbar.js?v=20260829c';
+    s.src = prefix + 'editbar.js?v=20260829d';
     s.async = true;
     document.head.appendChild(s);
   }

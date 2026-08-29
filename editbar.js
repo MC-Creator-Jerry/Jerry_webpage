@@ -3,9 +3,15 @@
 //  - 站主点击浮动「更改当前页面布局」按钮 -> window.XLEdit.open() 进入编辑模式
 //      · 点击已有文字元素 -> 就地编辑（contenteditable）
 //      · 点击图片 -> 弹出输入新地址换图
-//      · Word 式工具栏：新建文本框 / 删除文本框 / 插入图片 / 插入视频 /
-//        改变字体 / 字号 / 选取文字颜色
-//      · 保存 -> POST /api/page-edit；退出 -> 还原到已保存状态
+//      · 工具栏分组：
+//          块   ＋新建 / ⧉复制 / ↑上移 / ↓下移 / 🗑删除
+//          媒体 🖼图片 / 🎬视频 / 🔍＋放大 / 🔍－缩小
+//          格式 B / I / U / S / 对齐 / 🔗链接 / ⛓解除 / 清格式
+//          样式 字体 / 字号 / 文字颜色
+//      · 快捷键：Ctrl/Cmd+S 保存 · Esc 退出 · Ctrl/Cmd+B/I/U 粗斜下划线
+//                Delete/Backspace 删除选中块（未在输入时）
+//      · 有未保存修改时，退出或刷新前会提示；保存按钮显示「未保存」圆点
+//  - 保存 -> POST /api/page-edit；退出 -> 还原到已保存状态
 (function () {
   'use strict';
   var OWNER = 'MC-Creator-Jerry';
@@ -98,11 +104,21 @@
         wrap.appendChild(a);
       }
     }
-    if (b.zoom && (+b.zoom !== 1)) {
-      wrap.style.transform = 'scale(' + b.zoom + ')';
-      wrap.style.transformOrigin = 'top left';
-    }
+    applyZoomTo(wrap, b.zoom);
     return wrap;
+  }
+
+  function applyZoomTo(wrap, zoom) {
+    var z = parseFloat(zoom || '1') || 1;
+    if (z !== 1) {
+      wrap.dataset.zoom = z;
+      wrap.style.transform = 'scale(' + z + ')';
+      wrap.style.transformOrigin = 'top left';
+    } else {
+      delete wrap.dataset.zoom;
+      wrap.style.transform = '';
+      wrap.style.transformOrigin = '';
+    }
   }
 
   // ---------- 应用已保存覆盖（所有访客） ----------
@@ -135,6 +151,45 @@
   var activeWrap = null;     // 当前选中的内容块
   var activeInner = null;    // 当前聚焦的文本框
   var savedRange = null;     // 文本框内选区
+  var dirty = false;         // 是否有未保存修改
+  var saving = false;        // 是否正在保存
+  var banner = null;         // 顶部编辑条
+  var saveBtn = null;
+
+  // ---------- 轻提示 ----------
+  var toastTimer;
+  function toast(msg, ms) {
+    var t = document.querySelector('.xl-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.className = 'xl-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, ms || 2000);
+  }
+
+  // ---------- 未保存状态 ----------
+  function markDirty() {
+    if (dirty) return;
+    dirty = true;
+    updateSaveBtn();
+  }
+  function updateSaveBtn() {
+    if (!saveBtn) return;
+    if (saving) {
+      saveBtn.textContent = '保存中…';
+      saveBtn.disabled = true;
+      saveBtn.classList.remove('is-dirty');
+      return;
+    }
+    saveBtn.disabled = false;
+    saveBtn.textContent = '保存';
+    saveBtn.classList.toggle('is-dirty', dirty);
+    saveBtn.title = dirty ? '有未保存的修改（Ctrl/Cmd+S）' : '已保存（Ctrl/Cmd+S）';
+  }
 
   function saveSel() {
     var s = window.getSelection();
@@ -161,6 +216,32 @@
     $all('#xl-edit-blocks .xl-block').forEach(function (w) { w.classList.toggle('active', w === wrap); });
   }
 
+  // ---------- 富文本命令 ----------
+  // execCommand 虽已废弃，但仍是各浏览器普遍支持的富文本实现方式
+  function exec(cmd, val) {
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
+    restoreSel();
+    try { document.execCommand(cmd, false, val == null ? null : val); } catch (e) {}
+    saveSel();
+    markDirty();
+    updateToolbarState();
+  }
+
+  var STATE_CMDS = {
+    bold: 'bold', italic: 'italic', underline: 'underline', strikeThrough: 'strike',
+    justifyLeft: 'aleft', justifyCenter: 'acenter', justifyRight: 'aright'
+  };
+  function updateToolbarState() {
+    if (!banner) return;
+    Object.keys(STATE_CMDS).forEach(function (cmd) {
+      var btn = banner.querySelector('.xl-tb-btn[data-cmd="' + STATE_CMDS[cmd] + '"]');
+      if (!btn) return;
+      var on = false;
+      try { on = document.queryCommandState(cmd); } catch (e) {}
+      btn.classList.toggle('on', !!on);
+    });
+  }
+
   function onTextClick(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -172,6 +253,7 @@
       el.removeEventListener('blur', done);
       el.removeAttribute('contenteditable');
       edits[cssPath(el)] = { type: 'text', value: el.textContent };
+      markDirty();
     }
     el.addEventListener('blur', done);
   }
@@ -190,6 +272,7 @@
     }
     img.src = url;
     edits[cssPath(img)] = { type: 'img', value: url };
+    markDirty();
   }
 
   // ---------- 本地文件上传 ----------
@@ -275,20 +358,53 @@
     });
   }
 
-  // ---------- 工具栏动作 ----------
+  // ---------- 块操作 ----------
   function makeTextbox() {
     var b = buildBlockEl({ id: genId(), type: 'textbox', html: '' });
     var inner = b.querySelector('.xl-block-inner');
     inner.setAttribute('contenteditable', 'true');
     blocksContainer().appendChild(b);
     setActive(b);
+    activeInner = inner;
     inner.focus();
+    markDirty();
   }
 
   function deleteActive() {
-    if (!activeWrap) { window.alert('请先点选要删除的内容块（文本框/图片/视频）。'); return; }
+    if (!activeWrap) { toast('请先点选要删除的内容块'); return; }
     activeWrap.remove();
-    activeWrap = null; activeInner = null;
+    activeWrap = null; activeInner = null; savedRange = null;
+    markDirty();
+    toast('已删除该内容块');
+  }
+
+  // 上移 / 下移（dir = -1 上移，+1 下移）
+  function moveActive(dir) {
+    if (!activeWrap) { toast('请先点选要移动的内容块'); return; }
+    var c = blocksContainer();
+    var blocks = $all('.xl-block', c);
+    var i = blocks.indexOf(activeWrap);
+    if (i < 0) return;
+    var j = i + dir;
+    if (j < 0) { toast('已经在最上面了'); return; }
+    if (j >= blocks.length) { toast('已经在最下面了'); return; }
+    if (dir < 0) c.insertBefore(activeWrap, blocks[j]);
+    else if (blocks[j].nextSibling) c.insertBefore(activeWrap, blocks[j].nextSibling);
+    else c.appendChild(activeWrap);
+    activeWrap.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    markDirty();
+    toast(dir < 0 ? '已上移' : '已下移');
+  }
+
+  function duplicateActive() {
+    if (!activeWrap) { toast('请先点选要复制的内容块'); return; }
+    var clone = activeWrap.cloneNode(true);
+    clone.dataset.bid = genId();
+    clone.classList.remove('active');
+    activeWrap.parentNode.insertBefore(clone, activeWrap.nextSibling);
+    setActive(clone);
+    markDirty();
+    toast('已复制此块');
   }
 
   function insertImage() {
@@ -296,6 +412,7 @@
       var b = buildBlockEl({ id: genId(), type: 'image', src: url, alt: '' });
       blocksContainer().appendChild(b);
       setActive(b);
+      markDirty();
     });
   }
 
@@ -304,85 +421,147 @@
       var b = buildBlockEl({ id: genId(), type: 'video', url: url });
       blocksContainer().appendChild(b);
       setActive(b);
+      markDirty();
     });
   }
 
   function applyFont(val) {
-    if (!activeInner) { window.alert('请先点选一个文本框。'); return; }
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
     activeInner.style.fontFamily = val;
     savedRange = null;
+    markDirty();
   }
 
   function applySize(val) {
-    if (!activeInner) { window.alert('请先点选一个文本框。'); return; }
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
     activeInner.style.fontSize = val;
+    markDirty();
   }
 
   function applyColor(val) {
-    if (!activeInner) { window.alert('请先点选一个文本框。'); return; }
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
     restoreSel();
     if (savedRange && !savedRange.collapsed) {
-      try { document.execCommand('foreColor', false, val); return; } catch (_) {}
+      try { document.execCommand('foreColor', false, val); saveSel(); markDirty(); return; } catch (_) {}
     }
     activeInner.style.color = val;
+    markDirty();
   }
 
   // 缩放选中的图片/视频块（0.2 ~ 4 倍）
   function applyZoom(delta) {
-    if (!activeWrap) { window.alert('请先点选一个图片或视频块。'); return; }
+    if (!activeWrap) { toast('请先点选一个图片或视频块'); return; }
     var t = activeWrap.dataset.type;
-    if (t !== 'image' && t !== 'video') { window.alert('放大/缩小仅适用于图片块或视频块。'); return; }
+    if (t !== 'image' && t !== 'video') { toast('放大/缩小仅适用于图片块或视频块'); return; }
     var cur = parseFloat(activeWrap.dataset.zoom || '1') || 1;
     var next = Math.min(4, Math.max(0.2, Math.round((cur + delta) * 100) / 100));
-    activeWrap.dataset.zoom = next;
-    activeWrap.style.transform = 'scale(' + next + ')';
-    activeWrap.style.transformOrigin = 'top left';
+    applyZoomTo(activeWrap, next);
+    markDirty();
+    toast('缩放 ' + Math.round(next * 100) + '%');
   }
 
+  function insertLink() {
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
+    restoreSel();
+    if (!savedRange || savedRange.collapsed) { toast('请先在文本框里选中要加链接的文字'); return; }
+    var url = window.prompt('输入链接地址（http/https 或以 / 开头）：', 'https://');
+    if (url === null) return;
+    url = url.trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url) && !/^\//.test(url)) { window.alert('地址不合法。'); return; }
+    exec('createLink', url);
+  }
+
+  // ---------- 顶部编辑条 ----------
   function showUI() {
-    var b = document.createElement('div');
-    b.className = 'xl-edit-banner';
+    banner = document.createElement('div');
+    banner.className = 'xl-edit-banner';
+
     var row = document.createElement('div');
     row.className = 'xl-edit-row';
     var tip = document.createElement('span');
     tip.className = 'xl-edit-tip';
-    tip.textContent = '布局编辑模式：点文字直接改，点图片换图；或用下方工具栏新建内容块';
-    var save = document.createElement('button');
-    save.type = 'button'; save.className = 'xl-edit-save'; save.textContent = '保存';
+    tip.innerHTML = '布局编辑模式 · 点文字直接改，点图片换图　<span class="xl-kbd">Ctrl/⌘+S</span> 保存　<span class="xl-kbd">Esc</span> 退出';
+    saveBtn = document.createElement('button');
+    saveBtn.type = 'button'; saveBtn.className = 'xl-edit-save'; saveBtn.textContent = '保存';
     var exit = document.createElement('button');
     exit.type = 'button'; exit.className = 'xl-edit-exit'; exit.textContent = '退出';
-    row.appendChild(tip); row.appendChild(save); row.appendChild(exit);
+    row.appendChild(tip); row.appendChild(saveBtn); row.appendChild(exit);
 
     var tb = document.createElement('div');
     tb.className = 'xl-edit-toolbar';
 
     function keep(e) { e.preventDefault(); }       // 点按钮不抢焦点
-    function btn(label, fn) {
+    function btn(label, fn, opts) {
+      opts = opts || {};
       var x = document.createElement('button');
-      x.type = 'button'; x.className = 'xl-tb-btn'; x.textContent = label;
+      x.type = 'button';
+      x.className = 'xl-tb-btn' + (opts.cls ? ' ' + opts.cls : '');
+      x.textContent = label;
+      if (opts.cmd) x.setAttribute('data-cmd', opts.cmd);
+      if (opts.title) x.title = opts.title;
       x.addEventListener('mousedown', keep);
       x.addEventListener('click', fn);
       return x;
     }
+    function sep() { var s = document.createElement('span'); s.className = 'xl-tb-sep'; return s; }
+    function group() { var g = document.createElement('div'); g.className = 'xl-tb-group'; return g; }
 
-    tb.appendChild(btn('＋ 新建文本框', makeTextbox));
-    tb.appendChild(btn('🗑 删除文本框', deleteActive));
-    tb.appendChild(btn('🖼 插入图片', insertImage));
-    tb.appendChild(btn('🎬 插入视频', insertVideo));
-    tb.appendChild(btn('🔍＋ 放大', function () { applyZoom(0.2); }));
-    tb.appendChild(btn('🔍－ 缩小', function () { applyZoom(-0.2); }));
-
+    // — 块操作 —
+    var gBlock = group();
+    gBlock.appendChild(btn('＋ 新建', makeTextbox, { title: '新建一个文本框' }));
+    gBlock.appendChild(btn('⧉ 复制', duplicateActive, { title: '复制选中的内容块' }));
+    gBlock.appendChild(btn('↑ 上移', function () { moveActive(-1); }, { title: '把选中块往上移' }));
+    gBlock.appendChild(btn('↓ 下移', function () { moveActive(1); }, { title: '把选中块往下移' }));
+    gBlock.appendChild(btn('🗑 删除', deleteActive, { title: '删除选中的内容块（Delete）' }));
+    tb.appendChild(gBlock);
     tb.appendChild(sep());
 
+    // — 媒体 —
+    var gMedia = group();
+    gMedia.appendChild(btn('🖼 图片', insertImage, { title: '插入图片（本地文件或链接）' }));
+    gMedia.appendChild(btn('🎬 视频', insertVideo, { title: '插入视频（本地文件或链接）' }));
+    gMedia.appendChild(btn('🔍＋', function () { applyZoom(0.2); }, { title: '放大选中块' }));
+    gMedia.appendChild(btn('🔍－', function () { applyZoom(-0.2); }, { title: '缩小选中块' }));
+    tb.appendChild(gMedia);
+    tb.appendChild(sep());
+
+    // — 行内格式 —
+    var gFmt = group();
+    gFmt.appendChild(btn('B', function () { exec('bold'); }, { cmd: 'bold', cls: 'f-bold', title: '粗体 (Ctrl/⌘+B)' }));
+    gFmt.appendChild(btn('I', function () { exec('italic'); }, { cmd: 'italic', cls: 'f-italic', title: '斜体 (Ctrl/⌘+I)' }));
+    gFmt.appendChild(btn('U', function () { exec('underline'); }, { cmd: 'underline', cls: 'f-underline', title: '下划线 (Ctrl/⌘+U)' }));
+    gFmt.appendChild(btn('S', function () { exec('strikeThrough'); }, { cmd: 'strike', cls: 'f-strike', title: '删除线' }));
+    tb.appendChild(gFmt);
+    tb.appendChild(sep());
+
+    // — 对齐 —
+    var gAlign = group();
+    gAlign.appendChild(btn('⇤', function () { exec('justifyLeft'); }, { cmd: 'aleft', title: '左对齐' }));
+    gAlign.appendChild(btn('⇔', function () { exec('justifyCenter'); }, { cmd: 'acenter', title: '居中' }));
+    gAlign.appendChild(btn('⇥', function () { exec('justifyRight'); }, { cmd: 'aright', title: '右对齐' }));
+    tb.appendChild(gAlign);
+    tb.appendChild(sep());
+
+    // — 链接 / 清除 —
+    var gLink = group();
+    gLink.appendChild(btn('🔗 链接', insertLink, { title: '给选中的文字加链接' }));
+    gLink.appendChild(btn('⛓ 解除', function () { exec('unlink'); }, { title: '移除链接' }));
+    gLink.appendChild(btn('🧹 清格式', function () { exec('removeFormat'); }, { title: '清除选中文字的格式' }));
+    tb.appendChild(gLink);
+    tb.appendChild(sep());
+
+    // — 字体 / 字号 / 颜色 —
+    var gStyle = group();
     var font = document.createElement('select');
     font.className = 'xl-tb-select';
-    [['', '改变字体'], ['sans-serif', '无衬线'], ['serif', '衬线'], ['monospace', '等宽'],
+    [['', '字体'], ['sans-serif', '无衬线'], ['serif', '衬线'], ['monospace', '等宽'],
       ['微软雅黑, sans-serif', '微软雅黑'], ['宋体, serif', '宋体'], ['黑体, sans-serif', '黑体'],
       ['楷体, serif', '楷体'], ['Arial', 'Arial'], ['Georgia', 'Georgia'],
       ['Times New Roman', 'Times'], ['Courier New, monospace', 'Courier']]
       .forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; font.appendChild(op); });
     font.addEventListener('change', function () { if (font.value) applyFont(font.value); });
-    tb.appendChild(font);
+    gStyle.appendChild(font);
 
     var size = document.createElement('select');
     size.className = 'xl-tb-select';
@@ -390,9 +569,7 @@
       ['20px', '20'], ['24px', '24'], ['28px', '28'], ['32px', '32'], ['36px', '36'], ['48px', '48']]
       .forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; size.appendChild(op); });
     size.addEventListener('change', function () { if (size.value) applySize(size.value); });
-    tb.appendChild(size);
-
-    tb.appendChild(sep());
+    gStyle.appendChild(size);
 
     var colorWrap = document.createElement('label');
     colorWrap.className = 'xl-tb-color';
@@ -402,21 +579,60 @@
     color.addEventListener('mousedown', keep);
     var colorTxt = document.createElement('span'); colorTxt.textContent = '文字颜色';
     colorWrap.appendChild(color); colorWrap.appendChild(colorTxt);
-    tb.appendChild(colorWrap);
+    gStyle.appendChild(colorWrap);
+    tb.appendChild(gStyle);
 
-    b.appendChild(row);
-    b.appendChild(tb);
-    document.body.appendChild(b);
+    banner.appendChild(row);
+    banner.appendChild(tb);
+    document.body.appendChild(banner);
 
-    save.addEventListener('click', saveEdits);
-    exit.addEventListener('click', function () { exitEdit(false); });
-
-    function sep() { var s = document.createElement('span'); s.className = 'xl-tb-sep'; return s; }
+    saveBtn.addEventListener('click', saveEdits);
+    exit.addEventListener('click', requestExit);
+    updateSaveBtn();
   }
 
+  // ---------- 快捷键 ----------
+  function onKeyDown(e) {
+    if (!active) return;
+    var meta = e.ctrlKey || e.metaKey;
+    var key = (e.key || '').toLowerCase();
+    var t = e.target;
+    var typing = !!(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || '')));
+
+    // 保存
+    if (meta && key === 's') { e.preventDefault(); saveEdits(); return; }
+    // 退出
+    if (key === 'escape') { e.preventDefault(); requestExit(); return; }
+    // 行内格式（在文本框内才生效）
+    if (meta && activeInner && (key === 'b' || key === 'i' || key === 'u')) {
+      e.preventDefault();
+      exec(key === 'b' ? 'bold' : key === 'i' ? 'italic' : 'underline');
+      return;
+    }
+    // 删除选中块：仅在「没有正在输入」时生效，避免影响正常打字
+    if (!typing && (key === 'delete' || key === 'backspace')) {
+      if (activeWrap) { e.preventDefault(); deleteActive(); }
+    }
+  }
+
+  // ---------- 离开前提醒 ----------
+  function onBeforeUnload(e) {
+    if (!active || !dirty) return undefined;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+
+  function requestExit() {
+    if (dirty && !window.confirm('有未保存的修改，确定要退出吗？')) return;
+    exitEdit(false);
+  }
+
+  // ---------- 进入 / 保存 / 退出 ----------
   function open() {
     if (active) return;
     active = true;
+    dirty = false;
     document.body.classList.add('xl-editmode');
     showUI();
     document.querySelectorAll(TEXT_SEL).forEach(function (el) {
@@ -438,16 +654,28 @@
     c.addEventListener('focusin', function (e) {
       var inner = e.target.closest && e.target.closest('.xl-block-inner');
       if (inner) { activeInner = inner; setActive(inner.closest('.xl-block')); }
+      updateToolbarState();
     });
     c.addEventListener('mousedown', function (e) {
       var w = e.target.closest && e.target.closest('.xl-block');
       if (w) setActive(w);
     });
-    document.addEventListener('selectionchange', saveSel);
+    // 任何输入都视为「有改动」，让未保存提醒真正生效
+    c.addEventListener('input', markDirty);
+    document.addEventListener('selectionchange', onSelChange);
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('beforeunload', onBeforeUnload);
     toast('已进入布局编辑模式');
   }
 
+  function onSelChange() {
+    if (!active) return;
+    saveSel();
+    updateToolbarState();
+  }
+
   function saveEdits() {
+    if (saving) return;
     var blocks = [];
     $all('#xl-edit-blocks .xl-block').forEach(function (wrap) {
       var type = wrap.dataset.type;
@@ -462,24 +690,43 @@
         blocks.push({ id: id, type: 'video', url: wrap.dataset.url || '', zoom: Number(wrap.dataset.zoom || 1) });
       }
     });
+    saving = true;
+    updateSaveBtn();
     fetch('/api/page-edit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: curPath(), edits: edits, blocks: blocks })
     }).then(function (r) {
-      if (!r.ok) { window.alert('保存失败（需要以站主账号登录）。'); return; }
+      saving = false;
+      if (!r.ok) {
+        updateSaveBtn();
+        window.alert('保存失败（需要以站主账号登录）。');
+        return;
+      }
+      dirty = false;
+      updateSaveBtn();
       toast('已保存布局修改');
       exitEdit(true);
-    }).catch(function () { window.alert('保存失败，请重试。'); });
+    }).catch(function () {
+      saving = false;
+      updateSaveBtn();
+      window.alert('保存失败，请重试。');
+    });
   }
 
   function exitEdit(keep) {
     active = false;
     activeWrap = null; activeInner = null; savedRange = null;
+    dirty = false; saving = false;
     document.body.classList.remove('xl-editmode');
-    document.removeEventListener('selectionchange', saveSel);
+    document.removeEventListener('selectionchange', onSelChange);
+    document.removeEventListener('keydown', onKeyDown);
+    window.removeEventListener('beforeunload', onBeforeUnload);
+    var c = document.getElementById('xl-edit-blocks');
+    if (c) c.removeEventListener('input', markDirty);
     var b = document.querySelector('.xl-edit-banner');
     if (b) b.remove();
+    banner = null; saveBtn = null;
     document.querySelectorAll('[data-xl-edit]').forEach(function (el) {
       el.removeAttribute('data-xl-edit');
       el.removeEventListener('click', onTextClick);
@@ -490,20 +737,6 @@
       el.removeEventListener('click', onImgClick);
     });
     if (!keep) applySaved(); // 还原到已保存状态
-  }
-
-  var toastTimer;
-  function toast(msg) {
-    var t = document.querySelector('.xl-toast');
-    if (!t) {
-      t = document.createElement('div');
-      t.className = 'xl-toast';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
   }
 
   window.XLEdit = { open: open, applySaved: applySaved };

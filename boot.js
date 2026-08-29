@@ -26,6 +26,21 @@
     return null;
   }
 
+  // 尝试从服务端读取登录态（兼容旧 HttpOnly gh_user cookie 的当前会话）
+  function refreshLoaderLogin() {
+    try {
+      fetch('/api/me', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.login) {
+            var txt = doc.querySelector('.xl-load-text');
+            if (txt) txt.innerHTML = buildLoaderText(d.login);
+          }
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
+
   // 加载动画三行字：未登录保持原样，登录后改为「欢迎回来\n【用户名】」
   function buildLoaderText(login) {
     if (login) {
@@ -121,6 +136,7 @@
     if (reduced || intra) { if (HOLD) return; safeReveal(); return; }
 
     var loader = buildLoader();
+    refreshLoaderLogin(); // 若 cookie 不可读，通过 /api/me 更新为欢迎回来
     requestAnimationFrame(function () { loader.classList.add('xl-show'); });
 
     // 整段序列兜底：比正常流程略长，保证异常时也能揭晓（HOLD 时给页面更多渲染时间）

@@ -14,6 +14,19 @@
   function jwLang() { try { return localStorage.getItem('xl_lang') || 'zh'; } catch (e) { return 'zh'; } }
   function jwT(zh, en) { return jwLang() === 'en' ? en : zh; }
   function jwEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function updateHeroTitle(user) {
+    var el = document.getElementById('heroTitle');
+    if (!el) return;
+    var en = jwLang() === 'en';
+    if (user && user.login) {
+      var name = jwEsc(user.display_name || user.login);
+      var tpl = en ? (el.getAttribute('data-en-logged') || 'Welcome back<br>【{name}】') : (el.getAttribute('data-zh-logged') || '欢迎回来<br>【{name}】');
+      el.innerHTML = tpl.replace(/\{name\}/g, name);
+    } else {
+      var def = en ? (el.getAttribute('data-en') || 'Welcome to Jerry\'s webpage') : (el.getAttribute('data-zh') || '欢迎来到 Jerry\'s webpage');
+      el.innerHTML = def;
+    }
+  }
   var __levelCache = {};
   function loadLevel(login, cb) {
     if (!login) { cb(null); return; }
@@ -200,6 +213,7 @@
       .then(function (d) { if (d && d.prefs) applyUserPrefs(d.prefs); })
       .catch(function () {});
     updateNoticeBadge();
+    updateHeroTitle(user);
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
 
@@ -212,6 +226,7 @@
     setAvatar(DEFAULT_AVATAR);
     setLoginItem(true);
     updateNoticeBadge();
+    updateHeroTitle(null);
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
 

@@ -95,9 +95,9 @@ input, textarea, select { font-family: inherit; }
 }
 
 /* ============ 5. 右下浮动按钮 + 安全区 ============ */
-.float-actions { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); gap: 10px; }
+.float-actions { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); gap: 10px; }
 @media (max-width: 560px) {
-  .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+  .float-actions { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
   .fab { width: 46px; height: 40px; border-radius: 12px; }
   .fab svg { width: 20px; height: 20px; }
 }
@@ -140,18 +140,18 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
 /* ============ 10. 头像弹层不溢出屏幕 ============ */
 .user-popup { max-width: calc(100vw - 24px); box-sizing: border-box; }
 
-/* ============ 11. 竖屏特殊布局：浮动按钮放蓝条上方，蓝条按钮放屏幕最下方 ============ */
+/* ============ 11. 竖屏特殊布局：浮动按钮固定在屏幕右下角（高于底部导航条），蓝条按钮放屏幕最下方 ============ */
 @media (orientation: portrait) {
   /* 小蓝条固定在最上方；按钮行固定在屏幕最下方 */
   body { padding-top: 88px; padding-bottom: 74px; }
   .topbar { top: 0; }
 
-  /* 浮动操作按钮（语言/设置）覆盖在小蓝条上方，置于最顶层 */
-  .float-actions {
+  /* 浮动操作按钮固定在右下角，并留出底部导航条高度避免重叠 */
+  html .float-actions {
     position: fixed;
-    top: 6px;
+    top: auto;
     right: 12px;
-    bottom: auto;
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     left: auto;
     z-index: 1000;
     flex-direction: row;
@@ -609,20 +609,25 @@ body.is-admin .bar-btn.admin-only { display: inline-flex; }
 .fab {
   width: 50px; height: 42px;
   display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 14px; font-size: 1.25rem; line-height: 1; color: #111;
-  background: rgba(255, 255, 255, 0.55);
+  border-radius: 14px; font-size: 1.25rem; line-height: 1; color: #1c2733;
+  background: rgba(255, 255, 255, 0.92);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
   backdrop-filter: blur(14px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   cursor: pointer; padding: 0; box-sizing: border-box;
+  transition: background .18s, transform .12s, box-shadow .18s;
 }
-.fab:hover { background: rgba(255, 255, 255, 0.78); }
+.fab:hover { background: rgba(255, 255, 255, 0.97); transform: translateY(-2px); }
 .fab:active { transform: scale(0.94); }
 .fab svg { width: 22px; height: 22px; display: block; }
 html[data-theme="dark"] .fab {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(255, 255, 255, 0.9);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
+html[data-theme="dark"] .fab:hover { background: rgba(255, 255, 255, 0.22); }
 @media (max-width: 560px) {
   .float-actions { right: 12px; bottom: 12px; gap: 8px; }
   .fab { width: 46px; height: 40px; border-radius: 12px; }

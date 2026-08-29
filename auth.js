@@ -106,6 +106,10 @@
       '.hc-lv-more:hover{text-decoration:underline}',
       '.user-popup .up-divider{height:1px;background:#e3e8ef;margin:6px 4px}',
       '.user-popup .up-item.admin-only[hidden]{display:none!important}',
+      /* ===== 登录后「欢迎回来」浮条 ===== */
+      '.xl-welcome{text-align:center;line-height:1.45;border-radius:14px;padding:12px 24px}',
+      '.xl-welcome .xl-welcome-title{font-weight:700;font-size:.96rem}',
+      '.xl-welcome .xl-welcome-name{margin-top:3px;font-size:.92rem;opacity:.92}',
       '@media (prefers-reduced-motion: reduce){.xl-hovercard{transition:none}}'
     ].join('\n');
     document.head.appendChild(s);
@@ -178,6 +182,22 @@
     if (li) li.hidden = !show;
   }
 
+  // 登录后浮条：欢迎回来（换行）【用户名】
+  function showWelcome(u) {
+    if (!u) return;
+    var t = document.createElement('div');
+    t.className = 'xl-toast xl-welcome';
+    t.innerHTML =
+      '<div class="xl-welcome-title">' + jwT('欢迎回来', 'Welcome back') + '</div>' +
+      '<div class="xl-welcome-name">【' + jwEsc(u.display_name || u.login) + '】</div>';
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    setTimeout(function () {
+      t.classList.remove('show');
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 320);
+    }, 2600);
+  }
+
   function setLoggedIn(user) {
     window.JW_AUTH.user = user;
     window.JW_AUTH.isAdmin = !!(user && user.isAdmin);
@@ -194,6 +214,11 @@
     var upReports = document.getElementById('upReports');
     if (upReports) upReports.hidden = !window.JW_AUTH.isAdmin;
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
+    // 登录态就绪后展示一次「欢迎回来」浮条（每页面加载仅一次）
+    if (!window.__welcomeShown) {
+      window.__welcomeShown = true;
+      setTimeout(function () { showWelcome(window.JW_AUTH.user); }, 450);
+    }
   }
 
   function setLoggedOut() {

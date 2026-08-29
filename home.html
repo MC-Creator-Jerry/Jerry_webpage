@@ -244,73 +244,7 @@
   </header>
 
   <main class="content">
-    <!-- Hero：头像 + 名字 + 一句话（简介留空，登录后可自行填写） -->
-    <section class="hero">
-      <div class="profile-head">
-        <div class="avatar" aria-label="avatar">J</div>
-        <div>
-          <div class="profile-name" data-zh="Jerry" data-en="Jerry">Jerry</div>
-          <div class="profile-tagline" id="bioDisplay"></div>
-          <input class="edit-input" id="bioInput" hidden maxlength="120" placeholder="一句话简介，例如：独立开发者，专注 AI 与自动化" />
-        </div>
-      </div>
-    </section>
-
-    <!-- 1. 关于我（留空，登录后可自行填写） -->
-    <section class="card" id="about">
-      <h2 data-zh="关于我" data-en="About Me">关于我</h2>
-      <p id="aboutDisplay"></p>
-      <textarea class="edit-textarea auto-grow" id="aboutInput" hidden maxlength="2000" placeholder="写一段自我介绍……"></textarea>
-    </section>
-
-    <!-- 4. 联系方式 / 社交（静态，不在本次编辑范围） -->
-    <section class="card" id="contact">
-      <h2 data-zh="联系方式 / 社交" data-en="Contact / Social">联系方式 / 社交</h2>
-      <ul class="social-list">
-        <li>
-          <svg class="social-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4.4-8 5-8-5V6l8 5 8-5z"/></svg>
-          <a href="mailto:jerryjwx@163.com" data-zh="邮箱：jerryjwx@163.com" data-en="Email: jerryjwx@163.com">邮箱：jerryjwx@163.com</a>
-        </li>
-        <li>
-          <svg class="social-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5A11.5 11.5 0 0 0 .5 12 11.5 11.5 0 0 0 12 23.5 11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5zM8.8 19.1c-.4.1-.6-.2-.6-.4v-3.3c0-.2 0-.5-.1-.6-1.1.2-1.3-.5-.1-1.1 1.2-.5 2.5-1.6 3-2.7.2-.6.1-1.1-.4-1.4-.6-.2-1.4-.2-2.1.1-.3.1-.5.4-.4.6.3.7.9 1.2.9 1.2s-.4.1-.8-.1c-.2-.1-.4-.2-.6-.1-.1.1 0 .3.1.4.3.4.7.8 1.2 1.1-.9.1-1.7.5-1.6 1.6.4 1.4 2.6 1 3.7.7.1.4.4.7.8.7v2.1c0 .2-.2.5-.6.4z"/></svg>
-          <a href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a>
-        </li>
-        <li>
-          <svg class="social-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 3v2.2c-.4-.1-.9-.2-1.3-.2-2 0-3.2 1.4-3.2 3.4v2.2H8.2v2.6h2.3V21h2.8v-5.6h2.2v-2.6h-2.2V10c0-.8.3-1.2 1.1-1.2.3 0 .6 0 .8.1z"/></svg>
-          <a href="https://space.bilibili.com/" target="_blank" rel="noopener" data-zh="哔哩哔哩（待补账号主页）" data-en="Bilibili (profile TBD)">哔哩哔哩（待补账号主页）</a>
-        </li>
-      </ul>
-    </section>
-
-    <!-- 2. 技能 / 专长（预生成若干，登录后可增删，含违禁词校验） -->
-    <section class="card" id="skills">
-      <h2 data-zh="技能 / 专长" data-en="Skills">技能 / 专长</h2>
-      <div class="tags" id="skillsDisplay"></div>
-      <div id="skillsEdit" hidden></div>
-    </section>
-
-    <!-- 3. 项目 / 作品（登录后可增删，支持作者链接） -->
-    <section class="card" id="projects">
-      <h2 data-zh="项目 / 作品" data-en="Projects">项目 / 作品</h2>
-      <div id="projectsDisplay"></div>
-      <div id="projectsEdit" hidden></div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div>© 2026 Jerry's webpage · 小蓝页 · <span data-zh="基于 GitHub Pages 与 Cloudflare 构建" data-en="Built with GitHub Pages & Cloudflare">基于 GitHub Pages 与 Cloudflare 构建</span></div>
-  </footer>
-
-  <!-- 编辑工具条 -->
-  <div class="edit-bar" id="editBar" hidden>
-    <span class="eb-info" data-zh="编辑模式" data-en="Editing">编辑模式</span>
-    <button class="bar-btn save" id="saveBtn" data-zh="保存" data-en="Save">保存</button>
-    <button class="bar-btn cancel" id="cancelBtn" data-zh="取消" data-en="Cancel">取消</button>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <!-- 底部浮动操作按钮（Liquid Glass） -->
+    
   <div class="float-actions">
     <a class="fab" id="langBtn" href="language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>

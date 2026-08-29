@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <script src="../boot.js?v=20260829g"></script>
+  <script src="../boot.js?v=20260829h"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>流量看板 · Jerry's webpage</title>
   <style>
@@ -34,6 +34,14 @@
     .chart-wrap { overflow-x: auto; }
     .chart-legend { display: flex; gap: 16px; font-size: 0.8rem; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
 
+    .chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .chart-head h2 { margin: 0; }
+    .seg { display: inline-flex; border: 1px solid var(--card-border); border-radius: 999px; overflow: hidden; }
+    .seg-btn { border: none; background: var(--card-bg); color: var(--muted); padding: 5px 14px; font-size: 0.84rem; cursor: pointer; }
+    .seg-btn + .seg-btn { border-left: 1px solid var(--card-border); }
+    .seg-btn:hover { color: var(--accent); }
+    .seg-btn.active { background: var(--accent); color: #fff; }
+
     table.rank { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
     table.rank th, table.rank td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--card-border); }
     table.rank th { color: var(--muted); font-weight: 600; font-size: 0.82rem; }
@@ -47,7 +55,7 @@
     [hidden] { display: none !important; }
     @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
   </style>
-  <link rel="stylesheet" href="../../common.css?v=20260829g" />
+  <link rel="stylesheet" href="../../common.css?v=20260829h" />
 </head>
 <body>
   <header class="topbar">
@@ -79,6 +87,7 @@
           <button class="range-tab" type="button" data-days="7">7 天</button>
           <button class="range-tab" type="button" data-days="14">14 天</button>
           <button class="range-tab active" type="button" data-days="30">30 天</button>
+          <button class="range-tab" type="button" data-days="90">90 天</button>
         </div>
         <button class="refresh-btn" id="refreshBtn" type="button" data-zh="刷新" data-en="Refresh">刷新</button>
       </div>
@@ -114,7 +123,13 @@
       </section>
 
       <section class="card">
-        <h2 data-zh="每日浏览量" data-en="Daily page views">每日浏览量</h2>
+        <div class="chart-head">
+          <h2 data-zh="每日浏览量" data-en="Daily page views">每日浏览量</h2>
+          <div class="seg" id="chartSeg">
+            <button class="seg-btn active" type="button" data-metric="pv" data-zh="浏览量 PV" data-en="PV">浏览量 PV</button>
+            <button class="seg-btn" type="button" data-metric="uv" data-zh="访客 UV" data-en="UV">访客 UV</button>
+          </div>
+        </div>
         <div class="chart-wrap">
           <div class="chart" id="chart"></div>
         </div>
@@ -156,8 +171,8 @@
     </a>
   </div>
 
-  <script src="../../prefs.js?v=20260829g"></script>
-  <script src="../../auth.js?v=20260829g"></script>
+  <script src="../../prefs.js?v=20260829h"></script>
+  <script src="../../auth.js?v=20260829h"></script>
   <script>
     (function () {
       var dash = document.getElementById('dash');
@@ -166,6 +181,8 @@
       var refreshBtn = document.getElementById('refreshBtn');
       var rangeTabs = document.getElementById('rangeTabs');
       var days = 30;
+      var chartMetric = 'pv';
+      var lastDays = [];
 
       function fmt(n) {
         try { return Number(n || 0).toLocaleString('zh-CN'); } catch (e) { return String(n || 0); }
@@ -182,20 +199,22 @@
         if (msg) denyMsg.textContent = msg;
       }
 
-      function renderChart(list) {
+      function renderChart(list, metric) {
+        metric = metric || 'pv';
         var chart = document.getElementById('chart');
         if (!chart) return;
         chart.innerHTML = '';
         if (!list.length) { chart.innerHTML = '<span class="hint">暂无数据</span>'; return; }
-        var max = list.reduce(function (m, d) { return Math.max(m, d.pv || 0); }, 0);
+        var max = list.reduce(function (m, d) { return Math.max(m, d[metric] || 0); }, 0);
         if (max <= 0) max = 1;
         list.forEach(function (d) {
           var col = document.createElement('div');
           col.className = 'col';
+          var val = d[metric] || 0;
           var bar = document.createElement('div');
-          bar.className = 'bar' + ((d.pv || 0) ? '' : ' zero');
-          bar.style.height = Math.max(2, Math.round(((d.pv || 0) / max) * 100)) + '%';
-          bar.title = d.date + ' · PV ' + (d.pv || 0) + ' · UV ' + (d.uv || 0);
+          bar.className = 'bar' + (val ? '' : ' zero');
+          bar.style.height = Math.max(2, Math.round((val / max) * 100)) + '%';
+          bar.title = d.date + (metric === 'uv' ? ' · UV ' + val : ' · PV ' + val) + '（PV ' + (d.pv || 0) + ' / UV ' + (d.uv || 0) + '）';
           var lb = document.createElement('div');
           lb.className = 'lb';
           lb.textContent = String(d.date || '').slice(5);
@@ -203,8 +222,8 @@
           col.appendChild(lb);
           chart.appendChild(col);
         });
-        var peak = list.reduce(function (a, b) { return (b.pv || 0) > (a.pv || 0) ? b : a; }, list[0]);
-        setText('chartHint', '峰值 ' + peak.date + '（' + fmt(peak.pv) + ' PV / ' + fmt(peak.uv) + ' UV），共 ' + list.length + ' 天');
+        var peak = list.reduce(function (a, b) { return (b[metric] || 0) > (a[metric] || 0) ? b : a; }, list[0]);
+        setText('chartHint', '峰值 ' + peak.date + '（' + (metric === 'uv' ? fmt(peak.uv) + ' UV' : fmt(peak.pv) + ' PV') + '），共 ' + list.length + ' 天');
       }
 
       function renderRanks(tbodyId, emptyId, rows, isRef) {
@@ -248,14 +267,14 @@
             setText('kTodayUv', fmt(today.uv));
             setText('kTodayDate', today.date || '');
             setText('kRangePv', fmt(d.rangePv));
-            setText('kRangeUv', '访客 ' + fmt(d.rangeUv));
+            setText('kRangeUv', '去重访客 ' + fmt(d.rangeUv));
             setText('kTotalPv', fmt(d.total && d.total.pv));
             var tr = d.total || {};
             setText('kTotalRange', tr.firstDay ? (tr.firstDay + ' 起 · 共 ' + (tr.days || 0) + ' 天有数据') : '');
             var rl = document.getElementById('kRangeLabel');
             if (rl) rl.textContent = '近 ' + days + ' 天 PV';
 
-            renderChart(d.days || []);
+            renderChart((lastDays = d.days || []), chartMetric);
             renderRanks('topPathsBody', 'topPathsEmpty', d.topPaths || [], false);
             renderRanks('topRefsBody', 'topRefsEmpty', d.topRefs || [], true);
           })
@@ -277,9 +296,23 @@
         });
       }
       if (refreshBtn) refreshBtn.addEventListener('click', load);
+
+      var chartSeg = document.getElementById('chartSeg');
+      if (chartSeg) {
+        Array.prototype.forEach.call(chartSeg.querySelectorAll('.seg-btn'), function (btn) {
+          btn.addEventListener('click', function () {
+            chartMetric = btn.getAttribute('data-metric') || 'pv';
+            Array.prototype.forEach.call(chartSeg.querySelectorAll('.seg-btn'), function (b) {
+              b.classList.toggle('active', b === btn);
+            });
+            renderChart(lastDays, chartMetric);
+          });
+        });
+      }
+
       load();
     })();
   </script>
-  <script src="../../common.js?v=20260829g"></script>
+  <script src="../../common.js?v=20260829h"></script>
 </body>
 </html>

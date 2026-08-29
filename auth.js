@@ -125,6 +125,8 @@
     window.JW_AUTH.user = user;
     window.JW_AUTH.isAdmin = !!(user && user.isAdmin);
     if (loginBtn) loginBtn.style.display = 'none';
+    var avatarBtn = document.getElementById('userAvatarBtn');
+    if (avatarBtn) avatarBtn.style.display = '';
     setAvatar((user && user.avatar_url) || ('https://github.com/' + user.login + '.png'));
     setLoginItem(false);
     fetch('/api/usersettings')
@@ -139,6 +141,8 @@
     window.JW_AUTH.user = null;
     window.JW_AUTH.isAdmin = false;
     if (loginBtn) loginBtn.style.display = '';
+    var avatarBtn = document.getElementById('userAvatarBtn');
+    if (avatarBtn) avatarBtn.style.display = 'none';
     setAvatar(DEFAULT_AVATAR);
     setLoginItem(true);
     updateNoticeBadge();
@@ -172,6 +176,7 @@
     btn.className = 'bar-avatar';
     btn.id = 'userAvatarBtn';
     btn.setAttribute('aria-label', '账户');
+    btn.style.display = 'none'; // 默认隐藏，仅登录后显示（避免未登录时同时出现头像与登录按钮）
     btn.innerHTML = '<img id="userAvatarImg" src="' + DEFAULT_AVATAR + '" alt="">';
 
     var pop = document.createElement('div');

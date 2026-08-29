@@ -82,6 +82,9 @@
       '.xl-hovercard .hc-btn:hover{filter:brightness(1.06)}',
       '.xl-hovercard .hc-actions-sub{margin-top:8px}',
       '.xl-hovercard .hc-actions-sub .hc-btn-sub{flex:none;width:100%;font-size:.82rem;padding:7px 10px}',
+      '.xl-hovercard .hc-actions-extras{margin-top:8px;display:flex;flex-direction:column;gap:6px}',
+      '.xl-hovercard .hc-actions-extras .hc-btn-sub{flex:none;width:100%;font-size:.82rem;padding:7px 10px;display:flex;align-items:center;justify-content:flex-start;gap:8px}',
+      '.xl-hovercard .hc-actions-extras .hc-btn-sub svg{width:16px;height:16px;flex:0 0 auto}',
       '.xl-hovercard .hc-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:10px}',
       '.xl-hovercard .hc-more{font-weight:600;font-size:.82rem;color:#0078d4;text-decoration:none}',
       '.xl-hovercard .hc-cols{display:flex;gap:10px}',
@@ -131,6 +134,10 @@
     return segs.map(function () { return '..'; }).join('/') + (segs.length ? '/' : '');
   }
   var BASE = relBase();
+
+  // 图标（供悬浮卡片与下拉菜单共用）
+  var helpIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>";
+  var flagIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/><line x1='4' y1='22' x2='4' y2='15'/></svg>";
 
   // 蓝条「通知」红点：拉取未读总数（系统+消息+评论）并刷新
   function updateNoticeBadge() {
@@ -213,8 +220,6 @@
       .then(function (d) { if (d && d.prefs) applyUserPrefs(d.prefs); })
       .catch(function () {});
     updateNoticeBadge();
-    var upReports = document.getElementById('upReports');
-    if (upReports) upReports.hidden = !window.JW_AUTH.isAdmin;
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
     // 登录态就绪后展示一次「欢迎回来」浮条（每页面加载仅一次）
     if (!window.__welcomeShown) {
@@ -232,8 +237,6 @@
     setAvatar(DEFAULT_AVATAR);
     setLoginItem(true);
     updateNoticeBadge();
-    var upReports = document.getElementById('upReports');
-    if (upReports) upReports.hidden = true;
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
 
@@ -259,8 +262,6 @@
     var personIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='12' cy='7' r='4'/></svg>";
     var gearIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'/></svg>";
     var ghIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='currentColor'><path d='M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.6 18 4.9 18 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z'/></svg>";
-    var helpIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>";
-    var flagIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/><line x1='4' y1='22' x2='4' y2='15'/></svg>";
     var subIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='5' width='20' height='14' rx='2'/><path d='m2 7 10 7 10-7'/></svg>";
 
     var btn = document.createElement('button');
@@ -283,10 +284,6 @@
       '<a class="up-item" id="upLogin" href="#" hidden>' +
         '<span class="up-ico">' + ghIco + '</span><span data-zh="登录" data-en="Sign in">登录</span></a>' +
       '<div class="up-divider"></div>' +
-      '<a class="up-item" id="upHelp" href="' + BASE + 'helpcenter/">' +
-        '<span class="up-ico">' + helpIco + '</span><span data-zh="帮助中心" data-en="Help Center">帮助中心</span></a>' +
-      '<a class="up-item admin-only" id="upReports" href="' + BASE + 'admin/reports/" hidden>' +
-        '<span class="up-ico">' + flagIco + '</span><span data-zh="举报后台" data-en="Reports">举报后台</span></a>' +
       '<a class="up-item" id="upSubscribe" href="' + BASE + 'subscribe/">' +
         '<span class="up-ico">' + subIco + '</span><span data-zh="订阅" data-en="Subscribe">订阅</span></a>';
 
@@ -296,8 +293,6 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       pop.hidden = !pop.hidden;
-      var ur = document.getElementById('upReports');
-      if (ur) ur.hidden = !(window.JW_AUTH.user && window.JW_AUTH.user.isAdmin);
       if (!pop.hidden) {
         var uu = window.JW_AUTH.user;
         if (uu && uu.login) {
@@ -408,6 +403,10 @@
           '</div>' +
           '<div class="hc-actions hc-actions-sub">' +
             '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'subscribe/">' + t('订阅更新', 'Subscribe') + '</a>' +
+          '</div>' +
+          '<div class="hc-actions hc-actions-extras">' +
+            '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'helpcenter/">' + helpIco + '<span>' + t('帮助中心', 'Help Center') + '</span></a>' +
+            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/reports/">' + flagIco + '<span>' + t('举报后台', 'Reports') + '</span></a>' : '') +
           '</div>';
         loadLevel(u.login, function (lv) {
           var box = card.querySelector('#hcLevel');

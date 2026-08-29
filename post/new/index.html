@@ -80,6 +80,12 @@
   .post-btn.secondary:hover { filter: brightness(1.02); }
   html[data-theme="dark"] .post-btn.secondary { background: rgba(255,255,255,0.14); }
   .edit-note { font-size: 0.85rem; color: var(--muted); margin-bottom: 12px; }
+  .repost-ref { border: 1px solid var(--card-border); border-left: 3px solid var(--accent); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; background: color-mix(in srgb, var(--accent) 6%, var(--panel-bg)); }
+  .repost-ref .rr-label { font-size: 0.72rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .repost-ref .rr-author { font-weight: 700; color: var(--text); text-decoration: none; }
+  .repost-ref .rr-author:hover { color: var(--accent); }
+  .repost-ref .rr-title { font-weight: 700; margin-top: 2px; }
+  .repost-ref .rr-text { font-size: 0.88rem; color: var(--muted); margin-top: 4px; max-height: 72px; overflow: hidden; }
   .hint { color: var(--muted); opacity: 0.85; font-size: 0.95rem; line-height: 1.7; }
   .hint a { color: var(--accent); text-decoration: none; font-weight: 600; }
   .hint a:hover { text-decoration: underline; }
@@ -165,6 +171,12 @@
 
     <section class="card" id="formCard" hidden>
       <p class="edit-note" id="editNote" hidden></p>
+      <div class="repost-ref" id="repostRef" hidden>
+        <div class="rr-label">转发自</div>
+        <a class="rr-author" id="rrAuthor" href="#"></a>
+        <div class="rr-title" id="rrTitle"></div>
+        <div class="rr-text" id="rrText"></div>
+      </div>
       <label class="edit-label" for="pTitle" data-zh="标题" data-en="Title">标题</label>
       <input class="edit-input" id="pTitle" maxlength="200" placeholder="帖子标题" />
       <span class="char-count" data-for="pTitle">0 / 200</span>
@@ -370,6 +382,7 @@
       }
 
       var editId = new URLSearchParams(location.search).get('edit');
+      var repostId = new URLSearchParams(location.search).get('repost');
 
       function post(status) {
         var title = pTitle.value.trim();
@@ -395,6 +408,7 @@
         var isEdit = !!editId;
         var method = isEdit ? 'PATCH' : 'POST';
         var payload = { title: title, body: html, status: status || 'published' };
+        if (repostId) payload.repostOf = repostId;
         if (isEdit) {
           payload.id = editId;
           if (files && files.length) payload.files = files; // 编辑态仅在有新附件时覆盖，否则保留原附件
@@ -443,11 +457,31 @@
           .catch(function () { toast('加载失败', true); });
       }
 
+      function loadForRepost() {
+        fetch('/api/post?id=' + encodeURIComponent(repostId))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (p) {
+            if (!p || p.error) { toast('无法加载原帖', true); return; }
+            var ref = document.getElementById('repostRef');
+            ref.hidden = false;
+            var author = document.getElementById('rrAuthor');
+            author.textContent = '@' + (p.login || '?');
+            author.href = '../../personal_profile/?user=' + encodeURIComponent(p.login || '');
+            document.getElementById('rrTitle').textContent = p.title || '（无标题）';
+            document.getElementById('rrText').textContent = (p.body ? p.body.replace(/<[^>]+>/g, '') : '').slice(0, 140);
+            var h1 = document.querySelector('.hero h1'); if (h1) h1.textContent = '转发帖子';
+            var hp = document.querySelector('.hero p'); if (hp) hp.textContent = '写下你的看法，转发这篇帖子。';
+            var pb = document.getElementById('postBtn'); if (pb) pb.textContent = '转发';
+          })
+          .catch(function () { toast('加载失败', true); });
+      }
+
       fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
-        if (me && me.login) {
-          formCard.hidden = false; updateCount();
-          if (editId) loadForEdit();
-        }
+          if (me && me.login) {
+            formCard.hidden = false; updateCount();
+            if (editId) loadForEdit();
+            else if (repostId) loadForRepost();
+          }
         else { loginHint.hidden = false; }
       }).catch(function () { loginHint.hidden = false; });
 

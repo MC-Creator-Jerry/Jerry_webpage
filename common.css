@@ -123,7 +123,7 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
   .hero h1 { font-size: 1.4rem; }
   .card { margin-top: 12px; }
   .site-footer { margin-top: 28px; padding: 16px; }
-  .float-actions { right: 12px; bottom: 12px; }
+  .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
   .fab { width: 42px; height: 38px; }
 }
 
@@ -628,8 +628,10 @@ html[data-theme="dark"] .fab {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 html[data-theme="dark"] .fab:hover { background: rgba(255, 255, 255, 0.22); }
+/* 浮动按钮图标（语言/设置）使用 img，无法继承 currentColor：深色模式下强制反白，保证可见 */
+html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 @media (max-width: 560px) {
-  .float-actions { right: 12px; bottom: 12px; gap: 8px; }
+  .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
   .fab { width: 46px; height: 40px; border-radius: 12px; }
   .fab svg { width: 20px; height: 20px; }
 }

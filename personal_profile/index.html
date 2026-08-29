@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260829f"></script>
+  <script src="../boot.js?v=20260829g"></script>
 <script>
   // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
   if (location.hostname.indexOf('github.io') !== -1) {
@@ -155,6 +155,7 @@
   .content.has-banner { margin-top: -52px; padding-top: 8px; }
 
   .profile-banner {
+    position: relative;
     width: 100%;
     height: 22vh;
     min-height: 140px;
@@ -166,6 +167,16 @@
     border-radius: 0 0 var(--radius) var(--radius);
     margin-bottom: 22px;
   }
+  /* 头图来源切换（仅站长本人可见，悬浮在头图右上角） */
+  .banner-mode { position: absolute; top: 10px; right: 12px; display: flex; gap: 6px; z-index: 3; }
+  .banner-mode button {
+    font-size: 0.8rem; line-height: 1; padding: 6px 13px; cursor: pointer;
+    color: #fff; background: rgba(8, 14, 24, 0.42); border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 999px; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  }
+  .banner-mode button:hover { background: rgba(8, 14, 24, 0.6); }
+  .banner-mode button.active { background: #fff; color: #16202c; border-color: #fff; font-weight: 700; }
+  .banner-mode-hint { position: absolute; left: 12px; bottom: 10px; z-index: 3; color: #fff; font-size: 0.78rem; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
   .profile-tools { display: flex; justify-content: flex-end; margin-bottom: 14px; }
   .bg-btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -277,7 +288,7 @@
   .my-msg-card .msg-entry-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--accent); border-radius: 999px; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; text-decoration: none; }
   .my-msg-card .msg-entry-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260829f" />
+  <link rel="stylesheet" href="../common.css?v=20260829g" />
 </head>
 <body>
   <header class="topbar">
@@ -301,7 +312,13 @@
 
   <div class="profile-theme-strip" id="profileThemeStrip" hidden></div>
 
-  <div class="profile-banner" id="profileBanner" hidden></div>
+  <div class="profile-banner" id="profileBanner" hidden>
+    <div class="banner-mode" id="bannerMode" hidden>
+      <button type="button" id="bmTheme" data-mode="theme" data-zh="主题色" data-en="Theme">主题色</button>
+      <button type="button" id="bmImage" data-mode="image" data-zh="图片" data-en="Image">图片</button>
+    </div>
+    <div class="banner-mode-hint" id="bannerModeHint" hidden></div>
+  </div>
 
   <main class="content">
     <div class="profile-tools" id="profileTools" hidden>
@@ -495,7 +512,7 @@
     </a>
   </div>
 
-  <script src="../auth.js?v=20260829f"></script>
+  <script src="../auth.js?v=20260829g"></script>
   <script>
     (function () {
       var OWNER = 'MC-Creator-Jerry';
@@ -539,23 +556,11 @@
 
       function applyBg() {
         var b = state.bg || {};
-        var bannerEl = $('profileBanner');
-        if (b.banner) {
-          // 自定义头图优先：打标记，主题头图不再覆盖它
-          bannerEl.style.backgroundImage = 'url("' + b.banner + '")';
-          bannerEl.dataset.customBanner = '1';
-          bannerEl.hidden = false;
-        } else {
-          bannerEl.style.backgroundImage = '';
-          delete bannerEl.dataset.customBanner;
-          bannerEl.hidden = true;
-        }
         var contentEl = document.querySelector('.content');
         if (b.bg) { contentEl.style.setProperty('--bigbg', 'url("' + b.bg + '")'); contentEl.classList.add('has-bigbg'); }
         else { contentEl.style.removeProperty('--bigbg'); contentEl.classList.remove('has-bigbg'); }
-        // 背景处理完再套主题：没有自定义头图时，由主题补上头图
-        var d = state.data || {};
-        applyTheme(d.themeId, d.themeColor);
+        // 头图（主题渐变 vs 自定义图片）由 renderBanner 统一决定，见下
+        renderBanner();
       }
       function loadBg(login) {
         if (!login) return;
@@ -643,8 +648,9 @@
       function renderDisplay() {
         var d = state.data || {};
         avatar.src = d.ghAvatar ? gh(d.login) : (d.avatar || gh(d.login));
-        // 个人主页主题：色条 + 主题头图 + 页面底色（由 applyTheme 统一处理）
+        // 个人主页主题：色条 + 强调色（applyTheme）；头图来源取舍（renderBanner）
         applyTheme(d.themeId, d.themeColor);
+        renderBanner();
         nameDisplay.innerHTML = '';
         nameDisplay.textContent = d.name || d.login || '';
         if (d.login === OWNER) {
@@ -779,6 +785,7 @@
           // 此前遗漏了它们，导致主题色 / 主题 / GitHub 头像开关 一保存就被静默清空。
           themeColor: d.themeColor || '',
           themeId: d.themeId || '',
+          bannerMode: d.bannerMode || '',
           ghAvatar: !!d.ghAvatar
         };
         // 头像：仅在「关闭 GitHub 同步」时随资料保存；开启同步时不写头像，避免覆盖已有自定义头像
@@ -894,28 +901,84 @@
         return null;
       }
 
-      // 把主题套到页面上：主题色条 + 主题头图 + 全站强调色（--accent）
-      // 自定义头图（用户上传/填链接）优先于主题头图，不会被覆盖
+      // 只负责：主题色条（6px）+ 全站强调色（--accent）。
+      // 头图（主题渐变 vs 自定义图片）的取舍交给 renderBanner，避免两处互相覆盖。
       function applyTheme(themeId, themeColor) {
         var t = findTheme(themeId);
         var strip = $('profileThemeStrip');
-        var bannerEl = $('profileBanner');
-
         if (strip) {
           if (themeColor) { strip.style.background = themeColor; strip.hidden = false; }
           else if (t) { strip.style.background = t.accent; strip.hidden = false; }
           else { strip.style.background = ''; strip.hidden = true; }
         }
-        // 没有自定义头图时，才用主题头图
-        if (bannerEl && !bannerEl.dataset.customBanner) {
-          if (t) { bannerEl.style.backgroundImage = t.banner; bannerEl.style.backgroundColor = t.accent; bannerEl.hidden = false; }
-          else { bannerEl.style.backgroundImage = ''; bannerEl.style.backgroundColor = ''; bannerEl.hidden = true; }
-        }
-        // 头图可见时让内容区上移，头像压在头图下缘
-        var contentEl = document.querySelector('.content');
-        if (contentEl && bannerEl) contentEl.classList.toggle('has-banner', !bannerEl.hidden);
         if (t) document.documentElement.style.setProperty('--accent', t.accent);
         else document.documentElement.style.removeProperty('--accent');
+      }
+
+      // 头图来源：从资料里读出 bannerMode（'' / 'theme' / 'image'）。
+      // '' = 旧逻辑（自定义图片优先）；'theme' = 强制主题渐变；'image' = 强制自定义图片
+      function effectiveBannerMode() {
+        var m = state.data && state.data.bannerMode;
+        if (m === 'theme' || m === 'image') return m;
+        return null;
+      }
+
+      // 统一决定头图显示什么、是否可见、切换控件状态
+      function renderBanner() {
+        var b = state.bg || {}, d = state.data || {}, t = findTheme(d.themeId);
+        var mode = effectiveBannerMode();
+        var el = $('profileBanner');
+        if (!el) return;
+        var contentEl = document.querySelector('.content');
+        var showImage = (mode !== 'theme') && !!b.banner;   // 图片模式 或 旧逻辑且有图
+        var showTheme = (mode !== 'image') && !!t;          // 主题模式 或 旧逻辑且有主题
+        if (showImage) {
+          el.style.backgroundImage = 'url("' + b.banner + '")';
+          el.style.backgroundColor = '';
+        } else if (showTheme) {
+          el.style.backgroundImage = t.banner;
+          el.style.backgroundColor = t.accent;
+        } else {
+          el.style.backgroundImage = '';
+          el.style.backgroundColor = '';
+        }
+        // 站长本人：只要已设置来源（bannerMode）或本身有内容，就显示头图面板，便于就地切换
+        var visible = showImage || showTheme || (isOwn() && !!mode);
+        el.hidden = !visible;
+        if (contentEl) contentEl.classList.toggle('has-banner', visible);
+        // 来源切换控件：仅站长可见，且只在面板显示时出现
+        var bm = $('bannerMode');
+        if (bm) bm.hidden = !(isOwn() && visible);
+        // 提示：选了图片却还没传图
+        var hint = $('bannerModeHint');
+        if (hint) {
+          if (isOwn() && mode === 'image' && !b.banner) {
+            hint.textContent = curLang() === 'en' ? 'Image mode: set a banner in “Background”' : '图片模式：请在「设置背景」里上传头图';
+            hint.hidden = false;
+          } else hint.hidden = true;
+        }
+        refreshBannerModeButtons();
+      }
+
+      function refreshBannerModeButtons() {
+        var m = effectiveBannerMode();
+        var b = state.bg || {}, d = state.data || {}, t = findTheme(d.themeId);
+        var showImage = (m !== 'theme') && !!b.banner;
+        var showTheme = (m !== 'image') && !!t;
+        var cur = showImage ? 'image' : (showTheme ? 'theme' : '');
+        ['theme', 'image'].forEach(function (k) {
+          var btn = k === 'theme' ? $('bmTheme') : $('bmImage');
+          if (btn) btn.classList.toggle('active', k === cur);
+        });
+      }
+
+      function setBannerMode(mode) {
+        if (!state.data) return;
+        saveProfile({ bannerMode: mode }, function () {
+          state.data.bannerMode = mode;
+          renderBanner();
+          toast((mode === 'theme' ? '头图将显示主题色' : '头图将显示自定义图片') + ' ✓');
+        });
       }
 
       function renderPresets() {
@@ -989,6 +1052,11 @@
         });
       }
 
+      /* ---------- 头图来源切换（主题色 / 图片） ---------- */
+      var bmTheme = $('bmTheme'), bmImage = $('bmImage');
+      if (bmTheme) bmTheme.onclick = function () { setBannerMode('theme'); };
+      if (bmImage) bmImage.onclick = function () { setBannerMode('image'); };
+
       /* ---------- 我的收藏 ---------- */
       function loadFavs() {
         fetch('/api/post-actions?favs=1')
@@ -1046,6 +1114,6 @@
         .catch(function () { if (VIEW_USER) loadPublic(VIEW_USER); else loginPrompt.hidden = false; });
     })();
   </script>
-  <script src="../common.js?v=20260829f"></script>
+  <script src="../common.js?v=20260829g"></script>
 </body>
 </html>

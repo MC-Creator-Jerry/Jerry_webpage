@@ -8,8 +8,12 @@
    ============================================================ */
 (function () {
   var doc = document;
+  var HOLD = false;       // 页面要求等数据渲染完成后再揭晓（如帖子中心）
+  var revealed = false;   // safeReveal 幂等保护
 
   function safeReveal() {
+    if (revealed) return;
+    revealed = true;
     var loader = doc.getElementById('xlLoader');
     if (loader) {
       // 揭晓前把进度条补满到 100%，保证视觉收尾连贯
@@ -30,8 +34,10 @@
       }, 420);
     }
   }
+  // 供页面在“数据渲染完成”后主动揭晓（与 HOLD 配合）
+  window.__xlReveal = safeReveal;
 
-  // 兜底：无论如何都在 2.4s 后强制揭晓，避免内容被永久隐藏
+  // 兜底：无论如何都在 2.4s 后强制揭晓，避免内容被永久隐藏（run 内会按 HOLD 重新设定）
   var safety = setTimeout(safeReveal, 2400);
 
   var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -89,13 +95,14 @@
 
   function run() {
     clearTimeout(safety);
-    if (reduced || intra) { safeReveal(); return; }
+    HOLD = !!window.__xlHoldReveal;
+    if (reduced || intra) { if (HOLD) return; safeReveal(); return; }
 
     var loader = buildLoader();
     requestAnimationFrame(function () { loader.classList.add('xl-show'); });
 
-    // 整段序列兜底：比正常流程略长，保证异常时也能揭晓
-    safety = setTimeout(safeReveal, 3400);
+    // 整段序列兜底：比正常流程略长，保证异常时也能揭晓（HOLD 时给页面更多渲染时间）
+    safety = setTimeout(safeReveal, HOLD ? 6000 : 3400);
 
     // ---- 阶段一：左上角标题 + 左侧竖直进度条（从上往下）----
     var intro = loader.querySelector('.xl-intro');
@@ -157,7 +164,8 @@
       }
 
       // 长方块保持显示，直到整块加载层淡出时与白底、「小蓝页」文字同时消失
-      setTimeout(safeReveal, 1280); // 方块出现后停留，再随整块一起淡出
+      // HOLD 时不在此自动揭晓，交由页面在列表渲染完成后调用 window.__xlReveal()
+      if (!HOLD) setTimeout(safeReveal, 1280); // 方块出现后停留，再随整块一起淡出
     }
   }
 

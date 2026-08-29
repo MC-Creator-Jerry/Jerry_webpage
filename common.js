@@ -323,7 +323,8 @@ window.XLTopics = (function () {
       path: (location.pathname || '/') + (location.search || ''),
       title: document.title || '',
       ref: document.referrer || '',
-      vid: getVid()
+      vid: getVid(),
+      hour: new Date().getHours() // 访客本地小时（0-23），用于时段分布
     });
     try {
       if (navigator.sendBeacon) {

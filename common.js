@@ -112,7 +112,7 @@
 
   // 顶部蓝条按钮 -> 白色图标
   var BAR = [
-    { re: /通知/, f: 'w-bell.svg' },
+    { re: /消息中心|通知/, f: 'w-bell.svg' },
     { re: /帮助/, f: 'w-help.svg' },
     { re: /个人主页|主页/, f: 'w-user.svg' },
     { re: /帖子中心/, f: 'w-posts.svg' },
@@ -400,7 +400,7 @@ window.XLTopics = (function () {
 
       var notice = bar.querySelector('#noticeBtn');
       var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
-      // 搜索栏放在「通知」按钮的左侧
+      // 搜索栏放在「消息中心」按钮的左侧
       var formRef = notice || login;
       if (formRef) { bar.insertBefore(form, formRef); }
       else { bar.appendChild(form); }

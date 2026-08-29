@@ -94,7 +94,7 @@
 
   /* 资料专属 */
   .profile-head { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; position: relative; }
-  .avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom)); color: #fff; font-size: 2.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--card-shadow); }
+  .avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom)); color: #fff; font-size: 2.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid var(--card-bg); box-shadow: 0 3px 12px rgba(0, 0, 0, .18); }
   .profile-name { font-size: 1.9rem; font-weight: 700; color: var(--text); line-height: 1.2; }
   .profile-meta { font-size: 0.9rem; color: var(--muted); margin-top: 4px; }
   .profile-tagline { font-size: 1.05rem; color: var(--muted); margin-top: 6px; max-width: 560px; display: inline; }
@@ -150,6 +150,10 @@
   .site-footer a:hover { text-decoration: underline; }
 
   /* ---- 个人主页背景 ---- */
+  /* 头图显示时：内容区上移，让头像压在头图下缘。
+     借鉴的是"大图头图 + 头像 + 信息栏"这一信息层级，配色与尺寸均为本站原创。 */
+  .content.has-banner { margin-top: -52px; padding-top: 8px; }
+
   .profile-banner {
     width: 100%;
     height: 22vh;
@@ -202,7 +206,7 @@
 
   /* 主题色弹窗（复用背景弹窗风格） */
   .theme-modal { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; background: rgba(10, 18, 30, 0.5); padding: 20px; }
-  .theme-sheet { width: 100%; max-width: 460px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+  .theme-sheet { width: 100%; max-width: 460px; max-height: 86vh; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
   .theme-sheet h3 { font-size: 1.05rem; color: var(--accent); margin-bottom: 12px; }
   .theme-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
   .theme-row input[type="color"] { width: 52px; height: 38px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--card-bg); cursor: pointer; padding: 2px; flex: 0 0 auto; }
@@ -210,6 +214,44 @@
   .theme-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
   .theme-swatch { width: 34px; height: 34px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
   .theme-swatch.active { border-color: #1c2733; }
+
+  /* 预设主题画廊：每张卡直接用该主题自己的头图渐变作预览 */
+  .theme-sub { font-size: 0.92rem; color: var(--text); margin: 20px 0 6px; }
+  .theme-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .theme-preset {
+    border: 2px solid transparent;
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 6px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color .15s, transform .12s, box-shadow .15s;
+  }
+  .theme-preset:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, .12); }
+  .theme-preset.active { border-color: var(--accent); }
+  .theme-preset-art {
+    display: block;
+    height: 54px;
+    border-radius: 7px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06);
+  }
+  .theme-preset-name {
+    display: block;
+    margin-top: 7px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .theme-preset.active .theme-preset-name { color: var(--accent); }
   .theme-sec-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; justify-content: flex-end; }
   .theme-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
   .theme-save:hover { filter: brightness(1.08); }
@@ -424,8 +466,13 @@
 
   <div class="theme-modal" id="themeModal" hidden>
     <div class="theme-sheet">
-      <h3 data-zh="个人主页主题色" data-en="Personal homepage theme color">个人主页主题色</h3>
-      <p class="file-note" data-zh="选择一条颜色，将显示在小蓝条下方（6px 高）。选「清除」可隐藏色条。" data-en="Pick a color shown below the blue bar (6px tall). Choose Clear to hide it.">选择一条颜色，将显示在小蓝条下方（6px 高）。选「清除」可隐藏色条。</p>
+      <h3 data-zh="个人主页主题" data-en="Personal homepage theme">个人主页主题</h3>
+      <p class="file-note" data-zh="选一个预设主题：会同时套用配色、主页头图与页面底色。若你上传过自定义头图，头图优先显示。" data-en="Pick a preset theme: it applies the colors, a homepage banner and a page tint. Your own uploaded banner takes priority.">选一个预设主题：会同时套用配色、主页头图与页面底色。若你上传过自定义头图，头图优先显示。</p>
+
+      <div class="theme-presets" id="themePresets"></div>
+
+      <h4 class="theme-sub" data-zh="自定义主题色" data-en="Custom accent">自定义主题色</h4>
+      <p class="file-note" data-zh="也可只调小蓝条下方的 6px 色条颜色。" data-en="Or just customize the 6px strip below the blue bar.">也可只调小蓝条下方的 6px 色条颜色。</p>
       <div class="theme-row">
         <input type="color" id="themeColorInput" value="#0078d4" />
         <input class="edit-input" id="themeHexInput" placeholder="#0078d4" maxlength="7" />
@@ -493,11 +540,22 @@
       function applyBg() {
         var b = state.bg || {};
         var bannerEl = $('profileBanner');
-        if (b.banner) { bannerEl.style.backgroundImage = 'url("' + b.banner + '")'; bannerEl.hidden = false; }
-        else { bannerEl.style.backgroundImage = ''; bannerEl.hidden = true; }
+        if (b.banner) {
+          // 自定义头图优先：打标记，主题头图不再覆盖它
+          bannerEl.style.backgroundImage = 'url("' + b.banner + '")';
+          bannerEl.dataset.customBanner = '1';
+          bannerEl.hidden = false;
+        } else {
+          bannerEl.style.backgroundImage = '';
+          delete bannerEl.dataset.customBanner;
+          bannerEl.hidden = true;
+        }
         var contentEl = document.querySelector('.content');
         if (b.bg) { contentEl.style.setProperty('--bigbg', 'url("' + b.bg + '")'); contentEl.classList.add('has-bigbg'); }
         else { contentEl.style.removeProperty('--bigbg'); contentEl.classList.remove('has-bigbg'); }
+        // 背景处理完再套主题：没有自定义头图时，由主题补上头图
+        var d = state.data || {};
+        applyTheme(d.themeId, d.themeColor);
       }
       function loadBg(login) {
         if (!login) return;
@@ -585,10 +643,8 @@
       function renderDisplay() {
         var d = state.data || {};
         avatar.src = d.ghAvatar ? gh(d.login) : (d.avatar || gh(d.login));
-        // 个人主页主题色条（小蓝条下方 6px）
-        var strip = $('profileThemeStrip');
-        if (d.themeColor) { strip.style.background = d.themeColor; strip.hidden = false; }
-        else { strip.style.background = ''; strip.hidden = true; }
+        // 个人主页主题：色条 + 主题头图 + 页面底色（由 applyTheme 统一处理）
+        applyTheme(d.themeId, d.themeColor);
         nameDisplay.innerHTML = '';
         nameDisplay.textContent = d.name || d.login || '';
         if (d.login === OWNER) {
@@ -718,7 +774,12 @@
         var payload = {
           name: d.name || '', about: d.about || '',
           skills: d.skills || [],
-          links: (d.links || []).filter(function (l) { return l.url; })
+          links: (d.links || []).filter(function (l) { return l.url; }),
+          // 这些字段必须随每次保存一起回传。后端对"未传"的字段会写入默认值，
+          // 此前遗漏了它们，导致主题色 / 主题 / GitHub 头像开关 一保存就被静默清空。
+          themeColor: d.themeColor || '',
+          themeId: d.themeId || '',
+          ghAvatar: !!d.ghAvatar
         };
         // 头像：仅在「关闭 GitHub 同步」时随资料保存；开启同步时不写头像，避免覆盖已有自定义头像
         if (!d.ghAvatar) payload.avatar = d.avatar || '';
@@ -760,12 +821,131 @@
         btn.onclick = function () { closeEditor(btn.getAttribute('data-cancel')); };
       });
 
-      /* ---------- 个人主页主题色 ---------- */
+      /* ---------- 个人主页主题（预设主题 + 自定义主题色） ---------- */
       var themeModal = $('themeModal'), openThemeBtn = $('openThemeBtn');
       var themeColorInput = $('themeColorInput'), themeHexInput = $('themeHexInput'), themeSwatches = $('themeSwatches');
+      var themePresets = $('themePresets');
       var themeSave = $('themeSave'), themeCancel = $('themeCancel'), themeClear = $('themeClear');
       var THEME_PRESETS = ['#0078d4', '#28599c', '#1f9d55', '#d13438', '#9b59b6', '#e67e22', '#16a2b8', '#2c3e50'];
-      var themeDraft = '';
+
+      /* 内置主题：配色与头图全部为原创。
+         头图不是图片文件，而是由多层 CSS 渐变手工"画"出来的矢量风景
+         （山峦／极光／暮色／竹林光斑／星点／沙丘），因此：
+           · 零外部依赖、零请求、任何分辨率都不失真、深浅色模式下都可用
+           · 绝无版权风险，也不会和任何站点撞图
+         参考的是"大图头图 + 头像 + 信息栏"这一信息层级思路，
+         配色刻意避开各平台标志性用色（如 B 站粉 #FB7299）。 */
+      var THEMES = [
+        {
+          id: 'dawn', zh: '晨雾', en: 'Dawn', accent: '#4a90d9',
+          banner: 'radial-gradient(130% 85% at 18% 112%, rgba(32,74,110,.85) 0%, transparent 58%),' +
+                  'radial-gradient(110% 75% at 72% 118%, rgba(58,110,150,.75) 0%, transparent 60%),' +
+                  'radial-gradient(60% 45% at 85% 25%, rgba(255,255,255,.7), transparent 65%),' +
+                  'linear-gradient(180deg, #eaf4fb 0%, #c3ddf1 38%, #86b9dc 74%, #4a90d9 100%)'
+        },
+        {
+          id: 'aurora', zh: '极光', en: 'Aurora', accent: '#17a2a2',
+          banner: 'radial-gradient(80% 55% at 30% 20%, rgba(80,230,200,.55), transparent 62%),' +
+                  'radial-gradient(70% 50% at 68% 32%, rgba(150,110,230,.5), transparent 66%),' +
+                  'radial-gradient(120% 70% at 50% 115%, rgba(8,26,38,.95) 0%, transparent 62%),' +
+                  'linear-gradient(180deg, #0d2438 0%, #123a4a 45%, #164e5c 78%, #0f3443 100%)'
+        },
+        {
+          id: 'dusk', zh: '暮山', en: 'Dusk', accent: '#e07a5f',
+          banner: 'radial-gradient(55% 40% at 62% 40%, rgba(255,214,150,.9), transparent 62%),' +
+                  'radial-gradient(120% 70% at 25% 112%, rgba(90,52,110,.9) 0%, transparent 60%),' +
+                  'radial-gradient(100% 60% at 78% 116%, rgba(120,60,100,.8) 0%, transparent 62%),' +
+                  'linear-gradient(180deg, #f6c98f 0%, #ee9b6e 38%, #c96a63 68%, #6d4c9f 100%)'
+        },
+        {
+          id: 'bamboo', zh: '竹影', en: 'Bamboo', accent: '#3f9e5a',
+          banner: 'repeating-linear-gradient(100deg, rgba(255,255,255,.14) 0 3px, transparent 3px 26px),' +
+                  'radial-gradient(70% 55% at 20% 15%, rgba(255,255,220,.55), transparent 62%),' +
+                  'radial-gradient(110% 65% at 80% 112%, rgba(20,70,38,.85) 0%, transparent 60%),' +
+                  'linear-gradient(150deg, #bfe3b8 0%, #6ec27e 42%, #3f9e5a 76%, #1f6b3a 100%)'
+        },
+        {
+          id: 'starry', zh: '星夜', en: 'Starry', accent: '#5b6ab8',
+          banner: 'radial-gradient(1.6px 1.6px at 12% 24%, #fff, transparent),' +
+                  'radial-gradient(1.4px 1.4px at 34% 12%, #fff, transparent),' +
+                  'radial-gradient(1.8px 1.8px at 58% 28%, #fff, transparent),' +
+                  'radial-gradient(1.3px 1.3px at 76% 14%, #fff, transparent),' +
+                  'radial-gradient(1.6px 1.6px at 88% 34%, #fff, transparent),' +
+                  'radial-gradient(1.5px 1.5px at 46% 18%, #fff, transparent),' +
+                  'radial-gradient(90% 60% at 70% 8%, rgba(150,170,255,.35), transparent 60%),' +
+                  'radial-gradient(120% 70% at 40% 118%, rgba(12,18,40,.9) 0%, transparent 62%),' +
+                  'linear-gradient(180deg, #131c36 0%, #26315c 45%, #3d4a8a 78%, #5b6ab8 100%)'
+        },
+        {
+          id: 'sand', zh: '砂岩', en: 'Sandstone', accent: '#c08a4a',
+          banner: 'radial-gradient(100% 55% at 22% 108%, rgba(150,96,42,.9) 0%, transparent 60%),' +
+                  'radial-gradient(85% 45% at 78% 112%, rgba(120,72,30,.85) 0%, transparent 62%),' +
+                  'radial-gradient(50% 35% at 72% 22%, rgba(255,240,200,.7), transparent 64%),' +
+                  'linear-gradient(180deg, #f6e2bb 0%, #e8c48a 40%, #c08a4a 76%, #8a5a2b 100%)'
+        }
+      ];
+
+      var themeDraft = '';      // 自定义主题色（hex）
+      var themeIdDraft = '';    // 内置主题 id
+
+      function curLang() { try { return localStorage.getItem('xl_lang') || 'zh'; } catch (e) { return 'zh'; } }
+      function findTheme(id) {
+        for (var i = 0; i < THEMES.length; i++) if (THEMES[i].id === id) return THEMES[i];
+        return null;
+      }
+
+      // 把主题套到页面上：主题色条 + 主题头图 + 全站强调色（--accent）
+      // 自定义头图（用户上传/填链接）优先于主题头图，不会被覆盖
+      function applyTheme(themeId, themeColor) {
+        var t = findTheme(themeId);
+        var strip = $('profileThemeStrip');
+        var bannerEl = $('profileBanner');
+
+        if (strip) {
+          if (themeColor) { strip.style.background = themeColor; strip.hidden = false; }
+          else if (t) { strip.style.background = t.accent; strip.hidden = false; }
+          else { strip.style.background = ''; strip.hidden = true; }
+        }
+        // 没有自定义头图时，才用主题头图
+        if (bannerEl && !bannerEl.dataset.customBanner) {
+          if (t) { bannerEl.style.backgroundImage = t.banner; bannerEl.style.backgroundColor = t.accent; bannerEl.hidden = false; }
+          else { bannerEl.style.backgroundImage = ''; bannerEl.style.backgroundColor = ''; bannerEl.hidden = true; }
+        }
+        // 头图可见时让内容区上移，头像压在头图下缘
+        var contentEl = document.querySelector('.content');
+        if (contentEl && bannerEl) contentEl.classList.toggle('has-banner', !bannerEl.hidden);
+        if (t) document.documentElement.style.setProperty('--accent', t.accent);
+        else document.documentElement.style.removeProperty('--accent');
+      }
+
+      function renderPresets() {
+        themePresets.innerHTML = '';
+        var en = curLang() === 'en';
+        THEMES.forEach(function (t) {
+          var c = document.createElement('button');
+          c.type = 'button';
+          c.className = 'theme-preset' + (t.id === themeIdDraft ? ' active' : '');
+          c.title = en ? t.en : t.zh;
+          var sw = document.createElement('span');
+          sw.className = 'theme-preset-art';
+          sw.style.backgroundImage = t.banner;
+          var nm = document.createElement('span');
+          nm.className = 'theme-preset-name';
+          nm.textContent = en ? t.en : t.zh;
+          c.appendChild(sw); c.appendChild(nm);
+          c.onclick = function () { pickTheme(t.id); };
+          themePresets.appendChild(c);
+        });
+      }
+
+      // 再点一次已选中的主题 = 取消该主题
+      function pickTheme(id) {
+        var t = findTheme(id);
+        if (!t) return;
+        themeIdDraft = (themeIdDraft === id) ? '' : id;
+        if (themeIdDraft) setThemeValue(t.accent);
+        renderPresets();
+      }
 
       function renderSwatches() {
         themeSwatches.innerHTML = '';
@@ -790,17 +970,23 @@
       };
       function openTheme() {
         themeDraft = (state.data && state.data.themeColor) || '#0078d4';
+        themeIdDraft = (state.data && state.data.themeId) || '';
         setThemeValue(themeDraft);
+        renderPresets();
         themeModal.hidden = false;
       }
       openThemeBtn.onclick = openTheme;
       themeCancel.onclick = function () { themeModal.hidden = true; };
       themeModal.addEventListener('click', function (e) { if (e.target === themeModal) themeModal.hidden = true; });
-      themeClear.onclick = function () { themeModal.hidden = true; saveTheme(''); };
-      themeSave.onclick = function () { themeModal.hidden = true; saveTheme(themeDraft); };
-      function saveTheme(color) {
+      themeClear.onclick = function () { themeModal.hidden = true; saveTheme('', ''); };
+      themeSave.onclick = function () { themeModal.hidden = true; saveTheme(themeDraft, themeIdDraft); };
+      function saveTheme(color, themeId) {
         if (!state.data) return;
-        saveProfile({ themeColor: color || '' }, function () { renderDisplay(); });
+        saveProfile({ themeColor: color || '', themeId: themeId || '' }, function () {
+          state.data.themeColor = color || '';
+          state.data.themeId = themeId || '';
+          renderDisplay();
+        });
       }
 
       /* ---------- 我的收藏 ---------- */

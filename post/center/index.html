@@ -450,6 +450,8 @@
           var card = document.createElement('div'); card.className = 'post post-card clickable'; card.dataset.id = p.id;
           var avatar = 'https://github.com/' + encodeURIComponent(p.login) + '.png';
           var canDel = meIsAdmin || (meLogin && p.login === meLogin);
+          var canEdit = meLogin && p.login === meLogin;
+          var edit = canEdit ? '<a class="del edit-link" href="../new/?edit=' + encodeURIComponent(p.id) + '">编辑</a>' : '';
           var del = canDel ? '<button class="del" data-id="' + p.id + '">删除</button>' : '';
           var cnt = (counts && counts[p.id]) || 0;
           var st = states[p.id] || {};
@@ -472,7 +474,7 @@
                 '<img class="ico" src="../../icons/' + (st && st.liked ? 'like-on' : 'like') + '.svg" alt="点赞"><span class="like-count">' + lc + '</span>' +
               '</button>' +
             '</div>' +
-            '<div class="post-actions" data-post="' + p.id + '"></div>' + del;
+            '<div class="post-actions" data-post="' + p.id + '"></div>' + edit + del;
           card.querySelector('.ptitle').textContent = p.title || '（无标题）';
           var bodyEl = card.querySelector('.post-body');
           bodyEl.innerHTML = p.body || '';
@@ -482,6 +484,10 @@
           if (attWrap) attWrap.innerHTML = XLMedia.build(p.files, { videoOnly: XLMedia.isVideoOnly(p.files, hasText) });
           if (canDel) {
             card.querySelector('.del').addEventListener('click', function (e) { e.stopPropagation(); delPost(p.id); });
+          }
+          if (canEdit) {
+            var editLink = card.querySelector('.edit-link');
+            if (editLink) editLink.addEventListener('click', function (e) { e.stopPropagation(); });
           }
           // 点击标题 / 评论按钮：在帖子中心内打开查看；点赞按钮独立处理
           card.querySelector('.ptitle').addEventListener('click', function (e) { e.preventDefault(); openPost(p.id); });

@@ -163,13 +163,14 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
   .site-name, .breadcrumb { max-width: none; }
 
   /* 主题 / 语言 / 设置 浮动按钮：竖屏时放到顶部蓝条右侧 */
+  /* 竖屏下浮动按钮同样固定在屏幕右下角（底部导航条上方），不再放到顶部 */
   html .float-actions {
     position: fixed !important;
-    top: 10px !important;
-    right: 14px !important;
-    bottom: auto !important;
+    top: auto !important;
+    right: 12px !important;
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
     left: auto !important;
-    z-index: 150 !important;
+    z-index: 1000 !important;
     flex-direction: row !important;
     gap: 8px;
   }

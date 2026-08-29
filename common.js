@@ -451,6 +451,33 @@ window.XLTopics = (function () {
 
   var themeBtn = null;
 
+  // 把浮动按钮强制提升为 body 直接子元素，并用 inline style 兜底，
+  // 避免某些页面把它嵌在 main/content 里，或 CSS 媒体查询未命中导致随滚动消失。
+  function pinFloat() {
+    var fa = document.querySelector('.float-actions');
+    if (!fa) return;
+    if (fa.parentNode !== document.body) {
+      try { document.body.appendChild(fa); } catch (e) {}
+    }
+    var landscape = false;
+    try { landscape = window.matchMedia('(orientation: landscape)').matches; } catch (e) {}
+    if (landscape) {
+      fa.style.position = 'fixed';
+      fa.style.top = 'auto';
+      fa.style.left = 'auto';
+      fa.style.right = '20px';
+      fa.style.bottom = '20px';
+      fa.style.zIndex = '150';
+    } else {
+      fa.style.position = '';
+      fa.style.top = '';
+      fa.style.left = '';
+      fa.style.right = '';
+      fa.style.bottom = '';
+      fa.style.zIndex = '';
+    }
+  }
+
   function injectFloat() {
     // 预载编辑栏脚本：无论是否有浮动按钮，都让其应用已保存的页面覆盖
     loadEditbar();
@@ -473,6 +500,9 @@ window.XLTopics = (function () {
 
     // 3) 站主：在主题按钮左侧插入「更改当前页面布局」
     maybeInjectLayoutBtn();
+
+    // 4) 强制钉在 body 并兜底固定位置，防止横屏下随滚动消失
+    pinFloat();
   }
 
   function loadEditbar() {
@@ -512,4 +542,14 @@ window.XLTopics = (function () {
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectFloat);
   else injectFloat();
+
+  // 方向/尺寸变化时重新兜底固定位置
+  var pinTimer = null;
+  function schedulePin() {
+    if (pinTimer) clearTimeout(pinTimer);
+    pinTimer = setTimeout(pinFloat, 80);
+  }
+  try { window.addEventListener('resize', schedulePin); } catch (e) {}
+  try { window.addEventListener('orientationchange', schedulePin); } catch (e) {}
+  try { window.matchMedia('(orientation: landscape)').addEventListener('change', schedulePin); } catch (e) {}
 })();

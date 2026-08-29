@@ -10,7 +10,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>消息中心 · Jerry's webpage</title>
-<meta name="description" content="站内消息中心：系统通知、消息通知、评论通知与私信。" />
+<meta name="description" content="站内消息中心：站长消息、系统消息、评论通知与私信。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>
@@ -155,20 +155,20 @@
     </section>
 
     <div class="tabs">
-      <button class="tab active" data-tab="system" data-zh="系统通知" data-en="System">系统通知<span class="tb" id="tbSystem" hidden></span></button>
-      <button class="tab" data-tab="message" data-zh="消息通知" data-en="Messages">消息通知<span class="tb" id="tbMessage" hidden></span></button>
+      <button class="tab active" data-tab="system" data-zh="站长消息" data-en="Owner Messages">站长消息<span class="tb" id="tbSystem" hidden></span></button>
+      <button class="tab" data-tab="message" data-zh="系统消息" data-en="System Messages">系统消息<span class="tb" id="tbMessage" hidden></span></button>
       <button class="tab" data-tab="comment" data-zh="评论通知" data-en="Comments">评论通知<span class="tb" id="tbComment" hidden></span></button>
       <button class="tab" data-tab="dm" data-zh="私信" data-en="Chat">私信</button>
     </div>
 
-    <!-- 系统通知 -->
+    <!-- 站长消息 -->
     <section id="panelSystem">
       <div class="panel-tools" id="toolsSystem" hidden>
         <button class="tool-btn danger" data-clear="system" data-zh="清除所有" data-en="Clear all">清除所有</button>
         <button class="tool-btn" data-read="system" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
       </div>
       <section class="card" id="adminPanel" hidden>
-        <h2 data-zh="发布系统通知（管理员）" data-en="Publish System Notice (Admin)">发布系统通知（管理员）</h2>
+        <h2 data-zh="发布站长消息（管理员）" data-en="Publish Owner Message (Admin)">发布站长消息（管理员）</h2>
         <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
         <input class="edit-input" id="nTitle" maxlength="120" placeholder="通知标题" />
         <span class="edit-label" data-zh="内容" data-en="Body">内容</span>
@@ -177,20 +177,20 @@
       </section>
 
       <div class="card">
-        <h2 data-zh="全部系统通知" data-en="All System Notices">全部系统通知</h2>
+        <h2 data-zh="全部站长消息" data-en="All Owner Messages">全部站长消息</h2>
         <div id="listSystem"></div>
-        <div id="emptySystem" class="hint" hidden data-zh="暂无系统通知。" data-en="No system notices.">暂无系统通知。</div>
+        <div id="emptySystem" class="hint" hidden data-zh="暂无站长消息。" data-en="No owner messages.">暂无站长消息。</div>
       </div>
     </section>
 
-    <!-- 消息通知 -->
+    <!-- 系统消息 -->
     <section id="panelMessage" hidden>
       <div class="panel-tools" id="toolsMessage" hidden>
         <button class="tool-btn danger" data-clear="message" data-zh="清除所有" data-en="Clear all">清除所有</button>
         <button class="tool-btn" data-read="message" data-zh="全部标为已读" data-en="Mark all read">全部标为已读</button>
       </div>
       <section class="card" id="msgAdminPanel" hidden>
-        <h2 data-zh="发送消息通知（管理员）" data-en="Send Message (Admin)">发送消息通知（管理员）</h2>
+        <h2 data-zh="发送系统消息（管理员）" data-en="Send System Message (Admin)">发送系统消息（管理员）</h2>
         <span class="edit-label" data-zh="接收者用户名" data-en="Recipient username">接收者用户名</span>
         <input class="edit-input" id="mTo" maxlength="39" placeholder="GitHub 用户名（不含 @）" />
         <span class="edit-label" data-zh="标题" data-en="Title">标题</span>
@@ -201,10 +201,10 @@
       </section>
 
       <div class="card">
-        <h2 data-zh="我的消息通知" data-en="My Messages">我的消息通知</h2>
+        <h2 data-zh="我的系统消息" data-en="My System Messages">我的系统消息</h2>
         <div id="listMessage"></div>
-        <div id="emptyMessage" class="hint" hidden data-zh="暂无消息通知。" data-en="No messages.">暂无消息通知。</div>
-        <div id="needLoginMsg" class="hint" hidden data-zh="登录后可查看你的消息通知。" data-en="Sign in to view your messages.">登录后可查看你的消息通知。</div>
+        <div id="emptyMessage" class="hint" hidden data-zh="暂无系统消息。" data-en="No system messages.">暂无系统消息。</div>
+        <div id="needLoginMsg" class="hint" hidden data-zh="登录后可查看你的系统消息。" data-en="Sign in to view your system messages.">登录后可查看你的系统消息。</div>
       </div>
     </section>
 
@@ -396,7 +396,7 @@
         b.addEventListener('click', function () { clearAll(b.getAttribute('data-clear')); });
       });
 
-      // 系统通知：发布 / 删除
+      // 站长消息：发布 / 删除
       function postNotice() {
         var title = document.getElementById('nTitle').value.trim();
         var body = document.getElementById('nBody').value.trim();
@@ -420,7 +420,7 @@
       }
       document.getElementById('postBtn').addEventListener('click', postNotice);
 
-      // 消息通知：发送（管理员）
+      // 系统消息：发送（管理员）
       function sendMessage() {
         var to = document.getElementById('mTo').value.trim();
         var title = document.getElementById('mTitle').value.trim();

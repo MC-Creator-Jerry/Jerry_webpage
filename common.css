@@ -701,13 +701,13 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1200;
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px;
+  display: flex; flex-direction: column;
   background: color-mix(in srgb, var(--accent) 92%, #000 8%);
   color: #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   font-size: 0.9rem;
 }
+.xl-edit-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
 .xl-edit-banner .xl-edit-tip { flex: 1 1 auto; min-width: 0; }
 .xl-edit-banner button {
   border: 1px solid rgba(255, 255, 255, 0.7);
@@ -722,6 +722,60 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 .xl-edit-banner button:hover { background: rgba(255, 255, 255, 0.28); }
 .xl-edit-banner .xl-edit-save { background: #fff; color: var(--accent); font-weight: 700; border-color: #fff; }
 .xl-edit-banner .xl-edit-save:hover { background: #eef6ff; }
+
+/* 编辑工具栏（Word 式） */
+.xl-edit-toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 16px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.xl-tb-btn, .xl-tb-select, .xl-tb-color {
+  font-family: inherit; font-size: 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15); color: #fff;
+  border-radius: 8px; padding: 6px 10px; cursor: pointer;
+  white-space: nowrap;
+}
+.xl-tb-btn:hover, .xl-tb-select:hover, .xl-tb-color:hover { background: rgba(255, 255, 255, 0.28); }
+.xl-tb-select { padding-right: 6px; }
+.xl-tb-select option { color: #1c2733; }
+.xl-tb-sep { width: 1px; align-self: stretch; background: rgba(255, 255, 255, 0.35); margin: 2px 4px; }
+.xl-tb-color { display: inline-flex; align-items: center; gap: 6px; }
+.xl-tb-color input[type=color] { width: 22px; height: 22px; border: none; background: none; padding: 0; cursor: pointer; }
+
+/* 内容块（站主新建：文本框 / 图片 / 视频） */
+#xl-edit-blocks {
+  max-width: 920px;
+  margin: 18px auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.xl-block { position: relative; border-radius: 10px; }
+.xl-block-inner {
+  outline: none;
+  min-height: 1.4em;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+}
+.xl-block-inner:empty:before { content: attr(data-placeholder); color: #9aa6b2; }
+.xl-block img, .xl-block .xl-video { max-width: 100%; border-radius: 10px; display: block; }
+.xl-block .xl-video { width: 100%; aspect-ratio: 16 / 9; border: 0; }
+.xl-block a { color: var(--accent); word-break: break-all; }
+
+/* 编辑模式：选中高亮 + 删除提示 */
+.xl-editmode .xl-block { outline: 1px dashed rgba(0, 120, 212, 0.55); outline-offset: 4px; }
+.xl-editmode .xl-block.active { outline: 2px solid var(--accent); outline-offset: 4px; }
+.xl-editmode .xl-block-inner { cursor: text; }
+.xl-editmode .xl-block.active:after {
+  content: '已选中 · 可删除';
+  position: absolute; top: -10px; right: 8px;
+  background: var(--accent); color: #fff;
+  font-size: 0.7rem; padding: 2px 8px; border-radius: 999px;
+}
 
 .xl-toast {
   position: fixed;

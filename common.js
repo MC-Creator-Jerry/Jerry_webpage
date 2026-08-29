@@ -449,7 +449,7 @@ window.XLTopics = (function () {
   function setTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     try { localStorage.setItem('xl_theme', t); } catch (e) {}
-    if (themeBtn) themeBtn.innerHTML = t === 'dark' ? SUN : MOON;
+    if (themeBtn) themeBtn.innerHTML = t === 'dark' ? MOON : SUN;
   }
 
   function fabBtn(id, cls, title, svg, onClick) {
@@ -475,7 +475,7 @@ window.XLTopics = (function () {
 
     // 1) 深浅色切换：插在「语言」按钮左侧
     if (!fa.querySelector('#themeToggle')) {
-      themeBtn = fabBtn('themeToggle', 'xl-theme', '切换深浅色', getTheme() === 'dark' ? SUN : MOON, function () {
+      themeBtn = fabBtn('themeToggle', 'xl-theme', '切换深浅色', getTheme() === 'dark' ? MOON : SUN, function () {
         setTheme(getTheme() === 'dark' ? 'light' : 'dark');
       });
       var lang = fa.querySelector('#langBtn') || fa.querySelector('a[href$="language.html"]');

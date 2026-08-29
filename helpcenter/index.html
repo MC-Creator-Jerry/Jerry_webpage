@@ -5,15 +5,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>帮助中心 · Jerry's webpage</title>
-<meta name="description" content="帮助中心：选择产品或使用搜索框查找，直达新闻主页。" />
+<meta name="description" content="帮助中心：选择产品或使用搜索框查找，直达小蓝页与 CleanOpt 文档。" />
 <meta name="author" content="Jerry" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="帮助中心 · Jerry's webpage" />
-<meta property="og:description" content="帮助中心：选择产品或使用搜索框查找，直达新闻主页。" />
+<meta property="og:description" content="帮助中心：选择产品或使用搜索框查找，直达小蓝页与 CleanOpt 文档。" />
 <meta property="og:site_name" content="Jerry's webpage" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="帮助中心 · Jerry's webpage" />
-<meta name="twitter:description" content="帮助中心：选择产品或使用搜索框查找，直达新闻主页。" />
+<meta name="twitter:description" content="帮助中心：选择产品或使用搜索框查找，直达小蓝页与 CleanOpt 文档。" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>
   :root {
@@ -152,7 +152,7 @@
     margin-bottom: 16px;
   }
 
-  /* ---- 搜索框 + 新闻主页按钮 ---- */
+  /* ---- 搜索框 + 产品按钮 ---- */
   .search-box { margin-bottom: 22px; }
   .search-input {
     width: 100%;
@@ -166,7 +166,8 @@
     transition: border-color 0.15s;
   }
   .search-input:focus { border-color: var(--accent); }
-  .help-news-btn {
+  .help-prod-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .help-prod-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -179,7 +180,7 @@
     font-size: 1rem;
     transition: opacity 0.15s;
   }
-  .help-news-btn:hover { opacity: 0.9; }
+  .help-prod-btn:hover { opacity: 0.9; }
 
   /* ---- 页脚 ---- */
   .site-footer {
@@ -236,8 +237,10 @@
         <input type="search" class="search-input" id="helpSearch"
                data-zh-ph="搜索产品…" data-en-ph="Search products…" placeholder="搜索产品…" />
       </div>
-      <a class="help-news-btn" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener"
-         data-zh="新闻主页" data-en="News Homepage">新闻主页</a>
+      <div class="help-prod-grid">
+        <a class="help-prod-btn" href="../xiaolanpage/" data-zh="小蓝页" data-en="Xiaolan Page">小蓝页</a>
+        <a class="help-prod-btn" href="../cleanopt-doc/" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</a>
+      </div>
     </section>
   </main>
 

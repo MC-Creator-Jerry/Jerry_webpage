@@ -596,3 +596,90 @@ body.is-admin .bar-btn.admin-only { display: inline-flex; }
 .react-btn.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 700; }
 .react-btn .r-emoji { font-size: 1.05rem; line-height: 1; }
 .react-btn .r-cnt { font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+
+/* ============ 全局浮动按钮基线（统一语言/设置/主题/编辑按钮外观） ============ */
+.float-actions {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 150;
+  display: flex;
+  gap: 12px;
+}
+.fab {
+  width: 50px; height: 42px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 14px; font-size: 1.25rem; line-height: 1; color: #111;
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  cursor: pointer; padding: 0; box-sizing: border-box;
+}
+.fab:hover { background: rgba(255, 255, 255, 0.78); }
+.fab:active { transform: scale(0.94); }
+.fab svg { width: 22px; height: 22px; display: block; }
+html[data-theme="dark"] .fab {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+@media (max-width: 560px) {
+  .float-actions { right: 12px; bottom: 12px; gap: 8px; }
+  .fab { width: 46px; height: 40px; border-radius: 12px; }
+  .fab svg { width: 20px; height: 20px; }
+}
+
+/* ============ 布局编辑模式（站主） ============ */
+.xl-editmode [data-xl-edit] {
+  outline: 1px dashed var(--accent);
+  outline-offset: 2px;
+  cursor: text;
+  border-radius: 4px;
+}
+.xl-editmode [data-xl-edit-img] {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+  cursor: pointer;
+}
+.xl-edit-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1200;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--accent) 92%, #000 8%);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  font-size: 0.9rem;
+}
+.xl-edit-banner .xl-edit-tip { flex: 1 1 auto; min-width: 0; }
+.xl-edit-banner button {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.xl-edit-banner button:hover { background: rgba(255, 255, 255, 0.28); }
+.xl-edit-banner .xl-edit-save { background: #fff; color: var(--accent); font-weight: 700; border-color: #fff; }
+.xl-edit-banner .xl-edit-save:hover { background: #eef6ff; }
+
+.xl-toast {
+  position: fixed;
+  left: 50%; bottom: 80px;
+  transform: translate(-50%, 12px);
+  z-index: 1300;
+  background: #1c2733;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.xl-toast.show { opacity: 1; transform: translate(-50%, 0); }

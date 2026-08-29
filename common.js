@@ -383,14 +383,19 @@ window.XLTopics = (function () {
       pointsLink.href = '/points/';
       pointsLink.textContent = '积分榜';
 
+      var groupsLink = document.createElement('a');
+      groupsLink.className = 'bar-btn xl-groups';
+      groupsLink.href = '/groups/';
+      groupsLink.textContent = '群组';
+
       var adminLink = document.createElement('a');
       adminLink.className = 'bar-btn admin-only';
       adminLink.href = '/admin/reports/';
       adminLink.textContent = '举报后台';
 
       var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
-      if (login) { bar.insertBefore(form, login); bar.insertBefore(dmLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(adminLink, login); }
-      else { bar.appendChild(form); bar.appendChild(dmLink); bar.appendChild(pointsLink); bar.appendChild(adminLink); }
+      if (login) { bar.insertBefore(form, login); bar.insertBefore(dmLink, login); bar.insertBefore(groupsLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(adminLink, login); }
+      else { bar.appendChild(form); bar.appendChild(dmLink); bar.appendChild(groupsLink); bar.appendChild(pointsLink); bar.appendChild(adminLink); }
     });
     updateDmBadge();
   }

@@ -467,6 +467,38 @@ window.XLTopics = (function () {
     fa.style.setProperty('z-index', z, 'important');
   }
 
+  // 底部蓝条同样强制钉在屏幕底部：竖屏时移到 body 并内联 fixed 兜底，
+  // 防止它嵌在 .topbar 里受包含块影响而退化为文档流（要滚到底才看到）。
+  // 横屏/桌面则还原回 .topbar 内，保持顶部右侧布局。
+  function pinBarRight() {
+    var bar = document.querySelector('.bar-right');
+    if (!bar) return;
+    var portrait = false;
+    try { portrait = window.matchMedia('(orientation: portrait)').matches; } catch (e) {}
+    if (portrait) {
+      if (bar.parentNode !== document.body) {
+        try { bar.__origParent = bar.parentNode; bar.__origNext = bar.nextSibling; document.body.appendChild(bar); } catch (e) {}
+      }
+      bar.style.setProperty('position', 'fixed', 'important');
+      bar.style.setProperty('top', 'auto', 'important');
+      bar.style.setProperty('bottom', '0px', 'important');
+      bar.style.setProperty('left', '0px', 'important');
+      bar.style.setProperty('right', '0px', 'important');
+      bar.style.setProperty('width', '100%', 'important');
+      bar.style.setProperty('z-index', '1000', 'important');
+    } else {
+      if (bar.parentNode === document.body && bar.__origParent && bar.__origParent.parentNode) {
+        try {
+          if (bar.__origNext && bar.__origNext.parentNode === bar.__origParent) bar.__origParent.insertBefore(bar, bar.__origNext);
+          else bar.__origParent.appendChild(bar);
+        } catch (e) { try { bar.__origParent.appendChild(bar); } catch (_) {} }
+      }
+      ['position', 'top', 'bottom', 'left', 'right', 'width', 'z-index'].forEach(function (p) {
+        bar.style.removeProperty(p);
+      });
+    }
+  }
+
   function ensureFloatActions() {
     var fa = document.querySelector('.float-actions');
     if (!fa) {
@@ -501,16 +533,18 @@ window.XLTopics = (function () {
 
     // 4) 强制钉在 body 并兜底固定位置，防止横屏下随滚动消失
     pinFloat();
+    pinBarRight();
   }
 
   function loadEditbar() {
     if (window.XLEdit) return;
-    var sc = document.querySelector('script[src$="common.js"]');
+    // 注意：脚本引用带 ?v= 版本号，src 不再以 "common.js" 结尾，必须用 *=
+    var sc = document.querySelector('script[src*="common.js"]');
     var src = sc ? (sc.getAttribute('src') || '') : '';
     var m = src.match(/^((?:\.\.\/)*)/);
     var prefix = m ? m[1] : '';
     var s = document.createElement('script');
-    s.src = prefix + 'editbar.js?v=20260829b';
+    s.src = prefix + 'editbar.js?v=20260829c';
     s.async = true;
     document.head.appendChild(s);
   }
@@ -546,7 +580,7 @@ window.XLTopics = (function () {
   var pinTimer = null;
   function schedulePin() {
     if (pinTimer) clearTimeout(pinTimer);
-    pinTimer = setTimeout(pinFloat, 80);
+    pinTimer = setTimeout(function () { pinFloat(); pinBarRight(); }, 80);
   }
   try { window.addEventListener('resize', schedulePin); } catch (e) {}
   try { window.addEventListener('orientationchange', schedulePin); } catch (e) {}

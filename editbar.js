@@ -50,6 +50,10 @@
   // 视频地址 -> 嵌入方式
   function videoEmbed(url) {
     var m;
+    // 本站上传的文件（/api/file?key=...）一律按可播放视频处理
+    if (/^\/api\/file(\?.*)?$/i.test(url) || /\/api\/file\?/i.test(url)) {
+      return { kind: 'video', src: url };
+    }
     if ((m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{6,})/))) {
       return { kind: 'iframe', src: 'https://www.youtube.com/embed/' + m[1] };
     }
@@ -188,6 +192,89 @@
     edits[cssPath(img)] = { type: 'img', value: url };
   }
 
+  // ---------- 本地文件上传 ----------
+  function isValidMediaUrl(url) {
+    return /^https?:\/\//i.test(url) || /^\//.test(url) || /^data:image\//i.test(url) || /^\/api\/file/i.test(url);
+  }
+
+  // 把本地文件上传到 /api/upload（需登录），返回可引用 URL /api/file?key=
+  function uploadFile(file, kind) {
+    return new Promise(function (resolve, reject) {
+      var fd = new FormData();
+      fd.append('file', file);
+      fetch('/api/upload', { method: 'POST', body: fd })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (o) {
+          if (!o.ok || !o.d.ok) { reject(new Error(o.d && o.d.error ? o.d.error : 'upload_failed')); return; }
+          resolve('/api/file?key=' + encodeURIComponent(o.d.key));
+        })
+        .catch(function (e) { reject(e); });
+    });
+  }
+
+  // 插入来源选择弹窗：本地文件 / 用链接
+  function pickInsertSource(kind, cb) {
+    var overlay = document.createElement('div');
+    overlay.className = 'xl-insert-modal';
+    var box = document.createElement('div');
+    box.className = 'xl-insert-box';
+    var title = document.createElement('div');
+    title.className = 'xl-insert-title';
+    title.textContent = kind === 'image' ? '插入图片' : '插入视频';
+    box.appendChild(title);
+
+    var fileIn = document.createElement('input');
+    fileIn.type = 'file';
+    fileIn.accept = kind === 'image' ? 'image/*' : 'video/*';
+    fileIn.style.display = 'none';
+    box.appendChild(fileIn);
+
+    var optLocal = document.createElement('button');
+    optLocal.type = 'button'; optLocal.className = 'xl-insert-opt';
+    optLocal.textContent = '📁 本地文件';
+    var optLink = document.createElement('button');
+    optLink.type = 'button'; optLink.className = 'xl-insert-opt';
+    optLink.textContent = '🔗 用链接';
+    var optCancel = document.createElement('button');
+    optCancel.type = 'button'; optCancel.className = 'xl-insert-opt xl-insert-cancel';
+    optCancel.textContent = '取消';
+    box.appendChild(optLocal); box.appendChild(optLink); box.appendChild(optCancel);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    function close() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }
+    overlay.addEventListener('mousedown', function (e) { if (e.target === overlay) close(); });
+    optCancel.addEventListener('click', close);
+
+    optLocal.addEventListener('click', function () {
+      fileIn.value = '';
+      fileIn.onchange = function () {
+        var f = fileIn.files && fileIn.files[0];
+        if (!f) return;
+        close();
+        toast(kind === 'image' ? '图片上传中…' : '视频上传中…');
+        uploadFile(f, kind).then(function (url) { cb(url); })
+          .catch(function (err) {
+            window.alert('上传失败：' + (err && err.message ? err.message : '未知错误') +
+              '\n（需以站主账号登录，且文件 ≤ 20MB）');
+          });
+      };
+      fileIn.click();
+    });
+
+    optLink.addEventListener('click', function () {
+      close();
+      var url = window.prompt(
+        kind === 'image' ? '输入图片地址（http/https 或以 / 开头的站内路径）：'
+                         : '输入视频地址（YouTube 链接，或 .mp4/.webm/.ogg 直链）：', '');
+      if (url === null) return;
+      url = url.trim();
+      if (!url) return;
+      if (!isValidMediaUrl(url)) { window.alert('地址不合法。'); return; }
+      cb(url);
+    });
+  }
+
   // ---------- 工具栏动作 ----------
   function makeTextbox() {
     var b = buildBlockEl({ id: genId(), type: 'textbox', html: '' });
@@ -205,27 +292,19 @@
   }
 
   function insertImage() {
-    var url = window.prompt('输入图片地址（http/https 或以 / 开头的站内路径）：', '');
-    if (url === null) return;
-    url = url.trim();
-    if (!url) return;
-    if (!/^https?:\/\//i.test(url) && !/^\//.test(url) && !/^data:image\//i.test(url)) {
-      window.alert('地址不合法：仅支持 http/https 或 / 开头的站内路径。'); return;
-    }
-    var b = buildBlockEl({ id: genId(), type: 'image', src: url, alt: '' });
-    blocksContainer().appendChild(b);
-    setActive(b);
+    pickInsertSource('image', function (url) {
+      var b = buildBlockEl({ id: genId(), type: 'image', src: url, alt: '' });
+      blocksContainer().appendChild(b);
+      setActive(b);
+    });
   }
 
   function insertVideo() {
-    var url = window.prompt('输入视频地址（YouTube 链接，或 .mp4/.webm/.ogg 直链）：', '');
-    if (url === null) return;
-    url = url.trim();
-    if (!url) return;
-    if (!/^https?:\/\//i.test(url) && !/^\//.test(url)) { window.alert('地址不合法。'); return; }
-    var b = buildBlockEl({ id: genId(), type: 'video', url: url });
-    blocksContainer().appendChild(b);
-    setActive(b);
+    pickInsertSource('video', function (url) {
+      var b = buildBlockEl({ id: genId(), type: 'video', url: url });
+      blocksContainer().appendChild(b);
+      setActive(b);
+    });
   }
 
   function applyFont(val) {

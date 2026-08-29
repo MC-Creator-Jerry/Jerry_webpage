@@ -121,11 +121,7 @@
     { re: /退出/, f: 'w-logout.svg' },
     { re: /新加帖子/, f: 'w-edit.svg' }
   ];
-  // 浮动按钮（语言/设置）-> 深色图标，替换内联 svg
-  var FAB = [
-    { re: /语言|language/i, f: 'globe.svg' },
-    { re: /设置|settings/i, f: 'gear.svg' }
-  ];
+  // 右下角浮动按钮（.fab）保留内联 SVG，不替换为图片图标
   // 通用文字按钮 -> 深色图标
   var GEN = [
     { re: /^发送$/, f: 'send.svg' }
@@ -138,12 +134,7 @@
         if (BAR[i].re.test(t)) { addIcon(b, BAR[i].f); break; }
       }
     });
-    document.querySelectorAll('.fab').forEach(function (f) {
-      var label = (f.getAttribute('aria-label') || f.getAttribute('title') || '').trim();
-      for (var j = 0; j < FAB.length; j++) {
-        if (FAB[j].re.test(label)) { f.innerHTML = ''; f.appendChild(makeImg(FAB[j].f)); break; }
-      }
-    });
+    // 右下角浮动按钮（.fab）保留内联 SVG，避免图片路径/加载失败导致按钮空白
     document.querySelectorAll('button, .btn').forEach(function (b) {
       if (b.querySelector(':scope > img.ico')) return;
       var t = (b.getAttribute('data-zh') || b.textContent || '').trim();
@@ -454,8 +445,7 @@ window.XLTopics = (function () {
   // 把浮动按钮强制提升为 body 直接子元素，并用 inline style 兜底，
   // 避免某些页面把它嵌在 main/content 里，或 CSS 媒体查询未命中导致随滚动消失。
   function pinFloat() {
-    var fa = document.querySelector('.float-actions');
-    if (!fa) return;
+    var fa = ensureFloatActions();
     if (fa.parentNode !== document.body) {
       try { document.body.appendChild(fa); } catch (e) {}
     }
@@ -477,12 +467,21 @@ window.XLTopics = (function () {
     fa.style.setProperty('z-index', z, 'important');
   }
 
+  function ensureFloatActions() {
+    var fa = document.querySelector('.float-actions');
+    if (!fa) {
+      fa = document.createElement('div');
+      fa.className = 'float-actions';
+      document.body.appendChild(fa);
+    }
+    return fa;
+  }
+
   function injectFloat() {
     // 预载编辑栏脚本：无论是否有浮动按钮，都让其应用已保存的页面覆盖
     loadEditbar();
 
-    var fa = document.querySelector('.float-actions');
-    if (!fa) return;
+    var fa = ensureFloatActions();
 
     // 1) 深浅色切换：插在「语言」按钮左侧
     if (!fa.querySelector('#themeToggle')) {
@@ -517,8 +516,8 @@ window.XLTopics = (function () {
   }
 
   function maybeInjectLayoutBtn() {
-    var fa = document.querySelector('.float-actions');
-    if (!fa || fa.querySelector('#editLayoutBtn')) return;
+    var fa = ensureFloatActions();
+    if (fa.querySelector('#editLayoutBtn')) return;
     var auth = window.JW_AUTH;
     var ok = auth && auth.user && (auth.user.isAdmin || auth.user.login === OWNER);
     if (!ok) return;

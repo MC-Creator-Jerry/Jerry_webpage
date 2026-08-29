@@ -67,6 +67,7 @@
     container.className = (container.className || '').replace(/\bpost-actions\b/g, '').trim() + ' post-actions';
 
     var followBtn = mkBtn(state.followed ? '已关注' : '关注', 'pa-follow' + (state.followed ? ' on' : ''), state.followed ? 'follow-on.svg' : 'plus.svg');
+    var favBtn = mkBtn(state.faved ? '已收藏' : '收藏', 'pa-fav' + (state.faved ? ' on' : ''), state.faved ? 'star-on.svg' : 'star.svg');
     var blockBtn = mkBtn(state.blocked ? '已屏蔽' : '屏蔽', 'pa-block' + (state.blocked ? ' on' : ''), 'ban.svg');
     var reportBtn = mkBtn(state.reported ? '已举报' : '举报', 'pa-report' + (state.reported ? ' on' : ''), 'flag.svg');
 
@@ -82,10 +83,12 @@
     var isOwnerPost = !!opts.authorLogin && opts.authorLogin === OWNER;
 
     followBtn.addEventListener('click', function () { doFollow(postId, followBtn, opts); });
+    favBtn.addEventListener('click', function () { doFav(postId, favBtn, opts); });
     if (!isOwnerPost) blockBtn.addEventListener('click', function () { doBlock(postId, blockBtn, opts); });
     reportBtn.addEventListener('click', function () { doReport(postId, reportBtn, opts); });
 
     container.appendChild(followBtn);
+    container.appendChild(favBtn);
     if (!isOwnerPost) container.appendChild(blockBtn);
     container.appendChild(reportBtn);
   }
@@ -224,6 +227,19 @@
         btn.classList.add('on');
         setLabel(btn, '已举报');
         if (opts.toast) opts.toast('举报已提交，感谢反馈');
+      }       else if (opts.toast) opts.toast('操作失败', true);
+    });
+  }
+
+  function doFav(postId, btn, opts) {
+    if (!requireLogin(opts)) return;
+    var willFav = !btn.classList.contains('on');
+    apiPost({ post: postId, action: willFav ? 'fav' : 'unfav' }).then(function (res) {
+      if (res && res.ok) {
+        btn.classList.toggle('on', !!res.faved);
+        setLabel(btn, res.faved ? '已收藏' : '收藏');
+        setIcon(btn, res.faved ? 'star-on.svg' : 'star.svg');
+        if (opts.toast) opts.toast(res.faved ? '已收藏 ★' : '已取消收藏');
       } else if (opts.toast) opts.toast('操作失败', true);
     });
   }

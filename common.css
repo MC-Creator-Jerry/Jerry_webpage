@@ -520,3 +520,30 @@ html.xl-entered body { animation: xlPageIn .55s cubic-bezier(.2, .7, .3, 1) both
   .xl-loader { display: none !important; }
   .xl-spark, html.xl-entered body { animation: none !important; }
 }
+
+/* ============ 13. 顶栏搜索框（common.js 注入到每个页面 .bar-right） ============ */
+.xl-search { display: inline-flex; align-items: center; margin-right: 4px; }
+.xl-search-input {
+  width: 132px; max-width: 36vw; height: 32px;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 999px;
+  padding: 0 12px; font-size: 0.85rem; font-family: inherit;
+  color: #fff; background: rgba(255,255,255,0.10);
+}
+.xl-search-input::placeholder { color: rgba(255,255,255,0.72); }
+.xl-search-input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,0.18); }
+html[data-theme="dark"] .xl-search-input { color: #fff; }
+@media (max-width: 560px) { .xl-search-input { width: 92px; } }
+
+/* 管理员专属入口（仅 body.is-admin 时可见） */
+.bar-btn.admin-only { display: none; }
+body.is-admin .bar-btn.admin-only { display: inline-flex; }
+
+/* 草稿标记 */
+.draft-badge { display: inline-block; margin-left: 8px; font-size: 0.72rem; font-weight: 700; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--card-border)); border-radius: 999px; padding: 1px 10px; vertical-align: middle; }
+
+/* 我的收藏（个人主页） */
+.fav-item { display: block; text-decoration: none; color: inherit; border: 1px solid var(--card-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: var(--card-bg); transition: border-color .15s, transform .1s; }
+.fav-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+.fav-item .fi-title { font-weight: 700; color: var(--text); }
+.fav-item:hover .fi-title { color: var(--accent); }
+.fav-item .fi-meta { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }

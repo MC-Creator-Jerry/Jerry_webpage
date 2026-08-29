@@ -339,6 +339,14 @@
       </div>
     </section>
 
+    <section class="card" id="favCard" hidden>
+      <div class="card-head">
+        <h2 data-zh="我的收藏" data-en="My Favorites">我的收藏</h2>
+      </div>
+      <div id="favList"></div>
+      <p class="hint-empty" id="favEmpty" hidden>（还没有收藏任何帖子）</p>
+    </section>
+
     <section class="card" id="avatarEditor" hidden>
       <div class="card-head">
         <h2 data-zh="自定义头像" data-en="Custom Avatar">自定义头像</h2>
@@ -448,6 +456,7 @@
       var avatarEditor = $('avatarEditor'), avatarFile = $('avatarFile'), avatarUrl = $('avatarUrl'), avatarPreview = $('avatarPreview');
       var ghAvatarSync = $('ghAvatarSync'), avatarCustomWrap = $('avatarCustomWrap');
       var loginPrompt = $('loginPrompt'), toastEl = $('toast');
+      var favCard = $('favCard'), favList = $('favList'), favEmpty = $('favEmpty');
 
       var MY_LOGIN = null;
       var VIEW_USER = new URLSearchParams(location.search).get('user');
@@ -569,6 +578,8 @@
         document.querySelectorAll('.change-btn[data-sec]').forEach(function (b) { b.hidden = !isOwn(); });
         // 设置背景按钮：仅本人可见
         $('profileTools').hidden = !isOwn();
+        // 我的收藏：仅本人可见
+        favCard.hidden = !isOwn();
       }
 
       /* ---------- 编辑器开关 ---------- */
@@ -748,11 +759,41 @@
         saveProfile({ themeColor: color || '' }, function () { renderDisplay(); });
       }
 
+      /* ---------- 我的收藏 ---------- */
+      function loadFavs() {
+        fetch('/api/post-actions?favs=1')
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            var ids = (d && d.favs) || [];
+            if (!ids.length) { favEmpty.hidden = false; favList.innerHTML = ''; return; }
+            favEmpty.hidden = true;
+            return fetch('/api/post?ids=' + encodeURIComponent(ids.join(',')))
+              .then(function (r) { return r.ok ? r.json() : { posts: [] }; })
+              .then(function (j) {
+                var posts = (j && j.posts) || [];
+                favList.innerHTML = '';
+                if (!posts.length) { favEmpty.hidden = false; return; }
+                favEmpty.hidden = true;
+                posts.forEach(function (p) {
+                  var a = document.createElement('a');
+                  a.className = 'fav-item';
+                  a.href = '../post/detail/?post=' + encodeURIComponent(p.id);
+                  var t = document.createElement('div'); t.className = 'fi-title'; t.textContent = p.title || '（无标题）';
+                  var m = document.createElement('div'); m.className = 'fi-meta';
+                  m.textContent = '@' + (p.login || '?') + ' · ' + new Date(p.ts || Date.now()).toLocaleDateString();
+                  a.appendChild(t); a.appendChild(m);
+                  favList.appendChild(a);
+                });
+              });
+          })
+          .catch(function () { favEmpty.hidden = false; favEmpty.textContent = '（加载收藏失败）'; });
+      }
+
       /* ---------- 加载 ---------- */
       function loadOwn() {
         fetch('/api/profile')
           .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { state.data = d; renderDisplay(); loadBg(d.login); })
+          .then(function (d) { state.data = d; renderDisplay(); loadBg(d.login); loadFavs(); })
           .catch(function () { loginPrompt.hidden = false; });
       }
       function loadPublic(login) {

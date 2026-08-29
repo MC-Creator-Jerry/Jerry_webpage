@@ -111,6 +111,10 @@
       '.hc-lv-more:hover{text-decoration:underline}',
       '.user-popup .up-divider{height:1px;background:#e3e8ef;margin:6px 4px}',
       '.user-popup .up-item.admin-only[hidden]{display:none!important}',
+      /* ===== 登录后「欢迎回来」浮条 ===== */
+      '.xl-welcome{text-align:center;line-height:1.45;border-radius:14px;padding:12px 24px}',
+      '.xl-welcome .xl-welcome-title{font-weight:700;font-size:.96rem}',
+      '.xl-welcome .xl-welcome-name{margin-top:3px;font-size:.92rem;opacity:.92}',
       '@media (prefers-reduced-motion: reduce){.xl-hovercard{transition:none}}'
     ].join('\n');
     document.head.appendChild(s);
@@ -187,6 +191,40 @@
     if (li) li.hidden = !show;
   }
 
+  // 登录后浮条：欢迎回来（换行）【用户名】
+  function showWelcome(u) {
+    if (!u) return;
+    var t = document.createElement('div');
+    t.className = 'xl-toast xl-welcome';
+    t.innerHTML =
+      '<div class="xl-welcome-title">' + jwT('欢迎回来', 'Welcome back') + '</div>' +
+      '<div class="xl-welcome-name">【' + jwEsc(u.display_name || u.login) + '】</div>';
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    setTimeout(function () {
+      t.classList.remove('show');
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 320);
+    }, 2600);
+  }
+
+  // 等待加载动画（boot.js 揭晓内容：移除 <html>.xl-booting）结束后再弹欢迎浮条
+  function showWelcomeAfterBoot(u) {
+    var root = document.documentElement;
+    if (!root.classList.contains('xl-booting')) {
+      // 无加载动画或已结束，稍延迟即显示
+      setTimeout(function () { showWelcome(u); }, 500);
+      return;
+    }
+    var mo = new MutationObserver(function () {
+      if (!root.classList.contains('xl-booting')) {
+        mo.disconnect();
+        // 等动画淡出（boot.js 约 420ms 移除 loader）后再弹，避免叠加
+        setTimeout(function () { showWelcome(u); }, 600);
+      }
+    });
+    mo.observe(root, { attributes: true, attributeFilter: ['class'] });
+  }
+
   function setLoggedIn(user) {
     window.JW_AUTH.user = user;
     window.JW_AUTH.isAdmin = !!(user && user.isAdmin);
@@ -201,6 +239,11 @@
       .catch(function () {});
     updateNoticeBadge();
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
+    // 登录态就绪后展示一次「欢迎回来」浮条（每页面加载仅一次），等加载动画结束再弹
+    if (!window.__welcomeShown) {
+      window.__welcomeShown = true;
+      showWelcomeAfterBoot(window.JW_AUTH.user);
+    }
   }
 
   function setLoggedOut() {

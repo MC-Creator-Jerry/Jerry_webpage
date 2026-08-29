@@ -217,6 +217,7 @@
       <div class="sort-bar" id="sortBar">
         <button class="sort-tab active" data-mode="new" type="button" data-zh="从新到旧" data-en="Newest first">从新到旧</button>
         <button class="sort-tab" data-mode="follow" type="button" data-zh="关注优先" data-en="Followed first">关注优先</button>
+        <button class="sort-tab" data-mode="hot" type="button" data-zh="热门" data-en="Hot">热门</button>
       </div>
       <div id="list"></div>
       <div id="empty" class="hint" hidden data-zh="还没有帖子，去发布第一条吧。" data-en="No posts yet. Publish the first one!">还没有帖子，去发布第一条吧。</div>
@@ -363,7 +364,8 @@
       var sortHint = document.getElementById('sortHint');
       var SORT_HINTS = {
         new: { zh: '站内所有帖子，按发布时间从新到旧排列。', en: 'All posts, newest first.' },
-        follow: { zh: '已关注的帖子排在最前，其余按发布时间从新到旧排列。', en: 'Followed posts first, then newest.' }
+        follow: { zh: '已关注的帖子排在最前，其余按发布时间从新到旧排列。', en: 'Followed posts first, then newest.' },
+        hot: { zh: '按互动热度排序（点赞×2 + 收藏 + 评论）。', en: 'Sorted by engagement (likes×2 + favorites + comments).' }
       };
       function applySortHint() {
         if (!sortHint) return;
@@ -456,12 +458,16 @@
           var cnt = (counts && counts[p.id]) || 0;
           var st = states[p.id] || {};
           var lc = (st && st.likeCount) || 0;
+          var repostLine = p.repostOf
+            ? '<div class="repost-tag"><span class="rt-label">转发自</span> <a href="../../personal_profile/?user=' + encodeURIComponent(p.repostLogin) + '">@' + esc(p.repostLogin) + '</a>：<a href="../detail/?post=' + encodeURIComponent(p.repostOf) + '">' + esc(p.repostTitle || '（无标题）') + '</a></div>'
+            : '';
           card.innerHTML =
             '<div class="head">' +
               '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
               '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
               '<span class="meta">' + fmtTime(p.ts) + '</span>' +
             '</div>' +
+            repostLine +
             '<h3><a class="ptitle" href="../detail/?post=' + encodeURIComponent(p.id) + '"></a></h3>' +
             '<div class="post-body"></div>' +
             '<div class="att-wrap"></div>' +
@@ -498,6 +504,11 @@
         if (typeof window.applyAll === 'function') window.applyAll();
       }
 
+      function hotScore(p) {
+        var st = states[p.id] || {};
+        var comments = (curCounts && curCounts[p.id]) || 0;
+        return (st.likeCount || 0) * 2 + (st.favCount || 0) + comments;
+      }
       function sortPosts(list) {
         var arr = list.slice();
         if (sortMode === 'follow') {
@@ -506,6 +517,12 @@
             var fb = (states[b.id] && states[b.id].followed) ? 1 : 0;
             if (fa !== fb) return fb - fa;            // 已关注的排前面
             return (b.ts || 0) - (a.ts || 0);        // 同组内从新到旧
+          });
+        } else if (sortMode === 'hot') {
+          arr.sort(function (a, b) {
+            var sa = hotScore(a), sb = hotScore(b);
+            if (sb !== sa) return sb - sa;            // 热度高的排前面
+            return (b.ts || 0) - (a.ts || 0);        // 同热度按新到旧
           });
         } else {
           arr.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });

@@ -215,11 +215,11 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
   }
 }
 
-/* ============ 11b. 横屏：左右安全区，避开刘海屏左右凹口 ============ */
+/* ============ 11b. 横屏：左右安全区（至少 10px），避开刘海屏左右凹口 ============ */
 @media (orientation: landscape) {
-  body { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
-  .content { padding-left: calc(16px + env(safe-area-inset-left, 0px)); padding-right: calc(16px + env(safe-area-inset-right, 0px)); }
-  .topbar { padding-left: calc(14px + env(safe-area-inset-left, 0px)); padding-right: calc(14px + env(safe-area-inset-right, 0px)); }
+  body { padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); }
+  .content { padding-left: calc(16px + max(10px, env(safe-area-inset-left, 0px))); padding-right: calc(16px + max(10px, env(safe-area-inset-right, 0px))); }
+  .topbar { padding-left: calc(14px + max(10px, env(safe-area-inset-left, 0px))); padding-right: calc(14px + max(10px, env(safe-area-inset-right, 0px))); }
 }
 
 @media (orientation: portrait) and (max-width: 400px) {

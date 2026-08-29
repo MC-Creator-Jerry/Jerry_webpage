@@ -9,8 +9,8 @@
 </script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>通知 · Jerry's webpage</title>
-<meta name="description" content="站内通知：系统、消息与评论。" />
+<title>消息中心 · Jerry's webpage</title>
+<meta name="description" content="站内消息中心：系统通知、消息通知、评论通知与私信。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>
@@ -75,6 +75,9 @@
   .tab .tb { background: var(--danger); color: #fff; border-radius: 999px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
   .tab.active .tb { background: #fff; color: var(--danger); }
 
+  .dm-frame { width: 100%; border: none; min-height: 78vh; border-radius: var(--radius); background: var(--card-bg); }
+  @media (max-width: 560px) { .dm-frame { min-height: 70vh; } }
+
   .card { margin-top: 6px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px; box-shadow: var(--card-shadow); }
   .card h2 { font-size: 1.1rem; color: var(--accent); margin-bottom: 12px; }
 
@@ -133,11 +136,11 @@
       <nav class="breadcrumb" aria-label="breadcrumb">
         <a href="../index.html" data-zh="主页" data-en="Home">主页</a>
         <span class="bc-sep">›</span>
-        <span class="bc-sub" data-zh="通知" data-en="Notice">通知</span>
+        <span class="bc-sub" data-zh="消息中心" data-en="Messages">消息中心</span>
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="通知" data-en="Notice">通知<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
       <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" href="../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
@@ -148,13 +151,14 @@
 
   <main class="content">
     <section class="hero">
-      <h1 data-zh="通知" data-en="Notice">通知</h1>
+      <h1 data-zh="消息中心" data-en="Messages">消息中心</h1>
     </section>
 
     <div class="tabs">
       <button class="tab active" data-tab="system" data-zh="系统通知" data-en="System">系统通知<span class="tb" id="tbSystem" hidden></span></button>
       <button class="tab" data-tab="message" data-zh="消息通知" data-en="Messages">消息通知<span class="tb" id="tbMessage" hidden></span></button>
       <button class="tab" data-tab="comment" data-zh="评论通知" data-en="Comments">评论通知<span class="tb" id="tbComment" hidden></span></button>
+      <button class="tab" data-tab="dm" data-zh="私信" data-en="Chat">私信</button>
     </div>
 
     <!-- 系统通知 -->
@@ -215,6 +219,15 @@
         <div id="listComment"></div>
         <div id="emptyComment" class="hint" hidden data-zh="暂无评论通知。" data-en="No comment notifications.">暂无评论通知。</div>
         <div id="needLoginCmt" class="hint" hidden data-zh="登录后可查看评论通知。" data-en="Sign in to view comment notifications.">登录后可查看评论通知。</div>
+      </div>
+    </section>
+
+    <!-- 私信（聊天） -->
+    <section id="panelDm" hidden>
+      <div class="card">
+        <h2 data-zh="私信" data-en="Direct Messages">私信</h2>
+        <p class="hint" data-zh="和其他用户一对一聊天。私信仅你与对方可见。" data-en="One-on-one chat with other users. Visible only to you and the other person.">和其他用户一对一聊天。私信仅你与对方可见。</p>
+        <iframe class="dm-frame" id="dmFrame" src="../messages/?embed=1" title="私信"></iframe>
       </div>
     </section>
   </main>
@@ -362,6 +375,7 @@
         document.getElementById('panelSystem').hidden = tab !== 'system';
         document.getElementById('panelMessage').hidden = tab !== 'message';
         document.getElementById('panelComment').hidden = tab !== 'comment';
+        document.getElementById('panelDm').hidden = tab !== 'dm';
         if (data.unread[tab] > 0) markSeen(tab);
       }
       document.querySelectorAll('.tab').forEach(function (t) {

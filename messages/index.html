@@ -121,7 +121,7 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/">通知<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       <a class="bar-btn" href="../post/">帖子中心</a>
       <a class="bar-btn" href="../products.html">产品</a>
       <a class="bar-btn" href="../helpcenter/">帮助中心</a>
@@ -280,5 +280,13 @@
     })();
   </script>
   <script src="../common.js"></script>
+  <script>
+    // 嵌入模式（被「消息中心」以 iframe 引入时）：隐藏自身的顶栏 / 页脚 / 浮动按钮
+    if (new URLSearchParams(location.search).get('embed') === '1') {
+      document.querySelectorAll('.topbar, .site-footer, .float-actions').forEach(function (el) { el.style.display = 'none'; });
+      var c = document.querySelector('.content');
+      if (c) { c.style.paddingTop = '20px'; c.style.maxWidth = '100%'; }
+    }
+  </script>
 </body>
 </html>

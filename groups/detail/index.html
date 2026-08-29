@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../../boot.js"></script>
+<script>
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>群组详情 · Jerry's webpage</title>
+<meta name="description" content="群组详情与成员。" />
+<meta name="author" content="Jerry" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+<style>
+  :root {
+    --bar-top: rgb(40, 89, 156); --bar-bottom: rgb(0, 120, 212); --accent: #0078d4; --font-scale: 1;
+    --radius: 14px; --bg: #f4f6f9; --text: #1c2733; --muted: #44556a; --card-bg: #ffffff; --card-border: #e3e8ef;
+    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05); --bar-fg: #ffffff; --panel-bg: #ffffff; --panel-border: #e3e8ef; --danger: #d13438;
+  }
+  html[data-theme="dark"] { --bg: #0f1720; --text: #e6edf5; --muted: #9fb0c3; --card-bg: #16212e; --card-border: #243244; --card-shadow: 0 1px 6px rgba(0,0,0,.4); --panel-bg: #16212e; --panel-border: #243244; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif; color: var(--text); background: var(--bg); transition: background .25s, color .25s; }
+  .topbar { position: sticky; top: 0; z-index: 100; min-height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background-color: var(--bar-top); background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%); color: var(--bar-fg); box-shadow: 0 2px 10px rgba(0,0,0,.18); border-radius: 0; }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name { font-size: 1.25rem; font-weight: 700; color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: .78rem; color: var(--bar-fg); opacity: .9; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn { border: none; background: rgba(255,255,255,.08); color: var(--bar-fg); border-radius: 0; padding: 6px 11px; font-size: .9rem; font-weight: 600; cursor: pointer; line-height: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+  .bar-btn:hover { background: rgba(255,255,255,.18); }
+  .float-actions { position: fixed; right: 20px; bottom: 20px; z-index: 150; display: flex; gap: 12px; }
+  .fab { width: 50px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; font-size: 1.25rem; color: #111; background: rgba(255,255,255,.55); backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); border: 1px solid rgba(255,255,255,.6); box-shadow: 0 6px 18px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.6); cursor: pointer; text-decoration: none; transition: background .18s, transform .12s; }
+  .fab:hover { background: rgba(255,255,255,.78); transform: translateY(-1px); }
+  .content { max-width: 760px; margin: 0 auto; padding: 40px 24px 64px; }
+  .back-link { display: inline-block; margin-bottom: 18px; color: var(--accent); text-decoration: none; font-weight: 600; font-size: .95rem; }
+  .back-link:hover { text-decoration: underline; }
+  .card { margin-top: 18px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--card-shadow); }
+  .g-title { font-size: 1.6rem; line-height: 1.35; color: var(--text); word-break: break-word; }
+  .g-desc { font-size: 1rem; line-height: 1.7; color: var(--muted); margin-top: 8px; white-space: pre-wrap; word-break: break-word; }
+  .g-meta { font-size: .85rem; color: var(--muted); margin-top: 12px; }
+  .g-meta a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .g-meta a:hover { text-decoration: underline; }
+  .g-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .post-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 9px 18px; font-size: .95rem; font-weight: 700; cursor: pointer; }
+  .post-btn:hover { filter: brightness(1.08); }
+  .post-btn.secondary { background: rgba(128,128,128,.18); color: var(--text); }
+  .post-btn.danger { background: var(--danger); }
+  .members-title { font-size: 1.1rem; color: var(--accent); margin: 26px 0 12px; }
+  .member { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--card-border); }
+  .member:last-child { border-bottom: none; }
+  .member .m-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: var(--card-border); }
+  .member .m-name { font-weight: 700; color: var(--text); text-decoration: none; }
+  .member .m-name:hover { color: var(--accent); }
+  .member .m-owner { font-size: .72rem; font-weight: 700; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--card-border)); border-radius: 999px; padding: 1px 9px; }
+  .member .m-spacer { flex: 1; }
+  .member .m-remove { border: none; background: transparent; color: var(--muted); font-size: .82rem; cursor: pointer; font-weight: 600; }
+  .member .m-remove:hover { color: var(--danger); }
+  .login-hint { color: var(--muted); opacity: .85; line-height: 1.7; }
+  .login-hint a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: .9rem; box-shadow: 0 6px 20px rgba(0,0,0,.3); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
+  .toast.err { background: var(--danger); }
+  .site-footer { border-top: 1px solid var(--card-border); margin-top: 48px; padding: 24px; text-align: center; color: var(--muted); font-size: .9rem; }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  [hidden] { display: none !important; }
+  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .g-title { font-size: 1.4rem; } }
+</style>
+  <link rel="stylesheet" href="../../common.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb"><a href="../../index.html">主页</a><span>›</span><a href="../">群组</a><span>›</span><span>详情</span></nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/">通知</a>
+      <a class="bar-btn" id="newPostBtn" href="../../post/new/">新加帖子</a>
+      <a class="bar-btn" href="../../helpcenter/">帮助中心</a>
+      <a class="bar-btn" id="loginBtn" href="#">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <a class="back-link" href="../">← 返回群组列表</a>
+    <section class="card" id="gBox" hidden></section>
+    <section class="card" id="loginHint" hidden>
+      <p class="login-hint">查看群组需要登录。<br /><a href="#" id="loginLink">点此登录</a>。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div>© 2026 Jerry · <a href="../../index.html">返回主页</a></div></footer>
+  <div class="toast" id="toast"></div>
+
+  <div class="float-actions">
+    <a class="fab" href="../../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="../../settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script src="../../auth.js"></script>
+  <script>
+    (function () {
+      var groupId = new URLSearchParams(location.search).get('group');
+      var gBox = document.getElementById('gBox');
+      var loginHint = document.getElementById('loginHint');
+      var toastEl = document.getElementById('toast');
+      var meLogin = null, isOwner = false, isMember = false, members = [];
+
+      function toast(msg, isErr) {
+        toastEl.textContent = msg;
+        toastEl.className = 'toast show' + (isErr ? ' err' : '');
+        setTimeout(function () { toastEl.className = 'toast' + (isErr ? ' err' : ''); }, 2600);
+      }
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+      function fmtTime(ts){ try { return new Date(ts).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); } catch(e){ return ''; } }
+
+      function render(d) {
+        var g = d.group;
+        isOwner = d.isOwner; isMember = d.isMember; members = d.members || [];
+        gBox.innerHTML =
+          '<div class="g-title"></div>' +
+          (g.desc ? '<div class="g-desc"></div>' : '') +
+          '<div class="g-meta">创建者 <a href="../../personal_profile/?user=' + encodeURIComponent(g.owner) + '">@' + esc(g.owner) + '</a> · ' + (g.memberCount || 0) + ' 名成员 · 创建于 ' + fmtTime(g.ts) + '</div>' +
+          '<div class="g-actions" id="gActions"></div>' +
+          '<div class="members-title">成员</div><div id="memberList"></div>';
+        gBox.querySelector('.g-title').textContent = g.name;
+        if (g.desc) gBox.querySelector('.g-desc').textContent = g.desc;
+        var actions = gBox.querySelector('#gActions');
+        if (meLogin) {
+          if (isMember) {
+            var leaveBtn = document.createElement('button'); leaveBtn.className = 'post-btn secondary'; leaveBtn.textContent = '退出群组';
+            leaveBtn.addEventListener('click', function () { act('leave'); });
+            actions.appendChild(leaveBtn);
+          } else {
+            var joinBtn = document.createElement('button'); joinBtn.className = 'post-btn'; joinBtn.textContent = '加入群组';
+            joinBtn.addEventListener('click', function () { act('join'); });
+            actions.appendChild(joinBtn);
+          }
+          if (isOwner) {
+            var delBtn = document.createElement('button'); delBtn.className = 'post-btn danger'; delBtn.textContent = '删除群组';
+            delBtn.addEventListener('click', function () { if (confirm('确定删除该群组？此操作不可撤销。')) act('delete'); });
+            actions.appendChild(delBtn);
+          }
+        }
+        var mlist = gBox.querySelector('#memberList');
+        members.forEach(function (login) {
+          var row = document.createElement('div'); row.className = 'member';
+          var img = document.createElement('img'); img.className = 'm-avatar'; img.src = 'https://github.com/' + encodeURIComponent(login) + '.png'; img.alt = ''; img.onerror = function () { this.style.visibility = 'hidden'; };
+          var name = document.createElement('a'); name.className = 'm-name'; name.href = '../../personal_profile/?user=' + encodeURIComponent(login); name.textContent = '@' + login;
+          row.appendChild(img); row.appendChild(name);
+          if (login === g.owner) { var ob = document.createElement('span'); ob.className = 'm-owner'; ob.textContent = '创建者'; row.appendChild(ob); }
+          row.appendChild(document.createElement('span')).className = 'm-spacer';
+          if (isOwner && login !== meLogin && login !== g.owner) {
+            var rm = document.createElement('button'); rm.className = 'm-remove'; rm.textContent = '移除';
+            rm.addEventListener('click', function () { if (confirm('将 @' + login + ' 移出群组？')) act('remove', login); });
+            row.appendChild(rm);
+          }
+          mlist.appendChild(row);
+        });
+        gBox.hidden = false;
+      }
+
+      function act(action, user) {
+        if (!meLogin) { if (window.JW_LOGIN) window.JW_LOGIN(); return; }
+        var payload = { action: action, id: groupId };
+        if (user) payload.user = user;
+        fetch('/api/group', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            if (res.ok) {
+              if (action === 'delete') { toast('已删除 ✓'); setTimeout(function () { location.href = '../'; }, 600); return; }
+              toast(action === 'join' ? '已加入 ✓' : action === 'leave' ? '已退出 ✓' : '已更新 ✓');
+              load();
+            } else if (res.body && res.body.error === 'unauthorized') { toast('请先登录', true); }
+            else if (res.body && res.body.error === 'forbidden') { toast('无权操作', true); }
+            else { toast('操作失败', true); }
+          })
+          .catch(function () { toast('网络错误', true); });
+      }
+
+      function load() {
+        if (!groupId) { gBox.innerHTML = '<p class="login-hint">缺少群组参数。</p>'; gBox.hidden = false; return; }
+        fetch('/api/group?id=' + encodeURIComponent(groupId))
+          .then(function (r) { return r.ok ? r.json() : { error: 'not_found' }; })
+          .then(function (d) {
+            if (d.error) { gBox.innerHTML = '<p class="login-hint">群组不存在或已删除。</p>'; gBox.hidden = false; return; }
+            render(d);
+          })
+          .catch(function () { gBox.innerHTML = '<p class="login-hint">加载失败。</p>'; gBox.hidden = false; });
+      }
+
+      document.getElementById('loginLink').addEventListener('click', function (e) { e.preventDefault(); if (window.JW_LOGIN) window.JW_LOGIN(); else location.href = '../../index.html'; });
+
+      fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
+        if (me && me.login) meLogin = me.login;
+        else loginHint.hidden = false;
+        load();
+      }).catch(function () { loginHint.hidden = false; load(); });
+    })();
+  </script>
+  <script src="../../common.js"></script>
+</body>
+</html>

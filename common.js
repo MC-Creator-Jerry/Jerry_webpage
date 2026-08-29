@@ -351,7 +351,7 @@ window.XLTopics = (function () {
   else setTimeout(send, 0);
 })();
 
-/* ============ 顶栏搜索框 + 管理员入口（注入到每个页面的 .bar-right） ============ */
+/* ============ 顶栏搜索框 + 私信入口 + 管理员入口（注入到每个页面的 .bar-right） ============ */
 (function () {
   function isSearchPage() { return /\/search\//.test(location.pathname); }
   function inject() {
@@ -359,7 +359,7 @@ window.XLTopics = (function () {
     var bars = document.querySelectorAll('.bar-right');
     if (!bars.length) return;
     bars.forEach(function (bar) {
-      if (!bar || bar.querySelector('.xl-search')) return;
+      if (!bar || bar.querySelector('.xl-search') || bar.querySelector('.xl-dm')) return;
       var form = document.createElement('form');
       form.className = 'xl-search';
       form.setAttribute('action', '/search/');
@@ -369,15 +369,46 @@ window.XLTopics = (function () {
       inp.placeholder = '搜索'; inp.setAttribute('aria-label', '搜索'); inp.maxLength = 80;
       form.appendChild(inp);
 
+      var dmLink = document.createElement('a');
+      dmLink.className = 'bar-btn xl-dm';
+      dmLink.href = '/messages/';
+      dmLink.textContent = '私信';
+      dmLink.hidden = true;
+      var dmBadge = document.createElement('span');
+      dmBadge.className = 'badge'; dmBadge.id = 'dmBadge'; dmBadge.hidden = true;
+      dmLink.appendChild(dmBadge);
+
+      var pointsLink = document.createElement('a');
+      pointsLink.className = 'bar-btn xl-points';
+      pointsLink.href = '/points/';
+      pointsLink.textContent = '积分榜';
+
       var adminLink = document.createElement('a');
       adminLink.className = 'bar-btn admin-only';
       adminLink.href = '/admin/reports/';
       adminLink.textContent = '举报后台';
 
       var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
-      if (login) { bar.insertBefore(form, login); bar.insertBefore(adminLink, login); }
-      else { bar.appendChild(form); bar.appendChild(adminLink); }
+      if (login) { bar.insertBefore(form, login); bar.insertBefore(dmLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(adminLink, login); }
+      else { bar.appendChild(form); bar.appendChild(dmLink); bar.appendChild(pointsLink); bar.appendChild(adminLink); }
     });
+    updateDmBadge();
+  }
+  function updateDmBadge() {
+    fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
+      if (!me || !me.login) return;
+      var links = document.querySelectorAll('.xl-dm');
+      links.forEach(function (l) { l.hidden = false; });
+      fetch('/api/message').then(function (r) { return r.ok ? r.json() : { conversations: [] }; }).then(function (d) {
+        var convs = d.conversations || [];
+        var unread = convs.reduce(function (s, c) { return s + (c.unread || 0); }, 0);
+        var badges = document.querySelectorAll('#dmBadge');
+        badges.forEach(function (b) {
+          if (unread > 0) { b.textContent = unread > 99 ? '99+' : String(unread); b.hidden = false; }
+          else { b.hidden = true; }
+        });
+      }).catch(function () {});
+    }).catch(function () {});
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
   else inject();

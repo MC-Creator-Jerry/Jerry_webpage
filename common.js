@@ -398,9 +398,14 @@ window.XLTopics = (function () {
       adminLink.href = '/admin/reports/';
       adminLink.textContent = '举报后台';
 
+      var notice = bar.querySelector('#noticeBtn');
       var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
-      if (login) { bar.insertBefore(form, login); bar.insertBefore(dmLink, login); bar.insertBefore(groupsLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(subLink, login); bar.insertBefore(adminLink, login); }
-      else { bar.appendChild(form); bar.appendChild(dmLink); bar.appendChild(groupsLink); bar.appendChild(pointsLink); bar.appendChild(subLink); bar.appendChild(adminLink); }
+      // 搜索栏放在「通知」按钮的左侧
+      var formRef = notice || login;
+      if (formRef) { bar.insertBefore(form, formRef); }
+      else { bar.appendChild(form); }
+      if (login) { bar.insertBefore(dmLink, login); bar.insertBefore(groupsLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(subLink, login); bar.insertBefore(adminLink, login); }
+      else { bar.appendChild(dmLink); bar.appendChild(groupsLink); bar.appendChild(pointsLink); bar.appendChild(subLink); bar.appendChild(adminLink); }
     });
     updateDmBadge();
     // 实时刷新：后台轮询通知 / 私信徽标（免 VAPID，纯前端轮询）

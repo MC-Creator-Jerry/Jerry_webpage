@@ -272,6 +272,7 @@
   <script src="../../auth.js"></script>
   <script src="../../post-actions.js"></script>
   <script src="../../poll.js"></script>
+  <script src="../../reactions.js"></script>
   <script>
     (function () {
       var listEl = document.getElementById('list');
@@ -422,6 +423,7 @@
       var states = {};
       var blockedSet = new Set();
       var pollsMap = {};
+      var reactsMap = {};
       var allPosts = [];
       var curCounts = {};
       var sortMode = 'new'; // 'new' = 从新到旧, 'follow' = 关注优先
@@ -474,6 +476,7 @@
             '<div class="post-body"></div>' +
             '<div class="att-wrap"></div>' +
             '<div class="att-poll" id="poll-' + p.id + '" hidden></div>' +
+            '<div class="att-react" id="react-' + p.id + '" hidden></div>' +
             '<div class="post-foot">' +
               '<span class="foot-spacer"></span>' +
               '<button class="foot-btn comment-btn" type="button" data-id="' + p.id + '" title="评论">' +
@@ -558,6 +561,10 @@
           if (pbox && pollsMap[p.id] && window.XLPoll) {
             window.XLPoll.render(pbox, Object.assign({}, pollsMap[p.id], { post: p.id }), { compact: true, canManage: false });
           }
+          var rbox = listEl.querySelector('.att-react[id="react-' + p.id + '"]');
+          if (rbox && reactsMap[p.id] && window.XLReactions) {
+            window.XLReactions.render(rbox, Object.assign({}, reactsMap[p.id], { post: p.id }), { compact: true });
+          }
         });
       }
 
@@ -586,6 +593,11 @@
                     .then(function (r) { return r.ok ? r.json() : { polls: {} }; })
                     .then(function (pd) { pollsMap = (pd && pd.polls) || {}; })
                     .catch(function () { pollsMap = {}; });
+                }).then(function () {
+                  return fetch('/api/react?posts=' + encodeURIComponent(ids.join(',')))
+                    .then(function (r) { return r.ok ? r.json() : { reacts: {} }; })
+                    .then(function (rd) { reactsMap = (rd && rd.reacts) || {}; })
+                    .catch(function () { reactsMap = {}; });
                 }).then(function () {
                   renderAndBind(posts, counts);
                   maybeOpenFromUrl();
@@ -695,7 +707,7 @@
             '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
             '<span class="meta">' + fmtTime(p.ts) + '</span>' +
           '</div>' +
-          '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><div class="post-body" style="font-size:1.02rem;line-height:1.8;color:var(--text)"></div><div class="att-wrap"></div><div class="att-poll" id="mPoll" hidden></div>' +
+          '<h1 style="font-size:1.5rem;line-height:1.35;margin:10px 0;word-break:break-word"></h1><div class="post-body" style="font-size:1.02rem;line-height:1.8;color:var(--text)"></div><div class="att-wrap"></div><div class="att-poll" id="mPoll" hidden></div><div class="att-react" id="mReact" hidden></div>' +
           '<div class="post-actions" id="mPostActions" data-post="' + p.id + '"></div>' +
           '<div class="post-foot" style="margin-top:10px">' +
             '<span class="foot-spacer"></span>' +
@@ -723,6 +735,7 @@
           onBlock: function (postId, blocked) { if (states[postId]) states[postId].blocked = blocked; if (blocked) { mPost.querySelector('#mPostActions').innerHTML = '<span class="hint">你已屏蔽此帖。</span>'; } else { loadModalPost(); } }
         });
         loadModalPoll(p, canEdit);
+        loadModalReactions(p);
         var mLike = document.getElementById('mLikeBtn');
         if (mLike) mLike.addEventListener('click', function () { toggleLike(p, this); });
         var mCommentBtn = document.getElementById('mCommentBtn');
@@ -755,6 +768,15 @@
               }
             }
           })
+          .catch(function () {});
+      }
+
+      function loadModalReactions(p) {
+        var box = document.getElementById('mReact');
+        if (!box || !window.XLReactions) return;
+        fetch('/api/react?post=' + encodeURIComponent(p.id))
+          .then(function (r) { return r.ok ? r.json() : { reactions: {}, mine: [] }; })
+          .then(function (d) { window.XLReactions.render(box, Object.assign({}, d, { post: p.id }), {}); })
           .catch(function () {});
       }
 

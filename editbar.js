@@ -94,6 +94,10 @@
         wrap.appendChild(a);
       }
     }
+    if (b.zoom && (+b.zoom !== 1)) {
+      wrap.style.transform = 'scale(' + b.zoom + ')';
+      wrap.style.transformOrigin = 'top left';
+    }
     return wrap;
   }
 
@@ -244,6 +248,18 @@
     activeInner.style.color = val;
   }
 
+  // 缩放选中的图片/视频块（0.2 ~ 4 倍）
+  function applyZoom(delta) {
+    if (!activeWrap) { window.alert('请先点选一个图片或视频块。'); return; }
+    var t = activeWrap.dataset.type;
+    if (t !== 'image' && t !== 'video') { window.alert('放大/缩小仅适用于图片块或视频块。'); return; }
+    var cur = parseFloat(activeWrap.dataset.zoom || '1') || 1;
+    var next = Math.min(4, Math.max(0.2, Math.round((cur + delta) * 100) / 100));
+    activeWrap.dataset.zoom = next;
+    activeWrap.style.transform = 'scale(' + next + ')';
+    activeWrap.style.transformOrigin = 'top left';
+  }
+
   function showUI() {
     var b = document.createElement('div');
     b.className = 'xl-edit-banner';
@@ -274,6 +290,8 @@
     tb.appendChild(btn('🗑 删除文本框', deleteActive));
     tb.appendChild(btn('🖼 插入图片', insertImage));
     tb.appendChild(btn('🎬 插入视频', insertVideo));
+    tb.appendChild(btn('🔍＋ 放大', function () { applyZoom(0.2); }));
+    tb.appendChild(btn('🔍－ 缩小', function () { applyZoom(-0.2); }));
 
     tb.appendChild(sep());
 
@@ -360,9 +378,9 @@
         blocks.push({ id: id, type: 'textbox', html: inner.innerHTML, style: inner.getAttribute('style') || '' });
       } else if (type === 'image') {
         var img = wrap.querySelector('img');
-        blocks.push({ id: id, type: 'image', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '' });
+        blocks.push({ id: id, type: 'image', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '', zoom: Number(wrap.dataset.zoom || 1) });
       } else if (type === 'video') {
-        blocks.push({ id: id, type: 'video', url: wrap.dataset.url || '' });
+        blocks.push({ id: id, type: 'video', url: wrap.dataset.url || '', zoom: Number(wrap.dataset.zoom || 1) });
       }
     });
     fetch('/api/page-edit', {

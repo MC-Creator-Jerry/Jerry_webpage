@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js"></script>
+<script>
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>订阅 · Jerry's webpage</title>
+<meta name="description" content="RSS 订阅源与邮件订阅。" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  :root {
+    --bar-top: rgb(40, 89, 156);
+    --bar-bottom: rgb(0, 120, 212);
+    --accent: #0078d4;
+    --font-scale: 1;
+    --radius: 14px;
+    --bg: #f4f6f9;
+    --text: #1c2733;
+    --muted: #44556a;
+    --card-bg: #ffffff;
+    --card-border: #e3e8ef;
+    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+    --bar-fg: #ffffff;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f1720; --text: #e6edf5; --muted: #9fb0c3;
+    --card-bg: #16212e; --card-border: #243244; --card-shadow: 0 1px 6px rgba(0,0,0,.4);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif; color: var(--text); background: var(--bg); min-height: 100%; }
+  .topbar { position: sticky; top: 0; z-index: 100; min-height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background-color: var(--bar-top); background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%); color: var(--bar-fg); box-shadow: 0 2px 10px rgba(0,0,0,.18); border-radius: 0; }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .site-name { font-size: 1.25rem; font-weight: 700; color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--bar-fg); opacity: .9; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn { border: none; background: rgba(255,255,255,.08); color: var(--bar-fg); border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .bar-btn:hover { background: rgba(255,255,255,.18); }
+  .content { max-width: 760px; margin: 0 auto; padding: 40px 24px 100px; }
+  h1.page-title { font-size: 1.7rem; color: var(--text); margin-bottom: 6px; }
+  .sub { color: var(--muted); font-size: 0.98rem; margin-bottom: 28px; line-height: 1.7; }
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--card-shadow); margin-bottom: 22px; }
+  .card h2 { font-size: 1.15rem; color: var(--accent); margin-bottom: 12px; }
+  .card p.desc { color: var(--muted); font-size: 0.92rem; line-height: 1.7; margin-bottom: 14px; }
+  .feed-row { display: flex; gap: 8px; align-items: center; }
+  .feed-url { flex: 1; border: 1px solid var(--card-border); border-radius: 9px; padding: 9px 12px; font-size: 0.92rem; color: var(--text); background: var(--bg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .copy-btn, .sub-btn { border: none; background: var(--accent); color: #fff; border-radius: 9px; padding: 9px 16px; font-size: 0.92rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .copy-btn:hover, .sub-btn:hover { filter: brightness(1.08); }
+  .sub-input { width: 100%; border: 1px solid var(--card-border); border-radius: 9px; padding: 10px 12px; font-size: 1rem; font-family: inherit; color: var(--text); background: var(--bg); }
+  .sub-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .sub-form { display: flex; gap: 8px; }
+  .hint { font-size: 0.82rem; color: var(--muted); margin-top: 10px; }
+  .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,.3); opacity: 0; transition: opacity .25s; pointer-events: none; max-width: 90vw; }
+  .toast.show { opacity: 1; }
+  .toast.err { background: var(--danger, #d13438); }
+  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .content { padding: 28px 16px 90px; } .sub-form { flex-direction: column; } }
+  [hidden] { display: none !important; }
+</style>
+  <link rel="stylesheet" href="../common.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb"><a href="../index.html">主页</a><span>›</span><span>订阅</span></nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../post/center/">帖子中心</a>
+      <a class="bar-btn" id="loginBtn" href="#">登录</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1 class="page-title">订阅 Jerry's webpage</h1>
+    <p class="sub">用 RSS 阅读器订阅最新帖子，或留下邮箱加入邮件订阅名单（后续邮件群发上线后自动通知）。</p>
+
+    <section class="card">
+      <h2>RSS 订阅源</h2>
+      <p class="desc">把下面这个地址添加到任意 RSS 阅读器（如 Feedly、Inoreader、NetNewsWire）即可。源会随新帖自动更新。</p>
+      <div class="feed-row">
+        <input class="feed-url" id="feedUrl" readonly value="" />
+        <button class="copy-btn" id="copyBtn" type="button">复制</button>
+      </div>
+      <p class="hint"><a id="feedOpen" href="" target="_blank" rel="noopener">在新标签页打开源 ↗</a></p>
+    </section>
+
+    <section class="card">
+      <h2>邮件订阅</h2>
+      <p class="desc">留下邮箱加入订阅名单。我们目前尚无自动邮件发送能力，名单已安全保存在云端，待邮件服务接入后即可批量通知。</p>
+      <div class="sub-form">
+        <input class="sub-input" id="email" type="email" maxlength="120" placeholder="you@example.com" />
+        <button class="sub-btn" id="subBtn" type="button">订阅</button>
+      </div>
+      <p class="hint" id="subHint">提交即表示同意接收本站更新邮件。可随时通过邮件内链接取消订阅。</p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../auth.js"></script>
+  <script>
+    (function () {
+      var feedUrl = location.origin + '/feed.xml';
+      document.getElementById('feedUrl').value = feedUrl;
+      document.getElementById('feedOpen').href = feedUrl;
+
+      var toastEl = document.getElementById('toast');
+      function toast(msg, isErr) {
+        toastEl.textContent = msg;
+        toastEl.className = 'toast show' + (isErr ? ' err' : '');
+        setTimeout(function () { toastEl.className = 'toast' + (isErr ? ' err' : ''); }, 2600);
+      }
+
+      document.getElementById('copyBtn').addEventListener('click', function () {
+        var inp = document.getElementById('feedUrl');
+        inp.select();
+        try {
+          if (navigator.clipboard) navigator.clipboard.writeText(inp.value).then(function () { toast('已复制 RSS 地址 ✓'); }, function () { document.execCommand('copy'); toast('已复制 RSS 地址 ✓'); });
+          else { document.execCommand('copy'); toast('已复制 RSS 地址 ✓'); }
+        } catch (e) { toast('复制失败，请手动复制', true); }
+      });
+
+      var subBtn = document.getElementById('subBtn');
+      var emailEl = document.getElementById('email');
+      var subHint = document.getElementById('subHint');
+      subBtn.addEventListener('click', function () {
+        var email = emailEl.value.trim();
+        if (!email) { toast('请输入邮箱', true); return; }
+        subBtn.disabled = true;
+        fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            subBtn.disabled = false;
+            if (res.ok) {
+              emailEl.value = '';
+              toast(res.body && res.body.already ? '你已在订阅名单中 ✓' : '订阅成功 ✓');
+              subHint.textContent = '已加入订阅名单（共 ' + (res.body && res.body.count || 1) + ' 位订阅者）。可随时取消订阅。';
+            } else if (res.body && res.body.error === 'bad_email') { toast('邮箱格式有误', true); }
+            else if (res.body && res.body.error === 'rate_limited') { toast('操作过于频繁，请稍后再试', true); }
+            else { toast('订阅失败，请重试', true); }
+          })
+          .catch(function () { subBtn.disabled = false; toast('网络错误，请重试', true); });
+      });
+
+      fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
+        var lb = document.getElementById('loginBtn');
+        if (me && me.login) { lb.textContent = me.login; lb.href = '../settings/homepage.html'; }
+      }).catch(function () {});
+    })();
+  </script>
+  <script src="../common.js"></script>
+</body>
+</html>

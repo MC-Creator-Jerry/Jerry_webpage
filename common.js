@@ -436,3 +436,95 @@ window.XLTopics = (function () {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
   else inject();
 })();
+
+/* ============ 浮动按钮：深浅色切换（所有访客）+ 站主「更改当前页面布局」 ============ */
+(function () {
+  'use strict';
+  var OWNER = 'MC-Creator-Jerry';
+  var SUN = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  var EDIT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>';
+
+  function getTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('xl_theme', t); } catch (e) {}
+    if (themeBtn) themeBtn.innerHTML = t === 'dark' ? SUN : MOON;
+  }
+
+  function fabBtn(id, cls, title, svg, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'fab ' + cls;
+    b.id = id;
+    b.title = title;
+    b.setAttribute('aria-label', title);
+    b.innerHTML = svg;
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  var themeBtn = null;
+
+  function injectFloat() {
+    // 预载编辑栏脚本：无论是否有浮动按钮，都让其应用已保存的页面覆盖
+    loadEditbar();
+
+    var fa = document.querySelector('.float-actions');
+    if (!fa) return;
+
+    // 1) 深浅色切换：插在「语言」按钮左侧
+    if (!fa.querySelector('#themeToggle')) {
+      themeBtn = fabBtn('themeToggle', 'xl-theme', '切换深浅色', getTheme() === 'dark' ? SUN : MOON, function () {
+        setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+      });
+      var lang = fa.querySelector('#langBtn') || fa.querySelector('a[href$="language.html"]');
+      if (lang) fa.insertBefore(themeBtn, lang);
+      else fa.appendChild(themeBtn);
+    }
+
+    // 2) 动态加载编辑栏脚本（仅站主会用，但全站预载以便随时可用）
+    loadEditbar();
+
+    // 3) 站主：在主题按钮左侧插入「更改当前页面布局」
+    maybeInjectLayoutBtn();
+  }
+
+  function loadEditbar() {
+    if (window.XLEdit) return;
+    var sc = document.querySelector('script[src$="common.js"]');
+    var src = sc ? (sc.getAttribute('src') || '') : '';
+    var m = src.match(/^((?:\.\.\/)*)/);
+    var prefix = m ? m[1] : '';
+    var s = document.createElement('script');
+    s.src = prefix + 'editbar.js';
+    s.async = true;
+    document.head.appendChild(s);
+  }
+
+  function maybeInjectLayoutBtn() {
+    var fa = document.querySelector('.float-actions');
+    if (!fa || fa.querySelector('#editLayoutBtn')) return;
+    var auth = window.JW_AUTH;
+    var ok = auth && auth.user && (auth.user.isAdmin || auth.user.login === OWNER);
+    if (!ok) return;
+    var btn = fabBtn('editLayoutBtn', 'xl-edit-fab', '更改当前页面布局', EDIT, function () {
+      if (window.XLEdit) window.XLEdit.open();
+    });
+    var ref = fa.querySelector('#themeToggle') || fa.querySelector('#langBtn');
+    if (ref) fa.insertBefore(btn, ref);
+    else fa.appendChild(btn);
+  }
+
+  // 登录态变化（auth.js 在解析完成后回调）-> 站主时补插布局按钮
+  var prev = window.onAuthState;
+  window.onAuthState = function (auth) {
+    if (typeof prev === 'function') { try { prev(auth); } catch (e) {} }
+    maybeInjectLayoutBtn();
+  };
+  // 若 auth 已就绪（脚本加载顺序导致），立即判断一次
+  if (window.JW_AUTH && window.JW_AUTH.user) maybeInjectLayoutBtn();
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectFloat);
+  else injectFloat();
+})();

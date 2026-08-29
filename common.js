@@ -351,7 +351,7 @@ window.XLTopics = (function () {
   else setTimeout(send, 0);
 })();
 
-/* ============ 顶栏搜索框 + 私信入口 + 管理员入口（注入到每个页面的 .bar-right） ============ */
+/* ============ 顶栏搜索框 + 私信/群组入口（注入到每个页面的 .bar-right） ============ */
 (function () {
   function isSearchPage() { return /\/search\//.test(location.pathname); }
   function inject() {
@@ -378,25 +378,10 @@ window.XLTopics = (function () {
       dmBadge.className = 'badge'; dmBadge.id = 'dmBadge'; dmBadge.hidden = true;
       dmLink.appendChild(dmBadge);
 
-      var pointsLink = document.createElement('a');
-      pointsLink.className = 'bar-btn xl-points';
-      pointsLink.href = '/points/';
-      pointsLink.textContent = '积分榜';
-
       var groupsLink = document.createElement('a');
       groupsLink.className = 'bar-btn xl-groups';
       groupsLink.href = '/groups/';
       groupsLink.textContent = '群组';
-
-      var subLink = document.createElement('a');
-      subLink.className = 'bar-btn xl-subscribe';
-      subLink.href = '/subscribe/';
-      subLink.textContent = '订阅';
-
-      var adminLink = document.createElement('a');
-      adminLink.className = 'bar-btn admin-only';
-      adminLink.href = '/admin/reports/';
-      adminLink.textContent = '举报后台';
 
       var notice = bar.querySelector('#noticeBtn');
       var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
@@ -404,8 +389,8 @@ window.XLTopics = (function () {
       var formRef = notice || login;
       if (formRef) { bar.insertBefore(form, formRef); }
       else { bar.appendChild(form); }
-      if (login) { bar.insertBefore(dmLink, login); bar.insertBefore(groupsLink, login); bar.insertBefore(pointsLink, login); bar.insertBefore(subLink, login); bar.insertBefore(adminLink, login); }
-      else { bar.appendChild(dmLink); bar.appendChild(groupsLink); bar.appendChild(pointsLink); bar.appendChild(subLink); bar.appendChild(adminLink); }
+      if (login) { bar.insertBefore(dmLink, login); bar.insertBefore(groupsLink, login); }
+      else { bar.appendChild(dmLink); bar.appendChild(groupsLink); }
     });
     updateDmBadge();
     // 实时刷新：后台轮询通知 / 私信徽标（免 VAPID，纯前端轮询）

@@ -418,10 +418,29 @@
   }
 
   // 页面加载即尝试读取登录态（后端 cookie）
-  fetch('/api/me')
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (d) { if (d && d.login) setLoggedIn(d); else setLoggedOut(); })
-    .catch(function () { setLoggedOut(); });
+  // 健壮性修复：只在后端明确「无会话(401)」时才登出；网络/限流等非 401 错误
+  // 一律重试一次并保留当前状态，杜绝「切个页面就莫名登出」。
+  function loadMe(tries) {
+    tries = tries || 0;
+    fetch('/api/me')
+      .then(function (r) {
+        if (r.ok) {
+          return r.json().then(function (d) {
+            if (d && d.login) setLoggedIn(d);
+            else setLoggedOut();
+          });
+        }
+        // 401 = 确实没有会话 -> 登出；其余（网络/404/5xx）属于瞬时异常
+        if (r.status === 401) { setLoggedOut(); return; }
+        if (tries < 1) return loadMe(tries + 1);
+        // 重试后仍异常：不要误登出，保持页面默认（登录按钮可见）状态
+      })
+      .catch(function () {
+        // 网络层失败：重试一次；绝不因瞬时网络抖动而登出
+        if (tries < 1) return loadMe(tries + 1);
+      });
+  }
+  loadMe();
 
   if (loginBtn) loginBtn.addEventListener('click', function (e) {
     e.preventDefault();

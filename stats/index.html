@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <script src="../boot.js?v=20260829h"></script>
+  <script src="../boot.js?v=20260829i"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>流量看板 · Jerry's webpage</title>
   <style>
@@ -50,12 +50,16 @@
     table.rank tr:last-child td { border-bottom: none; }
     .bar-inline { height: 6px; background: var(--accent); border-radius: 3px; min-width: 2px; }
 
+    .mix-bar { display: flex; height: 18px; border-radius: 9px; overflow: hidden; background: var(--card-border); margin: 8px 0 10px; }
+    .mix-new { background: var(--accent); min-width: 0; }
+    .mix-ret { background: color-mix(in srgb, var(--accent) 32%, var(--card-border)); min-width: 0; }
+
     .hint { color: var(--muted); }
     .err-box { color: #c0392b; }
     [hidden] { display: none !important; }
     @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
   </style>
-  <link rel="stylesheet" href="../../common.css?v=20260829h" />
+  <link rel="stylesheet" href="../../common.css?v=20260829i" />
 </head>
 <body>
   <header class="topbar">
@@ -155,6 +159,34 @@
         </table>
         <p class="hint" id="topRefsEmpty" hidden data-zh="暂无外部来源（多是直接访问）。" data-en="No external referrers (mostly direct visits).">暂无外部来源（多是直接访问）。</p>
       </section>
+
+      <section class="card">
+        <h2 data-zh="时段分布" data-en="Time of day">时段分布</h2>
+        <p class="hint" data-zh="按访客本地时间统计的 24 小时浏览量。" data-en="Page views by visitor local hour (24h).">按访客本地时间统计的 24 小时浏览量。</p>
+        <div class="chart-wrap">
+          <div class="chart" id="hourChart"></div>
+        </div>
+        <div class="chart-legend"><span id="hourHint">–</span></div>
+      </section>
+
+      <section class="card">
+        <h2 data-zh="地理分布" data-en="Geography">地理分布</h2>
+        <table class="rank">
+          <thead><tr><th style="width:44px">#</th><th data-zh="国家/地区" data-en="Country / Region">国家/地区</th><th style="width:120px" data-zh="浏览量" data-en="Views">浏览量</th></tr></thead>
+          <tbody id="countryBody"></tbody>
+        </table>
+        <p class="hint" id="countryEmpty" hidden data-zh="暂无国家数据（多来自本地或代理）。" data-en="No country data (often local or proxied).">暂无国家数据（多来自本地或代理）。</p>
+      </section>
+
+      <section class="card">
+        <h2 data-zh="访客构成（区间去重）" data-en="Visitor mix (deduped)">访客构成（区间去重）</h2>
+        <p class="hint" data-zh="区间内独立访客中，首次访问落在窗口内为「新访客」，否则为「回访」。" data-en="Of the window's unique visitors, those whose first-ever visit falls in the window are 'new', the rest 'returning'.">区间内独立访客中，首次访问落在窗口内为「新访客」，否则为「回访」。</p>
+        <div class="mix-bar" id="mixBar"><div class="mix-new" id="mixNew"></div><div class="mix-ret" id="mixRet"></div></div>
+        <div class="chart-legend">
+          <span id="mixNewTxt">新访客 –</span>
+          <span id="mixRetTxt">回访 –</span>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -171,8 +203,8 @@
     </a>
   </div>
 
-  <script src="../../prefs.js?v=20260829h"></script>
-  <script src="../../auth.js?v=20260829h"></script>
+  <script src="../../prefs.js?v=20260829i"></script>
+  <script src="../../auth.js?v=20260829i"></script>
   <script>
     (function () {
       var dash = document.getElementById('dash');
@@ -246,6 +278,68 @@
         });
       }
 
+      // 时段分布：24 根柱子（0-23 点）
+      function renderHours(arr) {
+        var chart = document.getElementById('hourChart');
+        if (!chart) return;
+        chart.innerHTML = '';
+        if (!arr || !arr.length) { chart.innerHTML = '<span class="hint">暂无数据</span>'; return; }
+        var max = arr.reduce(function (m, n) { return Math.max(m, n || 0); }, 0) || 1;
+        var total = arr.reduce(function (s, n) { return s + (n || 0); }, 0);
+        for (var h = 0; h < 24; h++) {
+          var val = arr[h] || 0;
+          var col = document.createElement('div');
+          col.className = 'col';
+          var bar = document.createElement('div');
+          bar.className = 'bar' + (val ? '' : ' zero');
+          bar.style.height = Math.max(2, Math.round((val / max) * 100)) + '%';
+          bar.title = h + ':00 · ' + fmt(val) + ' PV';
+          var lb = document.createElement('div');
+          lb.className = 'lb';
+          lb.textContent = String(h);
+          col.appendChild(bar);
+          col.appendChild(lb);
+          chart.appendChild(col);
+        }
+        var peakH = arr.indexOf(max);
+        setText('hourHint', '峰值 ' + peakH + ':00（' + fmt(max) + ' PV），合计 ' + fmt(total) + ' PV');
+      }
+
+      // 地理分布：国家/地区表
+      var COUNTRY_NAMES = { XX: '未知 / 本地' };
+      function renderCountries(rows) {
+        var tbody = document.getElementById('countryBody');
+        var empty = document.getElementById('countryEmpty');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!rows || !rows.length) { if (empty) empty.hidden = false; return; }
+        if (empty) empty.hidden = true;
+        var max = rows.reduce(function (m, r) { return Math.max(m, r.count || 0); }, 0) || 1;
+        rows.forEach(function (r, i) {
+          var name = COUNTRY_NAMES[r.key] || r.key;
+          var tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td>' + (i + 1) + '</td>' +
+            '<td class="path"><div>' + esc(name) + '</div>' +
+              '<div class="bar-inline" style="width:' + Math.max(2, Math.round((r.count / max) * 100)) + '%"></div></td>' +
+            '<td class="num">' + fmt(r.count) + '</td>';
+          tbody.appendChild(tr);
+        });
+      }
+
+      // 访客构成：新访客 vs 回访（区间去重）
+      function renderVisitorMix(newUv, retUv) {
+        var total = (newUv || 0) + (retUv || 0);
+        var pctNew = total ? Math.round((newUv / total) * 100) : 0;
+        var pctRet = total ? 100 - pctNew : 0;
+        var nEl = document.getElementById('mixNew');
+        var rEl = document.getElementById('mixRet');
+        if (nEl) nEl.style.width = pctNew + '%';
+        if (rEl) rEl.style.width = pctRet + '%';
+        setText('mixNewTxt', '新访客 ' + fmt(newUv) + '（' + pctNew + '%）');
+        setText('mixRetTxt', '回访 ' + fmt(retUv) + '（' + pctRet + '%）');
+      }
+
       function load() {
         if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.textContent = '加载中…'; }
         fetch('/api/stats?days=' + encodeURIComponent(days), { credentials: 'same-origin' })
@@ -277,6 +371,9 @@
             renderChart((lastDays = d.days || []), chartMetric);
             renderRanks('topPathsBody', 'topPathsEmpty', d.topPaths || [], false);
             renderRanks('topRefsBody', 'topRefsEmpty', d.topRefs || [], true);
+            renderHours(d.hours || []);
+            renderCountries(d.countries || []);
+            renderVisitorMix(d.rangeNewUv || 0, d.rangeRetUv || 0);
           })
           .catch(function () {
             if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = '刷新'; }
@@ -313,6 +410,6 @@
       load();
     })();
   </script>
-  <script src="../../common.js?v=20260829h"></script>
+  <script src="../../common.js?v=20260829i"></script>
 </body>
 </html>

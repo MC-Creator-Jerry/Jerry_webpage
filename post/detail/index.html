@@ -213,6 +213,7 @@
   <script src="../../auth.js"></script>
   <script src="../../post-actions.js"></script>
   <script src="../../poll.js"></script>
+  <script src="../../reactions.js"></script>
   <script>
     (function () {
       var FORBIDDEN = ['fuck','shit','bitch','asshole','bastard','dick','cunt','whore','slut','nigger','faggot','retard','tranny','nazi','kill yourself','kys','傻逼','sb','草泥马','操你','日你','妈的','贱人','婊子','杂种','滚蛋','废青','支那','洋奴','汉奸','狗杂种','加微信','扫码领','免费送','刷单','博彩','赌博','色情','裸聊','办证','代开发票','点击领取','一元购','日赚','月入过万','私聊客服'];
@@ -268,6 +269,7 @@
           repostLine +
           '<h1></h1><div class="post-body"></div><div class="att-wrap"></div>' +
           '<div class="att-poll" id="pollBox" hidden></div>' +
+          '<div class="att-react" id="reactBox" hidden></div>' +
           '<div class="post-actions" id="postActions" data-post="'+p.id+'"></div>' + edit + del +
           (canEdit ? '<button class="pa-btn poll-add-btn" id="addPollBtn" hidden>添加投票</button>' : '');
         postBox.querySelector('h1').textContent = p.title || '（无标题）';
@@ -290,6 +292,16 @@
           onBlock: function (postId, blocked) { if (blocked) showBlockedNote(postId); else loadPost(); }
         });
         loadPoll(p, canEdit);
+        loadReactions(p);
+      }
+
+      function loadReactions(p) {
+        var box = document.getElementById('reactBox');
+        if (!box || !window.XLReactions) return;
+        fetch('/api/react?post=' + encodeURIComponent(p.id))
+          .then(function (r) { return r.ok ? r.json() : { reactions: {}, mine: [] }; })
+          .then(function (d) { window.XLReactions.render(box, Object.assign({}, d, { post: p.id }), {}); })
+          .catch(function () {});
       }
 
       function loadPoll(p, canEdit) {

@@ -181,6 +181,13 @@
     transition: opacity 0.15s;
   }
   .help-prod-btn:hover { opacity: 0.9; }
+  .help-prod-btn[hidden] { display: none !important; }
+  .search-empty {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
 
   /* ---- 页脚 ---- */
   .site-footer {
@@ -238,10 +245,11 @@
                data-zh-ph="搜索产品…" data-en-ph="Search products…" placeholder="搜索产品…" />
       </div>
       <div class="help-prod-grid">
-        <a class="help-prod-btn" href="../xiaolanpage/" data-zh="小蓝页" data-en="Xiaolan Page">小蓝页</a>
-        <a class="help-prod-btn" href="../news-doc/" data-zh="新闻主页" data-en="News Homepage">新闻主页</a>
-        <a class="help-prod-btn" href="../cleanopt-doc/" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</a>
+        <a class="help-prod-btn" href="./xiaolanpage/" data-zh="小蓝页" data-en="Xiaolan Page">小蓝页</a>
+        <a class="help-prod-btn" href="./news-doc/" data-zh="新闻主页" data-en="News Homepage">新闻主页</a>
+        <a class="help-prod-btn" href="./cleanopt-doc/" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</a>
       </div>
+      <p class="search-empty" id="searchEmpty" hidden data-zh="未找到匹配的产品" data-en="No matching products found">未找到匹配的产品</p>
     </section>
   </main>
 
@@ -301,6 +309,46 @@
       function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
 
       applyAll();
+    })();
+  </script>
+  <script>
+    (function () {
+      var input = document.getElementById('helpSearch');
+      var grid = document.querySelector('.help-prod-grid');
+      var empty = document.getElementById('searchEmpty');
+      if (!input || !grid) return;
+
+      function getTerm() {
+        return (input.value || '').toLowerCase().replace(/\s+/g, '');
+      }
+
+      function matchBtn(btn, term) {
+        if (!term) return true;
+        var zh = (btn.getAttribute('data-zh') || '').toLowerCase();
+        var en = (btn.getAttribute('data-en') || '').toLowerCase();
+        var text = (btn.textContent || '').toLowerCase();
+        return zh.indexOf(term) !== -1 || en.indexOf(term) !== -1 || text.indexOf(term) !== -1;
+      }
+
+      function filter() {
+        var term = getTerm();
+        var btns = grid.querySelectorAll('.help-prod-btn');
+        var visible = 0;
+        for (var i = 0; i < btns.length; i++) {
+          var show = matchBtn(btns[i], term);
+          btns[i].hidden = !show;
+          if (show) visible++;
+        }
+        if (empty) {
+          empty.hidden = visible > 0;
+          var en = document.documentElement.lang === 'en';
+          empty.textContent = en ? (empty.getAttribute('data-en') || 'No matching products found') : (empty.getAttribute('data-zh') || '未找到匹配的产品');
+        }
+      }
+
+      input.addEventListener('input', filter);
+      input.addEventListener('keyup', filter);
+      filter();
     })();
   </script>
   <script src="../auth.js"></script>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js"></script>
+<script>
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>举报审核后台 · Jerry's webpage</title>
+<meta name="description" content="举报审核后台（仅管理员）。" />
+<meta name="author" content="Jerry" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  :root {
+    --bar-top: rgb(40, 89, 156); --bar-bottom: rgb(0, 120, 212); --accent: #0078d4;
+    --font-scale: 1; --radius: 14px; --bg: #f4f6f9; --text: #1c2733; --muted: #44556a;
+    --card-bg: #ffffff; --card-border: #e3e8ef; --card-shadow: 0 1px 4px rgba(20,35,59,0.05);
+    --bar-fg: #ffffff; --panel-bg: #ffffff; --panel-border: #e3e8ef; --danger: #d13438;
+  }
+  html[data-theme="dark"] { --bg:#0f1720; --text:#e6edf5; --muted:#9fb0c3; --card-bg:#16212e; --card-border:#243244; --card-shadow:0 1px 6px rgba(0,0,0,0.4); --panel-bg:#16212e; --panel-border:#243244; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body { min-height:100%; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif; color:var(--text); background:var(--bg); transition:background .25s,color .25s; }
+  .topbar { position:sticky; top:0; z-index:100; min-height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; background-color:var(--bar-top); background-image:linear-gradient(180deg,var(--bar-top) 0%,var(--bar-top) 45%,var(--bar-bottom) 100%); color:var(--bar-fg); box-shadow:0 2px 10px rgba(0,0,0,0.18); border-radius:0; }
+  .bar-left { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+  .site-name { font-size:1.25rem; font-weight:700; color:var(--bar-fg); text-decoration:none; }
+  .breadcrumb { display:flex; align-items:center; gap:4px; font-size:0.78rem; color:var(--bar-fg); opacity:0.9; }
+  .breadcrumb a { color:var(--bar-fg); text-decoration:none; }
+  .bar-right { display:flex; align-items:center; gap:8px; }
+  .bar-btn { border:none; background:rgba(255,255,255,0.08); color:var(--bar-fg); border-radius:0; padding:6px 11px; font-size:0.9rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+  .bar-btn:hover { background:rgba(255,255,255,0.18); }
+  .content { max-width:920px; margin:0 auto; padding:40px 24px 96px; }
+  .hero { margin-bottom:20px; }
+  .hero h1 { font-size:1.9rem; color:var(--text); }
+  .toolbar { display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+  .btn { border:1px solid var(--card-border); background:var(--card-bg); color:var(--text); border-radius:10px; padding:8px 14px; font-size:0.9rem; font-weight:600; cursor:pointer; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .btn.danger { color:var(--danger); border-color:color-mix(in srgb,var(--danger) 40%,var(--card-border)); }
+  .btn.danger:hover { background:color-mix(in srgb,var(--danger) 10%,var(--card-bg)); }
+  .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stat { font-size:0.9rem; color:var(--muted); }
+  .report { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px; box-shadow:var(--card-shadow); }
+  .report.resolved { opacity:0.62; }
+  .report .r-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .report .r-title { font-weight:700; color:var(--text); }
+  .report .r-meta { font-size:0.8rem; color:var(--muted); }
+  .badge { font-size:0.72rem; font-weight:700; border-radius:999px; padding:2px 10px; }
+  .badge.open { background:color-mix(in srgb,var(--danger) 14%,transparent); color:var(--danger); }
+  .badge.resolved { background:color-mix(in srgb,#1f9d55 14%,transparent); color:#1f9d55; }
+  .report .r-reason { font-size:0.92rem; color:var(--muted); margin:8px 0; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+  .report .r-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .empty { color:var(--muted); opacity:0.8; font-style:italic; padding:20px 0; }
+  .denied { text-align:center; padding:60px 0; color:var(--muted); }
+  .toast { position:fixed; left:50%; top:22px; transform:translateX(-50%); z-index:300; background:#1c2733; color:#fff; padding:10px 18px; border-radius:10px; font-size:0.9rem; box-shadow:0 6px 20px rgba(0,0,0,0.3); opacity:0; transition:opacity .25s; pointer-events:none; }
+  .toast.show { opacity:1; }
+  .site-footer { border-top:1px solid var(--card-border); margin-top:40px; padding:24px; text-align:center; color:var(--muted); font-size:0.9rem; }
+  .site-footer a { color:var(--accent); text-decoration:none; }
+  [hidden]{display:none!important;}
+  @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} }
+</style>
+  <link rel="stylesheet" href="../common.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb"><a href="../index.html">主页</a><span class="bc-sep">›</span><span class="bc-sub">举报审核</span></nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero"><h1 data-zh="举报审核后台" data-en="Report Review">举报审核后台</h1></section>
+    <section class="toolbar" id="toolbar" hidden>
+      <button class="btn" id="refresh" data-zh="刷新" data-en="Refresh">刷新</button>
+      <span class="stat" id="stat"></span>
+    </section>
+    <div id="list"></div>
+    <div id="empty" class="empty" hidden data-zh="暂无举报。" data-en="No reports.">暂无举报。</div>
+    <div id="denied" class="denied" hidden>
+      <p data-zh="无访问权限（仅管理员）。" data-en="No access (admin only).">无访问权限（仅管理员）。</p>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div>© 2026 Jerry · <a href="../index.html">返回主页</a></div></footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="../auth.js"></script>
+  <script>
+    (function () {
+      var listEl = document.getElementById('list');
+      var emptyEl = document.getElementById('empty');
+      var deniedEl = document.getElementById('denied');
+      var toolbar = document.getElementById('toolbar');
+      var statEl = document.getElementById('stat');
+      var toastEl = document.getElementById('toast');
+      var refreshBtn = document.getElementById('refresh');
+      function toast(m){ toastEl.textContent=m; toastEl.className='toast show'; setTimeout(function(){toastEl.className='toast';},2200); }
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+      function fmt(ts){ try{return new Date(ts).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(e){return '';} }
+
+      function load() {
+        fetch('/api/reports')
+          .then(function(r){ return r.ok? r.json() : {error:'forbidden', status:r.status}; })
+          .then(function(d){
+            if (d.error === 'forbidden') { deniedEl.hidden=false; toolbar.hidden=true; return; }
+            toolbar.hidden=false;
+            var reports = d.reports || [];
+            var open = reports.filter(function(r){return r.status!=='resolved';}).length;
+            statEl.textContent = '共 ' + reports.length + ' 条 · 待处理 ' + open + ' 条';
+            if (!reports.length){ emptyEl.hidden=false; listEl.innerHTML=''; return; }
+            emptyEl.hidden=true;
+            listEl.innerHTML='';
+            reports.forEach(function(r){
+              var card = document.createElement('div');
+              card.className = 'report' + (r.status==='resolved'?' resolved':'');
+              var resolved = r.status==='resolved';
+              card.innerHTML =
+                '<div class="r-head">' +
+                  '<span class="r-title"></span>' +
+                  '<span class="badge '+(resolved?'resolved':'open')+'">'+(resolved?'已处理':'待处理')+'</span>' +
+                  '<span class="r-meta">举报人 @'+esc(r.reporter)+' · 作者 @'+esc(r.postLogin)+' · '+fmt(r.ts)+'</span>' +
+                '</div>' +
+                '<div class="r-reason"></div>' +
+                '<div class="r-actions">' +
+                  (resolved
+                    ? '<button class="btn" data-act="reopen" data-id="'+r.id+'">重新打开</button>'
+                    : '<button class="btn primary" data-act="resolve" data-id="'+r.id+'">标记已处理</button>') +
+                  '<a class="btn" href="../post/detail/?post='+encodeURIComponent(r.postId)+'">查看帖子</a>' +
+                  '<button class="btn danger" data-act="delete" data-id="'+r.id+'">删除工单</button>' +
+                '</div>';
+              card.querySelector('.r-title').textContent = r.title || '（无标题）';
+              card.querySelector('.r-reason').textContent = '理由：' + (r.reason || '（未填写）');
+              listEl.appendChild(card);
+            });
+            listEl.querySelectorAll('button[data-act]').forEach(function(b){
+              b.addEventListener('click', function(){ act(b.getAttribute('data-act'), b.getAttribute('data-id')); });
+            });
+          })
+          .catch(function(){ deniedEl.hidden=false; deniedEl.querySelector('p').textContent='加载失败，请重试。'; });
+      }
+
+      function act(action, id) {
+        fetch('/api/reports', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id:id, action:action }) })
+          .then(function(r){ return r.ok? r.json() : {error:'fail'}; })
+          .then(function(d){ if (d.ok){ toast('已更新 ✓'); load(); } else { toast('操作失败', true); } })
+          .catch(function(){ toast('操作失败（网络错误）', true); });
+      }
+
+      refreshBtn.addEventListener('click', load);
+      load();
+    })();
+  </script>
+  <script src="../common.js"></script>
+</body>
+</html>

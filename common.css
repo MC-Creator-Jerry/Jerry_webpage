@@ -751,6 +751,46 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 .xl-tb-color { display: inline-flex; align-items: center; gap: 6px; }
 .xl-tb-color input[type=color] { width: 22px; height: 22px; border: none; background: none; padding: 0; cursor: pointer; }
 
+/* 工具栏分组：组内不拆行，窄屏时整组换行，避免按钮被拆得七零八落 */
+.xl-tb-group { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+
+/* 开关型按钮（粗体/斜体/下划线/删除线/对齐）的激活态：反白高亮 */
+.xl-tb-btn.on {
+  background: #fff;
+  color: var(--accent, #0078d4);
+  border-color: #fff;
+  font-weight: 700;
+}
+.xl-tb-btn:disabled { opacity: .55; cursor: not-allowed; }
+.xl-tb-btn:disabled:hover { background: rgba(255, 255, 255, 0.15); }
+
+/* B / I / U / S 用真实字形呈现，一眼可辨 */
+.xl-tb-btn.f-bold { font-weight: 800; }
+.xl-tb-btn.f-italic { font-style: italic; font-family: Georgia, serif; }
+.xl-tb-btn.f-underline { text-decoration: underline; }
+.xl-tb-btn.f-strike { text-decoration: line-through; }
+.xl-tb-btn.f-bold, .xl-tb-btn.f-italic,
+.xl-tb-btn.f-underline, .xl-tb-btn.f-strike {
+  min-width: 30px; padding: 6px 8px; text-align: center;
+}
+
+/* 快捷键提示小键帽 */
+.xl-kbd {
+  display: inline-block; padding: 1px 6px; margin: 0 1px;
+  border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: .74rem; line-height: 1.5; white-space: nowrap;
+}
+
+/* 保存按钮：有未保存修改时右上角显示琥珀色圆点 */
+.xl-edit-save.is-dirty { position: relative; }
+.xl-edit-save.is-dirty::after {
+  content: ''; position: absolute; top: -3px; right: -3px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ffb900;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, .18);
+}
+
 /* 内容块（站主新建：文本框 / 图片 / 视频） */
 #xl-edit-blocks {
   max-width: 920px;

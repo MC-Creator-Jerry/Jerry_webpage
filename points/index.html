@@ -10,7 +10,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>积分榜 · Jerry's webpage</title>
-<meta name="description" content="用户积分与排行榜。" />
+<meta name="description" content="用户积分与排行榜：帖子榜、登录榜与等级。" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>
   :root {
@@ -65,24 +65,37 @@
   .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 18px; box-shadow: var(--card-shadow); }
   .card h2 { font-size: 1.05rem; color: var(--accent); margin-bottom: 10px; }
 
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { border: 1px solid var(--card-border); background: var(--panel-bg); color: var(--muted); border-radius: 999px; padding: 7px 18px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all .15s; }
+  .tab:hover { border-color: var(--accent); color: var(--accent); }
+  .tab.active { color: #fff; background: var(--accent); border-color: var(--accent); }
+
   .lb { display: flex; flex-direction: column; gap: 8px; }
   .row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 10px; background: var(--panel-bg); }
   .row.me { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel-bg)); }
-  .rank { width: 30px; font-weight: 800; color: var(--muted); text-align: center; }
+  .rank { width: 30px; font-weight: 800; color: var(--muted); text-align: center; flex: 0 0 auto; }
   .rank.r1 { color: #e6a400; } .rank.r2 { color: #9aa7b5; } .rank.r3 { color: #cd7f32; }
-  .name { flex: 1; font-weight: 700; }
+  .name { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .name a { color: var(--text); text-decoration: none; }
   .name a:hover { color: var(--accent); }
-  .posts { font-size: 0.82rem; color: var(--muted); width: 90px; text-align: right; }
-  .pts { font-weight: 800; color: var(--accent); width: 70px; text-align: right; }
-  .empty { color: var(--muted); opacity: 0.8; font-style: italic; padding: 8px 4px; }
+  .posts { font-size: 0.82rem; color: var(--muted); width: 90px; text-align: right; flex: 0 0 auto; }
+  .pts { font-weight: 800; color: var(--accent); width: 70px; text-align: right; flex: 0 0 auto; }
 
+  .lv { flex: 0 0 auto; min-width: 44px; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 800; font-size: 0.8rem; text-align: center; }
+  .lvbar { flex: 0 0 auto; width: 120px; }
+  .lvbar-track { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 18%, var(--card-border)); overflow: hidden; }
+  .lvbar-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s; }
+  .lvbar-cap { font-size: 0.72rem; color: var(--muted); margin-top: 3px; text-align: center; }
+  .logins { font-size: 0.82rem; color: var(--muted); width: 92px; text-align: right; flex: 0 0 auto; }
+
+  .hidden { display: none !important; }
+  .empty { color: var(--muted); opacity: 0.8; font-style: italic; padding: 8px 4px; }
   .rule { font-size: 0.85rem; color: var(--muted); margin-top: 14px; line-height: 1.7; }
   .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.3); opacity: 0; transition: opacity .25s; pointer-events: none; }
   .toast.show { opacity: 1; }
   .site-footer { border-top: 1px solid var(--card-border); margin-top: 40px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; }
   .site-footer a { color: var(--accent); text-decoration: none; }
-  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .content { padding: 22px 16px 56px; } .hero h1 { font-size: 1.5rem; } }
+  @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .content { padding: 22px 16px 56px; } .hero h1 { font-size: 1.5rem; } .lvbar { width: 76px; } .posts, .logins { width: 64px; } .pts { width: 54px; } }
 </style>
   <link rel="stylesheet" href="../common.css" />
 </head>
@@ -109,13 +122,22 @@
   <main class="content">
     <section class="hero">
       <h1>积分榜</h1>
-      <p>每发布一篇帖子获得 10 积分。看看谁是本站最活跃的作者。</p>
+      <p>发帖与登录都有排名。看看谁是本站最活跃的作者，谁又是出勤最稳定的老朋友。</p>
     </section>
 
     <div class="card">
-      <h2>排行榜</h2>
-      <div class="lb" id="lb"><div class="empty">加载中……</div></div>
-      <p class="rule">积分规则：发布帖子 = 10 分 / 篇。（后续将加入评论数、被收藏数、被点赞数等加权。）</p>
+      <div class="tabs">
+        <button class="tab active" id="tabPost" type="button">帖子榜</button>
+        <button class="tab" id="tabLogin" type="button">登录榜</button>
+      </div>
+
+      <div class="lb" id="lbPost"></div>
+      <div class="lb hidden" id="lbLogin"></div>
+
+      <p class="rule">
+        帖子榜：每发布 1 篇帖子 = 10 分，按积分排序。<br>
+        登录榜：累计「活跃天数」（每天访问本站计 1 天），每 10 天升 1 级（Lv）；进度条显示距下一级还需几天。
+      </p>
     </div>
   </main>
 
@@ -137,29 +159,78 @@
   <script src="../auth.js"></script>
   <script>
     (function () {
-      var lb = document.getElementById('lb');
+      var lbPost = document.getElementById('lbPost');
+      var lbLogin = document.getElementById('lbLogin');
+      var tabPost = document.getElementById('tabPost');
+      var tabLogin = document.getElementById('tabLogin');
+
+      function setTab(which) {
+        var postActive = which === 'post';
+        tabPost.classList.toggle('active', postActive);
+        tabLogin.classList.toggle('active', !postActive);
+        lbPost.classList.toggle('hidden', !postActive);
+        lbLogin.classList.toggle('hidden', postActive);
+      }
+      tabPost.addEventListener('click', function () { setTab('post'); });
+      tabLogin.addEventListener('click', function () { setTab('login'); });
+
+      function rowEl(cls) {
+        var el = document.createElement('div');
+        el.className = 'row' + (cls ? ' ' + cls : '');
+        return el;
+      }
+      function cell(cls) { var d = document.createElement('div'); d.className = cls; return d; }
+
+      function renderPost(rows, me) {
+        if (!rows.length) { lbPost.innerHTML = '<div class="empty">还没有任何帖子，快来发布第一篇吧！</div>'; return; }
+        lbPost.innerHTML = '';
+        rows.forEach(function (r) {
+          var el = rowEl(me && r.login === me ? 'me' : '');
+          var rk = cell('rank' + (r.rank <= 3 ? ' r' + r.rank : '')); rk.textContent = r.rank;
+          var nm = cell('name');
+          var a = document.createElement('a'); a.href = '../personal_profile/?user=' + encodeURIComponent(r.login); a.textContent = '@' + r.login;
+          nm.appendChild(a);
+          var ps = cell('posts'); ps.textContent = r.posts + ' 帖';
+          var pt = cell('pts'); pt.textContent = r.points;
+          el.appendChild(rk); el.appendChild(nm); el.appendChild(ps); el.appendChild(pt);
+          lbPost.appendChild(el);
+        });
+      }
+
+      function renderLogin(rows, me) {
+        if (!rows.length) { lbLogin.innerHTML = '<div class="empty">还没有登录记录。</div>'; return; }
+        lbLogin.innerHTML = '';
+        rows.forEach(function (r) {
+          var el = rowEl(me && r.login === me ? 'me' : '');
+          var rk = cell('rank' + (r.rank <= 3 ? ' r' + r.rank : '')); rk.textContent = r.rank;
+          var nm = cell('name');
+          var a = document.createElement('a'); a.href = '../personal_profile/?user=' + encodeURIComponent(r.login); a.textContent = '@' + r.login;
+          nm.appendChild(a);
+          var lv = cell('lv'); lv.textContent = 'Lv.' + r.lv;
+          var bar = cell('lvbar');
+          var track = document.createElement('div'); track.className = 'lvbar-track';
+          var fill = document.createElement('div'); fill.className = 'lvbar-fill'; fill.style.width = Math.round(r.lvProgress * 100) + '%';
+          track.appendChild(fill);
+          var cap = document.createElement('div'); cap.className = 'lvbar-cap';
+          cap.textContent = '还需 ' + (10 - (r.logins % 10 || 10)) + ' 天';
+          bar.appendChild(track); bar.appendChild(cap);
+          var lg = cell('logins'); lg.textContent = r.logins + ' 天';
+          el.appendChild(rk); el.appendChild(nm); el.appendChild(lv); el.appendChild(bar); el.appendChild(lg);
+          lbLogin.appendChild(el);
+        });
+      }
+
+      var ME = (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login) || null;
       fetch('/api/points')
-        .then(function (r) { return r.ok ? r.json() : { leaderboard: [] }; })
+        .then(function (r) { return r.ok ? r.json() : { postBoard: [], loginBoard: [] }; })
         .then(function (d) {
-          var rows = (d.leaderboard || []);
-          if (!rows.length) { lb.innerHTML = '<div class="empty">还没有任何帖子，快来发布第一篇吧！</div>'; return; }
-          lb.innerHTML = '';
-          var ME = (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login) || null;
-          rows.forEach(function (r, i) {
-            var rank = i + 1;
-            var el = document.createElement('div');
-            el.className = 'row' + (ME && r.login === ME ? ' me' : '');
-            var rk = document.createElement('div'); rk.className = 'rank' + (rank <= 3 ? ' r' + rank : ''); rk.textContent = rank;
-            var nm = document.createElement('div'); nm.className = 'name';
-            var a = document.createElement('a'); a.href = '../personal_profile/?user=' + encodeURIComponent(r.login); a.textContent = '@' + r.login;
-            nm.appendChild(a);
-            var ps = document.createElement('div'); ps.className = 'posts'; ps.textContent = r.posts + ' 帖';
-            var pt = document.createElement('div'); pt.className = 'pts'; pt.textContent = r.points;
-            el.appendChild(rk); el.appendChild(nm); el.appendChild(ps); el.appendChild(pt);
-            lb.appendChild(el);
-          });
+          renderPost(d.postBoard || [], ME);
+          renderLogin(d.loginBoard || [], ME);
         })
-        .catch(function () { lb.innerHTML = '<div class="empty">加载失败</div>'; });
+        .catch(function () {
+          lbPost.innerHTML = '<div class="empty">加载失败</div>';
+          lbLogin.innerHTML = '<div class="empty">加载失败</div>';
+        });
     })();
   </script>
   <script src="../common.js"></script>

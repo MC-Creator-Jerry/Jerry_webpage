@@ -553,3 +553,34 @@ body.is-admin .bar-btn.admin-only { display: inline-flex; }
 .repost-tag .rt-label { font-weight: 700; color: var(--accent); margin-right: 4px; }
 .repost-tag a { color: var(--text); text-decoration: none; font-weight: 600; }
 .repost-tag a:hover { color: var(--accent); text-decoration: underline; }
+
+/* ===== 投票挂件 ===== */
+.att-poll { margin-top: 14px; }
+.poll { border: 1px solid var(--card-border); border-radius: 12px; padding: 14px 16px; background: color-mix(in srgb, var(--accent) 5%, var(--card-bg)); }
+.poll.compact { padding: 12px 14px; }
+.poll-q { font-weight: 700; color: var(--text); font-size: 1.02rem; margin-bottom: 10px; line-height: 1.5; }
+.poll-opts { display: flex; flex-direction: column; gap: 8px; }
+.poll-opt {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text);
+  border-radius: 9px; padding: 9px 13px; font-size: 0.92rem; font-family: inherit; cursor: pointer;
+  text-align: left; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.poll-opt:hover:not(:disabled) { border-color: var(--accent); }
+.poll-opt.chosen { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.poll-opt:disabled { cursor: default; }
+.poll-opt .po-text { position: relative; z-index: 2; flex: 1; }
+.poll-opt .po-bar { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--accent) 16%, transparent); z-index: 1; border-radius: 9px 0 0 9px; transition: width .35s ease; }
+.poll-opt.chosen .po-bar { background: color-mix(in srgb, var(--accent) 26%, transparent); }
+.poll-opt .po-pct { position: relative; z-index: 2; font-weight: 700; color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+.poll-opt.chosen .po-pct { color: var(--accent); }
+.poll-meta { font-size: 0.78rem; color: var(--muted); margin-top: 10px; }
+.poll-manage { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.poll-composer { border: 1px dashed var(--card-border); border-radius: 12px; padding: 14px; margin-top: 14px; background: var(--card-bg); }
+.poll-composer .pc-title { font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.poll-composer .pc-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.poll-composer .pc-add { border: 1px dashed var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 8px; padding: 7px 12px; font-size: 0.85rem; cursor: pointer; width: 100%; }
+.poll-composer .pc-add:hover { border-color: var(--accent); color: var(--accent); }
+.poll-composer .pc-save { margin-top: 6px; }
+.poll-add-btn { margin-top: 12px; }

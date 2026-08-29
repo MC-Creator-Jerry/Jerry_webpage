@@ -2,6 +2,7 @@
 <html lang="zh-CN" data-theme="light">
 <head>
   <script src="boot.js"></script>
+  <script>window.__xlHoldReveal = true;</script><!-- 帖子中心：等帖子列表渲染完成后再揭晓，避免空白/旧内容闪现 -->
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
@@ -277,6 +278,13 @@
     (function () {
       var listEl = document.getElementById('list');
       var emptyEl = document.getElementById('empty');
+
+      // 列表渲染完成后才揭晓页面（配合 boot.js 的 HOLD 机制，避免进入时闪现空白/旧内容）
+      function revealOnce() {
+        if (window.__xlRevealed) return;
+        window.__xlRevealed = true;
+        if (typeof window.__xlReveal === 'function') window.__xlReveal();
+      }
       var toastEl = document.getElementById('toast');
       var sortBar = document.getElementById('sortBar');
       var topicBar = document.getElementById('topicBar');
@@ -578,7 +586,7 @@
           .then(function (d) {
             var posts = d.posts || [];
             allPosts = posts;
-            if (!posts.length) { render(posts, {}); return; }
+            if (!posts.length) { render(posts, {}); revealOnce(); return; }
             var ids = posts.map(function (p) { return p.id; });
             fetch('/api/comment/counts?posts=' + encodeURIComponent(ids.join(',')))
               .then(function (r) { return r.ok ? r.json() : { counts: {} }; })
@@ -601,11 +609,17 @@
                 }).then(function () {
                   renderAndBind(posts, counts);
                   maybeOpenFromUrl();
+                  revealOnce();
                 });
               });
           })
-          .catch(function () { render([], {}); });
+          .catch(function () { render([], {}); revealOnce(); });
       }
+
+      // 从 bfcache 返回时刷新列表（避免展示旧内容）
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) { try { load(); } catch (_) {} }
+      });
 
       function toggleLike(p, btn) {
         if (!meLogin) { toast('请先登录', true); if (window.JW_LOGIN) window.JW_LOGIN(); return; }

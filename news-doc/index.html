@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>新闻主页 · 文档</title>
+<meta name="description" content="新闻主页产品文档。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="新闻主页 · 文档" />
+<meta property="og:description" content="新闻主页产品文档。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="新闻主页 · 文档" />
+<meta name="twitter:description" content="新闻主页产品文档。" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  :root {
+    --bar-top: rgb(40, 89, 156);
+    --bar-bottom: rgb(0, 120, 212);
+    --accent: #0078d4;
+    --font-scale: 1;
+    --radius: 14px;
+    --bg: #f4f6f9;
+    --text: #1c2733;
+    --muted: #44556a;
+    --card-bg: #ffffff;
+    --card-border: #e3e8ef;
+    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+    --bar-fg: #ffffff;
+    --panel-bg: #ffffff;
+    --panel-border: #e3e8ef;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f1720;
+    --text: #e6edf5;
+    --muted: #9fb0c3;
+    --card-bg: #16212e;
+    --card-border: #243244;
+    --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    --panel-bg: #16212e;
+    --panel-border: #243244;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a {
+    color: var(--bar-fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 0;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
+
+  /* ---- 内容区（目前留空，只保留 UI） ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 36px; }
+  .hero h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+  }
+  .card {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .empty-tip {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ---- 页脚 ---- */
+  .site-footer {
+    border-top: 1px solid var(--card-border);
+    margin-top: 48px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+</style>
+  <link rel="stylesheet" href="../common.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
+        <a id="bcMain" href="../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep" id="bcSep">›</span>
+        <span class="bc-sub" id="bcSub" data-zh="新闻主页" data-en="News Homepage">新闻主页</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" href="../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="新闻主页" data-en="News Homepage">新闻主页</h1>
+      <p data-zh="这是新闻主页的产品文档。" data-en="This is the product documentation for News Homepage.">这是新闻主页的产品文档。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="文档内容" data-en="Documentation">文档内容</h2>
+      <p class="empty-tip" data-zh="（内容待补充）" data-en="(Content to be added)">（内容待补充）</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 新闻主页 · <a href="../index.html">返回主页</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var en = cur.lang === 'en';
+        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      applyAll();
+    })();
+  </script>
+  <script src="../auth.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>

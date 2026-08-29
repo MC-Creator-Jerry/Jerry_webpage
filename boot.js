@@ -17,6 +17,26 @@
   var HOLD = false;       // 页面要求等数据渲染完成后再揭晓（如帖子中心）
   var revealed = false;   // safeReveal 幂等保护
 
+  // 从 cookie 读取登录账号（callback.js 写入 gh_user）
+  function getLoginFromCookie() {
+    try {
+      var m = document.cookie.match(/(?:^|; )gh_user=([^;]+)/);
+      if (m) return decodeURIComponent(m[1]);
+    } catch (e) {}
+    return null;
+  }
+
+  // 加载动画三行字：未登录保持原样，登录后改为「欢迎回来\n【用户名】」
+  function buildLoaderText(login) {
+    if (login) {
+      var esc = String(login).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+      return '<span class="xl-line">欢迎回来</span><span class="xl-line">【' + esc + '】</span>';
+    }
+    return '<span class="xl-line">欢迎来到</span><span class="xl-line">小蓝页</span><span class="xl-line">Jerry&#39;s Webpage</span>';
+  }
+
   function safeReveal() {
     if (revealed) return;
     revealed = true;
@@ -90,11 +110,7 @@
         '<div class="xl-prog-v-pct">0%</div>' +
       '</div>' +
       '<div class="xl-sqs"></div>' +
-      '<div class="xl-load-text">' +
-        '<span class="xl-line">欢迎来到</span>' +
-        '<span class="xl-line">小蓝页</span>' +
-        '<span class="xl-line">Jerry&#39;s Webpage</span>' +
-      '</div>';
+      '<div class="xl-load-text">' + buildLoaderText(getLoginFromCookie()) + '</div>';
     doc.body.appendChild(loader);
     return loader;
   }

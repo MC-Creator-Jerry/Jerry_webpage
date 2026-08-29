@@ -68,6 +68,13 @@
 
     var followBtn = mkBtn(state.followed ? '已关注' : '关注', 'pa-follow' + (state.followed ? ' on' : ''), state.followed ? 'follow-on.svg' : 'plus.svg');
     var favBtn = mkBtn(state.faved ? '已收藏' : '收藏', 'pa-fav' + (state.faved ? ' on' : ''), state.faved ? 'star-on.svg' : 'star.svg');
+    var repostBtn = document.createElement('a');
+    repostBtn.className = 'pa-btn pa-repost';
+    repostBtn.href = '../../post/new/?repost=' + encodeURIComponent(postId);
+    repostBtn.setAttribute('aria-label', '转发');
+    var rImg = document.createElement('img'); rImg.className = 'ico'; rImg.src = '../../icons/repost.svg'; rImg.alt = '';
+    var rSpan = document.createElement('span'); rSpan.className = 'pa-label'; rSpan.textContent = '转发';
+    repostBtn.appendChild(rImg); repostBtn.appendChild(rSpan);
     var blockBtn = mkBtn(state.blocked ? '已屏蔽' : '屏蔽', 'pa-block' + (state.blocked ? ' on' : ''), 'ban.svg');
     var reportBtn = mkBtn(state.reported ? '已举报' : '举报', 'pa-report' + (state.reported ? ' on' : ''), 'flag.svg');
 
@@ -89,6 +96,7 @@
 
     container.appendChild(followBtn);
     container.appendChild(favBtn);
+    container.appendChild(repostBtn);
     if (!isOwnerPost) container.appendChild(blockBtn);
     container.appendChild(reportBtn);
   }

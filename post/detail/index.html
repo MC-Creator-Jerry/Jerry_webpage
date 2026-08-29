@@ -255,12 +255,16 @@
         var canEdit = meLogin && p.login === meLogin;
         var edit = canEdit ? '<a class="del" id="editPost" href="../new/?edit=' + encodeURIComponent(p.id) + '">编辑帖子</a>' : '';
         var del = canDel ? '<button class="del" id="delPost">删除帖子</button>' : '';
+        var repostLine = p.repostOf
+          ? '<div class="repost-tag"><span class="rt-label">转发自</span> <a href="../../personal_profile/?user='+encodeURIComponent(p.repostLogin)+'">@'+esc(p.repostLogin)+'</a>：<a href="../detail/?post='+encodeURIComponent(p.repostOf)+'">'+esc(p.repostTitle || '（无标题）')+'</a></div>'
+          : '';
         postBox.innerHTML =
           '<div class="head">' +
             '<img class="avatar" src="'+avatar+'" alt="" onerror="this.style.visibility=\'hidden\'">' +
             '<a class="author" href="../../personal_profile/?user='+encodeURIComponent(p.login)+'">@'+esc(p.login)+'</a>' +
             '<span class="meta">'+fmtTime(p.ts)+'</span>' +
           '</div>' +
+          repostLine +
           '<h1></h1><div class="post-body"></div><div class="att-wrap"></div>' +
           '<div class="post-actions" id="postActions" data-post="'+p.id+'"></div>' + edit + del;
         postBox.querySelector('h1').textContent = p.title || '（无标题）';

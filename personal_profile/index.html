@@ -125,6 +125,9 @@
   .change-btn { border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--card-border)); background: transparent; color: var(--accent); border-radius: 999px; padding: 3px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; line-height: 1.5; }
   .change-btn:hover { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); }
   .change-btn.inline { margin-left: 8px; vertical-align: middle; }
+  .follow-btn { margin-left: 8px; border: none; background: var(--accent); color: #fff; border-radius: 999px; padding: 4px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; line-height: 1.5; }
+  .follow-btn:hover { filter: brightness(1.08); }
+  .follow-btn.on { background: transparent; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--card-border)); }
 
   /* 编辑态 */
   .edit-input, .edit-textarea { width: 100%; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; font-size: 1rem; font-family: inherit; color: var(--text); background: var(--panel-bg); margin-top: 6px; }
@@ -280,6 +283,7 @@
           <div class="profile-meta" id="loginDisplay"></div>
           <div style="margin-top:10px">
             <button class="change-btn" data-sec="avatar" hidden>更改头像</button>
+            <button class="follow-btn" id="followBtn" type="button" hidden></button>
           </div>
         </div>
       </div>
@@ -471,6 +475,7 @@
       var avatarEditor = $('avatarEditor'), avatarFile = $('avatarFile'), avatarUrl = $('avatarUrl'), avatarPreview = $('avatarPreview');
       var ghAvatarSync = $('ghAvatarSync'), avatarCustomWrap = $('avatarCustomWrap');
       var loginPrompt = $('loginPrompt'), toastEl = $('toast');
+      var followBtn = $('followBtn');
       var favCard = $('favCard'), favList = $('favList'), favEmpty = $('favEmpty');
 
       var MY_LOGIN = null;
@@ -556,6 +561,36 @@
           .catch(function () { toast('保存失败（网络错误）', true); });
       };
 
+      /* ---------- 用户关注（关注 / 好友） ---------- */
+      var followState = false;
+      function updateFollowBtn() {
+        if (!followBtn) return;
+        if (!MY_LOGIN || isOwn()) { followBtn.hidden = true; return; }
+        followBtn.hidden = false;
+        followBtn.textContent = followState ? '已关注' : '关注';
+        followBtn.classList.toggle('on', followState);
+      }
+      function loadFollowState() {
+        if (!MY_LOGIN || !state.data || isOwn()) return;
+        fetch('/api/ufollow?target=' + encodeURIComponent(state.data.login))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { if (d) { followState = !!d.following; updateFollowBtn(); } })
+          .catch(function () {});
+      }
+      if (followBtn) {
+        followBtn.addEventListener('click', function () {
+          if (!MY_LOGIN || isOwn()) return;
+          fetch('/api/ufollow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: followState ? 'unfollow' : 'follow', target: state.data.login })
+          })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) { if (d && d.ok) { followState = d.following; updateFollowBtn(); toast(followState ? '已关注 ✓' : '已取消关注'); } else { toast('操作失败', true); } })
+            .catch(function () { toast('操作失败', true); });
+        });
+      }
+
       function renderDisplay() {
         var d = state.data || {};
         avatar.src = d.ghAvatar ? gh(d.login) : (d.avatar || gh(d.login));
@@ -595,6 +630,9 @@
         $('profileTools').hidden = !isOwn();
         // 我的收藏：仅本人可见
         favCard.hidden = !isOwn();
+        // 关注按钮：仅查看他人时可见
+        updateFollowBtn();
+        loadFollowState();
       }
 
       /* ---------- 编辑器开关 ---------- */

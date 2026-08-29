@@ -350,3 +350,35 @@ window.XLTopics = (function () {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(send, 0); });
   else setTimeout(send, 0);
 })();
+
+/* ============ 顶栏搜索框 + 管理员入口（注入到每个页面的 .bar-right） ============ */
+(function () {
+  function isSearchPage() { return /\/search\//.test(location.pathname); }
+  function inject() {
+    if (isSearchPage()) return;
+    var bars = document.querySelectorAll('.bar-right');
+    if (!bars.length) return;
+    bars.forEach(function (bar) {
+      if (!bar || bar.querySelector('.xl-search')) return;
+      var form = document.createElement('form');
+      form.className = 'xl-search';
+      form.setAttribute('action', '/search/');
+      form.method = 'get';
+      var inp = document.createElement('input');
+      inp.type = 'search'; inp.name = 'q'; inp.className = 'xl-search-input';
+      inp.placeholder = '搜索'; inp.setAttribute('aria-label', '搜索'); inp.maxLength = 80;
+      form.appendChild(inp);
+
+      var adminLink = document.createElement('a');
+      adminLink.className = 'bar-btn admin-only';
+      adminLink.href = '/admin/reports/';
+      adminLink.textContent = '举报后台';
+
+      var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
+      if (login) { bar.insertBefore(form, login); bar.insertBefore(adminLink, login); }
+      else { bar.appendChild(form); bar.appendChild(adminLink); }
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
+  else inject();
+})();

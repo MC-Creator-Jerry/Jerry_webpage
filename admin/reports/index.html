@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260829d"></script>
+  <script src="../../boot.js?v=20260829d"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
@@ -12,7 +12,7 @@
 <title>举报审核后台 · Jerry's webpage</title>
 <meta name="description" content="举报审核后台（仅管理员）。" />
 <meta name="author" content="Jerry" />
-<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
 <style>
   :root {
     --bar-top: rgb(40, 89, 156); --bar-bottom: rgb(0, 120, 212); --accent: #0078d4;
@@ -61,16 +61,16 @@
   [hidden]{display:none!important;}
   @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260829d" />
+  <link rel="stylesheet" href="../../common.css?v=20260829d" />
 </head>
 <body>
   <header class="topbar">
     <div class="bar-left">
-      <a class="site-name" href="../index.html">Jerry's webpage</a>
-      <nav class="breadcrumb"><a href="../index.html">主页</a><span class="bc-sep">›</span><span class="bc-sub">举报审核</span></nav>
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb"><a href="../../index.html">主页</a><span class="bc-sep">›</span><span class="bc-sub">举报审核</span></nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
       <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
     </div>
@@ -89,10 +89,10 @@
     </div>
   </main>
 
-  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html">返回主页</a></div></footer>
+  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a></div></footer>
   <div class="toast" id="toast"></div>
 
-  <script src="../auth.js?v=20260829d"></script>
+  <script src="../../auth.js?v=20260829d"></script>
   <script>
     (function () {
       var listEl = document.getElementById('list');
@@ -133,7 +133,7 @@
                   (resolved
                     ? '<button class="btn" data-act="reopen" data-id="'+r.id+'">重新打开</button>'
                     : '<button class="btn primary" data-act="resolve" data-id="'+r.id+'">标记已处理</button>') +
-                  '<a class="btn" href="../post/detail/?post='+encodeURIComponent(r.postId)+'">查看帖子</a>' +
+                  '<a class="btn" href="../../post/detail/?post='+encodeURIComponent(r.postId)+'">查看帖子</a>' +
                   '<button class="btn danger" data-act="delete" data-id="'+r.id+'">删除工单</button>' +
                 '</div>';
               card.querySelector('.r-title').textContent = r.title || '（无标题）';
@@ -158,6 +158,6 @@
       load();
     })();
   </script>
-  <script src="../common.js?v=20260829d"></script>
+  <script src="../../common.js?v=20260829d"></script>
 </body>
 </html>

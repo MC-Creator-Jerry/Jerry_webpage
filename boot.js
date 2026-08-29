@@ -7,6 +7,12 @@
    - 尊重 prefers-reduced-motion；任何异常都会兜底揭晓内容
    ============================================================ */
 (function () {
+  // 尽早恢复用户保存的深浅色偏好：在首帧绘制前同步设置，杜绝刷新/跳转闪烁与偏好丢失
+  try {
+    var __t = localStorage.getItem('xl_theme');
+    if (__t === 'dark' || __t === 'light') document.documentElement.setAttribute('data-theme', __t);
+  } catch (e) {}
+
   var doc = document;
   var HOLD = false;       // 页面要求等数据渲染完成后再揭晓（如帖子中心）
   var revealed = false;   // safeReveal 幂等保护

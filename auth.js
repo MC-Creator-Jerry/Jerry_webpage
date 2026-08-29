@@ -10,6 +10,39 @@
   var logoutBtn = document.getElementById('logoutBtn');
   window.JW_AUTH = { user: null, isAdmin: false };
 
+  // 等级查询（供头像悬浮卡 / 下拉菜单展示 Lv + 进度条）
+  function jwLang() { try { return localStorage.getItem('xl_lang') || 'zh'; } catch (e) { return 'zh'; } }
+  function jwT(zh, en) { return jwLang() === 'en' ? en : zh; }
+  function jwEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var __levelCache = {};
+  function loadLevel(login, cb) {
+    if (!login) { cb(null); return; }
+    var c = __levelCache[login];
+    if (c && (Date.now() - c.ts) < 60000) { cb(c.data); return; }
+    fetch('/api/points?user=' + encodeURIComponent(login))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && typeof d.lv === 'number') { __levelCache[login] = { data: d, ts: Date.now() }; cb(d); }
+        else cb(null);
+      })
+      .catch(function () { cb(null); });
+  }
+  // 返回等级块的内部内容（外层 .hc-level 由占位 div 提供，避免空数据时显示空盒子）
+  function renderLevelBlock(lv) {
+    var pct = Math.round((lv.lvProgress || 0) * 100);
+    var hint = lv.lvCapped
+      ? jwT('已达最高等级', 'Max level reached')
+      : jwT('还需 ', 'Need ') + (lv.lvDaysLeft || 0) + jwT(' 天升级', ' days to next level');
+    return '<div class="hc-level-row">' +
+        '<span class="hc-lv-name">' + jwT('等级', 'Level') + '</span>' +
+        '<span class="hc-lv-val">Lv.' + lv.lv + '</span>' +
+      '</div>' +
+      '<div class="hc-progress" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100">' +
+        '<div class="hc-progress-bar" style="width:' + pct + '%"></div>' +
+      '</div>' +
+      '<div class="hc-lv-hint">' + jwEsc(hint) + '</div>';
+  }
+
   // 注入样式（通知红点 + 头像菜单 + 铃铛），避免给每个页面单独加 CSS
   (function injectStyles() {
     var s = document.createElement('style');
@@ -49,6 +82,16 @@
       '.xl-hovercard .hc-col li{padding:3px 0;border-top:1px solid #f0f3f7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
       '.xl-hovercard .hc-empty{color:#9aa6b2}',
       '.xl-hovercard .hc-loading{font-size:.85rem;color:#6b7785;text-align:center;padding:8px}',
+      /* ===== 头像菜单：等级 + 进度条 ===== */
+      '.hc-level{margin:10px 0 12px;padding:10px 12px;background:#f5f8fb;border:1px solid #e7edf3;border-radius:10px}',
+      '.user-popup .hc-level{margin:6px}',
+      '.hc-level[hidden]{display:none!important}',
+      '.hc-level-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}',
+      '.hc-lv-name{font-size:.82rem;color:#5b6776}',
+      '.hc-lv-val{font-size:.92rem;font-weight:800;color:#0078d4}',
+      '.hc-progress{height:7px;background:#e1e8f0;border-radius:999px;overflow:hidden}',
+      '.hc-progress-bar{height:100%;background:linear-gradient(90deg,#0078d4,#4eb1ff);border-radius:999px;transition:width .3s ease}',
+      '.hc-lv-hint{margin-top:5px;font-size:.72rem;color:#8a96a3;text-align:center}',
       '@media (prefers-reduced-motion: reduce){.xl-hovercard{transition:none}}'
     ].join('\n');
     document.head.appendChild(s);
@@ -184,6 +227,7 @@
     pop.id = 'userPopup';
     pop.hidden = true;
     pop.innerHTML =
+      '<div class="hc-level" id="upLevel" hidden></div>' +
       '<a class="up-item" id="upProfile" href="' + BASE + 'personal_profile/">' +
         '<span class="up-ico">' + personIco + '</span><span data-zh="个人主页" data-en="Profile">个人主页</span></a>' +
       '<a class="up-item" id="upSettings" href="' + BASE + 'settings/homepage.html">' +
@@ -197,6 +241,16 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       pop.hidden = !pop.hidden;
+      if (!pop.hidden) {
+        var uu = window.JW_AUTH.user;
+        if (uu && uu.login) {
+          loadLevel(uu.login, function (lv) {
+            var box = document.getElementById('upLevel');
+            if (!box) return;
+            if (lv) { box.hidden = false; box.innerHTML = renderLevelBlock(lv); }
+          });
+        }
+      }
     });
     document.addEventListener('click', function (e) {
       if (!pop.hidden && e.target !== btn && !pop.contains(e.target)) pop.hidden = true;
@@ -290,10 +344,16 @@
           '<div class="hc-avatar"><img src="' + av + '" alt=""></div>' +
           '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +
           '<div class="hc-login">@' + esc(u.login) + (u.isAdmin ? ' · ' + t('管理员', 'Admin') : '') + '</div>' +
+          '<div class="hc-level" id="hcLevel" hidden></div>' +
           '<div class="hc-actions">' +
             '<a class="hc-btn" href="' + BASE + 'personal_profile/">' + t('个人主页', 'Profile') + '</a>' +
             '<a class="hc-btn ghost" href="' + BASE + 'settings/homepage.html">' + t('设置', 'Settings') + '</a>' +
           '</div>';
+        loadLevel(u.login, function (lv) {
+          var box = card.querySelector('#hcLevel');
+          if (!box || !box.isConnected) return;
+          if (lv) { box.hidden = false; box.innerHTML = renderLevelBlock(lv); }
+        });
       } else {
         card.innerHTML =
           '<div class="hc-avatar"><img src="' + DEFAULT_AVATAR + '" alt=""></div>' +

@@ -630,6 +630,8 @@ body.is-admin .bar-btn.admin-only { display: inline-flex; }
 /* ============ 全局浮动按钮基线（统一语言/设置/主题/编辑按钮外观） ============ */
 .float-actions {
   position: fixed !important;
+  top: auto !important;
+  left: auto !important;
   right: 20px !important;
   bottom: 20px !important;
   z-index: 150 !important;
@@ -669,7 +671,7 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
     top: auto !important;
     left: auto !important;
     right: 20px !important;
-    bottom: 20px !important;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
     z-index: 150 !important;
     flex-direction: row !important;
   }
@@ -682,7 +684,7 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 }
 
 @media (orientation: landscape) and (max-width: 560px) {
-  .float-actions { right: 12px !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; gap: 8px !important; }
+  .float-actions { right: max(12px, env(safe-area-inset-right, 0px)) !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; gap: 8px !important; }
 }
 
 /* ============ 布局编辑模式（站主） ============ */

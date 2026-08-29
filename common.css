@@ -779,6 +779,31 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   font-size: 0.7rem; padding: 2px 8px; border-radius: 999px;
 }
 
+/* 编辑模式：插入来源选择弹窗（本地文件 / 用链接） */
+.xl-insert-modal {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+.xl-insert-box {
+  background: #fff; color: #1c2733;
+  border-radius: 14px; padding: 18px;
+  width: min(320px, 86vw);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.xl-insert-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; text-align: center; }
+.xl-insert-opt {
+  padding: 11px 14px; border: 1px solid #d7deea; border-radius: 10px;
+  background: #f5f8fc; color: #1c2733; font-size: 0.95rem; cursor: pointer; text-align: center;
+}
+.xl-insert-opt:hover { background: #eaf2fc; }
+.xl-insert-cancel { background: #f0f0f0; border-color: #ddd; }
+html[data-theme="dark"] .xl-insert-box { background: #1e2733; color: #e6edf5; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6); }
+html[data-theme="dark"] .xl-insert-opt { background: #26313f; color: #e6edf5; border-color: #34425a; }
+html[data-theme="dark"] .xl-insert-opt:hover { background: #2f3c4d; }
+html[data-theme="dark"] .xl-insert-cancel { background: #2a2a2a; border-color: #444; }
+
 .xl-toast {
   position: fixed;
   left: 50%; bottom: 80px;

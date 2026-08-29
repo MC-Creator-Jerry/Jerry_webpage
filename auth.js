@@ -111,10 +111,11 @@
       '.hc-lv-more:hover{text-decoration:underline}',
       '.user-popup .up-divider{height:1px;background:#e3e8ef;margin:6px 4px}',
       '.user-popup .up-item.admin-only[hidden]{display:none!important}',
-      /* ===== 登录后「欢迎回来」浮条 ===== */
-      '.xl-welcome{text-align:center;line-height:1.45;border-radius:14px;padding:12px 24px}',
-      '.xl-welcome .xl-welcome-title{font-weight:700;font-size:.96rem}',
-      '.xl-welcome .xl-welcome-name{margin-top:3px;font-size:.92rem;opacity:.92}',
+      /* ===== 登录后「欢迎来到」浮条 ===== */
+      '.xl-welcome{text-align:center;line-height:1.35;border-radius:16px;padding:18px 34px;background:linear-gradient(160deg,rgb(40,89,156) 0%,rgb(0,120,212) 45%,rgb(230,242,255) 100%);box-shadow:0 10px 28px rgba(0,120,212,.35)}',
+      '.xl-welcome .xl-welcome-line{font-weight:800;font-size:1.1rem;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);letter-spacing:.02em}',
+      '.xl-welcome .xl-welcome-brand{font-size:1.35rem;margin:2px 0}',
+      '.xl-welcome .xl-welcome-site{font-size:1.05rem;color:rgb(0,120,212);text-shadow:none;font-weight:700}',
       '@media (prefers-reduced-motion: reduce){.xl-hovercard{transition:none}}'
     ].join('\n');
     document.head.appendChild(s);
@@ -191,14 +192,15 @@
     if (li) li.hidden = !show;
   }
 
-  // 登录后浮条：欢迎回来（换行）【用户名】
+  // 登录后浮条：欢迎来到 小蓝页 Jerry's Webpage
   function showWelcome(u) {
     if (!u) return;
     var t = document.createElement('div');
     t.className = 'xl-toast xl-welcome';
     t.innerHTML =
-      '<div class="xl-welcome-title">' + jwT('欢迎回来', 'Welcome back') + '</div>' +
-      '<div class="xl-welcome-name">【' + jwEsc(u.display_name || u.login) + '】</div>';
+      '<div class="xl-welcome-line">' + jwT('欢迎来到', 'Welcome to') + '</div>' +
+      '<div class="xl-welcome-line xl-welcome-brand">小蓝页</div>' +
+      '<div class="xl-welcome-line xl-welcome-site">Jerry\'s Webpage</div>';
     document.body.appendChild(t);
     requestAnimationFrame(function () { t.classList.add('show'); });
     setTimeout(function () {

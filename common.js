@@ -398,6 +398,14 @@ window.XLTopics = (function () {
       else { bar.appendChild(form); bar.appendChild(dmLink); bar.appendChild(groupsLink); bar.appendChild(pointsLink); bar.appendChild(adminLink); }
     });
     updateDmBadge();
+    // 实时刷新：后台轮询通知 / 私信徽标（免 VAPID，纯前端轮询）
+    if (!window.__xlRealtimeStarted) {
+      window.__xlRealtimeStarted = true;
+      setInterval(function () {
+        try { updateDmBadge(); } catch (e) {}
+        try { if (window.JW_REFRESH_BADGE) window.JW_REFRESH_BADGE(); } catch (e) {}
+      }, 45000);
+    }
   }
   function updateDmBadge() {
     fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {

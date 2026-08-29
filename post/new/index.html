@@ -76,6 +76,10 @@
   .edit-textarea { min-height: 160px; resize: vertical; line-height: 1.6; }
   .post-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 10px 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 16px; }
   .post-btn:hover { filter: brightness(1.08); }
+  .post-btn.secondary { background: rgba(128,128,128,0.18); color: var(--text); }
+  .post-btn.secondary:hover { filter: brightness(1.02); }
+  html[data-theme="dark"] .post-btn.secondary { background: rgba(255,255,255,0.14); }
+  .edit-note { font-size: 0.85rem; color: var(--muted); margin-bottom: 12px; }
   .hint { color: var(--muted); opacity: 0.85; font-size: 0.95rem; line-height: 1.7; }
   .hint a { color: var(--accent); text-decoration: none; font-weight: 600; }
   .hint a:hover { text-decoration: underline; }
@@ -160,6 +164,7 @@
     </section>
 
     <section class="card" id="formCard" hidden>
+      <p class="edit-note" id="editNote" hidden></p>
       <label class="edit-label" for="pTitle" data-zh="标题" data-en="Title">标题</label>
       <input class="edit-input" id="pTitle" maxlength="200" placeholder="帖子标题" />
       <span class="char-count" data-for="pTitle">0 / 200</span>
@@ -215,6 +220,7 @@
         <div class="att-list" id="attList"></div>
       </div>
       <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
+      <button class="post-btn secondary" id="draftBtn" data-zh="保存草稿" data-en="Save draft">保存草稿</button>
     </section>
 
     <section class="card" id="loginHint" hidden>
@@ -251,6 +257,7 @@
       var pTitle = document.getElementById('pTitle');
       var pBody = document.getElementById('pBody');
       var postBtn = document.getElementById('postBtn');
+      var draftBtn = document.getElementById('draftBtn');
       var toastEl = document.getElementById('toast');
       var charCount = document.querySelector('.char-count[data-for="pBody"]');
       var BODY_MAX = 5000;
@@ -362,7 +369,9 @@
         });
       }
 
-      function post() {
+      var editId = new URLSearchParams(location.search).get('edit');
+
+      function post(status) {
         var title = pTitle.value.trim();
         var html = pBody.innerHTML.trim();
         var text = bodyText().trim();
@@ -370,38 +379,81 @@
         if (text.length > BODY_MAX) { toast('正文过长（上限 ' + BODY_MAX + ' 字）', true); return; }
         var w = findForbidden(title) || findForbidden(text);
         if (w) { toast('含违禁词：「' + w + '」', true); return; }
-        if (!selectedFiles.length) { doPublish(title, html, []); return; }
+        if (!selectedFiles.length) { doPublish(title, html, [], status); return; }
         postBtn.disabled = true; postBtn.textContent = '上传中 0/' + selectedFiles.length;
         var done = 0;
         Promise.all(selectedFiles.map(function (f) {
           return uploadOne(f).then(function (meta) { done++; postBtn.textContent = '上传中 ' + done + '/' + selectedFiles.length; return meta; });
         })).then(function (files) {
-          doPublish(title, html, files);
+          doPublish(title, html, files, status);
         }).catch(function (err) {
           postBtn.disabled = false; postBtn.textContent = '发布';
           toast(err && err.message === 'too_large' ? '文件过大（上限 20MB）' : '附件上传失败，请重试', true);
         });
       }
-      function doPublish(title, html, files) {
-        fetch('/api/post', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, body: html, files: files }) })
+      function doPublish(title, html, files, status) {
+        var isEdit = !!editId;
+        var method = isEdit ? 'PATCH' : 'POST';
+        var payload = { title: title, body: html, status: status || 'published' };
+        if (isEdit) {
+          payload.id = editId;
+          if (files && files.length) payload.files = files; // 编辑态仅在有新附件时覆盖，否则保留原附件
+        } else {
+          payload.files = files;
+        }
+        fetch('/api/post', { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
             postBtn.disabled = false; postBtn.textContent = '发布';
-            if (res.ok) { toast('已发布 ✓'); selectedFiles = []; setTimeout(function () { location.href = '../center/'; }, 700); }
+            if (res.ok) {
+              selectedFiles = [];
+              if (status === 'draft') {
+                toast(isEdit ? '草稿已更新 ✓' : '草稿已保存 ✓');
+              } else {
+                toast(isEdit ? '已更新 ✓' : '已发布 ✓');
+              }
+              setTimeout(function () { location.href = '../center/'; }, 700);
+            }
             else if (res.body && res.body.error === 'unauthorized') { toast('请先登录', true); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
-            else { toast('发布失败', true); }
+            else if (res.body && res.body.error === 'rate_limited') { toast('操作过快，请稍后再试', true); }
+            else if (res.body && res.body.error === 'not_found') { toast('帖子不存在或已被删除', true); }
+            else { toast(isEdit ? '更新失败' : '发布失败', true); }
           })
           .catch(function () { postBtn.disabled = false; postBtn.textContent = '发布'; toast('发布失败（网络错误）', true); });
       }
 
+      function loadForEdit() {
+        fetch('/api/post?id=' + encodeURIComponent(editId))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (p) {
+            if (!p || p.error) { toast('无法加载该帖子（可能不是你的帖子或已删除）', true); return; }
+            pTitle.value = p.title || '';
+            pBody.innerHTML = p.body || '';
+            updateCount();
+            var note = document.getElementById('editNote');
+            note.hidden = false;
+            note.textContent = '正在编辑帖子（最后更新：' + new Date(p.editedTs || p.ts || Date.now()).toLocaleString() + '）。';
+            var h1 = document.querySelector('.hero h1'); if (h1) h1.textContent = '编辑帖子';
+            var hp = document.querySelector('.hero p'); if (hp) hp.textContent = '修改后重新发布即可更新原帖。';
+            var bc = document.querySelector('.breadcrumb .bc-sub'); if (bc) bc.textContent = '编辑帖子';
+            var pb = document.getElementById('postBtn'); if (pb) pb.textContent = '保存并更新';
+            var db = document.getElementById('draftBtn'); if (db) db.textContent = '保存为草稿';
+          })
+          .catch(function () { toast('加载失败', true); });
+      }
+
       fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
-        if (me && me.login) { formCard.hidden = false; updateCount(); }
+        if (me && me.login) {
+          formCard.hidden = false; updateCount();
+          if (editId) loadForEdit();
+        }
         else { loginHint.hidden = false; }
       }).catch(function () { loginHint.hidden = false; });
 
       loginLink.addEventListener('click', function (e) { e.preventDefault(); if (window.JW_AUTH && window.JW_AUTH.loginWithGitHub) window.JW_AUTH.loginWithGitHub(); else location.href = '../../index.html'; });
-      postBtn.addEventListener('click', post);
+      postBtn.addEventListener('click', function () { post('published'); });
+      draftBtn.addEventListener('click', function () { post('draft'); });
     })();
   </script>
   <script src="../../common.js"></script>

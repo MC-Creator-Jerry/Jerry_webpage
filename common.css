@@ -94,13 +94,7 @@ input, textarea, select { font-family: inherit; }
   .post .meta { margin-left: 0; width: 100%; }
 }
 
-/* ============ 5. 右下浮动按钮 + 安全区 ============ */
-.float-actions { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); gap: 10px; }
-@media (max-width: 560px) {
-  .float-actions { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
-  .fab { width: 46px; height: 40px; border-radius: 12px; }
-  .fab svg { width: 20px; height: 20px; }
-}
+/* 浮动按钮基线已统一到文件末尾「13. 全局浮动按钮基线」；此处不再重复定义，避免多份样式打架 */
 
 /* ============ 7b. 图片图标（<img class="ico">，替代 emoji / inline-svg） ============ */
 img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain; flex: 0 0 auto; }
@@ -616,6 +610,7 @@ body.is-admin .bar-btn.admin-only { display: inline-flex; }
   border: 1px solid rgba(0, 0, 0, 0.10);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   cursor: pointer; padding: 0; box-sizing: border-box;
+  text-decoration: none;
   transition: background .18s, transform .12s, box-shadow .18s;
 }
 .fab:hover { background: rgba(255, 255, 255, 0.97); transform: translateY(-2px); }

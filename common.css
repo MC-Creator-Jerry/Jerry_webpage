@@ -547,3 +547,9 @@ body.is-admin .bar-btn.admin-only { display: inline-flex; }
 .fav-item .fi-title { font-weight: 700; color: var(--text); }
 .fav-item:hover .fi-title { color: var(--accent); }
 .fav-item .fi-meta { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+/* 转发引用 */
+.repost-tag { font-size: 0.82rem; color: var(--muted); background: color-mix(in srgb, var(--accent) 7%, var(--card-bg)); border-left: 3px solid var(--accent); border-radius: 8px; padding: 6px 12px; margin-bottom: 10px; }
+.repost-tag .rt-label { font-weight: 700; color: var(--accent); margin-right: 4px; }
+.repost-tag a { color: var(--text); text-decoration: none; font-weight: 600; }
+.repost-tag a:hover { color: var(--accent); text-decoration: underline; }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="boot.js?v=20260830ab"></script>
+  <script src="boot.js?v=20260830ac"></script>
 <script>
   // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
   // pages.dev 域名下不触发，避免循环。
@@ -341,7 +341,7 @@
 
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="common.css?v=20260830ab" />
+  <link rel="stylesheet" href="common.css?v=20260830ac" />
 </head>
 <body>
   <header class="topbar">
@@ -466,7 +466,7 @@
         <input class="c-input" type="text" name="name" data-ph-zh="姓名" data-ph-en="Name" placeholder="姓名" />
         <input class="c-input" type="email" name="email" data-ph-zh="邮箱" data-ph-en="Email" placeholder="邮箱" />
         <textarea class="c-input" name="msg" rows="3" data-ph-zh="想说的话…" data-ph-en="Your message…" placeholder="想说的话…"></textarea>
-        <button type="button" id="contactSendBtn" class="btn" data-zh="发送留言 →" data-en="Send message →">发送留言 →</button>
+        <button type="submit" id="contactSendBtn" class="btn" data-zh="发送留言 →" data-en="Send message →">发送留言 →</button>
       </form>
     </section>
   </main>
@@ -612,17 +612,44 @@
         clearTimeout(window.__toastT);
         window.__toastT = setTimeout(function () { toast.classList.remove('show'); }, 2600);
       }
-      var cs = document.getElementById('contactSendBtn');
-      if (cs) cs.addEventListener('click', function () {
-        showToast(cur.lang === 'en'
-          ? 'Thanks for your message! The send feature is still in development. You can also email jerry@example.com directly.'
-          : '感谢您的留言！消息发送功能正在开发中，您也可以直接发送邮件至 jerry@example.com');
+      var cf = document.getElementById('contactForm');
+      if (cf) cf.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = (cf.elements['name'].value || '').trim();
+        var email = (cf.elements['email'].value || '').trim();
+        var msg = (cf.elements['msg'].value || '').trim();
+        if (!name || !email || !msg) {
+          showToast(cur.lang === 'en' ? 'Please fill in name, email and message.' : '请填写姓名、邮箱和留言内容。');
+          return;
+        }
+        var btn = document.getElementById('contactSendBtn');
+        if (btn) btn.disabled = true;
+        fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, email: email, msg: msg })
+        })
+          .then(function (r) { return r.json().catch(function () { return {}; }); })
+          .then(function (d) {
+            if (d && d.ok) {
+              showToast(cur.lang === 'en' ? 'Message sent. Thank you!' : '留言已发送，感谢您的留言！');
+              cf.reset();
+            } else if (d && d.error === 'rate_limited') {
+              showToast(cur.lang === 'en' ? 'Too many messages. Please try later.' : '留言过于频繁，请稍后再试。');
+            } else {
+              showToast(cur.lang === 'en' ? 'Could not send. Please email jerry@example.com.' : '暂时无法发送，您可直接发邮件至 jerry@example.com');
+            }
+          })
+          .catch(function () {
+            showToast(cur.lang === 'en' ? 'Network error. Please email jerry@example.com.' : '网络异常，您可直接发邮件至 jerry@example.com');
+          })
+          .finally(function () { if (btn) btn.disabled = false; });
       });
 
       applyAll();
     })();
   </script>
-<script src="auth.js?v=20260830ab"></script>
-  <script src="common.js?v=20260830ab"></script>
+<script src="auth.js?v=20260830ac"></script>
+  <script src="common.js?v=20260830ac"></script>
 </body>
 </html>

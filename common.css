@@ -139,7 +139,7 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
 /* ============ 11. 竖屏特殊布局：顶部蓝条固定，右上角放主题/语言/设置，底部单行导航固定 ============ */
 @media (orientation: portrait) {
   body { padding-top: calc(64px + env(safe-area-inset-top, 0px)); padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
-  .content { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .content { padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
 
   /* 顶部蓝条固定，只显示左侧站点名+面包屑 */
   .topbar {

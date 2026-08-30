@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260830x"></script>
+  <script src="../boot.js?v=20260830y"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
@@ -66,32 +66,59 @@
   .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px; box-shadow: var(--card-shadow); }
   .card h2 { font-size: 1.05rem; color: var(--accent); margin-bottom: 10px; }
 
-  .new-dm { display: flex; gap: 8px; margin-bottom: 12px; }
+  .new-dm { display: flex; gap: 8px; margin-bottom: 10px; }
   .edit-input { width: 100%; border: 1px solid var(--card-border); border-radius: 10px; padding: 9px 12px; font-size: 0.95rem; font-family: inherit; color: var(--text); background: var(--panel-bg); }
   .edit-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
   .add-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 9px 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
   .add-btn:hover { filter: brightness(1.08); }
+  .conv-search { margin-bottom: 10px; }
 
-  .conv-list { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
-  .conv { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 10px; cursor: pointer; background: var(--panel-bg); }
+  .conv-list { display: flex; flex-direction: column; gap: 8px; max-height: 58vh; overflow-y: auto; }
+  .conv { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer; background: var(--panel-bg); transition: border-color .15s, background .15s; }
   .conv:hover { border-color: var(--accent); }
   .conv.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel-bg)); }
-  .conv .peer { font-weight: 700; }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); flex: 0 0 auto; }
+  .conv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .conv-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .conv .peer { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-time { font-size: 0.72rem; color: var(--muted); opacity: .8; flex: 0 0 auto; }
+  .conv-bottom { display: flex; align-items: center; gap: 6px; }
   .conv .last { font-size: 0.82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-  .conv .unread { background: var(--accent); color: #fff; border-radius: 999px; font-size: 0.72rem; font-weight: 700; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; }
+  .conv .unread { background: #ff4d4f; color: #fff; border-radius: 999px; font-size: 0.72rem; font-weight: 700; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; flex: 0 0 auto; }
   .empty { color: var(--muted); opacity: 0.8; font-style: italic; font-size: 0.9rem; padding: 8px 4px; }
 
   .thread { display: flex; flex-direction: column; min-height: 420px; }
-  .thread-head { font-weight: 700; padding-bottom: 10px; border-bottom: 1px solid var(--card-border); margin-bottom: 12px; }
-  .messages { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 52vh; padding-right: 4px; }
-  .bubble { max-width: 76%; padding: 9px 13px; border-radius: 14px; font-size: 0.95rem; line-height: 1.55; word-break: break-word; }
+  .thread-head { display: flex; align-items: center; gap: 10px; font-weight: 700; padding-bottom: 10px; border-bottom: 1px solid var(--card-border); margin-bottom: 12px; }
+  .thread-head .peer-av { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); }
+  .thread-head .th-name { flex: 1; }
+  .back-btn { display: none; border: none; background: transparent; color: var(--accent); font-size: 1.2rem; cursor: pointer; padding: 4px 8px; border-radius: 8px; line-height: 1; }
+  .back-btn:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .messages { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 52vh; padding-right: 4px; }
+  .day-divider { align-self: center; font-size: 0.74rem; color: var(--muted); background: color-mix(in srgb, var(--text) 8%, transparent); border-radius: 999px; padding: 2px 12px; margin: 2px 0; }
+  .msg-row { display: flex; gap: 8px; align-items: flex-end; }
+  .msg-row.msg-me { justify-content: flex-end; }
+  .msg-row.msg-peer { justify-content: flex-start; }
+  .msg-av { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); flex: 0 0 auto; }
+  .bubble { max-width: 70%; padding: 9px 13px; border-radius: 14px; font-size: 0.95rem; line-height: 1.55; word-break: break-word; }
+  .bubble .b-text { white-space: pre-wrap; }
   .bubble .ts { display: block; font-size: 0.7rem; opacity: 0.6; margin-top: 4px; }
-  .msg-me { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
-  .msg-peer { align-self: flex-start; background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); border: 1px solid var(--card-border); border-bottom-left-radius: 4px; }
-  .composer { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--card-border); }
+  .msg-me .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .msg-peer .bubble { background: var(--panel-bg); border: 1px solid var(--card-border); border-bottom-left-radius: 4px; }
+
+  .composer { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--card-border); }
+  .composer-tools { display: flex; align-items: center; gap: 6px; position: relative; }
+  .tool-btn { border: none; background: transparent; color: var(--muted); font-size: 1.15rem; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; line-height: 1; padding: 0; }
+  .tool-btn:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); }
+  .emoji-pop { position: absolute; top: 40px; left: 0; z-index: 50; width: 252px; max-height: 184px; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: var(--card-shadow); padding: 8px; display: none; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .emoji-pop.show { display: grid; }
+  .emoji-pop button { border: none; background: transparent; font-size: 1.25rem; cursor: pointer; border-radius: 6px; padding: 4px 0; }
+  .emoji-pop button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .composer-row { display: flex; gap: 8px; align-items: flex-end; }
   .composer textarea { flex: 1; resize: none; min-height: 44px; max-height: 120px; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; font-size: 0.95rem; font-family: inherit; color: var(--text); background: var(--panel-bg); }
   .composer textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
-  .composer button { align-self: flex-end; }
+  .composer button.send { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 10px 18px; font-size: 0.92rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .composer button.send:hover { filter: brightness(1.06); }
+  .composer button.send:disabled { opacity: .6; cursor: default; }
   .hint { color: var(--muted); font-size: 0.92rem; line-height: 1.7; }
 
   .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.3); opacity: 0; transition: opacity .25s; pointer-events: none; }
@@ -106,9 +133,12 @@
     .content { padding: 22px 16px 56px; }
     .dm-layout { grid-template-columns: 1fr; }
     .conv-list { max-height: 200px; }
+    .dm-layout.mobile-thread .card:first-child { display: none; }
+    .dm-layout:not(.mobile-thread) .thread { display: none; }
+    .back-btn { display: inline-flex; }
   }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260830x" />
+  <link rel="stylesheet" href="../common.css?v=20260830y" />
 </head>
 <body>
   <header class="topbar">
@@ -143,15 +173,22 @@
           <input class="edit-input" id="newPeer" placeholder="输入对方登录名，如 MC-Creator-Jerry" maxlength="60" />
           <button class="add-btn" id="newDmBtn">开始</button>
         </div>
+        <input class="edit-input conv-search" id="convSearch" placeholder="搜索会话…" />
         <div class="conv-list" id="convList"><div class="empty">还没有会话</div></div>
       </div>
 
       <div class="card thread">
-        <div class="thread-head" id="threadHead">选择一个会话开始聊天</div>
+        <div class="thread-head" id="threadHead"><span class="th-name">选择一个会话开始聊天</span></div>
         <div class="messages" id="messages"><p class="hint">在左侧选择一个会话，或输入对方登录名开始新私信。</p></div>
         <div class="composer" id="composer" hidden>
-          <textarea id="dmBody" placeholder="输入私信内容……（回车发送，Shift+回车换行）" maxlength="2000"></textarea>
-          <button class="add-btn" id="sendBtn">发送</button>
+          <div class="composer-tools">
+            <button class="tool-btn" id="emojiBtn" type="button" title="表情" aria-label="表情">😊</button>
+            <div class="emoji-pop" id="emojiPop"></div>
+          </div>
+          <div class="composer-row">
+            <textarea id="dmBody" placeholder="输入私信内容……（回车发送，Shift+回车换行）" maxlength="2000"></textarea>
+            <button class="send" id="sendBtn" type="button">发送</button>
+          </div>
         </div>
       </div>
     </div>
@@ -172,15 +209,16 @@
     </a>
   </div>
 
-  <script src="../prefs.js?v=20260830x"></script>
-  <script src="../auth.js?v=20260830x"></script>
+  <script src="../prefs.js?v=20260830y"></script>
+  <script src="../auth.js?v=20260830y"></script>
   <script>
     (function () {
       var $ = function (id) { return document.getElementById(id); };
       var convList = $('convList'), messages = $('messages'), threadHead = $('threadHead'),
           composer = $('composer'), dmBody = $('dmBody'), sendBtn = $('sendBtn'),
-          newPeer = $('newPeer'), newDmBtn = $('newDmBtn'), toastEl = $('toast');
-      var ME = null, currentPeer = null;
+          newPeer = $('newPeer'), newDmBtn = $('newDmBtn'), toastEl = $('toast'),
+          convSearch = $('convSearch'), emojiBtn = $('emojiBtn'), emojiPop = $('emojiPop');
+      var ME = null, currentPeer = null, ALL_CONVS = [];
 
       function toast(msg, isErr) {
         toastEl.textContent = msg;
@@ -188,38 +226,60 @@
         setTimeout(function () { toastEl.className = 'toast' + (isErr ? ' err' : ''); }, 2600);
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
-      function fmtTime(ts){ try { return new Date(ts).toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); } catch(e){ return ''; } }
+      function pad(n){ return (n<10?'0':'')+n; }
+      function fmtTime(ts){ try { var d=new Date(ts); return pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()); } catch(e){ return ''; } }
+      function fmtConvTime(ts){ try { var d=new Date(ts), now=new Date(); var a=new Date(d.getFullYear(),d.getMonth(),d.getDate()), b=new Date(now.getFullYear(),now.getMonth(),now.getDate()); var diff=Math.round((b-a)/86400000); if(diff===0) return pad(d.getHours())+':'+pad(d.getMinutes()); if(diff===1) return '昨天'; return pad(d.getMonth()+1)+'/'+pad(d.getDate()); } catch(e){ return ''; } }
+      function av(login){ return 'https://github.com/' + encodeURIComponent(login || '') + '.png'; }
+      function initialAvatar(name){
+        var ch = (name||'?').charAt(0).toUpperCase();
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#g)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">'+ch+'</text></svg>';
+        return 'data:image/svg+xml,' + encodeURIComponent(svg);
+      }
+      function avatarImg(login, cls){
+        return '<img class="'+cls+'" src="'+av(login)+'" alt="" onerror="this.onerror=null;this.src=\''+initialAvatar(login)+'\'">';
+      }
+      function dayKey(ts){ var d=new Date(ts); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+      function dayLabel(ts){ try { var d=new Date(ts), now=new Date(); var a=new Date(d.getFullYear(),d.getMonth(),d.getDate()), b=new Date(now.getFullYear(),now.getMonth(),now.getDate()); var diff=Math.round((b-a)/86400000); if(diff===0) return '今天'; if(diff===1) return '昨天'; return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate()); } catch(e){ return ''; } }
+
+      function renderConv(c){
+        var el = document.createElement('div');
+        el.className = 'conv' + (c.peer === currentPeer ? ' active' : '');
+        el.dataset.peer = c.peer;
+        el.innerHTML = avatarImg(c.peer, 'avatar') +
+          '<div class="conv-main">' +
+            '<div class="conv-top"><span class="peer">@'+esc(c.peer)+'</span><span class="conv-time">'+fmtConvTime(c.ts)+'</span></div>' +
+            '<div class="conv-bottom"><span class="last">'+esc(c.last||'')+'</span>'+(c.unread>0?'<span class="unread">'+c.unread+'</span>':'')+'</div>' +
+          '</div>';
+        el.addEventListener('click', function () { openThread(c.peer); });
+        return el;
+      }
+      function renderConvList(list){
+        convList.innerHTML = '';
+        if (!list.length) { convList.innerHTML = '<div class="empty">还没有会话</div>'; return; }
+        list.forEach(function (c) { convList.appendChild(renderConv(c)); });
+      }
 
       function loadConversations() {
         fetch('/api/message')
           .then(function (r) { return r.ok ? r.json() : { conversations: [] }; })
           .then(function (d) {
-            var convs = (d.conversations || []);
-            if (!convs.length) { convList.innerHTML = '<div class="empty">还没有会话</div>'; return; }
-            convList.innerHTML = '';
-            convs.forEach(function (c) {
-              var el = document.createElement('div');
-              el.className = 'conv' + (c.peer === currentPeer ? ' active' : '');
-              el.dataset.peer = c.peer;
-              var peer = document.createElement('span'); peer.className = 'peer'; peer.textContent = '@' + c.peer;
-              var last = document.createElement('span'); last.className = 'last'; last.textContent = c.last || '';
-              el.appendChild(peer); el.appendChild(last);
-              if (c.unread > 0) { var u = document.createElement('span'); u.className = 'unread'; u.textContent = c.unread; el.appendChild(u); }
-              el.addEventListener('click', function () { openThread(c.peer); });
-              convList.appendChild(el);
-            });
+            ALL_CONVS = (d.conversations || []);
+            renderConvList(ALL_CONVS);
           })
           .catch(function () { convList.innerHTML = '<div class="empty">加载失败</div>'; });
       }
 
       function openThread(peer) {
         currentPeer = peer;
-        threadHead.textContent = '与 @' + peer + ' 的私信';
+        threadHead.innerHTML = avatarImg(peer, 'peer-av') + '<span class="th-name">@'+esc(peer)+'</span>' + '<button class="back-btn" id="backBtn" type="button" aria-label="返回">←</button>';
+        var bb = $('backBtn');
+        if (bb) bb.addEventListener('click', function () { var lay = document.querySelector('.dm-layout'); if (lay) lay.classList.remove('mobile-thread'); });
         composer.hidden = false;
         Array.prototype.forEach.call(convList.querySelectorAll('.conv'), function (el) {
           el.classList.toggle('active', el.dataset.peer === peer);
         });
         loadThread(peer);
+        if (window.innerWidth <= 720) { var lay = document.querySelector('.dm-layout'); if (lay) lay.classList.add('mobile-thread'); }
         dmBody.focus();
       }
 
@@ -230,11 +290,20 @@
             var msgs = (d.messages || []);
             messages.innerHTML = '';
             if (!msgs.length) { messages.innerHTML = '<p class="hint">还没有消息，发送第一条吧。</p>'; return; }
+            var lastDay = null;
             msgs.forEach(function (m) {
-              var b = document.createElement('div');
-              b.className = 'bubble ' + (m.from === ME ? 'msg-me' : 'msg-peer');
-              b.innerHTML = esc(m.body) + '<span class="ts">' + fmtTime(m.ts) + '</span>';
-              messages.appendChild(b);
+              var dk = dayKey(m.ts);
+              if (dk !== lastDay) {
+                var dv = document.createElement('div'); dv.className = 'day-divider'; dv.textContent = dayLabel(m.ts);
+                messages.appendChild(dv); lastDay = dk;
+              }
+              var row = document.createElement('div');
+              var mine = m.from === ME;
+              row.className = 'msg-row ' + (mine ? 'msg-me' : 'msg-peer');
+              var inner = mine ? '' : avatarImg(m.from, 'msg-av');
+              inner += '<div class="bubble"><span class="b-text">'+esc(m.body)+'</span><span class="ts">'+fmtTime(m.ts)+'</span></div>';
+              row.innerHTML = inner;
+              messages.appendChild(row);
             });
             messages.scrollTop = messages.scrollHeight;
           })
@@ -265,6 +334,27 @@
         openThread(peer);
       }
 
+      function insertAtCursor(ta, text){
+        var s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
+        ta.value = v.slice(0, s) + text + v.slice(e);
+        var pos = s + text.length; ta.selectionStart = ta.selectionEnd = pos; ta.focus();
+      }
+      var EMOJIS = ['😀','😁','😂','🤣','😊','😍','😘','😎','🤔','😅','😭','😡','👍','👎','👏','🙏','💪','🔥','✨','🎉','❤️','💔','⭐','🌟','✅','❌','⚡','🚀','📌','📎','💡','🐱','🐶','🌹','☕','🍻','🎮','📱','💻','🌈','☀️','🌙','🍀','🎯','💯'];
+      EMOJIS.forEach(function (em) {
+        var b = document.createElement('button'); b.type = 'button'; b.textContent = em;
+        b.addEventListener('click', function () { insertAtCursor(dmBody, em); emojiPop.classList.remove('show'); });
+        emojiPop.appendChild(b);
+      });
+      emojiBtn.addEventListener('click', function (e) { e.stopPropagation(); emojiPop.classList.toggle('show'); });
+      document.addEventListener('click', function (e) {
+        if (emojiPop.classList.contains('show') && e.target !== emojiBtn && !emojiPop.contains(e.target)) emojiPop.classList.remove('show');
+      });
+
+      convSearch.addEventListener('input', function () {
+        var q = convSearch.value.trim().toLowerCase();
+        renderConvList(ALL_CONVS.filter(function (c) { return c.peer.toLowerCase().indexOf(q) !== -1; }));
+      });
+
       sendBtn.addEventListener('click', send);
       newDmBtn.addEventListener('click', startNew);
       dmBody.addEventListener('keydown', function (e) {
@@ -275,12 +365,12 @@
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (me) {
           if (me && me.login) { ME = me.login; loadConversations(); }
-          else { threadHead.textContent = '请先登录后使用私信'; composer.hidden = true; convList.innerHTML = '<div class="empty">请先登录</div>'; }
+          else { threadHead.innerHTML = '<span class="th-name">请先登录后使用私信</span>'; composer.hidden = true; convList.innerHTML = '<div class="empty">请先登录</div>'; }
         })
-        .catch(function () { threadHead.textContent = '加载失败'; });
+        .catch(function () { threadHead.innerHTML = '<span class="th-name">加载失败</span>'; });
     })();
   </script>
-  <script src="../common.js?v=20260830x"></script>
+  <script src="../common.js?v=20260830y"></script>
   <script>
     // 嵌入模式（被「消息中心」以 iframe 引入时）：隐藏自身的顶栏 / 页脚 / 浮动按钮
     if (new URLSearchParams(location.search).get('embed') === '1') {

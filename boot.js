@@ -26,18 +26,17 @@
     return null;
   }
 
-  // 尝试从服务端读取登录态（兼容旧 HttpOnly gh_user cookie 的当前会话）
+  // 加载层欢迎词：直接读 auth.js 写入的客户端登录态缓存，不再打 /api/me
   function refreshLoaderLogin() {
     try {
-      fetch('/api/me', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (d) {
-          if (d && d.login) {
-            var txt = doc.querySelector('.xl-load-text');
-            if (txt) txt.innerHTML = buildLoaderText(d.login);
-          }
-        })
-        .catch(function () {});
+      var r = sessionStorage.getItem('__xl_me');
+      if (r) {
+        var o = JSON.parse(r);
+        if (o && o.data && o.data.login) {
+          var txt = doc.querySelector('.xl-load-text');
+          if (txt) txt.innerHTML = buildLoaderText(o.data.login);
+        }
+      }
     } catch (e) {}
   }
 
@@ -141,14 +140,14 @@
     requestAnimationFrame(function () { loader.classList.add('xl-show'); });
 
     // 整段序列兜底：比正常流程略长，保证异常时也能揭晓（HOLD 时给页面更多渲染时间）
-    safety = setTimeout(safeReveal, HOLD ? 4000 : 3200);
+    safety = setTimeout(safeReveal, HOLD ? 2600 : 2400);
 
     // ---- 阶段一：左上角标题 + 左侧竖直进度条（从上往下）----
     var intro = loader.querySelector('.xl-intro');
     var fill = intro.querySelector('.xl-prog-v-fill');
     var pct = intro.querySelector('.xl-prog-v-pct');
     var dot = intro.querySelector('.xl-prog-v-dot');
-    var PROG_MS = 1100;
+    var PROG_MS = 700;
     var t0 = (performance && performance.now) ? performance.now() : Date.now();
     (function tick() {
       var n = (performance && performance.now) ? performance.now() : Date.now();
@@ -163,7 +162,7 @@
     // ---- 阶段二：整个面板往右滑 ----
     function phaseSlide() {
       intro.classList.add('xl-slide');
-      setTimeout(phasePrev, 460);
+      setTimeout(phasePrev, 320);
     }
 
     // ---- 阶段三：衔接「之前的」终末地动画（蓝字 + 随机方块 + 白 → 揭晓）----
@@ -204,7 +203,7 @@
 
       // 长方块保持显示，直到整块加载层淡出时与白底、「小蓝页」文字同时消失
       // HOLD 时不在此自动揭晓，交由页面在列表渲染完成后调用 window.__xlReveal()
-      if (!HOLD) setTimeout(safeReveal, 1280); // 方块出现后停留，再随整块一起淡出
+      if (!HOLD) setTimeout(safeReveal, 850); // 方块出现后停留，再随整块一起淡出
     }
   }
 

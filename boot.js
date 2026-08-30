@@ -93,7 +93,8 @@
   } catch (e) {}
 
   // 标记加载中，隐藏真实内容（先加类，首帧即生效，避免闪烁）
-  doc.documentElement.classList.add('xl-booting');
+  // 站内跳转不遮挡正文：过渡交给 common.js 的导航加载动画，正文本就已在目标页就绪
+  if (!intra) doc.documentElement.classList.add('xl-booting');
 
   // 同源链接点击：标记「本站内跳转」，目标页据此不重播动画
   doc.addEventListener('click', function (e) {
@@ -140,7 +141,7 @@
     requestAnimationFrame(function () { loader.classList.add('xl-show'); });
 
     // 整段序列兜底：比正常流程略长，保证异常时也能揭晓（HOLD 时给页面更多渲染时间）
-    safety = setTimeout(safeReveal, HOLD ? 6000 : 3400);
+    safety = setTimeout(safeReveal, HOLD ? 4000 : 3200);
 
     // ---- 阶段一：左上角标题 + 左侧竖直进度条（从上往下）----
     var intro = loader.querySelector('.xl-intro');

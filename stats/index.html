@@ -6,6 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>流量看板 · Jerry's webpage</title>
   <style>
+    :root {
+      --accent: #0078d4;
+      --radius: 14px;
+      --bg: #f4f6f9;
+      --text: #1c2733;
+      --muted: #44556a;
+      --card-bg: #ffffff;
+      --card-border: #e3e8ef;
+      --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+    }
+    html[data-theme="dark"] {
+      --bg: #0f1720; --text: #e6edf5; --muted: #9fb0c3;
+      --card-bg: #16212e; --card-border: #243244; --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    }
     .hero { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
     .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 8px; }
     .hero p { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 600px; }

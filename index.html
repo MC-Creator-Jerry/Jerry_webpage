@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="boot.js?v=20260830r"></script>
+  <script src="boot.js?v=20260830s"></script>
 <script>
   // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
   // pages.dev 域名下不触发，避免循环。
@@ -134,7 +134,7 @@
   .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
   .hero { margin-bottom: 36px; }
   .hero h1 {
-    font-size: 1.9rem;
+    font-size: 2.1rem;
     line-height: 1.25;
     color: var(--text);
     margin-bottom: 14px;
@@ -264,10 +264,68 @@
     .breadcrumb { font-size: 0.85rem; }
     .content { padding: 36px 16px 48px; }
     .hero h1 { font-size: 1.6rem; }
+    .prod-grid { grid-template-columns: 1fr; }
+    .contact-form .btn { width: 100%; }
   }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 1.5rem; }
+    .card p, .about-list li, .contact-list li { font-size: 1rem; }
+    .btn { width: 100%; }
+  }
+  /* ---- 统一按钮 ---- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    padding: 10px 20px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    text-decoration: none; min-height: 44px; margin-top: 14px;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn:hover { background: #005a9e; transform: translateY(-2px); }
+  .hero-focus { font-size: 1rem; color: var(--muted); margin-top: 6px; }
+
+  /* ---- 产品网格 ---- */
+  .prod-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 14px; }
+  .prod-card {
+    display: block; background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 18px; text-decoration: none; color: inherit;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .prod-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 6px 18px rgba(20, 35, 59, 0.12); }
+  .prod-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .prod-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .prod-desc { font-size: 0.92rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .prod-soon { font-size: 0.8rem; color: var(--accent); margin-top: 8px; font-weight: 600; }
+  .prod-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; color: #fff; background: var(--muted); border-radius: 999px; padding: 2px 8px; margin-top: 8px; }
+
+  /* ---- 关于 / 联系 ---- */
+  .about-list, .contact-list { margin: 10px 0 12px; padding-left: 20px; }
+  .about-list li, .contact-list li { font-size: 1rem; line-height: 1.8; color: var(--muted); margin-bottom: 6px; }
+  .contact-sub { font-size: 1.05rem; color: var(--accent); margin: 18px 0 8px; }
+  .contact-form { display: flex; flex-direction: column; gap: 10px; }
+  .c-input {
+    width: 100%; min-height: 44px; border: 1px solid var(--card-border); border-radius: 10px;
+    background: var(--bg); color: var(--text); padding: 10px 12px; font-size: 1rem; font-family: inherit;
+  }
+  .c-input:focus { outline: none; border-color: var(--accent); }
+  .contact-form textarea.c-input { min-height: 80px; resize: vertical; }
+  .contact-form .btn { align-self: flex-start; }
+
+  /* ---- 页脚链接 ---- */
+  .foot-links { margin-top: 8px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .foot-links a { color: var(--accent); text-decoration: none; }
+  .foot-links a:hover { text-decoration: underline; }
+
+  /* ---- 轻提示 toast ---- */
+  #toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: var(--bg); padding: 12px 20px; border-radius: 10px;
+    font-size: 0.95rem; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 999;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="common.css?v=20260830r" />
+  <link rel="stylesheet" href="common.css?v=20260830s" />
 </head>
 <body>
   <header class="topbar">
@@ -292,17 +350,41 @@
 
   <main class="content">
     <section class="hero">
-      <h1 id="heroTitle" data-zh="欢迎来到 Jerry's webpage" data-en="Welcome to Jerry's webpage" data-zh-logged="欢迎回来<br>【{name}】" data-en-logged="Welcome back<br>【{name}】">欢迎来到 Jerry's webpage</h1>
-      <p data-zh="这是一个基于 GitHub Pages 的个人网站，用来聚合各种各样有用的东西——全球新闻、项目作品与常用工具，都在这里入口直达。"
-         data-en="A personal site built on GitHub Pages, bringing together useful things — global news, projects and handy tools, all reachable from here.">这是一个基于 GitHub Pages 的个人网站，用来聚合各种各样有用的东西——全球新闻、项目作品与常用工具，都在这里入口直达。</p>
+      <h1 id="heroTitle" data-zh="👋 你好，我是 Jerry" data-en="👋 Hi, I'm Jerry" data-zh-logged="欢迎回来<br>【{name}】" data-en-logged="Welcome back<br>【{name}】">👋 你好，我是 Jerry</h1>
+      <p data-zh="一个热爱创造与工具效率的独立开发者。这个网站是我存放项目、想法和实用工具的数字花园。"
+         data-en="An independent developer who loves building and tooling efficiency. This site is my digital garden for projects, ideas and handy tools.">一个热爱创造与工具效率的独立开发者。这个网站是我存放项目、想法和实用工具的数字花园。</p>
+      <p class="hero-focus" data-zh="📌 当前重点：CleanOpt —— Windows 内存优化小工具" data-en="📌 Current focus: CleanOpt — a Windows memory optimization tool">📌 当前重点：CleanOpt —— Windows 内存优化小工具</p>
+      <a class="btn" href="products.html" data-zh="浏览全部产品 →" data-en="Browse all products →">浏览全部产品 →</a>
     </section>
 
-    <a class="card product-link" href="products.html">
-      <h2 data-zh="产品" data-en="Products">产品</h2>
-      <p class="product-teaser" data-zh="这里汇总了我正在做和已经上线的项目：全球新闻、写作与实用小工具等。点击进入产品页查看完整列表。"
-         data-en="A roundup of projects I'm building and shipping — global news, writing, and handy tools. Tap to open the full products page.">这里汇总了我正在做和已经上线的项目：全球新闻、写作与实用小工具等。点击进入产品页查看完整列表。</p>
-      <span class="product-go" data-zh="前往产品页 →" data-en="Go to products →">前往产品页 →</span>
-    </a>
+    <section class="card" id="products">
+      <h2 data-zh="🚀 我的项目作品" data-en="🚀 My Projects">🚀 我的项目作品</h2>
+      <div class="prod-grid">
+        <a class="prod-card" href="products/cleanopt/">
+          <div class="prod-icon">🧹</div>
+          <div class="prod-name" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</div>
+          <div class="prod-desc" data-zh="Windows 系统清理与内存优化小工具，后台静默运行。" data-en="Windows cleanup and memory optimizer that runs silently in the background.">Windows 系统清理与内存优化小工具，后台静默运行。</div>
+          <div class="prod-soon" data-zh="v1.0.0 · 立即下载" data-en="v1.0.0 · Download now">v1.0.0 · 立即下载</div>
+        </a>
+        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener">
+          <div class="prod-icon">📰</div>
+          <div class="prod-name" data-zh="全球新闻" data-en="Global News">全球新闻</div>
+          <div class="prod-desc" data-zh="每日双语全球要闻，10 大领域实时更新。" data-en="Daily bilingual world news across 10 fields, updated every day.">每日双语全球要闻，10 大领域实时更新。</div>
+        </a>
+        <a class="prod-card" href="#" onclick="return false">
+          <div class="prod-icon">🔧</div>
+          <div class="prod-name" data-zh="新工具（筹备中）" data-en="New tool (in progress)">新工具（筹备中）</div>
+          <div class="prod-desc" data-zh="正在筹备中，敬请期待。" data-en="In preparation — stay tuned.">正在筹备中，敬请期待。</div>
+          <div class="prod-tag" data-zh="🚧 开发中" data-en="🚧 In progress">🚧 开发中</div>
+        </a>
+        <a class="prod-card" href="#" onclick="return false">
+          <div class="prod-icon">📦</div>
+          <div class="prod-name" data-zh="实验项目（筹备中）" data-en="Experimental (in progress)">实验项目（筹备中）</div>
+          <div class="prod-desc" data-zh="想法验证阶段，暂不公开。" data-en="In the idea-validation stage, not public yet.">想法验证阶段，暂不公开。</div>
+          <div class="prod-tag" data-zh="🚧 开发中" data-en="🚧 In progress">🚧 开发中</div>
+        </a>
+      </div>
+    </section>
 
     <section class="card feature-card" id="featureCard" hidden>
       <span class="feature-tag" data-zh="精选" data-en="Featured">精选</span>
@@ -337,21 +419,45 @@
     </div>
 
     <section class="card" id="about">
-      <h2 data-zh="关于" data-en="About">关于</h2>
-      <p data-zh="这里会逐步放上具有长期价值的内容：个人项目、写作与一些实用小工具。现阶段以聚合入口为主，后续会随想法慢慢填充。"
-         data-en="Long-term, useful content will land here over time: personal projects, writing and small handy tools. For now it is mostly an aggregation hub, and will grow as ideas come.">这里会逐步放上具有长期价值的内容：个人项目、写作与一些实用小工具。现阶段以聚合入口为主，后续会随想法慢慢填充。</p>
+      <h2 data-zh="📖 关于这个站点" data-en="📖 About this site">📖 关于这个站点</h2>
+      <p data-zh="这个网站既是我的项目聚合地，也是我的写作与实验空间。"
+         data-en="This site is both my project hub and my writing &amp; experimentation space.">这个网站既是我的项目聚合地，也是我的写作与实验空间。</p>
+      <ul class="about-list">
+        <li data-zh="🛠️ 正在做：持续开发 CleanOpt，以及一些提升数字生活效率的小工具" data-en="🛠️ Building: continuously developing CleanOpt and small tools that improve digital-life efficiency">🛠️ 正在做：持续开发 CleanOpt，以及一些提升数字生活效率的小工具</li>
+        <li data-zh="✍️ 计划写：Windows 优化技巧、独立开发经验、工具测评" data-en="✍️ Planning to write: Windows optimization tips, indie-dev experience, tool reviews">✍️ 计划写：Windows 优化技巧、独立开发经验、工具测评</li>
+        <li data-zh="🌱 长期目标：让这个网站成为一个实用、开放且持续生长的资源站" data-en="🌱 Long-term goal: make this site a practical, open and continuously growing resource hub">🌱 长期目标：让这个网站成为一个实用、开放且持续生长的资源站</li>
+      </ul>
+      <p data-zh="如果你对某个工具或话题感兴趣，欢迎通过 GitHub 与我交流。"
+         data-en="If you're interested in any tool or topic, feel free to reach me on GitHub.">如果你对某个工具或话题感兴趣，欢迎通过 GitHub 与我交流。</p>
     </section>
 
     <section class="card" id="contact">
-      <h2 data-zh="联系" data-en="Contact">联系</h2>
-      <p data-zh="欢迎通过 GitHub 与我交流：">Welcome to reach me on GitHub:</p>
-      <p><a class="inline-link" href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a></p>
+      <h2 data-zh="📬 保持联系" data-en="📬 Keep in touch">📬 保持联系</h2>
+      <p data-zh="欢迎通过以下方式与我交流：" data-en="Feel free to reach me through any of these:">欢迎通过以下方式与我交流：</p>
+      <ul class="contact-list">
+        <li><a class="inline-link" href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a></li>
+        <li data-zh="📧 邮箱：jerry@example.com（请替换为您的真实邮箱）" data-en="📧 Email: jerry@example.com (replace with your real email)">📧 邮箱：jerry@example.com（请替换为您的真实邮箱）</li>
+      </ul>
+      <h3 class="contact-sub" data-zh="也可以直接给我留言" data-en="Or leave me a message">也可以直接给我留言</h3>
+      <form id="contactForm" class="contact-form" novalidate>
+        <input class="c-input" type="text" name="name" data-ph-zh="姓名" data-ph-en="Name" placeholder="姓名" />
+        <input class="c-input" type="email" name="email" data-ph-zh="邮箱" data-ph-en="Email" placeholder="邮箱" />
+        <textarea class="c-input" name="msg" rows="3" data-ph-zh="想说的话…" data-ph-en="Your message…" placeholder="想说的话…"></textarea>
+        <button type="submit" class="btn" data-zh="发送留言 →" data-en="Send message →">发送留言 →</button>
+      </form>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div>© 2026 Jerry's webpage · 小蓝页 · <span data-zh="基于 GitHub Pages 构建" data-en="Built on GitHub Pages">基于 GitHub Pages 构建</span> · <a href="contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+    <div>© 2026 Jerry's webpage · 小蓝页</div>
+    <div class="foot-links">
+      <a href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener">GitHub</a>
+      <a href="products.html" data-zh="产品" data-en="Products">产品</a>
+      <a href="#about" data-zh="关于" data-en="About">关于</a>
+      <a href="contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a>
+    </div>
   </footer>
+  <div id="toast"></div>
 
   
   <div class="float-actions">
@@ -393,6 +499,12 @@
           var n = nodes[i];
           var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
           if (txt != null) n.textContent = txt;
+        }
+        var phs = document.querySelectorAll('[data-ph-zh]');
+        for (var j = 0; j < phs.length; j++) {
+          var p = phs[j];
+          var ph = en ? (p.getAttribute('data-ph-en') || '') : p.getAttribute('data-ph-zh');
+          if (ph != null) p.placeholder = ph;
         }
       }
       function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
@@ -468,10 +580,25 @@
 
       // ---- 语言按钮：指向 language.html 的 <a>，由浏览器处理跳转，无需 JS 监听 ----
 
+      // ---- 首页联系表单（前端演示，无后端） ----
+      var toast = document.getElementById('toast');
+      function showToast(msg) {
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(window.__toastT);
+        window.__toastT = setTimeout(function () { toast.classList.remove('show'); }, 2600);
+      }
+      var cf = document.getElementById('contactForm');
+      if (cf) cf.addEventListener('submit', function (e) {
+        e.preventDefault();
+        showToast(cur.lang === 'en' ? 'Thanks for your message (feature in progress)' : '感谢留言（功能开发中）');
+      });
+
       applyAll();
     })();
   </script>
-<script src="auth.js?v=20260830r"></script>
-  <script src="common.js?v=20260830r"></script>
+<script src="auth.js?v=20260830s"></script>
+  <script src="common.js?v=20260830s"></script>
 </body>
 </html>

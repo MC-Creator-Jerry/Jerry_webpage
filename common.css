@@ -876,12 +876,31 @@ html[data-theme="dark"] .xl-insert-cancel { background: #2a2a2a; border-color: #
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  overflow: hidden;
   transform: translateY(0);
   transition: transform 0.55s cubic-bezier(.55, .06, .68, .19), opacity 0.35s ease;
+}
+/* 顶部蓝色长条：0 120 212 实色起头，向下过渡到白色背景 */
+.xl-loader.xl-nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(170px, 32vh, 340px);
+  background: linear-gradient(180deg,
+    rgb(0, 120, 212) 0%,
+    rgb(0, 120, 212) 20%,
+    rgba(0, 120, 212, 0.80) 48%,
+    rgba(0, 120, 212, 0.38) 74%,
+    rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
 }
 /* 进度条到达 100% 后整屏上滑收场 */
 .xl-loader.xl-nav.xl-hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 .xl-loader.xl-nav .xl-loader-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;

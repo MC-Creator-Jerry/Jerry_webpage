@@ -13,6 +13,7 @@
   function build() {
     var n = document.createElement('div');
     n.id = 'xl-loader';
+    n.className = 'xl-loader xl-nav';
     n.innerHTML =
       '<div class="xl-loader-inner">' +
         '<div class="xl-loader-text">正在加载资源</div>' +
@@ -32,7 +33,7 @@
     var n = el();
     if (!n) return;
     n.classList.add('xl-hidden');
-    setTimeout(function () { if (n && n.parentNode) n.parentNode.removeChild(n); }, 460);
+    setTimeout(function () { if (n && n.parentNode) n.parentNode.removeChild(n); }, 650);
   }
   function animate() {
     var n = show();

@@ -864,3 +864,51 @@ html[data-theme="dark"] .xl-insert-cancel { background: #2a2a2a; border-color: #
   transition: opacity 0.2s, transform 0.2s;
 }
 .xl-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ===== 页间导航加载动画（common.js 注入 DOM，这里只负责样式） ===== */
+.xl-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.4s ease;
+}
+.xl-loader.xl-hidden { opacity: 0; pointer-events: none; }
+.xl-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 让整体略偏上，使进度条落在「屏幕中心偏下」 */
+  transform: translateY(-6%);
+  gap: 12px;
+}
+.xl-loader-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1c2733;
+  letter-spacing: 0.06em;
+}
+.xl-loader-pct {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0078d4;
+  margin-bottom: 2px;
+}
+.xl-loader-bar {
+  width: min(280px, 68vw);
+  height: 6px;
+  background: #e6ebf2;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.xl-loader-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #0078d4, #28599c);
+  border-radius: 999px;
+  transition: width 0.18s ease;
+}

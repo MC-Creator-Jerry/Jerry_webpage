@@ -10,6 +10,16 @@
   var logoutBtn = document.getElementById('logoutBtn');
   window.JW_AUTH = { user: null, isAdmin: false };
 
+  // —— 登录态客户端缓存：避免每次切页都打 /api/me（省函数调用、更快）——
+  var ME_KEY = '__xl_me', ME_TTL = 120000, ME_PROMISE = null;
+  function readMeCache() {
+    try { var r = sessionStorage.getItem(ME_KEY); if (!r) return null; var o = JSON.parse(r); if (o && o.ts && Date.now() - o.ts < ME_TTL) return o.data; } catch (e) {}
+    return null;
+  }
+  function writeMeCache(d) { try { sessionStorage.setItem(ME_KEY, JSON.stringify({ ts: Date.now(), data: d })); } catch (e) {} }
+  function clearMeCache() { try { sessionStorage.removeItem(ME_KEY); } catch (e) {} }
+  function applyMe(d) { if (d && d.login) setLoggedIn(d); else setLoggedOut(); }
+
   // 等级查询（供头像悬浮卡 / 下拉菜单展示 Lv + 进度条）
   function jwLang() { try { return localStorage.getItem('xl_lang') || 'zh'; } catch (e) { return 'zh'; } }
   function jwT(zh, en) { return jwLang() === 'en' ? en : zh; }
@@ -150,20 +160,27 @@
   var trafficIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 3v18h18'/><path d='M7 16l4-4 4 5 5-7'/></svg>";
 
   // 蓝条「通知」红点：拉取未读总数（系统+消息+评论）并刷新
+  var NOTIF_KEY = '__xl_notif', NOTIF_TTL = 30000;
+  function applyBadge(d) {
+    var badge = document.getElementById('noticeBadge');
+    if (!badge) return;
+    if (d && d.total > 0) { badge.textContent = d.total > 99 ? '99+' : String(d.total); badge.hidden = false; }
+    else badge.hidden = true;
+  }
   function updateNoticeBadge() {
     var badge = document.getElementById('noticeBadge');
     if (!badge) return;
+    try {
+      var r = sessionStorage.getItem(NOTIF_KEY);
+      if (r) { var o = JSON.parse(r); if (o && o.ts && Date.now() - o.ts < NOTIF_TTL) { applyBadge(o.data); return; } }
+    } catch (e) {}
     fetch('/api/notif')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (d && d.total > 0) {
-          badge.textContent = d.total > 99 ? '99+' : String(d.total);
-          badge.hidden = false;
-        } else {
-          badge.hidden = true;
-        }
+        if (d) { try { sessionStorage.setItem(NOTIF_KEY, JSON.stringify({ ts: Date.now(), data: d })); } catch (e) {} applyBadge(d); }
+        else applyBadge(null);
       })
-      .catch(function () { badge.hidden = true; });
+      .catch(function () { applyBadge(null); });
   }
   window.JW_REFRESH_BADGE = updateNoticeBadge;
 
@@ -233,10 +250,12 @@
 
   // 暴露给设置页：登出 / 登录
   window.JW_LOGOUT = function () {
+    clearMeCache();
     fetch('/api/logout').then(function () { setLoggedOut(); }).catch(function () { setLoggedOut(); });
   };
   function doLogin() {
     var state = randState();
+    clearMeCache();
     try { sessionStorage.setItem('gh_oauth_state', state); } catch (x) {}
     var url = 'https://github.com/login/oauth/authorize?client_id=' + encodeURIComponent(CLIENT_ID) +
       '&redirect_uri=' + encodeURIComponent(REDIRECT) +
@@ -533,28 +552,24 @@
     return Array.prototype.map.call(a, function (b) { return b.toString(16).padStart(2, '0'); }).join('');
   }
 
-  // 页面加载即尝试读取登录态（后端 cookie）
-  // 健壮性修复：只在后端明确「无会话(401)」时才登出；网络/限流等非 401 错误
-  // 一律重试一次并保留当前状态，杜绝「切个页面就莫名登出」。
-  function loadMe(tries) {
-    tries = tries || 0;
-    fetch('/api/me')
+  // 页面加载即尝试读取登录态（后端 cookie）。
+  // 优先用客户端缓存（sessionStorage），命中则跳过 /api/me；未命中才请求，
+  // 并用 ME_PROMISE 去重，避免与 boot.js 同帧各打一次（旧版会重复请求）。
+  function loadMe() {
+    var cached = readMeCache();
+    if (cached) { applyMe(cached); return; }
+    if (ME_PROMISE) { ME_PROMISE.then(applyMe); return; }
+    ME_PROMISE = fetch('/api/me')
       .then(function (r) {
-        if (r.ok) {
-          return r.json().then(function (d) {
-            if (d && d.login) setLoggedIn(d);
-            else setLoggedOut();
-          });
-        }
-        // 401 = 确实没有会话 -> 登出；其余（网络/404/5xx）属于瞬时异常
-        if (r.status === 401) { setLoggedOut(); return; }
-        if (tries < 1) return loadMe(tries + 1);
-        // 重试后仍异常：不要误登出，保持页面默认（登录按钮可见）状态
+        if (r.ok) return r.json().then(function (d) { if (d && d.login) writeMeCache(d); return d; });
+        return { __noSession: true, status: r.status }; // 401=无会话；其余为瞬时异常
       })
-      .catch(function () {
-        // 网络层失败：重试一次；绝不因瞬时网络抖动而登出
-        if (tries < 1) return loadMe(tries + 1);
-      });
+      .catch(function () { return { __noSession: true, status: 0 }; });
+    ME_PROMISE.then(function (d) {
+      // 仅在明确无会话(401)或空响应时登出；瞬时异常(网络/5xx)保持默认 UI，不误登出
+      if (!d || d.__noSession) { if (d && d.status === 401) setLoggedOut(); return; }
+      applyMe(d);
+    });
   }
   loadMe();
 

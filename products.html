@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="boot.js?v=20260830s"></script>
+  <script src="boot.js?v=20260830t"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>产品 · Jerry's webpage</title>
@@ -175,6 +175,7 @@
   }
   .prod-card {
     display: block;
+    position: relative;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius);
@@ -192,6 +193,38 @@
   .prod-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
   .prod-desc { font-size: 0.92rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
   .prod-soon { font-size: 0.8rem; color: var(--accent); margin-top: 8px; font-weight: 600; }
+
+  /* 固定按钮 + 已固定 / 推荐区 */
+  .prod-pin {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.5;
+    transition: opacity 0.15s, transform 0.15s;
+    user-select: none;
+  }
+  .prod-pin:hover, .prod-pin:focus-visible { opacity: 1; transform: scale(1.15); outline: none; }
+  .prod-pin.pinned { opacity: 1; }
+  .pin-empty {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+    padding: 4px 2px;
+  }
+  .ext-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 8px;
+    font-weight: 600;
+    opacity: 0.85;
+  }
 
   /* ---- 页脚 ---- */
   .site-footer {
@@ -217,7 +250,7 @@
   }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="common.css?v=20260830s" />
+  <link rel="stylesheet" href="common.css?v=20260830t" />
 </head>
 <body>
   <header class="topbar">
@@ -248,16 +281,87 @@
     <section class="card">
       <h2 data-zh="全部产品" data-en="All Products">全部产品</h2>
       <div class="prod-grid">
-        <a class="prod-card" href="products/cleanopt/">
+        <a class="prod-card" href="products/cleanopt/" data-pin-icon="🧹" data-pin-name="CleanOpt" data-pin-en="CleanOpt" data-pin-url="products/cleanopt/" data-pin-desc="Windows 系统清理与内存优化小工具。" data-pin-desc-en="Windows cleanup &amp; memory optimizer.">
           <div class="prod-icon">🧹</div>
           <div class="prod-name" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</div>
           <div class="prod-desc" data-zh="Windows 系统清理与内存优化小工具。" data-en="Windows system cleanup and memory optimization tool.">Windows 系统清理与内存优化小工具。</div>
           <div class="prod-soon" data-zh="v1.0.0 · 立即下载" data-en="v1.0.0 · Download now">v1.0.0 · 立即下载</div>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
         </a>
-        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener">
+        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener" data-pin-icon="📰" data-pin-name="全球新闻" data-pin-en="Global News" data-pin-url="https://mc-creator-jerry.github.io/daily-news/" data-pin-desc="每日双语全球要闻，10 大领域实时更新。" data-pin-desc-en="Daily bilingual world news across 10 fields.">
           <div class="prod-icon">📰</div>
           <div class="prod-name" data-zh="全球新闻" data-en="Global News">全球新闻</div>
           <div class="prod-desc" data-zh="每日双语全球要闻，10 大领域实时更新。" data-en="Daily bilingual world news across 10 fields, updated every day.">每日双语全球要闻，10 大领域实时更新。</div>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="card" id="pinnedSection">
+      <h2 data-zh="我的已固定" data-en="My Pinned">我的已固定</h2>
+      <div class="prod-grid" id="pinnedGrid" hidden></div>
+      <p class="pin-empty" id="pinnedEmpty" data-zh="你还没有固定任何产品。在任意产品卡片上点击右上角的 ☆ 即可固定到这里。"
+         data-en="You haven't pinned anything yet. Tap the ☆ in the top-right of any product card to pin it here.">你还没有固定任何产品。在任意产品卡片上点击右上角的 ☆ 即可固定到这里。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="站长推荐网络产品" data-en="Webmaster's Picks">站长推荐网络产品</h2>
+      <div class="prod-grid">
+        <a class="prod-card" href="https://wordly.org" target="_blank" rel="noopener" data-pin-icon="🟩" data-pin-name="Wordle" data-pin-en="Wordle" data-pin-url="https://wordly.org" data-pin-desc="每日猜词小游戏。" data-pin-desc-en="Daily word guessing game.">
+          <div class="prod-icon">🟩</div>
+          <div class="prod-name">Wordle</div>
+          <div class="prod-desc">每日猜词小游戏。</div>
+          <span class="ext-badge">wordly.org ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+        <a class="prod-card" href="https://www.bilibili.com" target="_blank" rel="noopener" data-pin-icon="📺" data-pin-name="哔哩哔哩" data-pin-en="Bilibili" data-pin-url="https://www.bilibili.com" data-pin-desc="中文视频与社区平台。" data-pin-desc-en="Chinese video &amp; community platform.">
+          <div class="prod-icon">📺</div>
+          <div class="prod-name">哔哩哔哩</div>
+          <div class="prod-desc">中文视频与社区平台。</div>
+          <span class="ext-badge">bilibili.com ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+        <a class="prod-card" href="https://www.deepseek.com" target="_blank" rel="noopener" data-pin-icon="🤖" data-pin-name="DeepSeek" data-pin-en="DeepSeek" data-pin-url="https://www.deepseek.com" data-pin-desc="智能对话与推理模型。" data-pin-desc-en="AI chat &amp; reasoning models.">
+          <div class="prod-icon">🤖</div>
+          <div class="prod-name">DeepSeek</div>
+          <div class="prod-desc">智能对话与推理模型。</div>
+          <span class="ext-badge">deepseek.com ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+        <a class="prod-card" href="https://www.duolingo.com" target="_blank" rel="noopener" data-pin-icon="🦉" data-pin-name="Duolingo" data-pin-en="Duolingo" data-pin-url="https://www.duolingo.com" data-pin-desc="游戏化语言学习。" data-pin-desc-en="Gamified language learning.">
+          <div class="prod-icon">🦉</div>
+          <div class="prod-name">Duolingo</div>
+          <div class="prod-desc">游戏化语言学习。</div>
+          <span class="ext-badge">duolingo.com ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+        <a class="prod-card" href="https://github.com" target="_blank" rel="noopener" data-pin-icon="🐙" data-pin-name="GitHub" data-pin-en="GitHub" data-pin-url="https://github.com" data-pin-desc="全球代码托管与协作。" data-pin-desc-en="Global code hosting &amp; collaboration.">
+          <div class="prod-icon">🐙</div>
+          <div class="prod-name">GitHub</div>
+          <div class="prod-desc">全球代码托管与协作。</div>
+          <span class="ext-badge">github.com ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+        <a class="prod-card" href="https://www.cloudflare.com" target="_blank" rel="noopener" data-pin-icon="☁️" data-pin-name="Cloudflare" data-pin-en="Cloudflare" data-pin-url="https://www.cloudflare.com" data-pin-desc="网络性能与安全平台。" data-pin-desc-en="Web performance &amp; security platform.">
+          <div class="prod-icon">☁️</div>
+          <div class="prod-name">Cloudflare</div>
+          <div class="prod-desc">网络性能与安全平台。</div>
+          <span class="ext-badge">cloudflare.com ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+        <a class="prod-card" href="https://wheelofnames.com" target="_blank" rel="noopener" data-pin-icon="🎡" data-pin-name="Wheel of Names" data-pin-en="Wheel of Names" data-pin-url="https://wheelofnames.com" data-pin-desc="随机抽签与转盘工具。" data-pin-desc-en="Random picker &amp; name wheel.">
+          <div class="prod-icon">🎡</div>
+          <div class="prod-name">Wheel of Names</div>
+          <div class="prod-desc">随机抽签与转盘工具。</div>
+          <span class="ext-badge">wheelofnames.com ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+        </a>
+        <a class="prod-card" href="https://endfield.hypergryph.com" target="_blank" rel="noopener" data-pin-icon="🎮" data-pin-name="终末地" data-pin-en="Endfield" data-pin-url="https://endfield.hypergryph.com" data-pin-desc="鹰角网络终端工业题材新作。" data-pin-desc-en="Hypergryph's terminal-industrial themed game.">
+          <div class="prod-icon">🎮</div>
+          <div class="prod-name">终末地</div>
+          <div class="prod-desc">鹰角网络终端工业题材新作。</div>
+          <span class="ext-badge">endfield.hypergryph.com ↗</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
         </a>
       </div>
     </section>
@@ -308,17 +412,99 @@
           var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
           if (txt != null) n.textContent = txt;
         }
+        renderPins();
       }
       function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+
+      // ---- 我的已固定（localStorage，纯前端，双站可用） ----
+      var PIN_KEY = 'xl_pins';
+      function getPins() { try { return JSON.parse(localStorage.getItem(PIN_KEY) || '[]'); } catch (e) { return []; } }
+      function setPins(a) { try { localStorage.setItem(PIN_KEY, JSON.stringify(a)); } catch (e) {} }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+      }
+
+      function cardFromPin(p, pinned) {
+        var en = cur.lang === 'en';
+        var a = document.createElement('a');
+        a.className = 'prod-card';
+        a.href = p.url; a.target = '_blank'; a.rel = 'noopener';
+        var html = '<div class="prod-icon">' + esc(p.icon) + '</div>' +
+          '<div class="prod-name">' + esc((en && p.en) ? p.en : p.name) + '</div>';
+        if (p.desc) html += '<div class="prod-desc">' + esc((en && p.descEn) ? p.descEn : p.desc) + '</div>';
+        html += '<span class="prod-pin' + (pinned ? ' pinned' : '') + '" role="button" tabindex="0" aria-label="取消固定">★</span>';
+        a.innerHTML = html;
+        a.querySelector('.prod-pin').addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation(); unpin(p.url);
+        });
+        return a;
+      }
+
+      function renderPins() {
+        var grid = document.getElementById('pinnedGrid');
+        var empty = document.getElementById('pinnedEmpty');
+        if (!grid) return;
+        var pins = getPins();
+        grid.innerHTML = '';
+        if (!pins.length) { empty.hidden = false; grid.hidden = true; return; }
+        empty.hidden = true; grid.hidden = false;
+        pins.forEach(function (p) { grid.appendChild(cardFromPin(p, true)); });
+      }
+
+      function unpin(url) {
+        setPins(getPins().filter(function (x) { return x.url !== url; }));
+        renderPins(); syncPinButtons();
+      }
+
+      function syncPinButtons() {
+        var urls = getPins().map(function (x) { return x.url; });
+        document.querySelectorAll('.prod-card[data-pin-url] .prod-pin').forEach(function (b) {
+          var card = b.closest('.prod-card');
+          var on = urls.indexOf(card.getAttribute('data-pin-url')) >= 0;
+          b.classList.toggle('pinned', on);
+          b.textContent = on ? '★' : '☆';
+          b.setAttribute('aria-label', on ? '取消固定' : '固定');
+        });
+      }
+
+      function onPinClick(e) {
+        e.preventDefault(); e.stopPropagation();
+        var card = e.currentTarget.closest('.prod-card');
+        var p = {
+          icon: card.getAttribute('data-pin-icon'),
+          name: card.getAttribute('data-pin-name'),
+          en: card.getAttribute('data-pin-en') || '',
+          url: card.getAttribute('data-pin-url'),
+          desc: card.getAttribute('data-pin-desc') || '',
+          descEn: card.getAttribute('data-pin-desc-en') || ''
+        };
+        var pins = getPins();
+        var i = pins.findIndex(function (x) { return x.url === p.url; });
+        if (i >= 0) pins.splice(i, 1); else pins.push(p);
+        setPins(pins); renderPins(); syncPinButtons();
+      }
+
+      function bindPins() {
+        document.querySelectorAll('.prod-card[data-pin-url] .prod-pin').forEach(function (b) {
+          b.addEventListener('click', onPinClick);
+          b.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPinClick(e); }
+          });
+        });
+      }
 
       // ---- 设置已迁至 settings/homepage.html（点右下角齿轮在新标签打开） ----
 
       // ---- 语言按钮：指向 language.html 的 <a>，由浏览器处理跳转，无需 JS 监听 ----
 
       applyAll();
+      bindPins();
+      syncPinButtons();
     })();
   </script>
-<script src="auth.js?v=20260830s"></script>
-  <script src="common.js?v=20260830s"></script>
+<script src="auth.js?v=20260830t"></script>
+  <script src="common.js?v=20260830t"></script>
 </body>
 </html>

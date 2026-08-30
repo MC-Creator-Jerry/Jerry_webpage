@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <script src="../../boot.js?v=20260829l"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>帖子流量 · Jerry's webpage</title>
+  <style>
+    :root {
+      --accent: #0078d4;
+      --radius: 14px;
+      --bg: #f4f6f9;
+      --text: #1c2733;
+      --muted: #44556a;
+      --card-bg: #ffffff;
+      --card-border: #e3e8ef;
+      --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+      --bar-top: rgb(40, 89, 156);
+      --bar-bottom: rgb(0, 120, 212);
+      --bar-fg: #ffffff;
+    }
+    /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+    .topbar { position: sticky; top: 0; z-index: 100; min-height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background-color: var(--bar-top); background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%); color: var(--bar-fg); box-shadow: 0 2px 10px rgba(0,0,0,0.18); border-radius: 0; }
+    .site-name { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px; color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer; }
+    .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9; }
+    .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+    .bar-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .bar-btn { border: none; background: rgba(255,255,255,0.08); color: var(--bar-fg); border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; line-height: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .content { max-width: 960px; margin: 0 auto; padding: 40px 24px 64px; box-sizing: border-box; }
+
+    .hero { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 8px; }
+    .hero p { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 600px; }
+    .hero-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .range-tabs { display: flex; gap: 6px; }
+    .range-tab { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: 0.88rem; cursor: pointer; }
+    .range-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .range-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .refresh-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 16px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    .refresh-btn:hover { filter: brightness(1.08); }
+    .refresh-btn:disabled { opacity: .6; cursor: default; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 20px 22px; margin-top: 18px; }
+    .card h2 { margin: 0 0 6px; color: var(--text); font-size: 1.2rem; }
+
+    table.rank { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    table.rank th, table.rank td { text-align: left; padding: 10px 10px; border-bottom: 1px solid var(--card-border); }
+    table.rank th { color: var(--muted); font-weight: 600; font-size: 0.82rem; }
+    table.rank td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+    table.rank td.title { word-break: break-word; }
+    table.rank td.title a { color: var(--accent); text-decoration: none; }
+    table.rank td.title a:hover { text-decoration: underline; }
+    table.rank tr:last-child td { border-bottom: none; }
+    .bar-inline { height: 6px; background: var(--accent); border-radius: 3px; min-width: 2px; margin-top: 6px; }
+
+    .hint { color: var(--muted); }
+    .err-box { color: #c0392b; }
+    [hidden] { display: none !important; }
+    @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
+  </style>
+  <link rel="stylesheet" href="../../common.css?v=20260829l" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <a href="../" data-zh="流量看板" data-en="Traffic">流量看板</a>
+        <span class="bc-sep">›</span>
+        <span data-zh="帖子流量" data-en="Post traffic">帖子流量</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../../post/center/" data-zh="帖子中心" data-en="Posts">帖子中心</a>
+      <a class="bar-btn" href="../../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <div>
+        <h1 data-zh="帖子流量" data-en="Post traffic">帖子流量</h1>
+        <p id="subHint" data-zh="各帖子的页面浏览量（按所选时间窗口统计，仅管理员可见）。" data-en="Page views per post (within the selected window, admin only).">各帖子的页面浏览量（按所选时间窗口统计，仅管理员可见）。</p>
+      </div>
+      <div class="hero-actions">
+        <div class="range-tabs" id="rangeTabs">
+          <button class="range-tab" type="button" data-days="7">7 天</button>
+          <button class="range-tab" type="button" data-days="14">14 天</button>
+          <button class="range-tab active" type="button" data-days="30">30 天</button>
+          <button class="range-tab" type="button" data-days="90">90 天</button>
+        </div>
+        <button class="refresh-btn" id="refreshBtn" type="button" data-zh="刷新" data-en="Refresh">刷新</button>
+      </div>
+    </section>
+
+    <section class="card" id="denyCard" hidden>
+      <h2 data-zh="无访问权限" data-en="No access">无访问权限</h2>
+      <p class="hint" id="denyMsg" data-zh="帖子流量仅站主与管理员可见。" data-en="Post traffic is for admins only.">帖子流量仅站主与管理员可见。</p>
+    </section>
+
+    <div id="dash" hidden>
+      <section class="card">
+        <h2 data-zh="热门帖子（按浏览量）" data-en="Top posts by views">热门帖子（按浏览量）</h2>
+        <p class="hint" data-zh="下方为所选时间窗口内的帖子页面浏览量（PV）。标题缺失表示帖子可能已被删除。" data-en="Page views for post detail pages within the selected window. A missing title means the post may have been deleted.">下方为所选时间窗口内的帖子页面浏览量（PV）。标题缺失表示帖子可能已被删除。</p>
+        <table class="rank">
+          <thead><tr><th style="width:46px">#</th><th data-zh="标题" data-en="Title">标题</th><th style="width:130px" data-zh="浏览量 PV" data-en="Views">浏览量 PV</th></tr></thead>
+          <tbody id="postBody"></tbody>
+        </table>
+        <p class="hint" id="postEmpty" hidden data-zh="所选时间窗口内暂无帖子访问记录。" data-en="No post views in the selected window.">所选时间窗口内暂无帖子访问记录。</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" href="../../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="../../settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script src="../../prefs.js?v=20260829l"></script>
+  <script src="../../auth.js?v=20260829l"></script>
+  <script>
+    (function () {
+      var dash = document.getElementById('dash');
+      var denyCard = document.getElementById('denyCard');
+      var denyMsg = document.getElementById('denyMsg');
+      var refreshBtn = document.getElementById('refreshBtn');
+      var rangeTabs = document.getElementById('rangeTabs');
+      var days = 30;
+
+      function fmt(n) {
+        try { return Number(n || 0).toLocaleString('zh-CN'); } catch (e) { return String(n || 0); }
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function showDeny(msg) {
+        denyCard.hidden = false;
+        dash.hidden = true;
+        if (msg) denyMsg.textContent = msg;
+      }
+
+      function renderPosts(rows) {
+        var tbody = document.getElementById('postBody');
+        var empty = document.getElementById('postEmpty');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!rows || !rows.length) { if (empty) empty.hidden = false; return; }
+        if (empty) empty.hidden = true;
+        var max = rows.reduce(function (m, r) { return Math.max(m, r.views || 0); }, 0) || 1;
+        rows.forEach(function (r, i) {
+          var tr = document.createElement('tr');
+          var titleHtml = esc(r.title || ('帖子 #' + r.id));
+          var href = '../../post/detail/?id=' + encodeURIComponent(r.id);
+          tr.innerHTML =
+            '<td class="num">' + (i + 1) + '</td>' +
+            '<td class="title"><a href="' + esc(href) + '" target="_blank" rel="noopener">' + titleHtml + '</a>' +
+              '<div class="bar-inline" style="width:' + Math.max(2, Math.round((r.views / max) * 100)) + '%"></div></td>' +
+            '<td class="num">' + fmt(r.views) + '</td>';
+          tbody.appendChild(tr);
+        });
+      }
+
+      function load() {
+        if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.textContent = '加载中…'; }
+        fetch('/api/stats?days=' + encodeURIComponent(days), { credentials: 'same-origin' })
+          .then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, body: j }; });
+          })
+          .then(function (res) {
+            if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = '刷新'; }
+            if (res.status === 401) { showDeny('请先登录后再查看帖子流量。'); return; }
+            if (res.status === 403) { showDeny('帖子流量仅站主与管理员可见。'); return; }
+            var d = res.body || {};
+            if (!d.ok) { showDeny('统计数据加载失败。'); return; }
+            denyCard.hidden = true;
+            dash.hidden = false;
+            renderPosts(d.topPosts || []);
+          })
+          .catch(function () {
+            if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = '刷新'; }
+            showDeny('网络错误，无法加载统计数据。');
+          });
+      }
+
+      if (rangeTabs) {
+        Array.prototype.forEach.call(rangeTabs.querySelectorAll('.range-tab'), function (tab) {
+          tab.addEventListener('click', function () {
+            days = parseInt(tab.getAttribute('data-days') || '30', 10) || 30;
+            Array.prototype.forEach.call(rangeTabs.querySelectorAll('.range-tab'), function (t) {
+              t.classList.toggle('active', t === tab);
+            });
+            load();
+          });
+        });
+      }
+      if (refreshBtn) refreshBtn.addEventListener('click', load);
+
+      load();
+    })();
+  </script>
+  <script src="../../common.js?v=20260829l"></script>
+</body>
+</html>

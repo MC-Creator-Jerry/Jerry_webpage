@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <script src="../boot.js?v=20260829j"></script>
+  <script src="../boot.js?v=20260829k"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>流量看板 · Jerry's webpage</title>
   <style>
@@ -15,7 +15,19 @@
       --card-bg: #ffffff;
       --card-border: #e3e8ef;
       --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
+      --bar-top: rgb(40, 89, 156);
+      --bar-bottom: rgb(0, 120, 212);
+      --bar-fg: #ffffff;
     }
+    /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+    .topbar { position: sticky; top: 0; z-index: 100; min-height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background-color: var(--bar-top); background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%); color: var(--bar-fg); box-shadow: 0 2px 10px rgba(0,0,0,0.18); border-radius: 0; }
+    .site-name { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px; color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer; }
+    .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9; }
+    .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+    .bar-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .bar-btn { border: none; background: rgba(255,255,255,0.08); color: var(--bar-fg); border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; line-height: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    /* 主体内容：桌面端居中留白（移动端由 common.css 控制） */
+    .content { max-width: 960px; margin: 0 auto; padding: 40px 24px 64px; box-sizing: border-box; }
     html[data-theme="dark"] {
       --bg: #0f1720; --text: #e6edf5; --muted: #9fb0c3;
       --card-bg: #16212e; --card-border: #243244; --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
@@ -73,7 +85,7 @@
     [hidden] { display: none !important; }
     @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
   </style>
-  <link rel="stylesheet" href="../../common.css?v=20260829j" />
+  <link rel="stylesheet" href="../../common.css?v=20260829k" />
 </head>
 <body>
   <header class="topbar">
@@ -217,8 +229,8 @@
     </a>
   </div>
 
-  <script src="../../prefs.js?v=20260829j"></script>
-  <script src="../../auth.js?v=20260829j"></script>
+  <script src="../../prefs.js?v=20260829k"></script>
+  <script src="../../auth.js?v=20260829k"></script>
   <script>
     (function () {
       var dash = document.getElementById('dash');
@@ -424,6 +436,6 @@
       load();
     })();
   </script>
-  <script src="../../common.js?v=20260829j"></script>
+  <script src="../../common.js?v=20260829k"></script>
 </body>
 </html>

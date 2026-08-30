@@ -5,6 +5,83 @@
  *   <span class="char-count" data-for="x"></span>
  * 无需手动调用，脚本在 DOM 就绪后自动初始化页面内所有 .auto-grow 与带 maxlength 的字段。
  */
+/* ===== 页间导航加载动画：主页↔辅页 切换时盖白 + 蓝色进度条 ===== */
+(function () {
+  'use strict';
+  var KEY = 'xl_nav_loader';
+  function el() { return document.getElementById('xl-loader'); }
+  function build() {
+    var n = document.createElement('div');
+    n.id = 'xl-loader';
+    n.innerHTML =
+      '<div class="xl-loader-inner">' +
+        '<div class="xl-loader-text">正在加载资源</div>' +
+        '<div class="xl-loader-pct">0%</div>' +
+        '<div class="xl-loader-bar"><div class="xl-loader-fill"></div></div>' +
+      '</div>';
+    (document.body || document.documentElement).appendChild(n);
+    return n;
+  }
+  function show() {
+    var n = el();
+    if (!n) n = build();
+    n.classList.remove('xl-hidden');
+    return n;
+  }
+  function hide() {
+    var n = el();
+    if (!n) return;
+    n.classList.add('xl-hidden');
+    setTimeout(function () { if (n && n.parentNode) n.parentNode.removeChild(n); }, 460);
+  }
+  function animate() {
+    var n = show();
+    var fill = n.querySelector('.xl-loader-fill');
+    var pct = n.querySelector('.xl-loader-pct');
+    var p = 0;
+    fill.style.width = '0%';
+    pct.textContent = '0%';
+    var timer = setInterval(function () {
+      p += Math.random() * 11 + 5;
+      if (p > 92) p = 92;
+      fill.style.width = p + '%';
+      pct.textContent = Math.round(p) + '%';
+    }, 170);
+    function done() {
+      clearInterval(timer);
+      fill.style.width = '100%';
+      pct.textContent = '100%';
+      setTimeout(hide, 280);
+    }
+    if (document.readyState === 'complete') done();
+    else {
+      window.addEventListener('load', done);
+      setTimeout(done, 2600); // 兜底：资源迟迟不触发 load 也收尾
+    }
+  }
+  // 出发页：点击站内链接 → 立即盖白 + 记录标记，目标页据此播放动画
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a') : null;
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    if (!href || href.charAt(0) === '#' || href.charAt(0) === '?') return;
+    if (a.target === '_blank' || a.hasAttribute('download')) return;
+    // 仅站内 / 相对路径链接
+    if (/^(https?:)?\/\//i.test(href) && href.indexOf(location.host) === -1) return;
+    try { sessionStorage.setItem(KEY, '1'); } catch (e2) {}
+    show();
+    // 若导航未真正发生（同页/被拦截），看守狗收掉白屏
+    setTimeout(function () { if (el()) hide(); }, 1600);
+  }, true);
+  // 目标页：从站内导航过来则播放动画
+  try {
+    if (sessionStorage.getItem(KEY) === '1') {
+      sessionStorage.removeItem(KEY);
+      animate();
+    }
+  } catch (e) {}
+})();
+
 (function () {
   'use strict';
 

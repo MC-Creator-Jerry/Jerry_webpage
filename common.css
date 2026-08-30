@@ -866,7 +866,8 @@ html[data-theme="dark"] .xl-insert-cancel { background: #2a2a2a; border-color: #
 .xl-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ===== 页间导航加载动画（common.js 注入 DOM，这里只负责样式） ===== */
-.xl-loader {
+/* 用 .xl-nav 作用域，避免覆盖上面的「终末地」入场动画（.xl-loader 共用类） */
+.xl-loader.xl-nav {
   position: fixed;
   inset: 0;
   z-index: 99999;
@@ -875,37 +876,39 @@ html[data-theme="dark"] .xl-insert-cancel { background: #2a2a2a; border-color: #
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  transition: opacity 0.4s ease;
+  transform: translateY(0);
+  transition: transform 0.55s cubic-bezier(.55, .06, .68, .19), opacity 0.35s ease;
 }
-.xl-loader.xl-hidden { opacity: 0; pointer-events: none; }
-.xl-loader-inner {
+/* 进度条到达 100% 后整屏上滑收场 */
+.xl-loader.xl-nav.xl-hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+.xl-loader.xl-nav .xl-loader-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 让整体略偏上，使进度条落在「屏幕中心偏下」 */
-  transform: translateY(-6%);
-  gap: 12px;
+  gap: 22px;
 }
-.xl-loader-text {
-  font-size: 1.05rem;
-  font-weight: 600;
+/* 「正在加载资源」放大铺满视觉中心 */
+.xl-loader.xl-nav .xl-loader-text {
+  font-size: clamp(2.2rem, 11vw, 5rem);
+  font-weight: 800;
   color: #1c2733;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-align: center;
 }
-.xl-loader-pct {
-  font-size: 0.92rem;
+.xl-loader.xl-nav .xl-loader-pct {
+  font-size: 1rem;
   font-weight: 700;
   color: #0078d4;
-  margin-bottom: 2px;
 }
-.xl-loader-bar {
-  width: min(280px, 68vw);
-  height: 6px;
+.xl-loader.xl-nav .xl-loader-bar {
+  width: min(320px, 72vw);
+  height: 8px;
   background: #e6ebf2;
   border-radius: 999px;
   overflow: hidden;
 }
-.xl-loader-fill {
+.xl-loader.xl-nav .xl-loader-fill {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #0078d4, #28599c);

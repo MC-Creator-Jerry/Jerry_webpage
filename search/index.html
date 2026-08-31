@@ -139,6 +139,11 @@
       var toastEl = document.getElementById('toast');
       function toast(m){ toastEl.textContent = m; toastEl.className = 'toast show'; setTimeout(function(){ toastEl.className='toast'; }, 2200); }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+      function initialAvatar(login) {
+        var ch = (login || '?').charAt(0).toUpperCase();
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#g)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">' + ch + '</text></svg>';
+        return 'data:image/svg+xml,' + encodeURIComponent(svg);
+      }
       function stripTags(html){ var d = document.createElement('div'); d.innerHTML = html || ''; return (d.textContent||'').replace(/\s+/g,' ').trim(); }
 
       function doSearch(q) {
@@ -169,7 +174,7 @@
               var h2 = document.createElement('div'); h2.className = 'sec-title'; h2.textContent = '用户'; results.appendChild(h2);
               users.forEach(function (u) {
                 var a = document.createElement('a'); a.className = 'card user-item'; a.href = '../personal_profile/?user=' + encodeURIComponent(u.login);
-                a.innerHTML = '<img src="https://github.com/' + encodeURIComponent(u.login) + '.png" onerror="this.style.visibility=\'hidden\'"><div><div class="un">@' + esc(u.login) + '</div><div class="ub"></div></div>';
+                a.innerHTML = '<img src="https://github.com/' + encodeURIComponent(u.login) + '.png" onerror="this.onerror=null;this.src=initialAvatar(\'' + u.login + '\')"><div><div class="un">@' + esc(u.login) + '</div><div class="ub"></div></div>';
                 a.querySelector('.ub').textContent = u.name !== u.login ? (u.name + (u.bio ? ' · ' + u.bio : '')) : (u.bio || '');
                 results.appendChild(a);
               });

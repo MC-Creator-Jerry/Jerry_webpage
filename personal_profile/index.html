@@ -100,6 +100,14 @@
   .profile-tagline { font-size: 1.05rem; color: var(--muted); margin-top: 6px; max-width: 560px; display: inline; }
   .owner-badge { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom)); vertical-align: middle; letter-spacing: 0.5px; }
 
+  /* 名字 + 改名按钮 同一行 */
+  .profile-name-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .rename-editor { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .rename-editor .edit-input { width: auto; min-width: 240px; margin-top: 0; font-size: 1.05rem; padding: 8px 12px; }
+  .rename-editor .save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 8px 18px; font-weight: 700; cursor: pointer; }
+  .rename-editor .save:hover { filter: brightness(1.08); }
+  .rename-editor .cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); border: none; border-radius: 10px; padding: 8px 18px; cursor: pointer; }
+
   .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
   .tag { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--card-border)); border-radius: 999px; padding: 6px 14px; font-size: 0.92rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
   .tag-x { cursor: pointer; font-weight: 700; opacity: 0.7; }
@@ -329,7 +337,15 @@
       <div class="profile-head">
         <img class="avatar" id="avatar" alt="" src="" />
         <div>
-          <div class="profile-name" id="nameDisplay"></div>
+          <div class="profile-name-row" id="nameRow">
+            <div class="profile-name" id="nameDisplay"></div>
+            <button class="change-btn inline" id="renameBtn" type="button" hidden data-zh="改名" data-en="Rename">改名</button>
+          </div>
+          <div class="rename-editor" id="renameEditor" hidden>
+            <input class="edit-input" id="renameInput" maxlength="40" />
+            <button class="save" id="renameSave" type="button" data-zh="保存" data-en="Save">保存</button>
+            <button class="cancel" id="renameCancel" type="button" data-zh="取消" data-en="Cancel">取消</button>
+          </div>
           <div class="profile-meta" id="loginDisplay"></div>
           <div style="margin-top:10px">
             <button class="change-btn" data-sec="avatar" hidden>更改头像</button>
@@ -521,6 +537,7 @@
 
       var $ = function (id) { return document.getElementById(id); };
       var avatar = $('avatar'), nameDisplay = $('nameDisplay'), loginDisplay = $('loginDisplay');
+      var nameRow = $('nameRow'), renameBtn = $('renameBtn'), renameEditor = $('renameEditor'), renameInput = $('renameInput');
       var aboutDisplay = $('aboutDisplay'), aboutEmpty = $('aboutEmpty'), aboutInput = $('aboutInput');
       var aboutView = $('aboutView'), aboutEditor = $('aboutEditor');
       var skillsDisplay = $('skillsDisplay'), skillsEmpty = $('skillsEmpty'), skillsEditList = $('skillsEditList');
@@ -683,6 +700,10 @@
         }
         // 编辑按钮可见性
         document.querySelectorAll('.change-btn[data-sec]').forEach(function (b) { b.hidden = !isOwn(); });
+        // 改名按钮 + 内联编辑器：仅本人可见，默认关闭编辑态
+        nameRow.hidden = false;
+        renameEditor.hidden = true;
+        renameBtn.hidden = !isOwn();
         // 设置背景按钮：仅本人可见
         $('profileTools').hidden = !isOwn();
         // 我的收藏：仅本人可见
@@ -830,6 +851,34 @@
       });
       document.querySelectorAll('[data-cancel]').forEach(function (btn) {
         btn.onclick = function () { closeEditor(btn.getAttribute('data-cancel')); };
+      });
+
+      /* ---------- 改名（名字右侧按钮，仅本人） ---------- */
+      renameBtn.onclick = function () {
+        if (!isOwn()) return;
+        renameInput.value = (state.data && state.data.name) || '';
+        nameRow.hidden = true;
+        renameEditor.hidden = false;
+        renameInput.focus();
+      };
+      renameCancel.onclick = function () {
+        renameEditor.hidden = true;
+        nameRow.hidden = false;
+      };
+      renameSave.onclick = function () {
+        var newName = renameInput.value.trim();
+        if (!newName) { toast('名字不能为空', true); return; }
+        var w = findForbidden(newName);
+        if (w) { toast('名字含违禁词：「' + w + '」，请修改后再保存。', true); return; }
+        saveProfile({ name: newName }, function () {
+          renameEditor.hidden = true;
+          nameRow.hidden = false;
+          renderDisplay();
+        });
+      };
+      renameInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); renameSave.click(); }
+        else if (e.key === 'Escape') { e.preventDefault(); renameCancel.click(); }
       });
 
       /* ---------- 个人主页主题（预设主题 + 自定义主题色） ---------- */

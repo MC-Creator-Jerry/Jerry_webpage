@@ -286,6 +286,11 @@
         window.__xlRevealed = true;
         if (typeof window.__xlReveal === 'function') window.__xlReveal();
       }
+      function initialAvatar(login) {
+        var ch = (login || '?').charAt(0).toUpperCase();
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#g)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">' + ch + '</text></svg>';
+        return 'data:image/svg+xml,' + encodeURIComponent(svg);
+      }
       var toastEl = document.getElementById('toast');
       var sortBar = document.getElementById('sortBar');
       var topicBar = document.getElementById('topicBar');
@@ -476,7 +481,7 @@
             : '';
           card.innerHTML =
             '<div class="head">' +
-              '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+              '<img class="avatar" src="' + avatar + '" alt="" onerror="this.onerror=null;this.src=initialAvatar(\'' + p.login + '\')">' +
               '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
               '<span class="meta">' + fmtTime(p.ts) + '</span>' +
             '</div>' +
@@ -718,7 +723,7 @@
         var del = canDel ? '<button class="del" id="mDelPost">删除帖子</button>' : '';
         mPost.innerHTML =
           '<div class="head">' +
-            '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+            '<img class="avatar" src="' + avatar + '" alt="" onerror="this.onerror=null;this.src=initialAvatar(\'' + p.login + '\')">' +
             '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(p.login) + '">@' + esc(p.login) + '</a>' +
             '<span class="meta">' + fmtTime(p.ts) + '</span>' +
           '</div>' +
@@ -804,7 +809,7 @@
           var row = document.createElement('div'); row.className = 'comment';
           var canDel = meIsAdmin || (meLogin && c.login === meLogin);
           row.innerHTML =
-            '<img class="avatar" src="' + avatar + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+            '<img class="avatar" src="' + avatar + '" alt="" onerror="this.onerror=null;this.src=initialAvatar(\'' + c.login + '\')">' +
             '<div class="body-wrap">' +
               '<div class="row1">' +
                 '<a class="author" href="../../personal_profile/?user=' + encodeURIComponent(c.login) + '">@' + esc(c.login) + '</a>' +
@@ -890,7 +895,7 @@
         mentionItems = users.slice(0, 6); mentionActive = -1; mMentionPop.innerHTML = '';
         mentionItems.forEach(function (u, i) {
           var el = document.createElement('div'); el.className = 'mi';
-          el.innerHTML = '<img src="' + (u.avatar || '') + '" onerror="this.style.visibility=\'hidden\'"><span class="ml">@' + esc(u.login) + '</span><span class="mn">' + esc(u.name || '') + '</span>';
+          el.innerHTML = '<img src="' + (u.avatar || '') + '" onerror="this.onerror=null;this.src=initialAvatar(\'' + u.login + '\')"><span class="ml">@' + esc(u.login) + '</span><span class="mn">' + esc(u.name || '') + '</span>';
           el.addEventListener('mousedown', function (e) { e.preventDefault(); pickMention(u.login); });
           mMentionPop.appendChild(el);
         });

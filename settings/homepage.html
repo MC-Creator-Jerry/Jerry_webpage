@@ -388,14 +388,12 @@
               accountStatus.textContent = en ? 'This account is set non-cancelable.' : '该账户已设为不可注销。';
               closeAccountBtn.disabled = true;
               closeAccountBtn.textContent = en ? 'Account locked' : '账户已锁定';
-              lockAccountBtn.disabled = false;
-              lockAccountBtn.textContent = en ? 'Remove non-cancelable' : '解除不可注销';
-              lockAccountBtn.classList.remove('danger-btn');
-              lockAccountBtn.classList.add('neutral-btn');
+              lockAccountBtn.hidden = true;
             } else {
               accountStatus.textContent = '';
               closeAccountBtn.disabled = false;
               closeAccountBtn.textContent = en ? 'Close account' : '注销该账户';
+              lockAccountBtn.hidden = false;
               lockAccountBtn.disabled = false;
               lockAccountBtn.textContent = en ? 'Make account non-cancelable' : '将此账户不可注销';
               lockAccountBtn.classList.add('danger-btn');
@@ -471,7 +469,7 @@
       })();
     })();
   </script>
-<script src="../auth.js?v=20260901b"></script>
+<script src="../auth.js?v=20260902a"></script>
   <script src="../common.js?v=20260831ac"></script>
 </body>
 </html>

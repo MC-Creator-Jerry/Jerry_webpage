@@ -122,6 +122,11 @@
         setTimeout(function () { toastEl.className = 'toast' + (isErr ? ' err' : ''); }, 2600);
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+      function initialAvatar(login) {
+        var ch = (login || '?').charAt(0).toUpperCase();
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#g)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">' + ch + '</text></svg>';
+        return 'data:image/svg+xml,' + encodeURIComponent(svg);
+      }
       function fmtTime(ts){ try { return new Date(ts).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); } catch(e){ return ''; } }
 
       function render(d) {
@@ -155,7 +160,7 @@
         var mlist = gBox.querySelector('#memberList');
         members.forEach(function (login) {
           var row = document.createElement('div'); row.className = 'member';
-          var img = document.createElement('img'); img.className = 'm-avatar'; img.src = 'https://github.com/' + encodeURIComponent(login) + '.png'; img.alt = ''; img.onerror = function () { this.style.visibility = 'hidden'; };
+          var img = document.createElement('img'); img.className = 'm-avatar'; img.src = 'https://github.com/' + encodeURIComponent(login) + '.png'; img.alt = ''; img.onerror = function () { this.onerror = null; this.src = initialAvatar(login); };
           var name = document.createElement('a'); name.className = 'm-name'; name.href = '../../personal_profile/?user=' + encodeURIComponent(login); name.textContent = '@' + login;
           row.appendChild(img); row.appendChild(name);
           if (login === g.owner) { var ob = document.createElement('span'); ob.className = 'm-owner'; ob.textContent = '创建者'; row.appendChild(ob); }

@@ -209,9 +209,16 @@
   }
   cleanupBar();
 
-  function setAvatar(src) {
+  function initialAvatarSvg(login) {
+    var ch = (login || '?').charAt(0).toUpperCase();
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="navav" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#navav)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">' + ch + '</text></svg>';
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
+  function setAvatar(src, login) {
     var img = document.getElementById('userAvatarImg');
-    if (img) img.src = src || DEFAULT_AVATAR;
+    if (!img) return;
+    img.onerror = function () { this.onerror = null; this.src = login ? initialAvatarSvg(login) : DEFAULT_AVATAR; };
+    img.src = src || DEFAULT_AVATAR;
   }
   function setLoginItem(show) {
     var li = document.getElementById('upLogin');
@@ -224,7 +231,7 @@
     if (loginBtn) loginBtn.style.display = 'none';
     var avatarBtn = document.getElementById('userAvatarBtn');
     if (avatarBtn) avatarBtn.style.display = '';
-    setAvatar((user && user.avatar_url) || ('https://github.com/' + user.login + '.png'));
+    setAvatar((user && user.avatar_url) || ('https://github.com/' + user.login + '.png'), user && user.login);
     setLoginItem(false);
     fetch('/api/usersettings')
       .then(function (r) { return r.ok ? r.json() : null; })

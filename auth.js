@@ -237,11 +237,12 @@
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="navav" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#navav)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">' + ch + '</text></svg>';
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
   }
+  window.initialAvatarSvg = initialAvatarSvg;
   function setAvatar(user) {
     var img = document.getElementById('userAvatarImg');
     if (!img) return;
     var login = user && user.login;
-    var src = (user && user.avatar_url) || (user && user.id ? 'https://avatars.githubusercontent.com/u/' + user.id + '?v=4' : '');
+    var src = (user && user.cloud_avatar_url) || (user && user.avatar_url) || (user && user.id ? 'https://avatars.githubusercontent.com/u/' + user.id + '?v=4' : '');
     if (!src && login) src = 'https://github.com/' + login + '.png';
     img.onerror = function () { this.onerror = null; this.src = login ? initialAvatarSvg(login) : DEFAULT_AVATAR; };
     img.src = src || DEFAULT_AVATAR;
@@ -435,7 +436,7 @@
     function buildAvatar(card) {
       var u = window.JW_AUTH.user;
       if (u && u.login) {
-        var av = u.avatar_url || (u.id ? 'https://avatars.githubusercontent.com/u/' + u.id + '?v=4' : ('https://github.com/' + u.login + '.png'));
+        var av = u.cloud_avatar_url || u.avatar_url || (u.id ? 'https://avatars.githubusercontent.com/u/' + u.id + '?v=4' : ('https://github.com/' + u.login + '.png'));
         card.innerHTML =
           '<div class="hc-avatar"><img id="hcAvatarImg" src="' + av + '" alt=""></div>' +
           '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +

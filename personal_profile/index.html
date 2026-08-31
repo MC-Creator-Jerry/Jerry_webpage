@@ -647,6 +647,12 @@
 
       function renderDisplay() {
         var d = state.data || {};
+        if (d.login) {
+          avatar.onerror = function () {
+            this.onerror = null;
+            if (typeof window.initialAvatarSvg === 'function') this.src = window.initialAvatarSvg(d.login);
+          };
+        }
         avatar.src = d.ghAvatar ? gh(d.login) : (d.avatar || gh(d.login));
         // 个人主页主题：色条 + 强调色（applyTheme）；头图来源取舍（renderBanner）
         applyTheme(d.themeId, d.themeColor);
@@ -1112,8 +1118,34 @@
           }
         })
         .catch(function () { if (VIEW_USER) loadPublic(VIEW_USER); else loginPrompt.hidden = false; });
+
+      /* ---------- 中英切换（i18n 引擎，修复遗留 P1） ---------- */
+      function applyLang() {
+        var en = curLang() === 'en';
+        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var zh = n.getAttribute('data-zh');
+          var enTxt = n.getAttribute('data-en') || zh;
+          var txt = en ? enTxt : zh;
+          if (txt == null) continue;
+          if (n.children.length === 0) {
+            n.textContent = txt;
+          } else {
+            // 保留子元素（如消息徽标 span），只更新首个文本节点
+            var first = n.childNodes[0];
+            if (first && first.nodeType === 3) first.nodeValue = txt;
+            else n.insertBefore(document.createTextNode(txt), n.firstChild);
+          }
+        }
+        if (typeof updateGhSyncUI === 'function') updateGhSyncUI();
+      }
+      applyLang();
+      // 从 language.html 切回（bfcache 恢复）时重新套用语言
+      window.addEventListener('pageshow', function (e) { if (e.persisted) applyLang(); });
     })();
   </script>
-  <script src="../common.js?v=20260830ac"></script>
+  <script src="../common.js?v=20260831ac"></script>
 </body>
 </html>

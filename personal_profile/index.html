@@ -327,7 +327,7 @@
     </div>
     <section class="hero">
       <div class="profile-head">
-        <img class="avatar" id="avatar" alt="avatar" src="" />
+        <img class="avatar" id="avatar" alt="" src="" />
         <div>
           <div class="profile-name" id="nameDisplay"></div>
           <div class="profile-meta" id="loginDisplay"></div>
@@ -434,7 +434,7 @@
         <input type="file" id="avatarFile" accept="image/*" />
         <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
         <input class="edit-input" id="avatarUrl" placeholder="https://..." />
-        <img id="avatarPreview" class="avatar avatar-preview" alt="preview" />
+        <img id="avatarPreview" class="avatar avatar-preview" alt="" />
       </div>
       <div class="sec-actions">
         <button class="save" data-save="avatar">保存</button>
@@ -512,7 +512,7 @@
     </a>
   </div>
 
-  <script src="../auth.js?v=20260901b"></script>
+  <script src="../auth.js?v=20260902a"></script>
   <script>
     (function () {
       var OWNER = 'MC-Creator-Jerry';
@@ -647,12 +647,10 @@
 
       function renderDisplay() {
         var d = state.data || {};
-        if (d.login) {
-          avatar.onerror = function () {
-            this.onerror = null;
-            if (typeof window.initialAvatarSvg === 'function') this.src = window.initialAvatarSvg(d.login);
-          };
-        }
+        avatar.onerror = function () {
+          this.onerror = null;
+          if (d.login && typeof window.initialAvatarSvg === 'function') this.src = window.initialAvatarSvg(d.login);
+        };
         avatar.src = d.ghAvatar ? gh(d.login) : (d.avatar || gh(d.login));
         // 个人主页主题：色条 + 强调色（applyTheme）；头图来源取舍（renderBanner）
         applyTheme(d.themeId, d.themeColor);

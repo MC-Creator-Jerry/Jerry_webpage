@@ -410,7 +410,7 @@
       if (u && u.login) {
         var av = u.avatar_url || ('https://github.com/' + u.login + '.png');
         card.innerHTML =
-          '<div class="hc-avatar"><img src="' + av + '" alt=""></div>' +
+          '<div class="hc-avatar"><img id="hcAvatarImg" src="' + av + '" alt=""></div>' +
           '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +
           '<div class="hc-login">@' + esc(u.login) + (u.isAdmin ? ' · ' + t('管理员', 'Admin') : '') + '</div>' +
           '<div class="hc-level" id="hcLevel" hidden></div>' +
@@ -426,6 +426,8 @@
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/reports/">' + flagIco + '<span>' + t('举报后台', 'Reports') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'stats/">' + trafficIco + '<span>' + t('流量', 'Traffic') + '</span></a>' : '') +
           '</div>';
+        var himg = card.querySelector('#hcAvatarImg');
+        if (himg) himg.onerror = function () { this.onerror = null; this.src = initialAvatarSvg(u.login); };
         loadLevel(u.login, function (lv) {
           var box = card.querySelector('#hcLevel');
           if (!box || !box.isConnected) return;

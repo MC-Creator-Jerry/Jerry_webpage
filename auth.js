@@ -24,6 +24,29 @@
   function jwLang() { try { return localStorage.getItem('xl_lang') || 'zh'; } catch (e) { return 'zh'; } }
   function jwT(zh, en) { return jwLang() === 'en' ? en : zh; }
   function jwEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function getCookie(name) {
+    var h = document.cookie;
+    if (!h) return '';
+    var parts = h.split(';');
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i].trim();
+      if (p.indexOf(name + '=') === 0) return decodeURIComponent(p.slice(name.length + 1));
+    }
+    return '';
+  }
+  function setCookie(name, value, days) {
+    var d = new Date();
+    d.setTime(d.getTime() + (days || 30) * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + encodeURIComponent(value) + '; Path=/; Secure; SameSite=Lax; expires=' + d.toUTCString();
+  }
+  function updateAuthCookies(user) {
+    // 改名自愈：/api/me 返回的 login/id 与 cookie 不一致时，自动刷新客户端 cookie
+    if (!user) return;
+    var curLogin = getCookie('gh_user');
+    if (user.login && user.login !== curLogin) setCookie('gh_user', user.login, 30);
+    var curUid = getCookie('gh_uid');
+    if (user.id && String(user.id) !== curUid) setCookie('gh_uid', String(user.id), 30);
+  }
   function updateHeroTitle(user) {
     var el = document.getElementById('heroTitle');
     if (!el) return;
@@ -214,9 +237,12 @@
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="navav" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#navav)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">' + ch + '</text></svg>';
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
   }
-  function setAvatar(src, login) {
+  function setAvatar(user) {
     var img = document.getElementById('userAvatarImg');
     if (!img) return;
+    var login = user && user.login;
+    var src = (user && user.avatar_url) || (user && user.id ? 'https://avatars.githubusercontent.com/u/' + user.id + '?v=4' : '');
+    if (!src && login) src = 'https://github.com/' + login + '.png';
     img.onerror = function () { this.onerror = null; this.src = login ? initialAvatarSvg(login) : DEFAULT_AVATAR; };
     img.src = src || DEFAULT_AVATAR;
   }
@@ -228,10 +254,11 @@
   function setLoggedIn(user) {
     window.JW_AUTH.user = user;
     window.JW_AUTH.isAdmin = !!(user && user.isAdmin);
+    updateAuthCookies(user);
     if (loginBtn) loginBtn.style.display = 'none';
     var avatarBtn = document.getElementById('userAvatarBtn');
     if (avatarBtn) avatarBtn.style.display = '';
-    setAvatar((user && user.avatar_url) || ('https://github.com/' + user.login + '.png'), user && user.login);
+    setAvatar(user);
     setLoginItem(false);
     fetch('/api/usersettings')
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -408,7 +435,7 @@
     function buildAvatar(card) {
       var u = window.JW_AUTH.user;
       if (u && u.login) {
-        var av = u.avatar_url || ('https://github.com/' + u.login + '.png');
+        var av = u.avatar_url || (u.id ? 'https://avatars.githubusercontent.com/u/' + u.id + '?v=4' : ('https://github.com/' + u.login + '.png'));
         card.innerHTML =
           '<div class="hc-avatar"><img id="hcAvatarImg" src="' + av + '" alt=""></div>' +
           '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +

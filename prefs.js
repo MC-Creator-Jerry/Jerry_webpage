@@ -30,6 +30,10 @@
     var nodes = document.querySelectorAll('[data-zh]');
     for (var i = 0; i < nodes.length; i++) {
       var n = nodes[i];
+      // 跳过含子元素的节点：直接赋值 textContent 会连内部的子元素（如登录链接 #loginLink）
+      // 一起删掉，导致依赖这些元素的页面脚本（发布页等）getElementById 取到 null 而报错。
+      // 含子元素时通常其子节点自带 data-zh 会被各自翻译，父节点无需整段覆盖。
+      if (n.children && n.children.length > 0) continue;
       var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
       if (txt != null) n.textContent = txt;
     }

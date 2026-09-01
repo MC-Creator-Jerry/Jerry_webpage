@@ -486,7 +486,7 @@
         else { loginHint.hidden = false; }
       }).catch(function () { loginHint.hidden = false; });
 
-      loginLink.addEventListener('click', function (e) { e.preventDefault(); if (window.JW_AUTH && window.JW_AUTH.loginWithGitHub) window.JW_AUTH.loginWithGitHub(); else location.href = '../../index.html'; });
+      if (loginLink) loginLink.addEventListener('click', function (e) { e.preventDefault(); if (window.JW_AUTH && window.JW_AUTH.loginWithGitHub) window.JW_AUTH.loginWithGitHub(); else location.href = '../../index.html'; });
       postBtn.addEventListener('click', function () { post('published'); });
       draftBtn.addEventListener('click', function () { post('draft'); });
     })();

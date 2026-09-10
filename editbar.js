@@ -155,6 +155,11 @@
   var saving = false;        // 是否正在保存
   var banner = null;         // 顶部编辑条
   var saveBtn = null;
+  // 调色板面板 DOM 引用（showUI 中填充，applyColor/applyHighlight 与 refreshRecents 访问）
+  var fgPanel = null;
+  var bgPanel = null;
+  // 阻止默认行为的 helper（mousedown 在工具按钮上时不抢走 selection 焦点）
+  function keepSel(e) { e.preventDefault(); }
 
   // ---------- 轻提示 ----------
   var toastTimer;
@@ -438,13 +443,104 @@
     markDirty();
   }
 
+  // 调色板与最近色：localStorage 记住最近 8 个用过的颜色
+  var RECENT_COLORS_KEY = 'xl_edit_recent_colors';
+  var RECENT_COLORS_MAX = 8;
+  var RECENT_BG_KEY = 'xl_edit_recent_bg';
+  function getRecent(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { return []; } }
+  function setRecent(key, arr) { try { localStorage.setItem(key, JSON.stringify(arr.slice(0, RECENT_COLORS_MAX))); } catch (e) {} }
+  function pushRecent(key, val) {
+    if (!val) return;
+    var arr = getRecent(key).filter(function (x) { return x.toLowerCase() !== val.toLowerCase(); });
+    arr.unshift(val);
+    setRecent(key, arr);
+  }
+
+  // 在选区上应用包裹标签（用于背景色等 execCommand 难处理的情况）
+  function applyStyleToRange(prop, val) {
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return false;
+    var range = sel.getRangeAt(0);
+    if (range.collapsed) return false;
+    // 包裹：逐个 textNode 套一层 <span style="...">
+    var spans = [];
+    var walker = document.createTreeWalker(range.commonAncestorContainer, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        // 仅接受与 range 有交集的文本节点
+        if (!range.intersectsNode(n)) return NodeFilter.FILTER_REJECT;
+        // 跳过空文本
+        if (!n.nodeValue || !n.nodeValue.trim().length) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var node;
+    while ((node = walker.nextNode())) {
+      var span = document.createElement('span');
+      span.style[prop] = val;
+      var parent = node.parentNode;
+      // 如果父节点已经是带同样 prop 的 span，复用
+      if (parent && parent.tagName === 'SPAN' && parent.style[prop] === val &&
+          parent.childNodes.length === 1) {
+        continue;
+      }
+      parent.insertBefore(span, node);
+      span.appendChild(node);
+      spans.push(span);
+    }
+    return spans.length > 0;
+  }
+
   function applyColor(val) {
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
+    val = (val || '').toLowerCase();
+    if (!val) return;
+    restoreSel();
+    var ok = false;
+    if (savedRange && !savedRange.collapsed) {
+      try {
+        // execCommand 兼容性最好，但现代浏览器可能对其弃用；双保险
+        document.execCommand('foreColor', false, val);
+        ok = true;
+      } catch (_) {}
+      if (!ok) ok = applyStyleToRange('color', val);
+    }
+    if (!ok) activeInner.style.color = val;
+    pushRecent(RECENT_COLORS_KEY, val);
+    refreshRecents();
+    savedRange = null;
+    markDirty();
+  }
+
+  function applyHighlight(val) {
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
+    val = (val || '').toLowerCase();
+    if (!val) return;
+    restoreSel();
+    var ok = false;
+    if (savedRange && !savedRange.collapsed) {
+      try {
+        document.execCommand('hiliteColor', false, val);
+        ok = true;
+      } catch (_) {}
+      if (!ok) ok = applyStyleToRange('backgroundColor', val);
+    }
+    if (!ok) activeInner.style.backgroundColor = val;
+    pushRecent(RECENT_BG_KEY, val);
+    refreshRecents();
+    savedRange = null;
+    markDirty();
+  }
+
+  function applyClearFormat() {
     if (!activeInner) { toast('请先点选一个文本框'); return; }
     restoreSel();
     if (savedRange && !savedRange.collapsed) {
-      try { document.execCommand('foreColor', false, val); saveSel(); markDirty(); return; } catch (_) {}
+      try { document.execCommand('removeFormat'); } catch (_) {}
+    } else {
+      // 清空 activeInner 上的所有 inline style
+      activeInner.removeAttribute('style');
     }
-    activeInner.style.color = val;
+    savedRange = null;
     markDirty();
   }
 
@@ -551,44 +647,357 @@
     tb.appendChild(gLink);
     tb.appendChild(sep());
 
-    // — 字体 / 字号 / 颜色 —
+    // — 字体 / 字号 / 颜色（Word-like 增强版） —
     var gStyle = group();
+
+    // 字体下拉（更多字体）
     var font = document.createElement('select');
     font.className = 'xl-tb-select';
-    [['', '字体'], ['sans-serif', '无衬线'], ['serif', '衬线'], ['monospace', '等宽'],
-      ['微软雅黑, sans-serif', '微软雅黑'], ['宋体, serif', '宋体'], ['黑体, sans-serif', '黑体'],
-      ['楷体, serif', '楷体'], ['Arial', 'Arial'], ['Georgia', 'Georgia'],
-      ['Times New Roman', 'Times'], ['Courier New, monospace', 'Courier']]
+    [['', '字体'], ['inherit', '继承'],
+      ['sans-serif', '无衬线'], ['serif', '衬线'], ['monospace', '等宽'],
+      ['system-ui, sans-serif', '系统默认'], ['-apple-system, BlinkMacSystemFont, sans-serif', '苹果系统'],
+      ['微软雅黑, sans-serif', '微软雅黑'], ['Microsoft YaHei, sans-serif', 'Microsoft YaHei'],
+      ['宋体, serif', '宋体'], ['SimSun, serif', 'SimSun'],
+      ['黑体, sans-serif', '黑体'], ['SimHei, sans-serif', 'SimHei'],
+      ['楷体, serif', '楷体'], ['KaiTi, serif', 'KaiTi'],
+      ['隶书, serif', '隶书'], ['FangSong, serif', '仿宋'],
+      ['PingFang SC, sans-serif', '苹方'],
+      ['Helvetica, Arial, sans-serif', 'Helvetica'],
+      ['Arial, sans-serif', 'Arial'], ['Verdana, sans-serif', 'Verdana'],
+      ['Tahoma, sans-serif', 'Tahoma'], ['Trebuchet MS, sans-serif', 'Trebuchet'],
+      ['Georgia, serif', 'Georgia'], ['Times New Roman, serif', 'Times'],
+      ['Garamond, serif', 'Garamond'], ['Palatino, serif', 'Palatino'],
+      ['Courier New, monospace', 'Courier'], ['Consolas, monospace', 'Consolas']]
       .forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; font.appendChild(op); });
     font.addEventListener('change', function () { if (font.value) applyFont(font.value); });
     gStyle.appendChild(font);
 
-    var size = document.createElement('select');
-    size.className = 'xl-tb-select';
-    [['', '字号'], ['12px', '12'], ['14px', '14'], ['16px', '16'], ['18px', '18'],
-      ['20px', '20'], ['24px', '24'], ['28px', '28'], ['32px', '32'], ['36px', '36'], ['48px', '48']]
-      .forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; size.appendChild(op); });
-    size.addEventListener('change', function () { if (size.value) applySize(size.value); });
+    // 字号下拉（更宽的范围，支持手动输入）
+    var size = document.createElement('input');
+    size.className = 'xl-tb-size';
+    size.type = 'text';
+    size.placeholder = '字号';
+    size.setAttribute('list', 'xl-tb-size-list');
+    var sizeList = document.createElement('datalist');
+    sizeList.id = 'xl-tb-size-list';
+    ['10','11','12','14','16','18','20','22','24','28','32','36','42','48','56','64','72','96']
+      .forEach(function (s) { var op = document.createElement('option'); op.value = s; sizeList.appendChild(op); });
+    banner.appendChild(sizeList); // datalist 挂到 banner 上更安全
+    size.addEventListener('change', function () {
+      var v = (size.value || '').trim();
+      if (!v) return;
+      // 接受纯数字（如 "16"）或带 px/em 的（如 "16px"）
+      if (/^\d+(\.\d+)?$/.test(v)) v = v + 'px';
+      if (!/^[\d.]+(px|em|rem|%)$/.test(v)) { toast('字号格式不对，如 16 / 18px / 1.2em'); return; }
+      applySize(v);
+    });
     gStyle.appendChild(size);
 
-    var colorWrap = document.createElement('label');
-    colorWrap.className = 'xl-tb-color';
-    var color = document.createElement('input');
-    color.type = 'color'; color.value = '#e60012';
-    color.addEventListener('input', function () { applyColor(color.value); });
-    color.addEventListener('mousedown', keep);
-    var colorTxt = document.createElement('span'); colorTxt.textContent = '文字颜色';
-    colorWrap.appendChild(color); colorWrap.appendChild(colorTxt);
-    gStyle.appendChild(colorWrap);
     tb.appendChild(gStyle);
+
+    // — 颜色工具组（调色板 + 自定义 + 最近用色 + 背景色） —
+    var gColor = group();
+    gColor.classList.add('xl-tb-group-color');
+
+    // 文字颜色按钮（带下拉面板）
+    var fgBtn = document.createElement('button');
+    fgBtn.type = 'button';
+    fgBtn.className = 'xl-tb-color-btn';
+    fgBtn.innerHTML = '<span class="xl-tb-color-letter">A</span><span class="xl-tb-color-bar" style="background:#222"></span><span class="xl-caret">▾</span>';
+    fgBtn.title = '文字颜色';
+    gColor.appendChild(fgBtn);
+
+    // 背景颜色按钮（高亮）
+    var bgBtn = document.createElement('button');
+    bgBtn.type = 'button';
+    bgBtn.className = 'xl-tb-color-btn xl-tb-bg-btn';
+    bgBtn.innerHTML = '<span class="xl-tb-color-bg-letter">A</span><span class="xl-tb-color-bar" style="background:#fff36d"></span><span class="xl-caret">▾</span>';
+    bgBtn.title = '背景颜色（高亮）';
+    gColor.appendChild(bgBtn);
+
+    // 调色板
+    var STANDARD_COLORS = [
+      '#000000','#404040','#808080','#a0a0a0','#d0d0d0','#ffffff',
+      '#e60012','#ff6600','#ffcc00','#ffe800','#a8d600','#00b050',
+      '#00b0f0','#0078d4','#002060','#5c0a8a','#d6006a','#a30000'
+    ];
+    var STANDARD_BG = [
+      '#ffffff','#fff36d','#ffd966','#a4d2ff','#c5e0b4','#f4cccc',
+      '#fff2cc','#e2efda','#d9e8f5','#fce4d6','#fad7d0','#e6b8af'
+    ];
+
+    function buildPanel(which) {
+      var panel = document.createElement('div');
+      panel.className = 'xl-tb-color-panel';
+      panel.dataset.which = which; // 'fg' or 'bg'
+      var palette = which === 'fg' ? STANDARD_COLORS : STANDARD_BG;
+      var grid = document.createElement('div');
+      grid.className = 'xl-tb-color-grid';
+      palette.forEach(function (c) {
+        var sw = document.createElement('button');
+        sw.type = 'button';
+        sw.className = 'xl-tb-color-swatch';
+        sw.style.background = c;
+        sw.dataset.color = c;
+        sw.title = c;
+        sw.addEventListener('mousedown', keep);
+        sw.addEventListener('click', function () {
+          closePanels();
+          if (which === 'fg') applyColor(c); else applyHighlight(c);
+        });
+        grid.appendChild(sw);
+      });
+      panel.appendChild(grid);
+
+      // 最近用色
+      var recentWrap = document.createElement('div');
+      recentWrap.className = 'xl-tb-color-recent';
+      var recentLabel = document.createElement('div');
+      recentLabel.className = 'xl-tb-color-recent-label';
+      recentLabel.textContent = '最近用色';
+      recentWrap.appendChild(recentLabel);
+      var recentGrid = document.createElement('div');
+      recentGrid.className = 'xl-tb-color-grid xl-tb-color-recent-grid';
+      recentGrid.dataset.which = which;
+      recentWrap.appendChild(recentGrid);
+      panel.appendChild(recentWrap);
+
+      // 自定义颜色 + 清除按钮
+      var customRow = document.createElement('div');
+      customRow.className = 'xl-tb-color-custom';
+      var picker = document.createElement('input');
+      picker.type = 'color';
+      picker.value = which === 'fg' ? '#222222' : '#fff36d';
+      picker.addEventListener('mousedown', keep);
+      picker.addEventListener('input', function () {
+        if (which === 'fg') applyColor(picker.value); else applyHighlight(picker.value);
+      });
+      var pickerLabel = document.createElement('span');
+      pickerLabel.textContent = '自定义';
+      customRow.appendChild(picker);
+      customRow.appendChild(pickerLabel);
+      // 清除颜色
+      var clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'xl-tb-color-clear';
+      clearBtn.textContent = which === 'fg' ? '清除文字颜色' : '清除背景';
+      clearBtn.addEventListener('mousedown', keep);
+      clearBtn.addEventListener('click', function () {
+        closePanels();
+        if (which === 'fg') applyColor('#222222'); // 用默认色重置
+        else applyHighlight('transparent');
+      });
+      customRow.appendChild(clearBtn);
+      panel.appendChild(customRow);
+      return panel;
+    }
+
+    fgPanel = buildPanel('fg');
+    bgPanel = buildPanel('bg');
+    fgBtn.appendChild(fgPanel);
+    bgBtn.appendChild(bgPanel);
+
+    function closePanels() {
+      [fgPanel, bgPanel].forEach(function (p) { p.classList.remove('open'); });
+    }
+    fgBtn.addEventListener('mousedown', keep);
+    bgBtn.addEventListener('mousedown', keep);
+    fgBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wasOpen = fgPanel.classList.contains('open');
+      closePanels();
+      if (!wasOpen) fgPanel.classList.add('open');
+    });
+    bgBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wasOpen = bgPanel.classList.contains('open');
+      closePanels();
+      if (!wasOpen) bgPanel.classList.add('open');
+    });
+    // 点页面其他位置关闭
+    document.addEventListener('mousedown', function (e) {
+      if (!fgBtn.contains(e.target)) fgPanel.classList.remove('open');
+      if (!bgBtn.contains(e.target)) bgPanel.classList.remove('open');
+    });
+
+    tb.appendChild(gColor);
+
+    // 清格式按钮
+    var gClear = group();
+    gClear.appendChild(btn('🧹 清格式', function () { applyClearFormat(); }, { title: '清除选中文字的所有格式（颜色、加粗等）' }));
+    tb.appendChild(gClear);
+
+    // 初始化最近用色面板
+    refreshRecents();
 
     banner.appendChild(row);
     banner.appendChild(tb);
     document.body.appendChild(banner);
 
+    // 创建浮动迷你工具栏（选中文字时浮现在选区上方）
+    createMiniToolbar();
+
     saveBtn.addEventListener('click', saveEdits);
     exit.addEventListener('click', requestExit);
     updateSaveBtn();
+  }
+
+  // 浮动迷你工具栏（Word-like 选中浮现）
+  var miniToolbar = null;
+  var miniFgPanel = null;
+  var miniBgPanel = null;
+  function createMiniToolbar() {
+    miniToolbar = document.createElement('div');
+    miniToolbar.className = 'xl-mini-toolbar';
+
+    function miniBtn(label, title, fn, cls) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      if (title) b.title = title;
+      if (cls) b.className = cls;
+      b.addEventListener('mousedown', keepSel);
+      b.addEventListener('click', fn);
+      return b;
+    }
+
+    miniToolbar.appendChild(miniBtn('B', '加粗 (Ctrl+B)', function () { exec('bold'); }, 'xl-mini-b f-bold'));
+    miniToolbar.appendChild(miniBtn('I', '斜体 (Ctrl+I)', function () { exec('italic'); }, 'xl-mini-i f-italic'));
+    miniToolbar.appendChild(miniBtn('U', '下划线 (Ctrl+U)', function () { exec('underline'); }, 'xl-mini-u f-underline'));
+
+    // 文字颜色（小型弹层）
+    var fg = document.createElement('button');
+    fg.type = 'button';
+    fg.className = 'xl-mini-fg';
+    fg.title = '文字颜色';
+    fg.innerHTML = '<span class="xl-mini-fg-letter">A</span><span class="xl-mini-fg-bar"></span>';
+    fg.addEventListener('mousedown', keepSel);
+    fg.addEventListener('click', function (e) {
+      e.stopPropagation();
+      miniBgPanel.classList.remove('open');
+      miniFgPanel.classList.toggle('open');
+    });
+    miniToolbar.appendChild(fg);
+
+    // 背景颜色（小型弹层）
+    var bg = document.createElement('button');
+    bg.type = 'button';
+    bg.className = 'xl-mini-bg';
+    bg.title = '背景颜色（高亮）';
+    bg.innerHTML = '<span class="xl-mini-bg-letter">A</span>';
+    bg.addEventListener('mousedown', keepSel);
+    bg.addEventListener('click', function (e) {
+      e.stopPropagation();
+      miniFgPanel.classList.remove('open');
+      miniBgPanel.classList.toggle('open');
+    });
+    miniToolbar.appendChild(bg);
+
+    miniToolbar.appendChild(miniBtn('🧹', '清除格式', applyClearFormat, 'xl-mini-clear'));
+
+    // 复用面板工厂（标准 + 最近 + 自定义，简化版以适合迷你宽度）
+    function buildMiniPanel(which) {
+      var panel = document.createElement('div');
+      panel.className = 'xl-tb-color-panel';
+      panel.dataset.which = which;
+      var palette = which === 'fg' ? STANDARD_COLORS : STANDARD_BG;
+      var grid = document.createElement('div');
+      grid.className = 'xl-tb-color-grid';
+      palette.forEach(function (c) {
+        var sw = document.createElement('button');
+        sw.type = 'button';
+        sw.className = 'xl-tb-color-swatch';
+        sw.style.background = c;
+        sw.title = c;
+        sw.addEventListener('mousedown', keepSel);
+        sw.addEventListener('click', function () {
+          panel.classList.remove('open');
+          if (which === 'fg') applyColor(c); else applyHighlight(c);
+        });
+        grid.appendChild(sw);
+      });
+      panel.appendChild(grid);
+      return panel;
+    }
+    miniFgPanel = buildMiniPanel('fg');
+    miniBgPanel = buildMiniPanel('bg');
+    fg.appendChild(miniFgPanel);
+    bg.appendChild(miniBgPanel);
+
+    document.body.appendChild(miniToolbar);
+
+    // 点击面板外关闭
+    document.addEventListener('mousedown', function (e) {
+      if (!miniToolbar.contains(e.target)) {
+        miniFgPanel.classList.remove('open');
+        miniBgPanel.classList.remove('open');
+      }
+    });
+  }
+
+  // 显示/隐藏迷你工具栏
+  function updateMiniToolbar() {
+    if (!miniToolbar) return;
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+      miniToolbar.classList.remove('open');
+      miniFgPanel && miniFgPanel.classList.remove('open');
+      miniBgPanel && miniBgPanel.classList.remove('open');
+      return;
+    }
+    var range = sel.getRangeAt(0);
+    // 只在 activeInner 内（编辑中的文本框）显示
+    if (!activeInner || !activeInner.contains(range.commonAncestorContainer)) {
+      miniToolbar.classList.remove('open');
+      return;
+    }
+    var rect = range.getBoundingClientRect();
+    if (!rect || (rect.left === 0 && rect.top === 0 && rect.right === 0)) {
+      miniToolbar.classList.remove('open');
+      return;
+    }
+    var top = rect.top - 44;
+    var left = rect.left + rect.width / 2;
+    // 顶部贴边则放到下方
+    if (top < 60) top = rect.bottom + 8;
+    // 屏幕左右边界保护
+    var margin = 8;
+    miniToolbar.style.top = Math.max(margin, Math.min(top, window.innerHeight - 50)) + 'px';
+    miniToolbar.style.left = Math.max(margin, Math.min(left, window.innerWidth - 240)) + 'px';
+    miniToolbar.classList.add('open');
+  }
+
+  // 刷新最近用色面板的格子
+  function refreshRecents() {
+    [fgPanel, bgPanel].forEach(function (panel) {
+      if (!panel) return;
+      var which = panel.dataset.which;
+      var grid = panel.querySelector('.xl-tb-color-recent-grid');
+      if (!grid) return;
+      var key = which === 'fg' ? RECENT_COLORS_KEY : RECENT_BG_KEY;
+      var list = getRecent(key);
+      grid.innerHTML = '';
+      if (!list.length) {
+        var ph = document.createElement('div');
+        ph.className = 'xl-tb-color-recent-empty';
+        ph.textContent = '（无）';
+        grid.appendChild(ph);
+        return;
+      }
+      list.forEach(function (c) {
+        var sw = document.createElement('button');
+        sw.type = 'button';
+        sw.className = 'xl-tb-color-swatch';
+        sw.style.background = c;
+        sw.title = c;
+        sw.addEventListener('mousedown', keepSel);
+        sw.addEventListener('click', function () {
+          panel.classList.remove('open');
+          if (which === 'fg') applyColor(c); else applyHighlight(c);
+        });
+        grid.appendChild(sw);
+      });
+    });
   }
 
   // ---------- 快捷键 ----------
@@ -672,6 +1081,7 @@
     if (!active) return;
     saveSel();
     updateToolbarState();
+    updateMiniToolbar();
   }
 
   function saveEdits() {
@@ -726,7 +1136,8 @@
     if (c) c.removeEventListener('input', markDirty);
     var b = document.querySelector('.xl-edit-banner');
     if (b) b.remove();
-    banner = null; saveBtn = null;
+    if (miniToolbar) { miniToolbar.remove(); miniToolbar = null; miniFgPanel = null; miniBgPanel = null; }
+    banner = null; saveBtn = null; fgPanel = null; bgPanel = null;
     document.querySelectorAll('[data-xl-edit]').forEach(function (el) {
       el.removeAttribute('data-xl-edit');
       el.removeEventListener('click', onTextClick);

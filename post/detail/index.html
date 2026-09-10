@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../../boot.js?v=20260830ac"></script>
+  <script src="../../boot.js?v=20260910aa"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
@@ -145,7 +145,7 @@
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 100px; } .post h1 { font-size: 1.3rem; } .post-btn { width: 100%; } }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260830ac" />
+  <link rel="stylesheet" href="../../common.css?v=20260910ai" />
 </head>
 <body>
   <header class="topbar">
@@ -210,8 +210,8 @@
     </a>
   </div>
 
-  <script src="../../prefs.js?v=20260830ac"></script>
-  <script src="../../auth.js?v=20260902a"></script>
+  <script src="../../prefs.js?v=20260830ad"></script>
+  <script src="../../auth.js?v=20260908c"></script>
   <script src="../../post-actions.js"></script>
   <script src="../../poll.js"></script>
   <script src="../../reactions.js"></script>
@@ -396,7 +396,7 @@
         if (!confirm('确定删除这条帖子？')) return;
         fetch('/api/post?id=' + encodeURIComponent(postId), { method: 'DELETE' })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
-          .then(function (res) { if (res.ok) { toast('已删除 ✓'); location.href = '../center/'; } else { toast('删除失败', true); } })
+          .then(function (res) { if (res.ok) { toast('已删除 ✓'); try { sessionStorage.setItem('__xl_intra', '1'); sessionStorage.setItem('xl_nav_loader', '1'); } catch (e) {} location.href = '../center/'; } else { toast('删除失败', true); } })
           .catch(function () { toast('删除失败（网络错误）', true); });
       }
       function delComment(id) {
@@ -508,6 +508,6 @@
       }).catch(function () { loginHint.hidden = false; loadPost(); loadComments(); });
     })();
   </script>
-  <script src="../../common.js?v=20260831ac"></script>
+  <script src="../../common.js?v=20260908aq"></script>
 </body>
 </html>

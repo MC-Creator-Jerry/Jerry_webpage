@@ -469,6 +469,9 @@ window.XLTopics = (function () {
       iconSpan.className = 'bar-icon';
       iconSpan.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + svg + '</svg>';
       btn.insertBefore(iconSpan, btn.firstChild);
+      // 标记「图标已注入」：icon 模式下 .bar-text 仅在带此类的按钮上 sr-only 隐藏；
+      // 若某按钮因任何原因漏注图标，文字仍可见，按钮永远不会变成空白方块。
+      btn.classList.add('xl-has-icon');
     }
   }
 
@@ -821,7 +824,7 @@ window.XLTopics = (function () {
     var m = src.match(/^((?:\.\.\/)*)/);
     var prefix = m ? m[1] : '';
     var s = document.createElement('script');
-    s.src = prefix + 'editbar.js?v=20260908ae';
+    s.src = prefix + 'editbar.js?v=20260910a';
     s.async = true;
     document.head.appendChild(s);
   }

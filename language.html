@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh" data-theme="light">
 <head>
-  <script src="boot.js?v=20260830ac"></script>
+  <script src="boot.js?v=20260910aa"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>语言 / Language</title>
@@ -86,7 +86,7 @@
 
     @media (max-width: 520px) { .lang-grid { grid-template-columns: 1fr; } }
   </style>
-  <link rel="stylesheet" href="common.css?v=20260830ac" />
+  <link rel="stylesheet" href="common.css?v=20260910ai" />
 </head>
 <body>
   <header class="topbar">
@@ -140,12 +140,14 @@
         c.addEventListener('click', function () {
           var lang = c.getAttribute('data-lang');
           try { localStorage.setItem('xl_lang', lang); } catch (e) {}
+          // 同源跳转携带站内跳转标记，避免首页误判为全新加载而重播开场动画
+          try { sessionStorage.setItem('__xl_intra', '1'); sessionStorage.setItem('xl_nav_loader', '1'); } catch (e) {}
           window.location.href = 'index.html';
         });
       });
     })();
   </script>
-<script src="auth.js?v=20260902a"></script>
-  <script src="common.js?v=20260831ac"></script>
+<script src="auth.js?v=20260908c"></script>
+  <script src="common.js?v=20260908aq"></script>
 </body>
 </html>

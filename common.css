@@ -106,6 +106,99 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
 .pa-btn img.ico { width: 14px; height: 14px; margin-right: 4px; vertical-align: -2px; }
 .ico-btn img.ico, button img.ico { width: 18px; height: 18px; }
 
+/* ============ 7c. 小蓝条显示模式（图标+小文字 / 长 / 仅图标） ============ */
+/* .bar-btn 内的 .bar-icon / .bar-text 子元素由 common.js 注入。默认「长」模式与未注入图标前视觉一致（零回归）。 */
+.bar-btn { position: relative; }
+.bar-btn .bar-icon { display: none; align-items: center; justify-content: center; line-height: 0; }
+.bar-btn .bar-icon svg { display: block; }
+.bar-btn .bar-text { display: inline; }
+
+/* 长（默认）：横排文字按钮 */
+body.xl-bar-long .bar-btn .bar-icon { display: none; }
+body.xl-bar-long .bar-btn .bar-text { display: inline; }
+
+/* 图标加小文字：竖排小卡片，图标在上、文字在下（缩小） */
+body.xl-bar-tile .bar-right { gap: 4px; }
+body.xl-bar-tile .bar-btn {
+  flex-direction: column;
+  padding: 6px 10px;
+  min-width: 56px;
+  border-radius: 8px;
+  gap: 2px;
+  line-height: 1.1;
+}
+body.xl-bar-tile .bar-btn .bar-icon { display: inline-flex; }
+body.xl-bar-tile .bar-btn .bar-icon svg { width: 22px; height: 22px; }
+body.xl-bar-tile .bar-btn .bar-text {
+  display: block;
+  font-size: 0.5rem;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+}
+body.xl-bar-tile .topbar { min-height: 72px; }
+@media (max-width: 720px) {
+  body.xl-bar-tile .bar-btn { min-width: 48px; padding: 5px 7px; }
+  body.xl-bar-tile .bar-btn .bar-icon svg { width: 20px; height: 20px; }
+  body.xl-bar-tile .bar-btn .bar-text { font-size: 0.46rem; }
+}
+
+/* 仅图标：方块图标按钮，文字 sr-only 保留可访问性 */
+body.xl-bar-icon .bar-right { gap: 4px; }
+body.xl-bar-icon .bar-btn { padding: 8px; min-width: 0; gap: 0; }
+body.xl-bar-icon .bar-btn .bar-icon { display: inline-flex; }
+body.xl-bar-icon .bar-btn .bar-icon svg { width: 20px; height: 20px; }
+body.xl-bar-icon .bar-btn .bar-text {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+/* 仅图标模式下徽标（未读数）以角标形式浮在按钮右上，仍可见 */
+body.xl-bar-icon .bar-btn > .badge {
+  position: absolute; top: 1px; right: 1px; margin-left: 0;
+  min-width: 14px; height: 14px; font-size: .62rem; padding: 0 3px;
+}
+/* 图标加小文字模式：徽标也做角标，避免挤歪竖排布局 */
+body.xl-bar-tile .bar-btn > .badge {
+  position: absolute; top: 2px; right: 3px; margin-left: 0;
+}
+
+/* hero 右上角帮助中心入口（绝对定位，全屏可用） */
+.hero { position: relative; }
+.hero-help-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--card-border, #e3e8ef);
+  color: var(--text, #1c2733);
+  text-decoration: none;
+  font-size: .88rem;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: background .15s, border-color .15s, transform .15s;
+  z-index: 1;
+}
+.hero-help-btn:hover {
+  background: color-mix(in srgb, var(--accent, #0078d4) 10%, var(--card-bg, #fff));
+  border-color: var(--accent, #0078d4);
+  color: var(--accent, #0078d4);
+}
+.hero-help-btn:active { transform: translateY(1px); }
+.hero-help-btn svg { color: var(--accent, #0078d4); }
+
+/* 触屏设备：新模式按钮至少 44px 可点区域（仅 coarse 指针生效，桌面保持紧凑） */
+@media (pointer: coarse) {
+  body.xl-bar-tile .bar-btn { min-width: 54px; min-height: 48px; }
+  body.xl-bar-icon .bar-btn { min-width: 44px; min-height: 44px; }
+}
+
 /* ============ 6. 防止 iOS 点击输入框自动放大（移动端字号≥16px） ============ */
 @media (max-width: 560px) {
   input, textarea, select, .edit-input, .edit-textarea, .search-input { font-size: 16px; }
@@ -119,9 +212,74 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
   .hero h1 { font-size: 1.4rem; }
   .card { margin-top: 12px; }
   .site-footer { margin-top: 28px; padding: 16px; }
+  .gh-icon { vertical-align: -0.15em; margin-right: 0.3em; }
   .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
   .fab { width: 42px; height: 38px; }
 }
+
+/* ============ 16. 用户自定义产品区块 + 添加弹窗 ============ */
+.custom-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.custom-head h2 { margin: 0; }
+.custom-add-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 999px;
+  background: var(--accent, #0078d4); color: #fff;
+  border: none; cursor: pointer; font-size: .85rem; font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background .15s, transform .15s;
+}
+.custom-add-btn:hover { background: color-mix(in srgb, var(--accent, #0078d4) 88%, #000); }
+.custom-add-btn:active { transform: translateY(1px); }
+.custom-hint { margin: 8px 0 0; font-size: .82rem; color: var(--muted, #44556a); opacity: .9; }
+.custom-modal {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, .45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1100; padding: 16px;
+}
+.custom-modal[hidden] { display: none; }
+.custom-modal-inner {
+  background: var(--card-bg, #fff); border-radius: var(--radius, 14px);
+  padding: 22px; width: 100%; max-width: 440px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  max-height: 90vh; overflow-y: auto;
+}
+.custom-modal-inner h3 { margin: 0 0 14px; font-size: 1.15rem; }
+.custom-field { display: block; margin-bottom: 12px; }
+.custom-field > span { display: block; font-size: .85rem; color: var(--muted, #44556a); margin-bottom: 4px; }
+.custom-field input, .custom-field textarea { margin-top: 0; }
+.custom-error {
+  background: color-mix(in srgb, var(--danger, #d13438) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger, #d13438) 40%, transparent);
+  color: var(--danger, #d13438);
+  padding: 8px 12px; border-radius: 8px; font-size: .85rem;
+  margin-bottom: 12px;
+}
+.custom-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+.custom-actions button {
+  padding: 8px 18px; border-radius: 999px; font-size: .9rem;
+  border: 1px solid var(--card-border, #e3e8ef);
+  background: var(--card-bg, #fff); cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.custom-actions button:hover { background: color-mix(in srgb, var(--accent, #0078d4) 8%, var(--card-bg, #fff)); border-color: var(--accent, #0078d4); }
+.custom-save {
+  background: var(--accent, #0078d4) !important; color: #fff !important;
+  border-color: var(--accent, #0078d4) !important;
+}
+.custom-save:hover { background: color-mix(in srgb, var(--accent, #0078d4) 88%, #000) !important; }
+.custom-del {
+  position: absolute; top: 6px; left: 6px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: color-mix(in srgb, var(--danger, #d13438) 18%, var(--card-bg, #fff));
+  color: var(--danger, #d13438);
+  border: 1px solid color-mix(in srgb, var(--danger, #d13438) 35%, transparent);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; line-height: 1; cursor: pointer;
+  opacity: 0; transition: opacity .15s, background .15s;
+}
+.prod-card.has-custom-del:hover .custom-del { opacity: 1; }
+.custom-del:hover { background: var(--danger, #d13438); color: #fff; }
+.prod-card.has-custom-del { position: relative; }
 
 /* ============ 8. 页脚响应 ============ */
 @media (max-width: 560px) {
@@ -131,6 +289,28 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
 /* ============ 9. 搜索框触屏友好 ============ */
 @media (max-width: 560px) {
   .search-input { padding-top: 12px; padding-bottom: 12px; }
+}
+
+/* ============ 14. 触屏优化基线 ============ */
+/* 旋转 / 缩放时禁止字体跳变 */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* 去除点击灰色高亮（改用 :active 回弹反馈），并消除 300ms 点击延迟 */
+a, button, .bar-btn, .fab, .btn, .icon-btn, .seg, .topic-chip,
+.xl-switch, input, select, textarea, label, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+/* 触屏（无 hover）设备：禁用悬浮上浮，避免「粘滞 hover」残留 */
+@media (hover: none) {
+  .card:hover, .news-card:hover, .section-card:hover, .prod-card:hover,
+  .feature-card:hover, .post:hover, .user-card:hover { transform: none; box-shadow: none; }
+  button:hover, .bar-btn:hover, .fab:hover, .btn:hover, .icon-btn:hover { transform: none; }
+  a.xl-link:hover::after, .nav-link:hover::after, .bar-btn.link:hover::after { transform: scaleX(0); }
+  .topic-chip:hover { border-color: var(--card-border); color: var(--muted); background: none; }
+}
+/* 纯触屏无物理 Alt 键：隐藏键盘键位提示徽标 */
+@media (pointer: coarse) {
+  body.xl-keytips .xl-keycap { display: none !important; }
 }
 
 /* ============ 10. 头像弹层不溢出屏幕 ============ */
@@ -168,7 +348,7 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
     position: fixed !important;
     top: auto !important;
     right: 12px !important;
-    bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px) + var(--vb-bottom, 0px));
     left: auto !important;
     z-index: 1000 !important;
     flex-direction: row !important;
@@ -176,11 +356,11 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
   }
   html .float-actions .fab { width: 44px; height: 44px; border-radius: 12px; }
 
-  /* 底部导航条：固定屏幕底部，单行横向滚动，不折行 */
+  /* 小蓝条2号（竖屏底部导航条）：固定屏幕底部，搜索框靠左、其余按钮靠右，单行横向滚动，不折行 */
   .bar-right {
     position: fixed !important;
     top: auto !important;
-    bottom: 0 !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--vb-bottom, 0px));
     left: 0 !important;
     right: 0 !important;
     z-index: 1000 !important;
@@ -202,10 +382,18 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
     overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
+    overscroll-behavior-x: contain !important;
+    scroll-snap-type: x proximity !important;
+    touch-action: pan-x !important;
   }
   .bar-right::-webkit-scrollbar { display: none; }
-  .bar-right > * { flex: 0 0 auto; }
+  .bar-right > * { flex: 0 0 auto; scroll-snap-align: start; }
+  /* 小蓝条2号：搜索框靠左，其余按钮靠右 */
+  .bar-right > .xl-search + .bar-btn { margin-left: auto; }
   .bar-btn { padding: 8px 12px; font-size: .85rem; white-space: nowrap; }
+  /* 底部导航在 tile/icon 模式下也要保证竖排按钮的可点高度 */
+  body.xl-bar-tile .bar-right .bar-btn,
+  body.xl-bar-icon .bar-right .bar-btn { min-height: 44px; }
   .xl-search-input { width: 78px; }
 
   /* 头像下拉菜单在竖屏下改为固定定位，避免被底部导航条裁剪 */
@@ -223,6 +411,14 @@ img.ico { width: 18px; height: 18px; vertical-align: middle; object-fit: contain
   body { padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); }
   .content { padding-left: calc(16px + max(10px, env(safe-area-inset-left, 0px))); padding-right: calc(16px + max(10px, env(safe-area-inset-right, 0px))); }
   .topbar { padding-left: calc(14px + max(10px, env(safe-area-inset-left, 0px))); padding-right: calc(14px + max(10px, env(safe-area-inset-right, 0px))); }
+}
+
+/* 横屏矮屏（手机横屏）：顶栏按钮较多（新模式 + 快捷键）时允许横向滚动，避免溢出被裁 */
+@media (orientation: landscape) and (max-height: 560px) {
+  .topbar { flex-wrap: nowrap; }
+  .bar-right { overflow-x: auto; flex-wrap: nowrap; gap: 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; touch-action: pan-x; }
+  .bar-right::-webkit-scrollbar { display: none; }
+  .bar-right > * { flex: 0 0 auto; }
 }
 
 @media (orientation: portrait) and (max-width: 400px) {
@@ -389,7 +585,7 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
 
 .xl-load-text {
   position: relative;
-  z-index: 10;                   /* 置于最高图层：盖在蓝色长方块之上 */
+  z-index: 30;                   /* 屏幕顶层：盖在蓝色长方块与所有 loader 子元素之上 */
   color: rgb(0, 120, 212);
   font-weight: 700;
   font-size: clamp(26px, 6.5vw, 52px);
@@ -397,9 +593,14 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
   letter-spacing: .14em;
   padding-left: .14em;            /* 补偿字距，视觉居中 */
   text-align: center;
-  -webkit-text-stroke: 2px #fff;  /* 白边 */
-  text-shadow: 0 1px 2px rgba(255,255,255,.85), 0 0 5px rgba(255,255,255,.75);
   user-select: none;
+  /* 非常浅的蓝色背景（pill/badge 形态），让欢迎文字更醒目 */
+  background: rgba(0, 120, 212, 0.10);
+  padding: 14px 36px 14px calc(36px + .14em);
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px rgba(0, 120, 212, 0.10), 0 6px 24px rgba(0, 120, 212, 0.08);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 /* 三行字逐行错落淡入 */
 .xl-load-text .xl-line {
@@ -412,6 +613,71 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
 .xl-loader.xl-msg .xl-load-text .xl-line:nth-child(1) { transition-delay: 0s; }
 .xl-loader.xl-msg .xl-load-text .xl-line:nth-child(2) { transition-delay: .12s; }
 .xl-loader.xl-msg .xl-load-text .xl-line:nth-child(3) { transition-delay: .24s; }
+
+/* 进度条下落阶段（阶段一）显示的「正在加载中」：沿用加载文字的同款蓝/粗体/字距处理，
+   置于竖直进度条右侧、百分比下方，随 .xl-intro 在阶段二右滑时一同离场 */
+.xl-loading-label {
+  position: absolute;
+  left: 40px;
+  top: calc(50% + 30px);
+  color: rgb(0, 120, 212);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .14em;
+  padding: 6px 16px 6px calc(16px + .14em);
+  border-radius: 14px;
+  background: rgba(0, 120, 212, 0.10);
+  box-shadow: 0 0 0 1px rgba(0, 120, 212, 0.10), 0 6px 24px rgba(0, 120, 212, 0.08);
+  white-space: nowrap;
+  user-select: none;
+  /* 进度条阶段默认即显示（不依赖 .xl-show 的过渡时机，避免极端加载延迟下不出现）；
+  //  仅阶段三（.xl-msg）欢迎文字淡入时才隐藏，避免两处文字同屏 */
+  opacity: 1;
+  transform: none;
+  transition: opacity .3s ease, transform .3s ease;
+}
+/* 阶段三（.xl-msg）欢迎文字淡入时，隐藏进度条阶段的「正在加载中」，避免两处文字同屏 */
+.xl-loader.xl-msg .xl-loading-label { opacity: 0 !important; transform: translateY(6px) !important; }
+
+/* ============ 横竖屏切换：加载动画 + 按钮位移到对应位置 ============ */
+/* orientationchange / 跨断点 resize 时短暂加 .xl-orient-anim：白色淡入淡出覆盖层 + 小蓝条/小蓝条2号按钮逐个错落滑入。
+   覆盖层 z-index 高于 bar/loader，保证视觉上像「正在切换」；按钮 animation 是「移动到对应位置」的本体动画。 */
+body.xl-orient-anim::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  z-index: 2000;
+  pointer-events: none;
+  animation: xlOrientOverlay .44s ease-out forwards;
+}
+@keyframes xlOrientOverlay {
+  0%   { opacity: 0; }
+  35%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+body.xl-orient-anim .bar-right .bar-btn,
+body.xl-orient-anim .bar-right .xl-search {
+  animation: xlOrientBtnIn .42s cubic-bezier(.2, .7, .3, 1) both;
+}
+body.xl-orient-anim .bar-right > *:nth-child(1) { animation-delay: 0s; }
+body.xl-orient-anim .bar-right > *:nth-child(2) { animation-delay: .04s; }
+body.xl-orient-anim .bar-right > *:nth-child(3) { animation-delay: .08s; }
+body.xl-orient-anim .bar-right > *:nth-child(4) { animation-delay: .12s; }
+body.xl-orient-anim .bar-right > *:nth-child(5) { animation-delay: .16s; }
+body.xl-orient-anim .bar-right > *:nth-child(6) { animation-delay: .20s; }
+body.xl-orient-anim .bar-right > *:nth-child(7) { animation-delay: .24s; }
+@keyframes xlOrientBtnIn {
+  from { opacity: 0; transform: translateY(14px) scale(.92); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+/* 尊重 prefers-reduced-motion：直接显示，不做覆盖层与位移动画 */
+@media (prefers-reduced-motion: reduce) {
+  body.xl-orient-anim::after,
+  body.xl-orient-anim .bar-right .bar-btn,
+  body.xl-orient-anim .bar-right .xl-search { animation: none !important; }
+  body.xl-orient-anim::after { display: none !important; }
+}
 
 .xl-sqs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .xl-sq {
@@ -750,6 +1016,154 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 .xl-tb-sep { width: 1px; align-self: stretch; background: rgba(255, 255, 255, 0.35); margin: 2px 4px; }
 .xl-tb-color { display: inline-flex; align-items: center; gap: 6px; }
 .xl-tb-color input[type=color] { width: 22px; height: 22px; border: none; background: none; padding: 0; cursor: pointer; }
+
+/* ============ 编辑工具栏增强：字号输入 + 调色板按钮 + 下拉面板 ============ */
+.xl-tb-size {
+  width: 56px; font-family: inherit; font-size: 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15); color: #fff;
+  border-radius: 8px; padding: 6px 8px;
+}
+.xl-tb-size::placeholder { color: rgba(255, 255, 255, 0.7); }
+.xl-tb-size:focus { outline: 2px solid rgba(255, 255, 255, 0.55); outline-offset: 1px; }
+
+/* 颜色按钮：「A」+ 颜色条 + 三角箭头，点击展开下拉 */
+.xl-tb-color-btn {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px 4px 4px;
+  font-family: inherit; font-size: 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15); color: #fff;
+  border-radius: 8px; cursor: pointer;
+}
+.xl-tb-color-btn:hover { background: rgba(255, 255, 255, 0.28); }
+.xl-tb-color-letter, .xl-tb-color-bg-letter {
+  font-weight: 800; font-size: 1rem; line-height: 1; padding: 2px 4px;
+}
+.xl-tb-color-letter { color: #fff; text-shadow: 0 0 2px rgba(0,0,0,.8); }
+.xl-tb-color-bg-letter { background: var(--accent); color: #fff; }
+.xl-tb-color-bar {
+  display: inline-block; width: 16px; height: 3px; border-radius: 2px;
+  background: #222; margin-left: 1px;
+}
+.xl-caret { font-size: .6rem; opacity: .8; margin-left: 1px; }
+
+/* 下拉调色板面板 */
+.xl-tb-color-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px); left: 0;
+  z-index: 1250;
+  background: var(--card-bg, #fff);
+  color: var(--text, #1c2733);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  padding: 10px;
+  width: 232px;
+}
+.xl-tb-color-panel.open { display: block; }
+.xl-tb-color-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+.xl-tb-color-swatch {
+  width: 100%; aspect-ratio: 1;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+}
+.xl-tb-color-swatch:hover { transform: scale(1.1); box-shadow: 0 0 0 2px var(--accent); }
+.xl-tb-color-recent { margin-top: 10px; }
+.xl-tb-color-recent-label {
+  font-size: .72rem; color: var(--muted, #44556a);
+  margin-bottom: 4px;
+}
+.xl-tb-color-recent-empty {
+  font-size: .72rem; color: var(--muted, #44556a); opacity: .6;
+  grid-column: 1 / -1;
+  padding: 4px 0;
+}
+.xl-tb-color-custom {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border, #e3e8ef);
+  font-size: .78rem;
+}
+.xl-tb-color-custom input[type=color] {
+  width: 28px; height: 28px; padding: 0;
+  border: 1px solid var(--card-border, #e3e8ef);
+  border-radius: 4px; cursor: pointer;
+}
+.xl-tb-color-clear {
+  margin-left: auto;
+  padding: 4px 10px;
+  font-size: .72rem;
+  border: 1px solid var(--card-border, #e3e8ef);
+  background: transparent;
+  color: var(--muted, #44556a);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.xl-tb-color-clear:hover {
+  background: var(--card-bg, #fff);
+  color: var(--danger, #d13438);
+  border-color: var(--danger, #d13438);
+}
+
+/* ============ 浮动迷你工具栏（Word 选中浮现式） ============ */
+.xl-mini-toolbar {
+  display: none;
+  position: fixed;
+  z-index: 1240;
+  background: color-mix(in srgb, var(--accent) 95%, #000 5%);
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 6px;
+  gap: 2px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  font-size: 0.85rem;
+  align-items: center;
+  white-space: nowrap;
+}
+.xl-mini-toolbar.open { display: inline-flex; }
+.xl-mini-toolbar button {
+  border: none; background: transparent; color: #fff;
+  padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 0.82rem;
+  font-weight: 700;
+}
+.xl-mini-toolbar button:hover { background: rgba(255, 255, 255, 0.25); }
+.xl-mini-toolbar .xl-mini-fg, .xl-mini-toolbar .xl-mini-bg {
+  position: relative;
+  padding: 5px 8px;
+}
+.xl-mini-toolbar .xl-mini-fg-letter, .xl-mini-toolbar .xl-mini-bg-letter {
+  display: inline-block; width: 14px; height: 14px;
+  line-height: 14px; text-align: center; border-radius: 3px;
+  font-weight: 800; font-size: 0.85rem;
+}
+.xl-mini-toolbar .xl-mini-fg-letter { background: #fff; color: #222; }
+.xl-mini-toolbar .xl-mini-bg-letter { background: #fff36d; color: #222; }
+.xl-mini-toolbar .xl-mini-fg-bar {
+  display: block; height: 2px; width: 14px; margin: 1px auto 0;
+  background: #fff;
+}
+.xl-mini-toolbar .xl-mini-fg-panel, .xl-mini-toolbar .xl-mini-bg-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  z-index: 1260;
+}
+.xl-mini-toolbar .xl-mini-fg-panel.open, .xl-mini-toolbar .xl-mini-bg-panel.open { display: block; }
+.xl-mini-toolbar .xl-mini-fg-panel .xl-tb-color-panel,
+.xl-mini-toolbar .xl-mini-bg-panel .xl-tb-color-panel {
+  position: static;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
 
 /* 工具栏分组：组内不拆行，窄屏时整组换行，避免按钮被拆得七零八落 */
 .xl-tb-group { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }

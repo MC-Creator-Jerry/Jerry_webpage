@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260830ac"></script>
+  <script src="../boot.js?v=20260910aa"></script>
 <script>
   // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
   if (location.hostname.indexOf('github.io') !== -1) {
@@ -94,7 +94,16 @@
 
   /* 资料专属 */
   .profile-head { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; position: relative; }
-  .avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom)); color: #fff; font-size: 2.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid var(--card-bg); box-shadow: 0 3px 12px rgba(0, 0, 0, .18); }
+  .avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom)); color: #fff; font-size: 2.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid var(--card-bg); box-shadow: 0 3px 12px rgba(0, 0, 0, .18); position: relative; overflow: hidden; }
+  .avatar > img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+  .avatar > .avatar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
+  /* 头像下一行：更改头像（文字头像 / 不使用头像） */
+  .avatar-stack { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .avatar-opts { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .avatar-opts-label { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+  .avatar-opt { padding: 5px 14px; font-size: 0.82rem; border-radius: 999px; border: 1px solid var(--card-border); background: var(--panel-bg); color: var(--text); cursor: pointer; transition: background .15s ease, border-color .15s ease, color .15s ease; font-weight: 600; }
+  .avatar-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .avatar-opt.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   .profile-name { font-size: 1.9rem; font-weight: 700; color: var(--text); line-height: 1.2; }
   .profile-meta { font-size: 0.9rem; color: var(--muted); margin-top: 4px; }
   .profile-tagline { font-size: 1.05rem; color: var(--muted); margin-top: 6px; max-width: 560px; display: inline; }
@@ -296,7 +305,7 @@
   .my-msg-card .msg-entry-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--accent); border-radius: 999px; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; text-decoration: none; }
   .my-msg-card .msg-entry-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260830ac" />
+  <link rel="stylesheet" href="../common.css?v=20260910ai" />
 </head>
 <body>
   <header class="topbar">
@@ -335,7 +344,17 @@
     </div>
     <section class="hero">
       <div class="profile-head">
-        <img class="avatar" id="avatar" alt="" src="" />
+        <div class="avatar-stack">
+          <div class="avatar" id="avatar">
+            <img id="avatarImg" alt="" />
+            <span id="avatarText" class="avatar-text" hidden></span>
+          </div>
+          <div class="avatar-opts" id="avatarOpts" hidden>
+            <div class="avatar-opts-label" data-zh="更改头像" data-en="Change Avatar">更改头像</div>
+            <button type="button" class="avatar-opt" data-mode="text" data-zh="使用文字头像" data-en="Use Text Avatar">使用文字头像</button>
+            <button type="button" class="avatar-opt" data-mode="none" data-zh="不使用头像" data-en="No Avatar">不使用头像</button>
+          </div>
+        </div>
         <div>
           <div class="profile-name-row" id="nameRow">
             <div class="profile-name" id="nameDisplay"></div>
@@ -528,7 +547,7 @@
     </a>
   </div>
 
-  <script src="../auth.js?v=20260902a"></script>
+  <script src="../auth.js?v=20260908c"></script>
   <script>
     (function () {
       var OWNER = 'MC-Creator-Jerry';
@@ -536,8 +555,73 @@
       function findForbidden(text){ if(!text) return null; var low=String(text).toLowerCase(); for(var i=0;i<FORBIDDEN.length;i++){ if(low.indexOf(FORBIDDEN[i].toLowerCase())!==-1) return FORBIDDEN[i]; } return null; }
 
       var $ = function (id) { return document.getElementById(id); };
-      var avatar = $('avatar'), nameDisplay = $('nameDisplay'), loginDisplay = $('loginDisplay');
+      var avatar = $('avatarImg'), avatarWrap = $('avatar'), avatarText = $('avatarText'), avatarOpts = $('avatarOpts'), nameDisplay = $('nameDisplay'), loginDisplay = $('loginDisplay');
       var nameRow = $('nameRow'), renameBtn = $('renameBtn'), renameEditor = $('renameEditor'), renameInput = $('renameInput');
+
+      /* ---------- 头像显示模式（image / text / none）---------- */
+      function getInitials(s) {
+        s = String(s || '').trim();
+        if (!s) return '?';
+        var ch = s.charAt(0);
+        return ch === ch.toLowerCase() ? ch.toUpperCase() : ch;
+      }
+      function getAvatarMode(login) {
+        try {
+          var v = localStorage.getItem('xl_avatar_mode:' + login);
+          if (v === 'text' || v === 'none' || v === 'image') return v;
+        } catch (e) {}
+        return 'image';
+      }
+      function setAvatarMode(login, mode) {
+        try { localStorage.setItem('xl_avatar_mode:' + login, mode); } catch (e) {}
+      }
+      function renderAvatar() {
+        var d = state.data;
+        if (!d || !avatarWrap) return;
+        var login = d.login;
+        var mode = getAvatarMode(login);
+        if (mode === 'none') {
+          avatarWrap.style.display = 'none';
+        } else {
+          avatarWrap.style.display = '';
+          if (mode === 'text') {
+            avatar.style.display = 'none';
+            avatarText.style.display = 'flex';
+            avatarText.textContent = getInitials(login || d.name || '');
+          } else {
+            avatar.style.display = '';
+            avatarText.style.display = 'none';
+            avatar.onerror = function () {
+              this.onerror = null;
+              if (login && typeof window.initialAvatarSvg === 'function') this.src = window.initialAvatarSvg(login);
+            };
+            avatar.src = d.ghAvatar ? gh(login) : (d.avatar || gh(login));
+          }
+        }
+        if (avatarOpts) {
+          var btns = avatarOpts.querySelectorAll('.avatar-opt');
+          for (var i = 0; i < btns.length; i++) {
+            var m = btns[i].getAttribute('data-mode');
+            btns[i].classList.toggle('active', m === mode);
+          }
+        }
+      }
+      // 头像模式按钮：点击切换；再次点击当前激活的则回到图片
+      var avatarOptBtns = document.querySelectorAll('.avatar-opt');
+      for (var ai = 0; ai < avatarOptBtns.length; ai++) {
+        avatarOptBtns[ai].addEventListener('click', function () {
+          if (!isOwn() || !state.data) return;
+          var login = state.data.login;
+          var cur = getAvatarMode(login);
+          var mode = this.getAttribute('data-mode');
+          var next = (cur === mode) ? 'image' : mode;
+          setAvatarMode(login, next);
+          renderAvatar();
+          if (next === 'image') toast('已恢复图片头像 ✓');
+          else if (next === 'text') toast('已切换到文字头像 ✓');
+          else toast('已隐藏头像 ✓');
+        });
+      }
       var aboutDisplay = $('aboutDisplay'), aboutEmpty = $('aboutEmpty'), aboutInput = $('aboutInput');
       var aboutView = $('aboutView'), aboutEditor = $('aboutEditor');
       var skillsDisplay = $('skillsDisplay'), skillsEmpty = $('skillsEmpty'), skillsEditList = $('skillsEditList');
@@ -664,11 +748,7 @@
 
       function renderDisplay() {
         var d = state.data || {};
-        avatar.onerror = function () {
-          this.onerror = null;
-          if (d.login && typeof window.initialAvatarSvg === 'function') this.src = window.initialAvatarSvg(d.login);
-        };
-        avatar.src = d.ghAvatar ? gh(d.login) : (d.avatar || gh(d.login));
+        renderAvatar();
         // 个人主页主题：色条 + 强调色（applyTheme）；头图来源取舍（renderBanner）
         applyTheme(d.themeId, d.themeColor);
         renderBanner();
@@ -700,6 +780,7 @@
         }
         // 编辑按钮可见性
         document.querySelectorAll('.change-btn[data-sec]').forEach(function (b) { b.hidden = !isOwn(); });
+        if (avatarOpts) avatarOpts.hidden = !isOwn();
         // 改名按钮 + 内联编辑器：仅本人可见，默认关闭编辑态
         nameRow.hidden = false;
         renameEditor.hidden = true;
@@ -1193,6 +1274,6 @@
       window.addEventListener('pageshow', function (e) { if (e.persisted) applyLang(); });
     })();
   </script>
-  <script src="../common.js?v=20260831ac"></script>
+  <script src="../common.js?v=20260908aq"></script>
 </body>
 </html>

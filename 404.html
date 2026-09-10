@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8" />
@@ -13,7 +13,7 @@
     document.head.appendChild(b);
   })();
 </script>
-<script src="boot.js?v=20260830ac"></script>
+<script src="boot.js?v=20260910aa"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>404 · 页面未找到 · Jerry's webpage</title>
 <meta name="description" content="404 — 您访问的页面不存在。" />
@@ -226,7 +226,7 @@
     .btn { justify-content: center; }
   }
 </style>
-<link rel="stylesheet" href="common.css?v=20260830ac" />
+<link rel="stylesheet" href="common.css?v=20260910ai" />
 </head>
 <body>
   <header class="topbar">
@@ -329,11 +329,11 @@
       if (b) b.addEventListener('click', function (e) {
         e.preventDefault();
         if (window.history && window.history.length > 1) history.back();
-        else location.href = 'index.html';
+        else { try { sessionStorage.setItem('__xl_intra', '1'); sessionStorage.setItem('xl_nav_loader', '1'); } catch (e) {} location.href = 'index.html'; }
       });
     })();
   </script>
-  <script src="auth.js?v=20260902a"></script>
-  <script src="common.js?v=20260831ac"></script>
+  <script src="auth.js?v=20260908c"></script>
+  <script src="common.js?v=20260908aq"></script>
 </body>
 </html>

@@ -3,6 +3,38 @@
  * 目标：所有系统（桌面/平板/手机）+ 横屏/竖屏 均可用；所有文字输入自适应。
  */
 
+/* ============ 0. 主题变量（全站唯一来源） ============
+ * 浅色为默认 :root；深色由 html[data-theme="dark"] 覆盖。
+ * 各页面内联 <style> 不再重复定义这些变量——改主题只改这里即可统一全站。
+ */
+:root {
+  --bar-top: rgb(40, 89, 156);
+  --bar-bottom: rgb(0, 120, 212);
+  --bar-fg: #ffffff;
+  --accent: #0078d4;
+  --font-scale: 1;
+  --radius: 14px;
+  --bg: #f4f6f9;
+  --text: #1c2733;
+  --muted: #44556a;
+  --card-bg: #ffffff;
+  --card-border: #e3e8ef;
+  --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  --panel-bg: #ffffff;
+  --panel-border: #e3e8ef;
+  --danger: #d13438;
+}
+html[data-theme="dark"] {
+  --bg: #0f1720;
+  --text: #e6edf5;
+  --muted: #9fb0c3;
+  --card-bg: #16212e;
+  --card-border: #243244;
+  --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+  --panel-bg: #16212e;
+  --panel-border: #243244;
+}
+
 /* ============ 1. 文字输入基础优化（全站生效） ============ */
 input, textarea, select { font-family: inherit; }
 
@@ -150,7 +182,9 @@ body.xl-bar-icon .bar-right { gap: 4px; }
 body.xl-bar-icon .bar-btn { padding: 8px; min-width: 0; gap: 0; }
 body.xl-bar-icon .bar-btn .bar-icon { display: inline-flex; }
 body.xl-bar-icon .bar-btn .bar-icon svg { width: 20px; height: 20px; }
-body.xl-bar-icon .bar-btn .bar-text {
+/* sr-only 隐藏文字仅当按钮「确有 .bar-icon 子节点」(:has 实时校验，避免类标记失同步)；
+   若某按钮漏注图标，文字照常显示，按钮永远不会变成空白方块。 */
+body.xl-bar-icon .bar-btn:has(.bar-icon) .bar-text {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }

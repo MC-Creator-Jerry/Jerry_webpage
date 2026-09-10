@@ -13,34 +13,7 @@
 <meta name="description" content="发布新帖子。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-<style>
-  :root {
-    --bar-top: rgb(40, 89, 156);
-    --bar-bottom: rgb(0, 120, 212);
-    --accent: #0078d4;
-    --font-scale: 1;
-    --radius: 14px;
-    --bg: #f4f6f9;
-    --text: #1c2733;
-    --muted: #44556a;
-    --card-bg: #ffffff;
-    --card-border: #e3e8ef;
-    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
-    --bar-fg: #ffffff;
-    --panel-bg: #ffffff;
-    --panel-border: #e3e8ef;
-    --danger: #d13438;
-  }
-  html[data-theme="dark"] {
-    --bg: #0f1720;
-    --text: #e6edf5;
-    --muted: #9fb0c3;
-    --card-bg: #16212e;
-    --card-border: #243244;
-    --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-    --panel-bg: #16212e;
-    --panel-border: #243244;
-  }
+<style>  
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: calc(16px * var(--font-scale)); }
   html, body { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif; color: var(--text); background: var(--bg); transition: background 0.25s, color 0.25s; }
@@ -62,7 +35,6 @@
   
   
   
-  html[data-theme="dark"] 
 
   .content { max-width: 720px; margin: 0 auto; padding: 40px 24px 64px; }
   .hero { margin-bottom: 24px; }
@@ -140,7 +112,7 @@
   .att-remove:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
   .post-btn:disabled { opacity: 0.6; cursor: default; filter: none; }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260910aj" />
+  <link rel="stylesheet" href="../../common.css?v=20260909ac" />
 </head>
 <body>
   <header class="topbar">
@@ -257,8 +229,8 @@
     </a>
   </div>
 
-  <script src="../../prefs.js?v=20260830ad"></script>
-  <script src="../../auth.js?v=20260908c"></script>
+  <script src="../../prefs.js?v=20260909a"></script>
+  <script src="../../auth.js?v=20260909a"></script>
   <script>
     (function () {
       var FORBIDDEN = ['fuck','shit','bitch','asshole','bastard','dick','cunt','whore','slut','nigger','faggot','retard','tranny','nazi','kill yourself','kys','傻逼','sb','草泥马','操你','日你','妈的','贱人','婊子','杂种','滚蛋','废青','支那','洋奴','汉奸','狗杂种','加微信','扫码领','免费送','刷单','博彩','赌博','色情','裸聊','办证','代开发票','点击领取','一元购','日赚','月入过万','私聊客服'];
@@ -491,6 +463,6 @@
       draftBtn.addEventListener('click', function () { post('draft'); });
     })();
   </script>
-  <script src="../../common.js?v=20260908aq"></script>
+  <script src="../../common.js?v=20260909ab"></script>
 </body>
 </html>

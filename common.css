@@ -614,30 +614,33 @@ html.xl-booting body > *:not(#xlLoader) { visibility: hidden; }
 .xl-loader.xl-msg .xl-load-text .xl-line:nth-child(2) { transition-delay: .12s; }
 .xl-loader.xl-msg .xl-load-text .xl-line:nth-child(3) { transition-delay: .24s; }
 
-/* 进度条下落阶段（阶段一）显示的「正在加载中」：沿用加载文字的同款蓝/粗体/字距处理，
-   置于竖直进度条右侧、百分比下方，随 .xl-intro 在阶段二右滑时一同离场 */
+/* 进度条下落阶段（阶段一）居中显示的「正在加载中」：与阶段三欢迎文字同款蓝/粗体/字距/pill
+   （用户圈出的大红圈位置 = 阶段三欢迎文字出现处，让两段文字在视觉上是同一颗 pill 的接力）。
+   position:fixed 脱离 .xl-intro，避免阶段二右滑时一起离场；居中后稳定在屏幕正中。
+   默认显示（base opacity:1，不依赖 .xl-show 的过渡时机，避免 file:///弱网下 run() 触发偏晚时
+   gating 类迟到导致不显示）；仅阶段三（.xl-msg）欢迎文字淡入时才让出。 */
 .xl-loading-label {
-  position: absolute;
-  left: 40px;
-  top: calc(50% + 30px);
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   color: rgb(0, 120, 212);
   font-weight: 700;
-  font-size: 15px;
+  font-size: clamp(26px, 6.5vw, 52px);
+  line-height: 1.55;
   letter-spacing: .14em;
-  padding: 6px 16px 6px calc(16px + .14em);
-  border-radius: 14px;
+  padding: 14px 36px 14px calc(36px + .14em);
+  border-radius: 22px;
   background: rgba(0, 120, 212, 0.10);
   box-shadow: 0 0 0 1px rgba(0, 120, 212, 0.10), 0 6px 24px rgba(0, 120, 212, 0.08);
   white-space: nowrap;
   user-select: none;
-  /* 进度条阶段默认即显示（不依赖 .xl-show 的过渡时机，避免极端加载延迟下不出现）；
-  //  仅阶段三（.xl-msg）欢迎文字淡入时才隐藏，避免两处文字同屏 */
   opacity: 1;
-  transform: none;
   transition: opacity .3s ease, transform .3s ease;
+  z-index: 30;
 }
-/* 阶段三（.xl-msg）欢迎文字淡入时，隐藏进度条阶段的「正在加载中」，避免两处文字同屏 */
-.xl-loader.xl-msg .xl-loading-label { opacity: 0 !important; transform: translateY(6px) !important; }
+/* 阶段三（.xl-msg）欢迎文字淡入时，让出中央位置；保留 Y 偏移做轻微下沉 */
+.xl-loader.xl-msg .xl-loading-label { opacity: 0 !important; transform: translate(-50%, calc(-50% + 6px)) !important; }
 
 /* ============ 横竖屏切换：加载动画 + 按钮位移到对应位置 ============ */
 /* orientationchange / 跨断点 resize 时短暂加 .xl-orient-anim：白色淡入淡出覆盖层 + 小蓝条/小蓝条2号按钮逐个错落滑入。

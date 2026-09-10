@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../../boot.js?v=20260830ac"></script>
+  <script src="../../boot.js?v=20260910aa"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
@@ -61,7 +61,7 @@
   [hidden]{display:none!important;}
   @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260830ac" />
+  <link rel="stylesheet" href="../../common.css?v=20260910ai" />
 </head>
 <body>
   <header class="topbar">
@@ -70,7 +70,11 @@
       <nav class="breadcrumb"><a href="../../index.html">主页</a><span class="bc-sep">›</span><span class="bc-sub">举报审核</span></nav>
     </div>
     <div class="bar-right">
+      <a class="bar-btn" href="../../home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       <a class="bar-btn" href="../../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" href="../../helpcenter/" data-zh="帮助中心" data-en="Help">帮助中心</a>
       <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
     </div>
@@ -92,8 +96,8 @@
   <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div></footer>
   <div class="toast" id="toast"></div>
 
-  <script src="../../prefs.js?v=20260830ac"></script>
-  <script src="../../auth.js?v=20260902a"></script>
+  <script src="../../prefs.js?v=20260830ad"></script>
+  <script src="../../auth.js?v=20260908c"></script>
   <script>
     (function () {
       var listEl = document.getElementById('list');
@@ -159,6 +163,6 @@
       load();
     })();
   </script>
-  <script src="../../common.js?v=20260831ac"></script>
+  <script src="../../common.js?v=20260908aq"></script>
 </body>
 </html>

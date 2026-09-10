@@ -19,6 +19,18 @@
   var TEXT_SEL = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,td,th,label,figcaption,span,a,.editable';
   var EXCLUDE = '.topbar,.bar-right,nav,.float-actions,.fab,.modal-overlay,.modal,.settings-overlay,.settings-panel,.pop-menu,.user-popup,script,style,button,form,header.breadcrumb-bar';
 
+  // 标准调色板（模块级：showUI 的 buildPanel 与 createMiniToolbar 的 buildMiniPanel 都要用，
+  // 必须提升到 IIFE 作用域，否则 createMiniToolbar 内引用会 ReferenceError -> showUI 抛错 -> 编辑模式瘫痪）
+  var STANDARD_COLORS = [
+    '#000000','#404040','#808080','#a0a0a0','#d0d0d0','#ffffff',
+    '#e60012','#ff6600','#ffcc00','#ffe800','#a8d600','#00b050',
+    '#00b0f0','#0078d4','#002060','#5c0a8a','#d6006a','#a30000'
+  ];
+  var STANDARD_BG = [
+    '#ffffff','#fff36d','#ffd966','#a4d2ff','#c5e0b4','#f4cccc',
+    '#fff2cc','#e2efda','#d9e8f5','#fce4d6','#fad7d0','#e6b8af'
+  ];
+
   function curPath() { return location.pathname || '/'; }
   function $(s, c) { return (c || document).querySelector(s); }
   function $all(s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); }
@@ -715,16 +727,7 @@
     bgBtn.title = '背景颜色（高亮）';
     gColor.appendChild(bgBtn);
 
-    // 调色板
-    var STANDARD_COLORS = [
-      '#000000','#404040','#808080','#a0a0a0','#d0d0d0','#ffffff',
-      '#e60012','#ff6600','#ffcc00','#ffe800','#a8d600','#00b050',
-      '#00b0f0','#0078d4','#002060','#5c0a8a','#d6006a','#a30000'
-    ];
-    var STANDARD_BG = [
-      '#ffffff','#fff36d','#ffd966','#a4d2ff','#c5e0b4','#f4cccc',
-      '#fff2cc','#e2efda','#d9e8f5','#fce4d6','#fad7d0','#e6b8af'
-    ];
+    // 调色板（STANDARD_COLORS / STANDARD_BG 已在 IIFE 模块级声明，此处直接复用）
 
     function buildPanel(which) {
       var panel = document.createElement('div');

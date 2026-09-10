@@ -225,6 +225,8 @@
     if (typeof window.applyAll === 'function') window.applyAll();
     // 云端小蓝条模式也要即时生效（图标注入由 common.js 完成，这里只补 body 类）
     if (typeof window.__xlApplyBarMode === 'function') window.__xlApplyBarMode();
+    // 确保顶栏图标始终注入（任何 applyAll 路径后都补一次，杜绝按钮变空白）
+    if (typeof window.__xlInjectBarIcons === 'function') window.__xlInjectBarIcons();
   }
 
   // 移除蓝条上不应出现的按钮（个人主页、退出）——集中在此处理，避免改 11 个页面
@@ -366,6 +368,8 @@
 
     // 让下拉项跟随当前语言
     if (typeof window.applyAll === 'function') window.applyAll();
+    // 确保顶栏图标始终注入（登录态确认后补一次，杜绝按钮变空白）
+    if (typeof window.__xlInjectBarIcons === 'function') window.__xlInjectBarIcons();
   })();
 
   // 通知按钮图标交给 common.js 的 injectIcons() 统一处理（与全站顶栏风格一致），

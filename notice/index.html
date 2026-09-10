@@ -13,34 +13,7 @@
 <meta name="description" content="站内消息中心：站长消息、系统消息、评论通知与私信。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
-<style>
-  :root {
-    --bar-top: rgb(40, 89, 156);
-    --bar-bottom: rgb(0, 120, 212);
-    --accent: #0078d4;
-    --font-scale: 1;
-    --radius: 14px;
-    --bg: #f4f6f9;
-    --text: #1c2733;
-    --muted: #44556a;
-    --card-bg: #ffffff;
-    --card-border: #e3e8ef;
-    --card-shadow: 0 1px 4px rgba(20, 35, 59, 0.05);
-    --bar-fg: #ffffff;
-    --panel-bg: #ffffff;
-    --panel-border: #e3e8ef;
-    --danger: #d13438;
-  }
-  html[data-theme="dark"] {
-    --bg: #0f1720;
-    --text: #e6edf5;
-    --muted: #9fb0c3;
-    --card-bg: #16212e;
-    --card-border: #243244;
-    --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-    --panel-bg: #16212e;
-    --panel-border: #243244;
-  }
+<style>  
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: calc(16px * var(--font-scale)); }
   html, body { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif; color: var(--text); background: var(--bg); transition: background 0.25s, color 0.25s; }
@@ -62,7 +35,6 @@
   
   
   
-  html[data-theme="dark"] 
 
   .content { max-width: 820px; margin: 0 auto; padding: 40px 24px 64px; }
   .hero { margin-bottom: 20px; }
@@ -130,8 +102,23 @@
   .hint { color: var(--muted); opacity: 0.75; font-style: italic; font-size: 0.95rem; padding: 10px 0; }
   [hidden] { display: none !important; }
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } .tab { padding: 7px 12px; font-size: 0.88rem; } }
+
+  /* —— 图片 / 视频附件（发布消息） —— */
+  .attach-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 4px; }
+  .attach-empty { color: var(--muted); opacity: 0.7; font-size: 0.85rem; }
+  .attach-item { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; font-size: 0.85rem; }
+  .attach-thumb { font-size: 1rem; }
+  .attach-name { color: var(--text); }
+  .attach-rm { border: none; background: transparent; color: var(--danger); cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 0 2px; }
+  .attach-rm:hover { opacity: 0.7; }
+  .attach-actions { display: flex; gap: 8px; margin-bottom: 10px; }
+  .attach-btn { border: 1px dashed var(--border); background: transparent; color: var(--text); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 0.88rem; }
+  .attach-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .notice-attach, .msg-attach { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .attach-img { max-width: 100%; max-height: 320px; border-radius: 10px; display: block; }
+  .attach-video { width: 100%; max-width: 480px; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; display: block; }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260910aj" />
+  <link rel="stylesheet" href="../common.css?v=20260909ac" />
 </head>
 <body>
   <header class="topbar">
@@ -183,6 +170,12 @@
         <input class="edit-input" id="nTitle" maxlength="120" placeholder="通知标题" />
         <span class="edit-label" data-zh="内容" data-en="Body">内容</span>
         <textarea class="edit-textarea auto-grow" id="nBody" maxlength="2000" placeholder="通知内容……"></textarea>
+        <span class="edit-label" data-zh="图片 / 视频附件" data-en="Image / Video Attachments">图片 / 视频附件</span>
+        <div class="attach-list" id="nAttachList"></div>
+        <div class="attach-actions">
+          <button type="button" class="attach-btn" id="nAddImg">🖼 添加图片</button>
+          <button type="button" class="attach-btn" id="nAddVid">🎬 添加视频</button>
+        </div>
         <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
       </section>
 
@@ -212,6 +205,12 @@
         <input class="edit-input" id="mTitle" maxlength="120" placeholder="消息标题" />
         <span class="edit-label" data-zh="内容" data-en="Body">内容</span>
         <textarea class="edit-textarea auto-grow" id="mBody" maxlength="2000" placeholder="消息内容……（如：你的帖子已经过了审核）"></textarea>
+        <span class="edit-label" data-zh="图片 / 视频附件" data-en="Image / Video Attachments">图片 / 视频附件</span>
+        <div class="attach-list" id="mAttachList"></div>
+        <div class="attach-actions">
+          <button type="button" class="attach-btn" id="mAddImg">🖼 添加图片</button>
+          <button type="button" class="attach-btn" id="mAddVid">🎬 添加视频</button>
+        </div>
         <button class="post-btn" id="msgSendBtn" data-zh="发送" data-en="Send">发送</button>
       </section>
 
@@ -262,8 +261,8 @@
     </a>
   </div>
 
-  <script src="../prefs.js?v=20260830ad"></script>
-  <script src="../auth.js?v=20260908c"></script>
+  <script src="../prefs.js?v=20260909a"></script>
+  <script src="../auth.js?v=20260909a"></script>
   <script>
     (function () {
       var FORBIDDEN = ['fuck','shit','bitch','asshole','bastard','dick','cunt','whore','slut','nigger','faggot','retard','tranny','nazi','kill yourself','kys','傻逼','sb','草泥马','操你','日你','妈的','贱人','婊子','杂种','滚蛋','废青','支那','洋奴','汉奸','狗杂种','加微信','扫码领','免费送','刷单','博彩','赌博','色情','裸聊','办证','代开发票','点击领取','一元购','日赚','月入过万','私聊客服'];
@@ -313,6 +312,7 @@
           if (n.permanent === false) { var t1 = document.createElement('span'); t1.className = 'temp-tag'; t1.textContent = '暂时'; h3.appendChild(t1); }
           card.querySelector('.meta').textContent = fmtTime(n.ts);
           card.querySelector('p').textContent = n.body || '';
+          renderAttachments(card, n.attachments);
           if (isAdmin) card.querySelector('.del').addEventListener('click', function () { delNotice(n.id); });
           el.appendChild(card);
         });
@@ -335,6 +335,7 @@
           card.querySelector('h3').textContent = m.title || '（无标题）';
           if (m.permanent === false) { var t2 = document.createElement('span'); t2.className = 'temp-tag'; t2.textContent = '暂时'; card.querySelector('h3').appendChild(t2); }
           card.querySelector('p').textContent = m.body || '';
+          renderAttachments(card, m.attachments);
           card.querySelector('.time').textContent = fmtTime(m.ts);
           el.appendChild(card);
         });
@@ -415,6 +416,78 @@
         b.addEventListener('click', function () { clearAll(b.getAttribute('data-clear')); });
       });
 
+      // ---- 图片 / 视频附件（发布消息支持附带媒体） ----
+      var nAtts = [], mAtts = [];
+      var renderNAttach = null, renderMAttach = null;
+      function isValidMediaUrl(u) {
+        return /^https?:\/\//i.test(u) || /^\//.test(u) || /^data:image\//i.test(u) || /^\/api\/file/i.test(u);
+      }
+      function videoEmbed(url) {
+        var m;
+        if (/^\/api\/file(\?.*)?$/i.test(url) || /\/api\/file\?/i.test(url)) return { kind: 'video', src: url };
+        if ((m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{6,})/))) return { kind: 'iframe', src: 'https://www.youtube.com/embed/' + m[1] };
+        if (/^https?:\/\/.+\.(?:mp4|webm|ogg)(?:\?.*)?$/i.test(url) || /^\/.*\.(?:mp4|webm|ogg)$/i.test(url)) return { kind: 'video', src: url };
+        return { kind: 'link', src: url };
+      }
+      function uploadAttach(file, kind, atts, render) {
+        var fd = new FormData(); fd.append('file', file);
+        toast(kind === 'image' ? '图片上传中…' : '视频上传中…');
+        fetch('/api/upload', { method: 'POST', body: fd })
+          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (o) {
+            if (!o.ok || !o.d || !o.d.ok) { window.alert('上传失败：' + (o.d && o.d.error ? o.d.error : '未知错误') + '\n（需以站主账号登录，且文件 ≤ 20MB）'); return; }
+            atts.push({ type: kind, url: '/api/file?key=' + encodeURIComponent(o.d.key) }); render();
+          })
+          .catch(function () { window.alert('上传失败（网络错误）'); });
+      }
+      function setupAttach(listId, atts, addImgId, addVidId) {
+        var listEl = document.getElementById(listId);
+        function render() {
+          listEl.innerHTML = '';
+          if (!atts.length) { var e = document.createElement('span'); e.className = 'attach-empty'; e.textContent = '（暂无附件）'; listEl.appendChild(e); return; }
+          atts.forEach(function (a, i) {
+            var it = document.createElement('div'); it.className = 'attach-item';
+            var t = document.createElement('span'); t.className = 'attach-thumb'; t.textContent = a.type === 'image' ? '🖼' : '🎬';
+            var n = document.createElement('span'); n.className = 'attach-name'; n.textContent = a.type === 'image' ? '图片' : '视频';
+            var x = document.createElement('button'); x.type = 'button'; x.className = 'attach-rm'; x.textContent = '×';
+            x.addEventListener('click', function () { atts.splice(i, 1); render(); });
+            it.appendChild(t); it.appendChild(n); it.appendChild(x); listEl.appendChild(it);
+          });
+        }
+        function add(kind) {
+          var useFile = window.confirm(kind === 'image' ? '点「确定」选择本地图片上传；点「取消」用图片链接。' : '点「确定」选择本地视频上传；点「取消」用视频链接。');
+          if (useFile) {
+            var inp = document.createElement('input'); inp.type = 'file'; inp.accept = kind === 'image' ? 'image/*' : 'video/*';
+            inp.onchange = function () { var f = inp.files && inp.files[0]; if (!f) return; uploadAttach(f, kind, atts, render); };
+            inp.click();
+          } else {
+            var url = window.prompt(kind === 'image' ? '图片地址（http/https 或以 / 开头的站内路径）：' : '视频地址（YouTube 链接，或 .mp4/.webm/.ogg 直链）：');
+            if (url === null) return; url = (url || '').trim(); if (!url) return;
+            if (!isValidMediaUrl(url)) { window.alert('地址不合法。'); return; }
+            atts.push({ type: kind, url: url }); render();
+          }
+        }
+        document.getElementById(addImgId).addEventListener('click', function () { add('image'); });
+        document.getElementById(addVidId).addEventListener('click', function () { add('video'); });
+        render();
+        return render;
+      }
+      function renderAttachments(container, atts) {
+        if (!Array.isArray(atts) || !atts.length) return;
+        var wrap = document.createElement('div'); wrap.className = 'notice-attach';
+        atts.forEach(function (a) {
+          if (a.type === 'video') {
+            var emb = videoEmbed(a.url);
+            if (emb.kind === 'iframe') { var f = document.createElement('iframe'); f.src = emb.src; f.allowFullscreen = true; f.loading = 'lazy'; f.className = 'attach-video'; wrap.appendChild(f); }
+            else if (emb.kind === 'video') { var v = document.createElement('video'); v.src = emb.src; v.controls = true; v.className = 'attach-video'; v.setAttribute('preload', 'metadata'); wrap.appendChild(v); }
+            else { var ln = document.createElement('a'); ln.href = a.url; ln.target = '_blank'; ln.rel = 'noopener'; ln.textContent = a.url; wrap.appendChild(ln); }
+          } else {
+            var img = document.createElement('img'); img.src = a.url; img.alt = ''; img.loading = 'lazy'; img.className = 'attach-img'; wrap.appendChild(img);
+          }
+        });
+        container.appendChild(wrap);
+      }
+
       // 站长消息：发布 / 删除
       function postNotice() {
         var title = document.getElementById('nTitle').value.trim();
@@ -424,10 +497,10 @@
         if (w) { toast('含违禁词：「' + w + '」', true); return; }
         var nType = document.querySelector('input[name="nType"]:checked');
         var permanent = !nType || nType.value !== 'temp';
-        fetch('/api/notice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, body: body, permanent: permanent }) })
+        fetch('/api/notice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, body: body, permanent: permanent, attachments: nAtts }) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
-            if (res.ok) { document.getElementById('nTitle').value = ''; document.getElementById('nBody').value = ''; toast('已发布 ✓'); load(); }
+            if (res.ok) { nAtts.length = 0; if (renderNAttach) renderNAttach(); document.getElementById('nTitle').value = ''; document.getElementById('nBody').value = ''; toast('已发布 ✓'); load(); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else { toast('发布失败', true); }
           })
@@ -452,10 +525,10 @@
         if (w) { toast('含违禁词：「' + w + '」', true); return; }
         var mType = document.querySelector('input[name="mType"]:checked');
         var permanent = !mType || mType.value !== 'temp';
-        fetch('/api/notif/message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: to, title: title, body: body, permanent: permanent }) })
+        fetch('/api/notif/message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: to, title: title, body: body, permanent: permanent, attachments: mAtts }) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
-            if (res.ok) { document.getElementById('mTo').value=''; document.getElementById('mTitle').value=''; document.getElementById('mBody').value=''; toast('已发送给 @' + to + ' ✓'); load(); }
+            if (res.ok) { mAtts.length = 0; if (renderMAttach) renderMAttach(); document.getElementById('mTo').value=''; document.getElementById('mTitle').value=''; document.getElementById('mBody').value=''; toast('已发送给 @' + to + ' ✓'); load(); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else if (res.body && res.body.error === 'missing_to') { toast('请填写接收者', true); }
             else { toast('发送失败', true); }
@@ -463,6 +536,10 @@
           .catch(function () { toast('发送失败（网络错误）', true); });
       }
       document.getElementById('msgSendBtn').addEventListener('click', sendMessage);
+
+      // 初始化两个发布表单的附件管理器
+      renderNAttach = setupAttach('nAttachList', nAtts, 'nAddImg', 'nAddVid');
+      renderMAttach = setupAttach('mAttachList', mAtts, 'mAddImg', 'mAddVid');
 
       // 进入页面即尝试登录态（用于判断管理员 / 显示定向通知）
       fetch('/api/me').then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
@@ -475,6 +552,6 @@
       }).catch(load);
     })();
   </script>
-  <script src="../common.js?v=20260908aq"></script>
+  <script src="../common.js?v=20260909ab"></script>
 </body>
 </html>

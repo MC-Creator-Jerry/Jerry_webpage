@@ -40,12 +40,19 @@
   }
   function applyBar() {
     if (!document.body) return;
-    var m = get(K.barmode, 'long');
-    if (m !== 'tile' && m !== 'icon' && m !== 'long') m = 'long';
+    var m = get(K.barmode, 'tile');
+    if (m !== 'tile' && m !== 'icon' && m !== 'long') m = 'tile';
     document.body.classList.remove('xl-bar-tile', 'xl-bar-long', 'xl-bar-icon');
     document.body.classList.add('xl-bar-' + m);
   }
-  function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); applyBar(); }
+  function applyAll() {
+    applyTheme(); applyFont(); applyRadius(); applyLang(); applyBar();
+    // 重新注入顶栏图标：语言/主题重应用后确保 .bar-icon 始终存在，
+    // 杜绝任何路径（含未守卫的内联 applyLang）把图标结构抹掉后按钮变空白。
+    if (typeof window.__xlInjectBarIcons === 'function') {
+      try { window.__xlInjectBarIcons(); } catch (e) {}
+    }
+  }
 
   // 暴露给 auth.js（登录同步云端设置后）与各页面动态渲染后重新调用
   window.applyAll = applyAll;

@@ -77,17 +77,32 @@
   // 供页面在“数据渲染完成”后主动揭晓（与 HOLD 配合）
   window.__xlReveal = safeReveal;
 
+  // 登录态确认后由 auth.js 调用：把加载层欢迎词刷新为「欢迎回来\n【用户名】」
+  // 解决回归——boot.js 在加载瞬间已用 cookie/sessionStorage 定稿文字，auth.js 异步 /api/me
+  // 确认登录后原先不回写，导致新标签/会话清空时仍显示「欢迎来到小蓝页」。
+  window.__xlSetLoginText = function (login) {
+    try {
+      var txt = doc.querySelector('.xl-load-text');
+      if (txt) txt.innerHTML = buildLoaderText(login);
+    } catch (e) {}
+  };
+
   // 兜底：无论如何都在 2.4s 后强制揭晓，避免内容被永久隐藏（run 内会按 HOLD 重新设定）
   var safety = setTimeout(safeReveal, 2400);
 
   var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  // 判断是否「站内跳转」：仅当来源页点击了同源链接才跳过动画
+  // 判断是否「站内跳转」（跳过开场动画）：主信号是 __xl_intra（同源链接点击或程序化跳转前已置位，
+  // 且经 location.replace 同源跳转会保留）。
+  // 仅在 navType 明确为 reload / back_forward（刷新、前进后退）时排除，确保这些场景仍照常播放开场动画；
+  // 若性能条目暂时缺失（navType 为 ''），仍按 __xl_intra 判定为站内跳转，避免目标页重播开场动画
+  //（即修复「加载动画完成后又刷新加载页」的回归：2026-09-05 把 navType 默认改 '' 后，
+  //  站内跳转在性能条目未就绪时会被误判为非站内而重播动画）。
   var intra = false;
   try {
     var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
-    var navType = nav.type || 'navigate';
-    intra = (sessionStorage.getItem('__xl_intra') === '1') && navType === 'navigate';
+    var navType = nav.type || '';
+    intra = (sessionStorage.getItem('__xl_intra') === '1') && navType !== 'reload' && navType !== 'back_forward';
     sessionStorage.removeItem('__xl_intra'); // 读取即消费，避免影响后续刷新
   } catch (e) {}
 
@@ -95,17 +110,25 @@
   // 站内跳转不遮挡正文：过渡交给 common.js 的导航加载动画，正文本就已在目标页就绪
   if (!intra) doc.documentElement.classList.add('xl-booting');
 
-  // 同源链接点击：标记「本站内跳转」，目标页据此不重播动画
+  // 同源链接点击：标记「本站内跳转」，目标页据此不重播开场动画
+  // 关键修复：仅对「真实站内跳转」置位；被其它处理器拦截 / 弹窗 / 自链接 / 修饰键 / download 等情况不置位，
+  // 且若点击后本页并未真正离开（标记未被目标页消费），1.2s 内自愈清除，避免污染下一次加载。
+  // （历史 bug：标记被误置且未消费，导致后续刷新 / 加载直接走到“已完成”的收尾态，跳过开场动画。）
   doc.addEventListener('click', function (e) {
     try {
       var a = e.target && e.target.closest ? e.target.closest('a') : null;
       if (!a) return;
       var href = a.getAttribute('href');
-      if (!href || a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
-      if (/^#/.test(href) || /^javascript:/i.test(href)) return;
-      if (a.href && a.href.indexOf(location.origin) === 0) {
-        sessionStorage.setItem('__xl_intra', '1');
-      }
+      if (!href || a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.button || e.defaultPrevented) return;
+      if (/^#/.test(href) || /^javascript:/i.test(href) || /^mailto:/i.test(href) || /^\?/.test(href)) return;
+      if (a.hasAttribute('download')) return;
+      if (!(a.href && a.href.indexOf(location.origin) === 0)) return;
+      if (a.href === location.href) return; // 自链接（指向当前页）会触发刷新，不应跳过开场动画
+      sessionStorage.setItem('__xl_intra', '1');
+      var _cur = location.href;
+      setTimeout(function () {
+        try { if (location.href === _cur) sessionStorage.removeItem('__xl_intra'); } catch (e2) {}
+      }, 1200);
     } catch (e) {}
   });
 
@@ -123,6 +146,7 @@
         '<div class="xl-intro-title"><span class="t1">Jerry\'s webpage</span><span class="t2">小蓝页</span></div>' +
         '<div class="xl-prog-v"><div class="xl-prog-v-fill"></div><div class="xl-prog-v-dot"></div></div>' +
         '<div class="xl-prog-v-pct">0%</div>' +
+        '<div class="xl-loading-label">正在加载中</div>' +
       '</div>' +
       '<div class="xl-sqs"></div>' +
       '<div class="xl-load-text">' + buildLoaderText(getLoginFromCookie()) + '</div>';

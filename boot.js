@@ -146,8 +146,9 @@
         '<div class="xl-intro-title"><span class="t1">Jerry\'s webpage</span><span class="t2">小蓝页</span></div>' +
         '<div class="xl-prog-v"><div class="xl-prog-v-fill"></div><div class="xl-prog-v-dot"></div></div>' +
         '<div class="xl-prog-v-pct">0%</div>' +
-        '<div class="xl-loading-label">正在加载中</div>' +
       '</div>' +
+      // 居中的「正在加载中」放在 .xl-intro 之外，避免阶段二右滑时被一起带走
+      '<div class="xl-loading-label">正在加载中</div>' +
       '<div class="xl-sqs"></div>' +
       '<div class="xl-load-text">' + buildLoaderText(getLoginFromCookie()) + '</div>';
     doc.body.appendChild(loader);

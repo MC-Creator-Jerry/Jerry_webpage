@@ -11,7 +11,7 @@
 // 在「动态渲染完内容后」重新套用一次语言与主题。
 (function () {
   'use strict';
-  var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+  var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', barmode: 'xl_barmode' };
   function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
 
   function applyTheme() {
@@ -38,7 +38,14 @@
       if (txt != null) n.textContent = txt;
     }
   }
-  function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+  function applyBar() {
+    if (!document.body) return;
+    var m = get(K.barmode, 'long');
+    if (m !== 'tile' && m !== 'icon' && m !== 'long') m = 'long';
+    document.body.classList.remove('xl-bar-tile', 'xl-bar-long', 'xl-bar-icon');
+    document.body.classList.add('xl-bar-' + m);
+  }
+  function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); applyBar(); }
 
   // 暴露给 auth.js（登录同步云端设置后）与各页面动态渲染后重新调用
   window.applyAll = applyAll;

@@ -210,7 +210,7 @@
   // ← 填入 GitHub OAuth App 的 Client ID；为空则视为未配置（按钮隐藏）
   var CLIENT_ID = 'Ov23ctu9zRxIQ0o0uxiJ';
 
-  var KEYS = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave' };
+  var KEYS = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave', barmode: 'xl_barmode' };
   function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
   function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
@@ -221,7 +221,10 @@
     if (p.font != null) set(KEYS.font, String(p.font));
     if (p.radius != null) set(KEYS.radius, String(p.radius));
     if (p.autosave) set(KEYS.autosave, p.autosave);
+    if (p.barmode) set(KEYS.barmode, p.barmode);
     if (typeof window.applyAll === 'function') window.applyAll();
+    // 云端小蓝条模式也要即时生效（图标注入由 common.js 完成，这里只补 body 类）
+    if (typeof window.__xlApplyBarMode === 'function') window.__xlApplyBarMode();
   }
 
   // 移除蓝条上不应出现的按钮（个人主页、退出）——集中在此处理，避免改 11 个页面
@@ -267,6 +270,8 @@
       .catch(function () {});
     updateNoticeBadge();
     updateHeroTitle(user);
+    // 同步更新开场加载动画欢迎词（若仍在播放）：登录态确认即回写「欢迎回来\n【用户名】」
+    if (window.__xlSetLoginText && user.login) window.__xlSetLoginText(user.login);
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
   }
 
@@ -363,18 +368,9 @@
     if (typeof window.applyAll === 'function') window.applyAll();
   })();
 
-  // 通知按钮统一换成铃铛图标（避免改 11 个页面）
-  (function bellifyNotice() {
-    var nb = document.getElementById('noticeBtn');
-    if (!nb) return;
-    var badge = nb.querySelector('#noticeBadge');
-    var bell = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/></svg>";
-    nb.classList.add('icon');
-    nb.setAttribute('aria-label', '消息中心');
-    nb.removeAttribute('data-zh');
-    nb.removeAttribute('data-en');
-    nb.innerHTML = bell + (badge ? badge.outerHTML : '');
-  })();
+  // 通知按钮图标交给 common.js 的 injectIcons() 统一处理（与全站顶栏风格一致），
+  // 这里不再额外覆盖 innerHTML，避免与注入的 .bar-icon 重复产生「两个铃铛」的 bug。
+  // 原 bellifyNotice() 块（2026-09-08 移除）
 
   // 头像 / 通知 悬浮预览卡（B 站风格：鼠标悬停自动展开小型预览）
   (function hoverPreview() {

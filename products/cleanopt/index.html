@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../../boot.js?v=20260830ac"></script>
+  <script src="../../boot.js?v=20260910aa"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CleanOpt · 产品 · Jerry's webpage</title>
@@ -141,6 +141,40 @@
   .disclaimer h2 { color: var(--danger); margin-bottom: 10px; }
   .disclaimer p { color: var(--text); margin-bottom: 0; }
 
+  /* ===== 历史版本 (version history) ===== */
+  .history-card > summary {
+    list-style: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 0;
+  }
+  .history-card > summary::-webkit-details-marker { display: none; }
+  .history-card > summary h2 { margin-bottom: 0; }
+  .history-card .chev { transition: transform 0.2s; font-size: 1.15rem; color: var(--muted); line-height: 1; }
+  .history-card[open] .chev { transform: rotate(180deg); }
+  .history-body { margin-top: 14px; }
+  .history-list { list-style: none; margin: 0; padding: 0; }
+  .history-item { padding: 12px 0; border-bottom: 1px solid var(--card-border); }
+  .history-item:last-child { border-bottom: none; }
+  .history-item-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .history-version {
+    font-weight: 700; color: var(--accent); font-size: 1rem;
+  }
+  .history-version.current {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: 999px; padding: 2px 10px;
+  }
+  .history-tag-current {
+    font-size: 0.72rem; color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 999px; padding: 1px 8px;
+  }
+  .history-date { font-size: 0.85rem; color: var(--muted); }
+  .history-notes { margin-top: 6px; font-size: 0.95rem; line-height: 1.65; color: var(--muted); white-space: pre-line; }
+  .history-empty { margin-top: 4px; color: var(--muted); font-size: 0.95rem; }
+  .edit-hint { font-size: 0.8rem; color: var(--muted); margin: 4px 0 10px; line-height: 1.5; }
+  .edit-hint code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+
   .admin-only { display: none; }
   body.is-admin .admin-only { display: block; }
 
@@ -184,7 +218,7 @@
   }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260830ac" />
+  <link rel="stylesheet" href="../../common.css?v=20260910ai" />
 </head>
 <body>
   <header class="topbar">
@@ -232,6 +266,17 @@
       <p id="pDisclaimer">本软件按“原样”提供，作者不对因使用本软件导致的任何数据丢失、系统异常或硬件损坏承担责任。请在下载和使用前自行备份重要数据，并确认您了解相关风险。</p>
     </section>
 
+    <details class="card history-card" id="historyCard">
+      <summary>
+        <h2 data-zh="历史版本" data-en="Version History">历史版本</h2>
+        <span class="chev" aria-hidden="true">▾</span>
+      </summary>
+      <div class="history-body">
+        <ul class="history-list" id="historyList"></ul>
+        <p class="history-empty" id="historyEmpty" data-zh="暂无历史版本记录。" data-en="No version history yet.">暂无历史版本记录。</p>
+      </div>
+    </details>
+
     <section class="card admin-only" id="adminEditor">
       <h2 data-zh="管理员编辑" data-en="Admin Editor">管理员编辑</h2>
       <span class="edit-label" data-zh="版本号" data-en="Version">版本号</span>
@@ -242,6 +287,9 @@
       <input class="edit-input" id="editDownload" />
       <span class="edit-label" data-zh="免责声明" data-en="Disclaimer">免责声明</span>
       <textarea class="edit-textarea auto-grow" id="editDisclaimer"></textarea>
+      <span class="edit-label" data-zh="历史版本 (JSON 数组)" data-en="Version History (JSON array)">历史版本 (JSON 数组)</span>
+      <textarea class="edit-textarea auto-grow" id="editHistory" placeholder='[{"version":"2026.0831.1813","date":"2026-08-31","notes":"初始发布版本"}]'></textarea>
+      <p class="edit-hint" data-zh="每项含 version / date / notes 三个字段，按从新到旧排列。留空表示不记录历史。" data-en="Each item has version / date / notes fields, newest first. Leave empty for no history.">每项含 version / date / notes 三个字段，按从新到旧排列。留空表示不记录历史。</p>
       <button class="save-btn" id="saveBtn" data-zh="保存" data-en="Save">保存</button>
     </section>
   </main>
@@ -296,12 +344,60 @@
         document.getElementById('pDisclaimer').textContent = p.disclaimer || '';
         var dl = document.getElementById('pDownload');
         dl.href = p.downloadUrl || '../../downloads/useful_files.zip';
+        renderHistory(p);
         if (isAdmin) {
           document.getElementById('editVersion').value = p.version || '';
           document.getElementById('editDesc').value = p.desc || '';
           document.getElementById('editDownload').value = p.downloadUrl || '';
           document.getElementById('editDisclaimer').value = p.disclaimer || '';
+          document.getElementById('editHistory').value = JSON.stringify(p.history || [], null, 2);
         }
+      }
+
+      function renderHistory(p) {
+        var list = document.getElementById('historyList');
+        var empty = document.getElementById('historyEmpty');
+        if (!list) return;
+        list.innerHTML = '';
+        var items = [];
+        if (p.version) items.push({ version: p.version, date: '', notes: '', current: true });
+        if (Array.isArray(p.history)) {
+          p.history.forEach(function (h) {
+            if (h && h.version) items.push({ version: h.version, date: h.date || '', notes: h.notes || '', current: false });
+          });
+        }
+        if (items.length === 0) { if (empty) empty.hidden = false; return; }
+        if (empty) empty.hidden = true;
+        items.forEach(function (it) {
+          var li = document.createElement('li');
+          li.className = 'history-item';
+          var top = document.createElement('div');
+          top.className = 'history-item-top';
+          var v = document.createElement('span');
+          v.className = 'history-version' + (it.current ? ' current' : '');
+          v.textContent = 'v' + it.version;
+          top.appendChild(v);
+          if (it.current) {
+            var tag = document.createElement('span');
+            tag.className = 'history-tag-current';
+            tag.textContent = '当前';
+            top.appendChild(tag);
+          }
+          if (it.date) {
+            var d = document.createElement('span');
+            d.className = 'history-date';
+            d.textContent = it.date;
+            top.appendChild(d);
+          }
+          li.appendChild(top);
+          if (it.notes) {
+            var n = document.createElement('div');
+            n.className = 'history-notes';
+            n.textContent = it.notes;
+            li.appendChild(n);
+          }
+          list.appendChild(li);
+        });
       }
 
       function load() {
@@ -324,12 +420,24 @@
       }
 
       document.getElementById('saveBtn').addEventListener('click', function () {
+        var histRaw = document.getElementById('editHistory').value.trim();
+        var history = null;
+        if (histRaw) {
+          try {
+            history = JSON.parse(histRaw);
+            if (!Array.isArray(history)) throw new Error('not array');
+          } catch (e) {
+            toast('历史版本 JSON 格式错误');
+            return;
+          }
+        }
         var body = {
           id: 'cleanopt',
           version: document.getElementById('editVersion').value.trim(),
           desc: document.getElementById('editDesc').value.trim(),
           downloadUrl: document.getElementById('editDownload').value.trim(),
-          disclaimer: document.getElementById('editDisclaimer').value.trim()
+          disclaimer: document.getElementById('editDisclaimer').value.trim(),
+          history: history
         };
         fetch('/api/product-meta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
           .then(function (r) { return r.json(); })
@@ -343,7 +451,7 @@
       load(); checkAdmin();
     })();
   </script>
-<script src="../../auth.js?v=20260902a"></script>
-  <script src="../../common.js?v=20260831ac"></script>
+<script src="../../auth.js?v=20260908c"></script>
+  <script src="../../common.js?v=20260908aq"></script>
 </body>
 </html>

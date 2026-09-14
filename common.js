@@ -669,6 +669,7 @@ window.XLTopics = (function () {
   var MOON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
   var EDIT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
   var BG_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>';
+  var HELP = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg>';
 
   function getTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
   function setTheme(t) {
@@ -894,6 +895,20 @@ window.XLTopics = (function () {
     }
     fa.insertBefore(bgBtn, themeBtn);
 
+    // 帮助中心：做成小浮动按钮，浮在「设置」齿轮正上方（已从小蓝条移除入口）
+    if (!fa.querySelector('#helpBtn')) {
+      var helpA = document.createElement('a');
+      helpA.className = 'fab xl-help-fab';
+      helpA.id = 'helpBtn';
+      helpA.href = scriptPrefix() + 'helpcenter/';
+      helpA.target = '_blank';
+      helpA.rel = 'noopener';
+      helpA.title = '帮助中心';
+      helpA.setAttribute('aria-label', '帮助中心');
+      helpA.innerHTML = HELP;
+      fa.appendChild(helpA);
+    }
+
     // 2) 动态加载编辑栏脚本（仅站主会用，但全站预载以便随时可用）
     loadEditbar();
 
@@ -905,15 +920,19 @@ window.XLTopics = (function () {
     pinBarRight();
   }
 
-  function loadEditbar() {
-    if (window.XLEdit) return;
-    // 注意：脚本引用带 ?v= 版本号，src 不再以 "common.js" 结尾，必须用 *=
+  // 依据当前页引用 common.js 的相对前缀（如 "../../"）推断站内相对路径前缀
+  function scriptPrefix() {
     var sc = document.querySelector('script[src*="common.js"]');
     var src = sc ? (sc.getAttribute('src') || '') : '';
     var m = src.match(/^((?:\.\.\/)*)/);
-    var prefix = m ? m[1] : '';
+    return m ? m[1] : '';
+  }
+
+  function loadEditbar() {
+    if (window.XLEdit) return;
+    // 注意：脚本引用带 ?v= 版本号，src 不再以 "common.js" 结尾，必须用 *=
     var s = document.createElement('script');
-    s.src = prefix + 'editbar.js?v=20260914a';
+    s.src = scriptPrefix() + 'editbar.js?v=20260914a';
     s.async = true;
     document.head.appendChild(s);
   }

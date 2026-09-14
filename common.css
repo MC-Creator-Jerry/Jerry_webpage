@@ -935,6 +935,31 @@ body.is-admin .bar-btn.admin-only { display: inline-flex; }
 .react-btn .r-cnt { font-size: 0.82rem; font-variant-numeric: tabular-nums; }
 
 /* ============ 全局浮动按钮基线（统一语言/设置/主题/编辑按钮外观） ============ */
+/* ============ 自定义背景（访客个人偏好，localStorage 持久化，与深浅色同机制） ============ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--xl-bg-color, transparent);
+  background-image: var(--xl-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.xl-bg-panel { position: fixed; right: 20px; bottom: 76px; z-index: 200; width: 240px; max-width: calc(100vw - 24px); background: var(--card-bg); color: var(--text); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.28); padding: 14px; font-size: .9rem; }
+.xl-bg-panel h4 { margin: 0 0 10px; font-size: .95rem; }
+.xl-bg-panel .row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.xl-bg-panel label { flex: 0 0 auto; color: var(--muted); }
+.xl-bg-panel input[type="color"] { width: 38px; height: 30px; border: 1px solid var(--card-border); border-radius: 6px; background: none; padding: 2px; cursor: pointer; }
+.xl-bg-panel input[type="text"] { flex: 1 1 auto; min-width: 0; padding: 6px 8px; border: 1px solid var(--card-border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+.xl-bg-panel .actions { display: flex; gap: 8px; margin-top: 10px; }
+.xl-bg-panel .actions button { flex: 1; padding: 7px 0; border: 1px solid var(--card-border); border-radius: 8px; background: var(--bg); color: var(--text); cursor: pointer; font: inherit; }
+.xl-bg-panel .actions .primary { background: var(--accent); color: #fff; border-color: transparent; }
+.xl-bg-panel .hint { color: var(--muted); font-size: .75rem; margin-top: 8px; line-height: 1.4; }
+@media (max-width: 560px) { .xl-bg-panel { right: 12px; left: 12px; width: auto; bottom: 76px; } }
+
 .float-actions {
   position: fixed !important;
   top: auto !important;

@@ -927,7 +927,8 @@ window.XLTopics = (function () {
     var btn = fabBtn('editLayoutBtn', 'xl-edit-fab', '更改当前页面布局', EDIT, function () {
       if (window.XLEdit) window.XLEdit.open();
     });
-    var ref = fa.querySelector('#themeToggle') || fa.querySelector('#langBtn');
+    // 顺序固定为「编辑 → 背景 → 主题」（编辑在最左、背景在编辑与主题之间）
+    var ref = fa.querySelector('#bgToggle') || fa.querySelector('#themeToggle') || fa.querySelector('#langBtn');
     if (ref) fa.insertBefore(btn, ref);
     else fa.appendChild(btn);
     pinFloat();

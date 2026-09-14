@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mc-creator-jerry-webpage.pages.dev/sitemap.xml

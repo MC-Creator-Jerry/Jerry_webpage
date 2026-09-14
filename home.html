@@ -7,8 +7,7 @@
 <meta name="description" content="个人主页已合并到「个人资料」页面。" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <!-- 遗留页：个人主页已由 /personal_profile/ 取代（顶栏入口早已被 auth.js 移除）。
-     保留此页仅作极简跳转，避免旧书签/外链 404。 -->
-<meta http-equiv="refresh" content="0; url=personal_profile/" />
+     Cloudflare Pages 用 _redirects 返回 301；GitHub 镜像由下方 JS 兜底跳转。 -->
 <script>
   (function () {
     var gh = location.hostname.indexOf('github.io') !== -1;

@@ -12,6 +12,18 @@
     var __t = localStorage.getItem('xl_theme');
     if (__t === 'dark' || __t === 'light') document.documentElement.setAttribute('data-theme', __t);
   } catch (e) {}
+  // 尽早恢复用户保存的自定义背景：首帧前同步设置 CSS 变量，杜绝刷新/跳转闪烁
+  try {
+    var __bg = localStorage.getItem('xl_bg');
+    if (__bg) {
+      var __o = JSON.parse(__bg);
+      if (__o && (__o.color || __o.image)) {
+        if (__o.color) document.documentElement.style.setProperty('--xl-bg-color', __o.color);
+        if (__o.image) document.documentElement.style.setProperty('--xl-bg-image', 'url("' + String(__o.image).replace(/"/g, '\\"') + '")');
+        document.documentElement.classList.add('xl-has-bg');
+      }
+    }
+  } catch (e) {}
 
   var doc = document;
   var HOLD = false;       // 页面要求等数据渲染完成后再揭晓（如帖子中心）

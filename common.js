@@ -523,7 +523,7 @@ window.XLTopics = (function () {
    直接并入 pinBarRight()/pinFloat() 的 inline bottom（!important），使底部条始终贴屏幕最底。
    具体实现见下方浮动按钮 IIFE 内的 vbOffset()/syncVB()。桌面 Chrome 的 offsetBottom 恒为 0，无副作用。 */
 
-/* ============ 键盘快捷键（单一来源 XL_KEYS）：N 通知中心 / S 搜索 / U 登录·用户 / H 帮助中心 / P 产品 / T 帖子中心 / L 语言 / O 设置 / M 切换深浅色 / F 主页 / E 编辑当前页面布局(站主) ============ */
+/* ============ 键盘快捷键（单一来源 XL_KEYS）：N 通知中心 / S 搜索 / U 登录·用户 / H 帮助中心 / P 产品 / T 帖子中心 / L 语言 / O 设置 / M 切换深浅色 / I 自定义背景 / F 主页 / E 编辑当前页面布局(站主) ============ */
 /* 说明：key=按键（小写，用于 keydown 匹配）；nav=目标路径；re=按钮 href 匹配（用于 Alt 键提示徽标，已兼容相对链接）；login=true 走 loginOrMine()，theme=true 走 window.__xlToggleTheme() */
 (function () {
   var XL_KEYS = [
@@ -585,6 +585,7 @@ window.XLTopics = (function () {
         e.preventDefault();
         if (XL_KEYS[i].login) loginOrMine();
         else if (XL_KEYS[i].theme) { if (window.__xlToggleTheme) window.__xlToggleTheme(); }
+        else if (XL_KEYS[i].bg) { if (window.__xlOpenBg) window.__xlOpenBg(); }
         else if (XL_KEYS[i].edit) { if (isOwner()) editCurrentPage(); }
         else go(XL_KEYS[i].nav);
         return;
@@ -609,6 +610,8 @@ window.XLTopics = (function () {
       var kk = keys[i];
       if (kk.theme) {
         if (btn.id === 'themeToggle') return kk.key.toUpperCase();
+      } else if (kk.bg) {
+        if (btn.id === 'bgToggle') return kk.key.toUpperCase();
       } else if (kk.login) {
         if (btn.id === 'loginBtn' || btn.id === 'logoutBtn') return kk.key.toUpperCase();
       } else if (kk.edit) {
@@ -664,6 +667,7 @@ window.XLTopics = (function () {
   var SUN = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>';
   var MOON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
   var EDIT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+  var BG_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>';
 
   function getTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
   function setTheme(t) {
@@ -689,6 +693,80 @@ window.XLTopics = (function () {
   }
 
   var themeBtn = null;
+  var bgBtn = null;
+  var bgPanel = null;
+
+  function readBg() {
+    try { var s = localStorage.getItem('xl_bg'); return s ? JSON.parse(s) : null; } catch (e) { return null; }
+  }
+  function toHex(c) {
+    if (/^#[0-9a-fA-F]{6}$/.test(c || '')) return c;
+    if (/^#[0-9a-fA-F]{3}$/.test(c || '')) return '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3];
+    return '#f4f6f9';
+  }
+  function applyBg(o) {
+    o = o || {};
+    if (!o.color && !o.image) { resetBg(); return; }
+    try { localStorage.setItem('xl_bg', JSON.stringify({ color: o.color || '', image: o.image || '' })); } catch (e) {}
+    if (o.color) document.documentElement.style.setProperty('--xl-bg-color', o.color);
+    else document.documentElement.style.removeProperty('--xl-bg-color');
+    if (o.image) document.documentElement.style.setProperty('--xl-bg-image', 'url("' + String(o.image).replace(/"/g, '\\"') + '")');
+    else document.documentElement.style.removeProperty('--xl-bg-image');
+    document.documentElement.classList.add('xl-has-bg');
+  }
+  function resetBg() {
+    try { localStorage.removeItem('xl_bg'); } catch (e) {}
+    document.documentElement.style.removeProperty('--xl-bg-color');
+    document.documentElement.style.removeProperty('--xl-bg-image');
+    document.documentElement.classList.remove('xl-has-bg');
+  }
+  function setPanelLang(p) {
+    var en = false;
+    try { en = (localStorage.getItem('xl_lang') || 'zh') === 'en'; } catch (e) {}
+    p.querySelectorAll('[data-zh]').forEach(function (el) {
+      var t = en ? (el.getAttribute('data-en') || el.getAttribute('data-zh')) : el.getAttribute('data-zh');
+      if (t != null) el.textContent = t;
+    });
+  }
+  function buildBgPanel() {
+    if (bgPanel) return bgPanel;
+    var p = document.createElement('div');
+    p.className = 'xl-bg-panel';
+    p.setAttribute('role', 'dialog');
+    p.style.display = 'none';
+    p.innerHTML =
+      '<h4 data-zh="自定义背景" data-en="Custom Background">自定义背景</h4>' +
+      '<div class="row"><label data-zh="颜色" data-en="Color">颜色</label><input type="color" id="xlBgColor"></div>' +
+      '<div class="row"><label data-zh="图片" data-en="Image">图片</label><input type="text" id="xlBgImage" data-ph-zh="背景图 URL（https://…）" data-ph-en="Background image URL"></div>' +
+      '<div class="actions"><button type="button" id="xlBgApply" class="primary" data-zh="应用" data-en="Apply">应用</button><button type="button" id="xlBgReset" data-zh="恢复默认" data-en="Reset">恢复默认</button></div>' +
+      '<div class="hint" data-zh="仅本机浏览器生效，刷新后保留。" data-en="Saved on this browser; persists after refresh.">仅本机浏览器生效，刷新后保留。</div>';
+    document.body.appendChild(p);
+    var colorIn = p.querySelector('#xlBgColor');
+    var imgIn = p.querySelector('#xlBgImage');
+    p.querySelector('#xlBgApply').addEventListener('click', function () {
+      applyBg({ color: colorIn.value || '', image: imgIn.value.trim() || '' });
+      closeBgPanel();
+    });
+    p.querySelector('#xlBgReset').addEventListener('click', function () { resetBg(); closeBgPanel(); });
+    colorIn.addEventListener('input', function () {
+      applyBg({ color: colorIn.value || '', image: imgIn.value.trim() || '' });
+    });
+    bgPanel = p;
+    return p;
+  }
+  function openBgPanel() {
+    var p = buildBgPanel();
+    var cur = readBg();
+    p.querySelector('#xlBgColor').value = (cur && cur.color) ? toHex(cur.color) : '#f4f6f9';
+    p.querySelector('#xlBgImage').value = (cur && cur.image) ? cur.image : '';
+    setPanelLang(p);
+    var en = (localStorage.getItem('xl_lang') || 'zh') === 'en';
+    p.querySelector('#xlBgImage').setAttribute('placeholder', en ? p.querySelector('#xlBgImage').getAttribute('data-ph-en') : p.querySelector('#xlBgImage').getAttribute('data-ph-zh'));
+    p.style.display = 'block';
+  }
+  function closeBgPanel() { if (bgPanel) bgPanel.style.display = 'none'; }
+  function toggleBgPanel() { if (bgPanel && bgPanel.style.display === 'block') closeBgPanel(); else openBgPanel(); }
+  window.__xlOpenBg = toggleBgPanel;
 
   // 把浮动按钮强制提升为 body 直接子元素，并用 inline style 兜底，
   // 避免某些页面把它嵌在 main/content 里，或 CSS 媒体查询未命中导致随滚动消失。
@@ -795,15 +873,26 @@ window.XLTopics = (function () {
 
     var fa = ensureFloatActions();
 
+    // 0) 自定义背景：浮动按钮簇最左（深浅色切换左侧）
+    if (!fa.querySelector('#bgToggle')) {
+      bgBtn = fabBtn('bgToggle', 'xl-bg', '自定义背景', BG_ICON, function () { toggleBgPanel(); });
+    } else {
+      bgBtn = fa.querySelector('#bgToggle');
+    }
+
     // 1) 深浅色切换：插在「语言」按钮左侧
     if (!fa.querySelector('#themeToggle')) {
       themeBtn = fabBtn('themeToggle', 'xl-theme', '切换深浅色', getTheme() === 'dark' ? MOON : SUN, function () {
         setTheme(getTheme() === 'dark' ? 'light' : 'dark');
       });
-      var lang = fa.querySelector('#langBtn') || fa.querySelector('a[href$="language.html"]');
-      if (lang) fa.insertBefore(themeBtn, lang);
-      else fa.appendChild(themeBtn);
+    } else {
+      themeBtn = fa.querySelector('#themeToggle');
     }
+    // 先保证「自定义背景」在「深浅色切换」左侧
+    fa.insertBefore(bgBtn, themeBtn);
+    var lang = fa.querySelector('#langBtn') || fa.querySelector('a[href$="language.html"]');
+    if (lang) fa.insertBefore(themeBtn, lang);
+    else if (themeBtn.parentNode !== fa) fa.appendChild(themeBtn);
 
     // 2) 动态加载编辑栏脚本（仅站主会用，但全站预载以便随时可用）
     loadEditbar();

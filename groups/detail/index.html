@@ -127,7 +127,7 @@
         var g = d.group;
         isOwner = d.isOwner; isMember = d.isMember; members = d.members || [];
         gBox.innerHTML =
-          '<div class="g-title"></div>' +
+          '<h1 class="g-title"></h1>' +
           (g.desc ? '<div class="g-desc"></div>' : '') +
           '<div class="g-meta">创建者 <a href="../../personal_profile/?user=' + encodeURIComponent(g.owner) + '">@' + esc(g.owner) + '</a> · ' + (g.memberCount || 0) + ' 名成员 · 创建于 ' + fmtTime(g.ts) + '</div>' +
           '<div class="g-actions" id="gActions"></div>' +
@@ -207,6 +207,6 @@
       }).catch(function () { loginHint.hidden = false; load(); });
     })();
   </script>
-  <script src="../../common.js?v=20260909ab"></script>
+  <script src="../../common.js?v=20260910b"></script>
 </body>
 </html>

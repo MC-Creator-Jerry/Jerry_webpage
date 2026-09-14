@@ -7,9 +7,8 @@
 <meta name="description" content="站内帖子中心：查看与发布帖子。" data-page-node-id="ucwtyBwn4nGNlYNWtkGUDy" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" data-page-node-id="WV8Pgr3N69NbMRPBTrBQe5" />
 <!-- 帖子中心入口：真实列表在 /post/center/。
-     此页仅作极简跳转——不再渲染整页结构，也不加载 boot.js，
-     避免先闪一帧无用界面/加载动画再跳转。 -->
-<meta http-equiv="refresh" content="0; url=center/" data-page-node-id="UNMojExqXjkzvlaJ1SmlIT" />
+     Cloudflare Pages 用 _redirects 返回 301；GitHub 镜像由下方 JS 兜底跳转。
+     不再渲染整页结构，也不加载 boot.js，避免先闪一帧无用界面。 -->
 <script>
   (function () {
     // 保留 github.io → pages.dev 的规范跳转（与其它页面一致）

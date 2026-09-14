@@ -873,15 +873,9 @@ window.XLTopics = (function () {
     loadEditbar();
 
     var fa = ensureFloatActions();
+    var lang = fa.querySelector('#langBtn') || fa.querySelector('a[href$="language.html"]');
 
-    // 0) 自定义背景：浮动按钮簇最左（深浅色切换左侧）
-    if (!fa.querySelector('#bgToggle')) {
-      bgBtn = fabBtn('bgToggle', 'xl-bg', '自定义背景', BG_ICON, function () { toggleBgPanel(); });
-    } else {
-      bgBtn = fa.querySelector('#bgToggle');
-    }
-
-    // 1) 深浅色切换：插在「语言」按钮左侧
+    // 1) 深浅色切换：先插入到「语言」按钮左侧（必须已成为 fa 的子节点，后面自定义背景才能以它为参照）
     if (!fa.querySelector('#themeToggle')) {
       themeBtn = fabBtn('themeToggle', 'xl-theme', '切换深浅色', getTheme() === 'dark' ? MOON : SUN, function () {
         setTheme(getTheme() === 'dark' ? 'light' : 'dark');
@@ -889,11 +883,16 @@ window.XLTopics = (function () {
     } else {
       themeBtn = fa.querySelector('#themeToggle');
     }
-    // 先保证「自定义背景」在「深浅色切换」左侧
-    fa.insertBefore(bgBtn, themeBtn);
-    var lang = fa.querySelector('#langBtn') || fa.querySelector('a[href$="language.html"]');
     if (lang) fa.insertBefore(themeBtn, lang);
     else if (themeBtn.parentNode !== fa) fa.appendChild(themeBtn);
+
+    // 0) 自定义背景：再插到深浅色切换左侧
+    if (!fa.querySelector('#bgToggle')) {
+      bgBtn = fabBtn('bgToggle', 'xl-bg', '自定义背景', BG_ICON, function () { toggleBgPanel(); });
+    } else {
+      bgBtn = fa.querySelector('#bgToggle');
+    }
+    fa.insertBefore(bgBtn, themeBtn);
 
     // 2) 动态加载编辑栏脚本（仅站主会用，但全站预载以便随时可用）
     loadEditbar();

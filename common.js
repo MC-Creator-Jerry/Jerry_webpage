@@ -537,6 +537,7 @@ window.XLTopics = (function () {
     { key: 'o', nav: '/settings/homepage.html', re: /\bsettings\b/,     login: false },
     { key: 'f', nav: '/',                 re: /\/(index\.html)?$/,     login: false },
     { key: 'm', theme: true },
+    { key: 'i', bg: true },
     { key: 'e', edit: true } // 编辑当前页面布局（仅站主，权限在 keydown 内校验）
   ];
   window.__xlKeys = XL_KEYS; // 暴露给 Alt 键提示 IIFE 复用，避免键位漂移

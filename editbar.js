@@ -134,21 +134,29 @@
   }
 
   // ---------- 应用已保存覆盖（所有访客） ----------
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function nl2br(s) {
+    return escHtml(s).replace(/\r?\n/g, '<br>');
+  }
   function applySaved() {
     fetch('/api/page-edit?path=' + encodeURIComponent(curPath()))
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d) return;
-        var edits = d.edits || {};
+        var savedEdits = d.edits || {};
         var blocks = Array.isArray(d.blocks) ? d.blocks : [];
-        Object.keys(edits).forEach(function (sel) {
-          var e = edits[sel];
+        // 回填已保存覆盖到内存表，避免保存时整键覆盖把历史修改清掉（Fix 1）
+        Object.keys(savedEdits).forEach(function (sel) {
+          var e = savedEdits[sel];
           if (!e) return;
+          edits[sel] = { type: e.type, value: e.value };
           var node = document.querySelector(sel);
           if (!node) return;
           try {
             if (e.type === 'img') { if (node.tagName === 'IMG') node.src = e.value; }
-            else { node.textContent = e.value; }
+            else { node.innerHTML = nl2br(e.value); }   // 保留换行（Fix 2）
           } catch (_) {}
         });
         var c = blocksContainer();
@@ -269,7 +277,7 @@
     function done() {
       el.removeEventListener('blur', done);
       el.removeAttribute('contenteditable');
-      edits[cssPath(el)] = { type: 'text', value: el.textContent };
+      edits[cssPath(el)] = { type: 'text', value: el.innerText };
       markDirty();
     }
     el.addEventListener('blur', done);

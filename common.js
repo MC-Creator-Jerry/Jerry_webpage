@@ -824,7 +824,7 @@ window.XLTopics = (function () {
     var m = src.match(/^((?:\.\.\/)*)/);
     var prefix = m ? m[1] : '';
     var s = document.createElement('script');
-    s.src = prefix + 'editbar.js?v=20260910a';
+    s.src = prefix + 'editbar.js?v=20260914a';
     s.async = true;
     document.head.appendChild(s);
   }

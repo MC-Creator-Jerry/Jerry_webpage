@@ -150,6 +150,17 @@
   .edit-hint { font-size: 0.8rem; color: var(--muted); margin: 4px 0 10px; line-height: 1.5; }
   .edit-hint code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
 
+  /* ===== 功能列表 + 界面预览 ===== */
+  .feat-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .feat-item { display: flex; gap: 12px; align-items: flex-start; background: var(--bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 14px 16px; }
+  .feat-ico { font-size: 1.6rem; line-height: 1.4; flex-shrink: 0; }
+  .feat-item b { color: var(--text); font-size: 1rem; }
+  .feat-item p { color: var(--muted); font-size: 0.9rem; line-height: 1.55; margin-top: 4px; }
+  .shot { margin-top: 6px; border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; background: var(--bg); }
+  .shot svg { display: block; width: 100%; height: auto; }
+  .shot-note { font-size: 0.82rem; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+  @media (max-width: 560px) { .feat-list { grid-template-columns: 1fr; } }
+
   .admin-only { display: none; }
   body.is-admin .admin-only { display: block; }
 
@@ -224,6 +235,54 @@
     </section>
 
     <section class="card">
+      <h2 data-zh="功能列表" data-en="Features">功能列表</h2>
+      <ul class="feat-list">
+        <li class="feat-item">
+          <span class="feat-ico">🧹</span>
+          <div>
+            <b data-zh="系统垃圾清理" data-en="Junk cleanup">系统垃圾清理</b>
+            <p data-zh="一键清理临时文件、系统缓存、回收站冗余等，安全释放磁盘空间。" data-en="One-click cleanup of temp files, system cache and recycle-bin leftovers — safely free up disk space.">一键清理临时文件、系统缓存、回收站冗余等，安全释放磁盘空间。</p>
+          </div>
+        </li>
+        <li class="feat-item">
+          <span class="feat-ico">💾</span>
+          <div>
+            <b data-zh="内存优化" data-en="Memory optimization">内存优化</b>
+            <p data-zh="智能释放被占用的内存，提升系统响应速度，减少卡顿。" data-en="Smartly reclaim occupied memory to boost responsiveness and reduce stutter.">智能释放被占用的内存，提升系统响应速度，减少卡顿。</p>
+          </div>
+        </li>
+        <li class="feat-item">
+          <span class="feat-ico">🔇</span>
+          <div>
+            <b data-zh="后台静默运行" data-en="Silent background">后台静默运行</b>
+            <p data-zh="常驻后台，不弹窗、不打扰，按需自动维护系统。" data-en="Runs quietly in the background with no popups — maintains your system automatically.">常驻后台，不弹窗、不打扰，按需自动维护系统。</p>
+          </div>
+        </li>
+        <li class="feat-item">
+          <span class="feat-ico">🎮</span>
+          <div>
+            <b data-zh="游戏免打扰" data-en="Game do-not-disturb">游戏免打扰</b>
+            <p data-zh="检测到游戏进程时自动暂停清理任务，避免抢占资源与掉帧。" data-en="Auto-pauses cleanup when a game is detected, so it never steals resources or drops frames.">检测到游戏进程时自动暂停清理任务，避免抢占资源与掉帧。</p>
+          </div>
+        </li>
+        <li class="feat-item">
+          <span class="feat-ico">📦</span>
+          <div>
+            <b data-zh="免安装便携版" data-en="Portable, no install">免安装便携版</b>
+            <p data-zh="解压即用，单文件约 54 KB，不写注册表、不留残留。" data-en="Unzip and run. A single ~54 KB file — no registry writes, no leftovers.">解压即用，单文件约 54 KB，不写注册表、不留残留。</p>
+          </div>
+        </li>
+        <li class="feat-item">
+          <span class="feat-ico">🔒</span>
+          <div>
+            <b data-zh="安全优先" data-en="Safety first">安全优先</b>
+            <p data-zh="仅清理明确安全的系统冗余，操作前可预览，并附完整免责声明。" data-en="Only clears clearly-safe system leftovers; previews before acting and ships with a full disclaimer.">仅清理明确安全的系统冗余，操作前可预览，并附完整免责声明。</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
       <h2 data-zh="下载" data-en="Download">下载</h2>
       <p data-zh="下载后解压即可使用。建议先阅读下方的免责声明。" data-en="Download and extract to use. Please read the disclaimer below first.">下载后解压即可使用。建议先阅读下方的免责声明。</p>
       <div class="download-wrap">
@@ -233,6 +292,44 @@
         </a>
         <span class="download-meta" id="downloadMeta">.zip · ~54 KB</span>
       </div>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="界面预览" data-en="Preview">界面预览</h2>
+      <p data-zh="CleanOpt 主界面示意：左侧功能导航，中间实时内存占用与趋势，一键「立即清理」。" data-en="CleanOpt main UI preview: left nav, live memory usage &amp; trend in the center, one-tap “Clean now”.">CleanOpt 主界面示意：左侧功能导航，中间实时内存占用与趋势，一键「立即清理」。</p>
+      <div class="shot">
+        <svg viewBox="0 0 720 400" role="img" aria-label="CleanOpt 界面预览">
+          <defs>
+            <linearGradient id="coTitle" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/>
+            </linearGradient>
+            <linearGradient id="coMem" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#2e9e5b"/><stop offset="0.6" stop-color="#e0a800"/><stop offset="1" stop-color="#d13438"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="718" height="398" rx="14" fill="#ffffff" stroke="#dfe5ee"/>
+          <path d="M14 1 H706 a13 13 0 0 1 13 13 V46 H1 V14 a13 13 0 0 1 13 -13 Z" fill="url(#coTitle)"/>
+          <circle cx="26" cy="24" r="6" fill="#ff5f57"/><circle cx="46" cy="24" r="6" fill="#febc2e"/><circle cx="66" cy="24" r="6" fill="#28c840"/>
+          <text x="360" y="29" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">CleanOpt</text>
+          <rect x="1" y="46" width="150" height="353" fill="#f4f7fb" stroke="#e3e9f1"/>
+          <rect x="14" y="70" width="122" height="30" rx="7" fill="#0078d4" opacity="0.14"/>
+          <text x="28" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0078d4" font-weight="600">清理</text>
+          <text x="28" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6b80">内存</text>
+          <text x="28" y="166" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6b80">设置</text>
+          <text x="180" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#1b2733">内存占用</text>
+          <rect x="180" y="96" width="420" height="16" rx="8" fill="#eef1f6"/>
+          <rect x="180" y="96" width="262" height="16" rx="8" fill="url(#coMem)"/>
+          <text x="610" y="109" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6b80">62%</text>
+          <polyline points="180,200 250,180 320,190 390,150 460,165 530,130 600,145" fill="none" stroke="#0078d4" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <polygon points="180,200 250,180 320,190 390,150 460,165 530,130 600,145 600,212 180,212" fill="#0078d4" opacity="0.10"/>
+          <text x="180" y="240" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6b80">近 1 小时内存趋势</text>
+          <rect x="180" y="270" width="150" height="42" rx="21" fill="#0078d4"/>
+          <text x="255" y="296" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">立即清理</text>
+          <circle cx="190" cy="345" r="5" fill="#28c840"/>
+          <text x="204" y="349" font-family="Segoe UI, Arial, sans-serif" font-size="12.5" fill="#3a4a5c">后台静默运行中 · 游戏免打扰已开启</text>
+        </svg>
+      </div>
+      <p class="shot-note" data-zh="说明：上图为界面示意。把真实截图放入 products/cleanopt/img/ 后，用图片替换本区块即可。" data-en="Note: the figure above is an illustration. After adding real screenshots to products/cleanopt/img/, replace this block with an image.">说明：上图为界面示意。把真实截图放入 products/cleanopt/img/ 后，用图片替换本区块即可。</p>
     </section>
 
     <section class="card disclaimer">
@@ -426,6 +523,6 @@
     })();
   </script>
 <script src="../../auth.js?v=20260909a"></script>
-  <script src="../../common.js?v=20260914f"></script>
+  <script src="../../common.js?v=20260914g"></script>
 </body>
 </html>

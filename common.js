@@ -426,7 +426,8 @@ window.XLTopics = (function () {
     { keys: ['主页', '首页'], href: /(index\.html|\/(index)?$)/, svg: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>' },
     { keys: ['群组'], href: /\/groups\//, svg: '<circle cx="9" cy="9" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5"/><path d="M15 19c.5-2 2.5-3.5 5-3.5"/>' },
     { keys: ['个人主页', '我的主页', '个人'], href: /(personal_profile|home\.html)/, svg: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>' },
-    { keys: ['搜索'], href: /\/search\//, svg: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' }
+    { keys: ['搜索'], href: /\/search\//, svg: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' },
+    { keys: ['订阅'], id: 'subscribeBtn', svg: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>' }
   ];
 
   function pickIcon(btn) {
@@ -475,6 +476,30 @@ window.XLTopics = (function () {
     }
   }
 
+  function injectSubscribeBtn() {
+    // 降低登录门槛：在顶栏「登录」前注入「订阅」入口，非技术访客无需 GitHub 登录即可邮箱订阅更新。
+    var br = document.querySelector('.bar-right');
+    if (!br || br.querySelector('#subscribeBtn')) return;
+    var sc = document.querySelector('script[src*="common.js"]');
+    var src = sc ? (sc.getAttribute('src') || '') : '';
+    var mm = src.match(/^((?:\.\.\/)*)/);
+    var pre = mm ? mm[1] : '';
+    var a = document.createElement('a');
+    a.className = 'bar-btn';
+    a.id = 'subscribeBtn';
+    a.href = pre + 'subscribe/';
+    a.setAttribute('data-zh', '订阅');
+    a.setAttribute('data-en', 'Subscribe');
+    a.textContent = '订阅';
+    // 当前语言（默认 zh），避免注入晚于页面 applyLang 而残留中文
+    var lang = 'zh';
+    try { lang = localStorage.getItem('xl_lang') || 'zh'; } catch (e) {}
+    if (lang === 'en') a.textContent = 'Subscribe';
+    var login = br.querySelector('#loginBtn');
+    if (login) br.insertBefore(a, login);
+    else br.appendChild(a);
+  }
+
   function applyBarMode() {
     // 默认改为「图标加小文字」(tile)；新访客进来直接看到 tile，老用户保留自己存过的偏好。
     var m = 'tile';
@@ -487,7 +512,7 @@ window.XLTopics = (function () {
   window.__xlApplyBarMode = applyBarMode;
   window.__xlInjectBarIcons = injectIcons;
 
-  function run() { applyBarMode(); injectIcons(); }
+  function run() { applyBarMode(); injectSubscribeBtn(); injectIcons(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 })();

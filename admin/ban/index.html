@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../../boot.js?v=20260914ab"></script>
+<script>
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>小黑屋 · Jerry's webpage</title>
+<meta name="description" content="违规用户封禁管理（仅管理员）。" />
+<meta name="author" content="Jerry" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body { min-height:100%; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif; color:var(--text); background:var(--bg); transition:background .25s,color .25s; }
+  .topbar { position:sticky; top:0; z-index:100; min-height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; background-color:var(--bar-top); background-image:linear-gradient(180deg,var(--bar-top) 0%,var(--bar-top) 45%,var(--bar-bottom) 100%); color:var(--bar-fg); box-shadow:0 2px 10px rgba(0,0,0,0.18); border-radius:0; }
+  .bar-left { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+  .site-name { font-size:1.25rem; font-weight:700; color:var(--bar-fg); text-decoration:none; }
+  .breadcrumb { display:flex; align-items:center; gap:4px; font-size:0.78rem; color:var(--bar-fg); opacity:0.9; }
+  .breadcrumb a { color:var(--bar-fg); text-decoration:none; }
+  .bar-right { display:flex; align-items:center; gap:8px; }
+  .bar-btn { border:none; background:rgba(255,255,255,0.08); color:var(--bar-fg); border-radius:0; padding:6px 11px; font-size:0.9rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+  .bar-btn:hover { background:rgba(255,255,255,0.18); }
+  .content { max-width:920px; margin:0 auto; padding:40px 24px 96px; }
+  .hero { margin-bottom:20px; }
+  .hero h1 { font-size:1.9rem; color:var(--text); }
+  .hero p { color:var(--muted); margin-top:6px; font-size:.95rem; }
+  .toolbar { display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+  .btn { border:1px solid var(--card-border); background:var(--card-bg); color:var(--text); border-radius:10px; padding:8px 14px; font-size:0.9rem; font-weight:600; cursor:pointer; font-family:inherit; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .btn.danger { color:var(--danger); border-color:color-mix(in srgb,var(--danger) 40%,var(--card-border)); }
+  .btn.danger:hover { background:color-mix(in srgb,var(--danger) 10%,var(--card-bg)); }
+  .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stat { font-size:0.9rem; color:var(--muted); }
+  .empty { color:var(--muted); opacity:0.8; font-style:italic; padding:20px 0; }
+  .denied { text-align:center; padding:60px 0; color:var(--muted); }
+  .toast { position:fixed; left:50%; top:22px; transform:translateX(-50%); z-index:300; background:#1c2733; color:#fff; padding:10px 18px; border-radius:10px; font-size:0.9rem; box-shadow:0 6px 20px rgba(0,0,0,0.3); opacity:0; transition:opacity .25s; pointer-events:none; }
+  .toast.show { opacity:1; }
+
+  /* 封禁表单 */
+  .ban-form { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:18px 20px; margin-bottom:22px; box-shadow:var(--card-shadow); }
+  .ban-form h2 { font-size:1.05rem; margin-bottom:12px; color:var(--accent); }
+  .ban-row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+  .ban-field { display:flex; flex-direction:column; gap:4px; }
+  .ban-field label { font-size:.82rem; color:var(--muted); }
+  .ban-field input, .ban-field select { padding:9px 11px; border:1px solid var(--card-border); border-radius:9px; background:var(--bg); color:var(--text); font:inherit; min-width:160px; }
+  .ban-field.wide input { min-width:240px; }
+  .ban-field input:focus, .ban-field select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent); }
+  .ban-form .hint { font-size:.78rem; color:var(--muted); margin-top:10px; opacity:.9; }
+
+  /* 封禁卡片 */
+  .ban { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px; box-shadow:var(--card-shadow); }
+  .ban .b-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .ban .b-login { font-weight:700; color:var(--text); font-size:1.02rem; }
+  .ban .b-meta { font-size:.8rem; color:var(--muted); }
+  .ban .b-reason { font-size:.92rem; color:var(--muted); margin:8px 0; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+  .ban .b-count { font-weight:700; color:var(--danger); font-variant-numeric:tabular-nums; }
+  .ban .b-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+
+  .site-footer { border-top:1px solid var(--card-border); margin-top:40px; padding:24px; text-align:center; color:var(--muted); font-size:0.9rem; }
+  .site-footer a { color:var(--accent); text-decoration:none; }
+  [hidden]{display:none!important;}
+  @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} .ban-field input, .ban-field select{min-width:120px;} }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20260916b" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb"><a href="../../index.html">主页</a><span class="bc-sep">›</span><span class="bc-sub">小黑屋</span></nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../../home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="小黑屋" data-en="Ban List">小黑屋</h1>
+      <p data-zh="违规用户封禁管理。封禁时长以服务器（网上）时间为准，到期自动解除。" data-en="Ban management for violating users. Durations use server (online) time and auto-expire.">违规用户封禁管理。封禁时长以服务器（网上）时间为准，到期自动解除。</p>
+    </section>
+
+    <section class="ban-form" id="banFormBox" hidden>
+      <h2 data-zh="封禁用户" data-en="Ban a user">封禁用户</h2>
+      <div class="ban-row">
+        <div class="ban-field">
+          <label data-zh="GitHub 登录名" data-en="GitHub login">GitHub 登录名</label>
+          <input type="text" id="banLogin" maxlength="60" placeholder="如 MC-Creator-Jerry" />
+        </div>
+        <div class="ban-field">
+          <label data-zh="封禁时长" data-en="Duration">封禁时长</label>
+          <select id="banDur">
+            <option value="3600000">1 小时</option>
+            <option value="86400000">1 天</option>
+            <option value="259200000">3 天</option>
+            <option value="604800000" selected>7 天</option>
+            <option value="1296000000">15 天</option>
+            <option value="2592000000">30 天</option>
+            <option value="7776000000">90 天</option>
+            <option value="31536000000">365 天</option>
+          </select>
+        </div>
+        <div class="ban-field wide">
+          <label data-zh="原因（可选）" data-en="Reason (optional)">原因（可选）</label>
+          <input type="text" id="banReason" maxlength="200" placeholder="违规说明" />
+        </div>
+        <button class="btn primary" id="banSubmit" data-zh="封禁" data-en="Ban">封禁</button>
+      </div>
+      <div class="hint" data-zh="注意：站主账号不可被封禁；时长上限 365 天。" data-en="Note: the owner cannot be banned; max duration is 365 days.">注意：站主账号不可被封禁；时长上限 365 天。</div>
+    </section>
+
+    <section class="toolbar" id="toolbar" hidden>
+      <button class="btn" id="refresh" data-zh="刷新" data-en="Refresh">刷新</button>
+      <span class="stat" id="stat"></span>
+    </section>
+    <div id="list"></div>
+    <div id="empty" class="empty" hidden data-zh="小黑屋目前是空的。" data-en="Ban list is empty.">小黑屋目前是空的。</div>
+    <div id="denied" class="denied" hidden>
+      <p data-zh="无访问权限（仅管理员）。" data-en="No access (admin only).">无访问权限（仅管理员）。</p>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../admin/reports/">举报后台</a></div></footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="../../prefs.js?v=20260909a"></script>
+  <script src="../../auth.js?v=20260916b"></script>
+  <script>
+    (function () {
+      var listEl = document.getElementById('list');
+      var emptyEl = document.getElementById('empty');
+      var deniedEl = document.getElementById('denied');
+      var toolbar = document.getElementById('toolbar');
+      var statEl = document.getElementById('stat');
+      var formBox = document.getElementById('banFormBox');
+      var toastEl = document.getElementById('toast');
+      var refreshBtn = document.getElementById('refresh');
+      var banSubmit = document.getElementById('banSubmit');
+
+      // 以「服务器时间」为锚：GET 返回的 serverNow 是当前网上时间；前端倒计时在其基础上叠加本地流逝，
+      // 避免用访客设备时钟（可能不准）来计算剩余封禁时长。实际到期仍由后端 Date.now() 强制判定。
+      var anchorServer = 0, anchorLocal = 0;
+
+      function toast(m){ toastEl.textContent=m; toastEl.className='toast show'; setTimeout(function(){toastEl.className='toast';},2200); }
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+      function fmtDate(ts){ try{return new Date(ts).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(e){return '';} }
+      function serverNow(){ return anchorServer + (Date.now() - anchorLocal); }
+      function fmtRemain(ms){
+        if (ms <= 0) return '已到期';
+        var s = Math.floor(ms/1000);
+        var d = Math.floor(s/86400); s -= d*86400;
+        var h = Math.floor(s/3600); s -= h*3600;
+        var m = Math.floor(s/60); s -= m*60;
+        var parts = [];
+        if (d) parts.push(d + '天');
+        if (h) parts.push(h + '小时');
+        if (m && !d) parts.push(m + '分');
+        if (!d && !h) parts.push(s + '秒');
+        return parts.join('') + '后解除';
+      }
+
+      function renderBans(bans){
+        if (!bans.length){ emptyEl.hidden=false; listEl.innerHTML=''; return; }
+        emptyEl.hidden=true;
+        listEl.innerHTML='';
+        bans.forEach(function(r){
+          var card = document.createElement('div');
+          card.className = 'ban';
+          var remain = r.until ? fmtRemain(r.until - serverNow()) : '';
+          card.innerHTML =
+            '<div class="b-head">' +
+              '<span class="b-login"></span>' +
+              '<span class="b-meta">封禁于 ' + esc(fmtDate(r.bannedAt)) + '</span>' +
+            '</div>' +
+            '<div class="b-reason"></div>' +
+            '<div class="b-actions">' +
+              '<button class="btn danger" data-act="unban" data-login="'+esc(r.login)+'">解除封禁</button>' +
+            '</div>' +
+            '<div class="b-meta" style="margin-top:6px">剩余：<span class="b-count" data-until="'+ (r.until||0) +'">'+esc(remain)+'</span></div>';
+          card.querySelector('.b-login').textContent = '@' + (r.login || '');
+          card.querySelector('.b-reason').textContent = r.reason ? ('原因：' + r.reason) : '（未填写原因）';
+          listEl.appendChild(card);
+        });
+        listEl.querySelectorAll('button[data-act="unban"]').forEach(function(b){
+          b.addEventListener('click', function(){ act('unban', b.getAttribute('data-login')); });
+        });
+      }
+
+      function tick(){
+        listEl.querySelectorAll('.b-count').forEach(function(el){
+          var u = Number(el.getAttribute('data-until')||0);
+          if (!u) return;
+          el.textContent = fmtRemain(u - serverNow());
+        });
+      }
+
+      function load(){
+        fetch('/api/ban')
+          .then(function(r){ return r.ok? r.json() : {error:'forbidden', status:r.status}; })
+          .then(function(d){
+            if (d.error === 'forbidden'){ deniedEl.hidden=false; toolbar.hidden=true; formBox.hidden=true; return; }
+            toolbar.hidden=false; formBox.hidden=false;
+            anchorServer = d.serverNow || Date.now();
+            anchorLocal = Date.now();
+            var bans = d.bans || [];
+            statEl.textContent = '当前封禁 ' + bans.length + ' 人';
+            renderBans(bans);
+          })
+          .catch(function(){ deniedEl.hidden=false; deniedEl.querySelector('p').textContent='加载失败，请重试。'; });
+      }
+
+      function act(action, target){
+        fetch('/api/ban', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ login:target, action:action }) })
+          .then(function(r){ return r.ok? r.json() : {error:'fail'}; })
+          .then(function(d){ if (d.ok){ toast('已更新 ✓'); load(); } else { toast('操作失败', true); } })
+          .catch(function(){ toast('操作失败（网络错误）', true); });
+      }
+
+      banSubmit.addEventListener('click', function(){
+        var login = document.getElementById('banLogin').value.trim();
+        var dur = Number(document.getElementById('banDur').value) || 0;
+        var reason = document.getElementById('banReason').value.trim();
+        if (!login){ toast('请填写登录名', true); return; }
+        fetch('/api/ban', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ login:login, action:'ban', durationMs:dur, reason:reason }) })
+          .then(function(r){ return r.ok? r.json() : r.json().then(function(e){return e;}); })
+          .then(function(d){
+            if (d.ok){ toast('已封禁 @'+login+' ✓'); document.getElementById('banLogin').value=''; document.getElementById('banReason').value=''; load(); }
+            else if (d.error === 'cannot_ban_owner'){ toast('不能封禁站主', true); }
+            else { toast('操作失败：' + (d.error||'未知'), true); }
+          })
+          .catch(function(){ toast('操作失败（网络错误）', true); });
+      });
+
+      refreshBtn.addEventListener('click', load);
+      load();
+      setInterval(tick, 1000);
+    })();
+  </script>
+  <script src="../../common.js?v=20260916b"></script>
+</body>
+</html>

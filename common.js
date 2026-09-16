@@ -427,7 +427,8 @@ window.XLTopics = (function () {
     { keys: ['群组'], href: /\/groups\//, svg: '<circle cx="9" cy="9" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5"/><path d="M15 19c.5-2 2.5-3.5 5-3.5"/>' },
     { keys: ['个人主页', '我的主页', '个人'], href: /(personal_profile|home\.html)/, svg: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>' },
     { keys: ['搜索'], href: /\/search\//, svg: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' },
-    { keys: ['订阅'], id: 'subscribeBtn', svg: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>' }
+    { keys: ['订阅'], id: 'subscribeBtn', svg: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>' },
+    { keys: ['博客'], id: 'blogBtn', svg: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' }
   ];
 
   function pickIcon(btn) {
@@ -500,6 +501,30 @@ window.XLTopics = (function () {
     else br.appendChild(a);
   }
 
+  function injectBlogBtn() {
+    // 与「订阅」同源：在顶栏「订阅」前注入「博客」入口，引向站内博客板块。
+    var br = document.querySelector('.bar-right');
+    if (!br || br.querySelector('#blogBtn')) return;
+    var sc = document.querySelector('script[src*="common.js"]');
+    var src = sc ? (sc.getAttribute('src') || '') : '';
+    var mm = src.match(/^((?:\.\.\/)*)/);
+    var pre = mm ? mm[1] : '';
+    var a = document.createElement('a');
+    a.className = 'bar-btn';
+    a.id = 'blogBtn';
+    a.href = pre + 'blog/';
+    a.setAttribute('data-zh', '博客');
+    a.setAttribute('data-en', 'Blog');
+    a.textContent = '博客';
+    // 当前语言（默认 zh），避免注入晚于页面 applyLang 而残留中文
+    var lang = 'zh';
+    try { lang = localStorage.getItem('xl_lang') || 'zh'; } catch (e) {}
+    if (lang === 'en') a.textContent = 'Blog';
+    var sub = br.querySelector('#subscribeBtn') || br.querySelector('#loginBtn');
+    if (sub) br.insertBefore(a, sub);
+    else br.appendChild(a);
+  }
+
   function applyBarMode() {
     // 默认改为「图标加小文字」(tile)；新访客进来直接看到 tile，老用户保留自己存过的偏好。
     var m = 'tile';
@@ -512,7 +537,7 @@ window.XLTopics = (function () {
   window.__xlApplyBarMode = applyBarMode;
   window.__xlInjectBarIcons = injectIcons;
 
-  function run() { applyBarMode(); injectSubscribeBtn(); injectIcons(); }
+  function run() { applyBarMode(); injectSubscribeBtn(); injectBlogBtn(); injectIcons(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 })();
@@ -999,4 +1024,46 @@ window.XLTopics = (function () {
   try { window.addEventListener('resize', schedulePin); } catch (e) {}
   try { window.addEventListener('orientationchange', schedulePin); } catch (e) {}
   try { window.matchMedia('(orientation: landscape)').addEventListener('change', schedulePin); } catch (e) {}
+})();
+
+/* ============ 回到顶部浮动按钮：滑到页面下部时显示，点击平滑回顶 ============ */
+(function () {
+  'use strict';
+  var ARROW = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>';
+
+  function ensureFA() {
+    var fa = document.querySelector('.float-actions');
+    if (!fa) { fa = document.createElement('div'); fa.className = 'float-actions'; document.body.appendChild(fa); }
+    return fa;
+  }
+  function build() {
+    var fa = ensureFA();
+    if (fa.querySelector('#toTopBtn')) return;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'fab xl-toplink';
+    b.id = 'toTopBtn';
+    b.title = '回到顶部';
+    b.setAttribute('aria-label', '回到顶部');
+    b.innerHTML = ARROW;
+    b.addEventListener('click', function () {
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+    });
+    fa.appendChild(b);
+  }
+  function onScroll() {
+    var btn = document.getElementById('toTopBtn');
+    if (!btn) return;
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    var show = y > Math.max(360, window.innerHeight * 0.5); // 滑过屏幕一半（至少 360px）即视为「页面的下面」
+    if (show) btn.classList.add('show'); else btn.classList.remove('show');
+  }
+  function init() {
+    build();
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();

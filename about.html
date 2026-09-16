@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="boot.js?v=20260914ab"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>关于 · Jerry's webpage</title>
+<meta name="description" content="关于 Jerry 与小蓝页：独立开发者 Jerry（MC-Creator-Jerry）是谁，这个站点在做什么，以及背后的产品理念。" />
+<meta name="author" content="Jerry" />
+<meta name="robots" content="index, follow" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px;
+    color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none; background: rgba(255,255,255,0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; line-height: 1; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255,255,255,0.18); }
+
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 8px; }
+  .hero h1 { font-size: 2.1rem; line-height: 1.25; color: var(--text); margin-bottom: 14px; }
+  .hero p { font-size: 1.05rem; line-height: 1.7; color: var(--muted); max-width: 680px; }
+
+  .card {
+    margin-top: 26px; background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 1.25rem; color: var(--accent); margin-bottom: 14px; }
+  .card p { font-size: 1rem; line-height: 1.8; color: var(--muted); margin-bottom: 12px; }
+  .card p:last-child { margin-bottom: 0; }
+  .about-list { margin: 6px 0 4px; padding-left: 22px; }
+  .about-list li { font-size: 1rem; line-height: 1.85; color: var(--muted); margin-bottom: 6px; }
+  .about-list li b { color: var(--text); }
+  .inline-link { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+  .inline-link:hover { border-bottom-color: var(--accent); }
+
+  .site-footer {
+    border-top: 1px solid var(--card-border); margin-top: 48px;
+    padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+  [hidden] { display: none !important; }
+</style>
+  <link rel="stylesheet" href="common.css?v=20260916b" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" data-zh="关于" data-en="About">关于</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="关于 Jerry 与小蓝页" data-en="About Jerry & Xiaolan Page">关于 Jerry 与小蓝页</h1>
+      <p data-zh="这里记录我是谁、这个站点在做什么，以及我对待工具与产品的一些基本态度。" data-en="Who I am, what this site is for, and the basic attitudes I bring to tools and products.">这里记录我是谁、这个站点在做什么，以及我对待工具与产品的一些基本态度。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="我是谁" data-en="Who I am">我是谁</h2>
+      <p data-zh="我是 Jerry（GitHub：MC-Creator-Jerry），一名独立开发者。比起做大而全的产品，我更喜欢从自己真实遇到的麻烦出发，做出小而扎实、能天天用上的工具。" data-en="I'm Jerry (GitHub: MC-Creator-Jerry), an independent developer. Rather than building big all-in-one products, I prefer starting from real annoyances I hit myself and making small, solid tools I can use every day.">我是 Jerry（GitHub：MC-Creator-Jerry），一名独立开发者。比起做大而全的产品，我更喜欢从自己真实遇到的麻烦出发，做出小而扎实、能天天用上的工具。</p>
+      <ul class="about-list">
+        <li data-zh="常驻 Windows 环境，关注系统性能、清理与隐私安全。" data-en="Live on Windows; care about system performance, cleanup and privacy.">常驻 Windows 环境，关注系统性能、清理与隐私安全。</li>
+        <li data-zh="相信「工具应当安静地帮上忙」，而不是弹窗、广告或后台偷跑。" data-en="Believe tools should help quietly — no popups, ads or sneaky background activity.">相信「工具应当安静地帮上忙」，而不是弹窗、广告或后台偷跑。</li>
+        <li data-zh="独立开发意味着要对用户负责：说明风险、允许预览、尊重选择。" data-en="Indie means being accountable to users: state the risks, allow previews, respect choices.">独立开发意味着要对用户负责：说明风险、允许预览、尊重选择。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="这个站点是什么" data-en="What this site is">这个站点是什么</h2>
+      <p data-zh="小蓝页既是我的项目聚合地，也是我的写作与实验空间。它不追求流量，而是一个实用、开放、会持续生长的资源站。" data-en="Xiaolan Page is both my project hub and my writing &amp; experimentation space. It isn't chasing traffic — it's a practical, open, continuously growing resource hub.">小蓝页既是我的项目聚合地，也是我的写作与实验空间。它不追求流量，而是一个实用、开放、会持续生长的资源站。</p>
+      <ul class="about-list">
+        <li data-zh="<b>项目作品</b>：CleanOpt 等我自己维护的工具，以及顺手收藏的优质网络产品。" data-en="<b>Projects</b>: tools I maintain like CleanOpt, plus hand-picked web products."><b>项目作品</b>：CleanOpt 等我自己维护的工具，以及顺手收藏的优质网络产品。</li>
+        <li data-zh="<b>博客</b>：开发笔记、工具测评与独立开发经验，记录项目背后的思考。" data-en="<b>Blog</b>: dev notes, tool reviews and indie-dev experience — the thinking behind projects."><b>博客</b>：开发笔记、工具测评与独立开发经验，记录项目背后的思考。</li>
+        <li data-zh="<b>留言板</b>：任何人都能公开留一句话，无需登录；我会读，也会回复。" data-en="<b>Guestbook</b>: anyone can leave a public note without logging in; I read and reply."><b>留言板</b>：任何人都能公开留一句话，无需登录；我会读，也会回复。</li>
+        <li data-zh="<b>全球新闻</b>：每日双语要闻站点的入口，关注更广阔的世界。" data-en="<b>Global News</b>: entry to the daily bilingual news site, for a wider view of the world."><b>全球新闻</b>：每日双语要闻站点的入口，关注更广阔的世界。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="我的产品理念" data-en="My product philosophy">我的产品理念</h2>
+      <ul class="about-list">
+        <li data-zh="<b>安全优先</b>：只做明确安全的操作，任何可能有风险的行为都先让你预览并确认。" data-en="<b>Safety first</b>: only do clearly-safe operations; anything risky is previewed and confirmed first."><b>安全优先</b>：只做明确安全的操作，任何可能有风险的行为都先让你预览并确认。</li>
+        <li data-zh="<b>克制而非堆功能</b>：一个工具把一件事做对，比十个半成品更有价值。" data-en="<b>Restraint over features</b>: one tool that does one thing right beats ten half-done ones."><b>克制而非堆功能</b>：一个工具把一件事做对，比十个半成品更有价值。</li>
+        <li data-zh="<b>本地优先、尊重隐私</b>：能在本机完成的，就不偷偷上传；需要账号的功能会清楚说明用途。" data-en="<b>Local-first, private</b>: what can run locally stays local; account features state their purpose clearly."><b>本地优先、尊重隐私</b>：能在本机完成的，就不偷偷上传；需要账号的功能会清楚说明用途。</li>
+        <li data-zh="<b>持续维护</b>：发布不是终点。已发布的产品会一直修、一直补，而不是扔下不管。" data-en="<b>Maintained</b>: shipping isn't the finish line. Released tools keep getting fixed and improved."><b>持续维护</b>：发布不是终点。已发布的产品会一直修、一直补，而不是扔下不管。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="如何联系我" data-en="How to reach me">如何联系我</h2>
+      <p data-zh="对一个工具或话题感兴趣？欢迎通过这些方式找到我：" data-en="Interested in a tool or topic? Reach me through any of these:">对一个工具或话题感兴趣？欢迎通过这些方式找到我：</p>
+      <ul class="about-list">
+        <li><a class="inline-link" href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a></li>
+        <li data-zh="📧 邮箱：jerryprdservice@163.com" data-en="📧 Email: jerryprdservice@163.com">📧 邮箱：jerryprdservice@163.com</li>
+        <li data-zh="不想用 GitHub？可以 <a class='inline-link' href='subscribe/'>邮箱订阅</a> 站点更新，或到 <a class='inline-link' href='guestbook/'>留言板</a> 给我留言。" data-en="Prefer not GitHub? <a class='inline-link' href='subscribe/'>Subscribe by email</a> for updates, or leave a note on the <a class='inline-link' href='guestbook/'>guestbook</a>.">不想用 GitHub？可以 <a class="inline-link" href="subscribe/">邮箱订阅</a> 站点更新，或到 <a class="inline-link" href="guestbook/">留言板</a> 给我留言。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="index.html" data-zh="返回主页" data-en="Back to home">返回主页</a> · <a href="blog/" data-zh="博客" data-en="Blog">博客</a> · <a href="guestbook/" data-zh="留言板" data-en="Guestbook">留言板</a> · <a href="contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" href="language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script src="auth.js?v=20260916b"></script>
+  <script src="common.js?v=20260916b"></script>
+</body>
+</html>

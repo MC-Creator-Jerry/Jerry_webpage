@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js?v=20260914ab"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>博客 · Jerry's webpage</title>
+<meta name="description" content="Jerry 的开发笔记、工具测评与独立开发经验，持续更新中。" />
+<meta name="author" content="Jerry" />
+<meta name="og:type" content="website" />
+<meta name="og:title" content="博客 · Jerry's webpage" />
+<meta name="og:description" content="Jerry 的开发笔记、工具测评与独立开发经验。" />
+<meta name="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="博客 · Jerry's webpage" />
+<meta name="twitter:description" content="Jerry 的开发笔记、工具测评与独立开发经验。" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px;
+    color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none; background: rgba(255,255,255,0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; line-height: 1; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255,255,255,0.18); }
+
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 32px; }
+  .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 12px; }
+  .hero p { font-size: 1.05rem; line-height: 1.7; color: var(--muted); max-width: 640px; }
+
+  .card {
+    margin-top: 22px; background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 14px; }
+
+  /* 博客列表 */
+  .blog-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .blog-item {
+    background: var(--bg); border: 1px solid var(--card-border); border-radius: var(--radius);
+    padding: 18px 20px; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .blog-item:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 18px rgba(20,35,59,0.12); }
+  .blog-item a { display: block; text-decoration: none; color: inherit; }
+  .blog-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.2px; }
+  .blog-title { font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.4; }
+  .blog-excerpt { font-size: 0.96rem; line-height: 1.65; color: var(--muted); margin-top: 8px; }
+  .blog-go { display: inline-block; margin-top: 12px; color: var(--accent); font-weight: 700; font-size: 0.95rem; }
+  .blog-item:hover .blog-go { text-decoration: underline; }
+
+  /* 预告 / 大纲（details 内联展开） */
+  .blog-outline > summary {
+    list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  }
+  .blog-outline > summary::-webkit-details-marker { display: none; }
+  .blog-outline .chev { transition: transform 0.2s; font-size: 1.1rem; color: var(--muted); }
+  .blog-outline[open] .chev { transform: rotate(180deg); }
+  .blog-outline .outline-body { margin-top: 12px; }
+  .blog-outline ol { margin: 8px 0 0 22px; padding: 0; }
+  .blog-outline li { color: var(--muted); font-size: 0.96rem; line-height: 1.8; }
+  .tag-soon {
+    display: inline-block; font-size: 0.72rem; font-weight: 700; color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: middle;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--card-border); margin-top: 48px;
+    padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+    .card { padding: 18px; }
+    .blog-item { padding: 14px 16px; }
+  }
+  [hidden] { display: none !important; }
+</style>
+  <link rel="stylesheet" href="../common.css?v=20260916b" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub">博客</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="博客" data-en="Blog">博客</h1>
+      <p data-zh="开发笔记、工具测评与独立开发经验。这里会持续生长，记录 CleanOpt 等项目背后的思考。" data-en="Dev notes, tool reviews and indie-dev experience. This space grows continuously, documenting the thinking behind projects like CleanOpt.">开发笔记、工具测评与独立开发经验。这里会持续生长，记录 CleanOpt 等项目背后的思考。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="最新文章" data-en="Latest posts">最新文章</h2>
+      <ul class="blog-list">
+        <li class="blog-item">
+          <a href="cleanopt-release-notes.html">
+            <div class="blog-meta">2026-09-15 · CleanOpt</div>
+            <div class="blog-title">CleanOpt v2026.0831 发布说明：一个安全优先的 Windows 清理小工具</div>
+            <div class="blog-excerpt">首个公开版本完整说明了它的六大能力：系统垃圾清理、内存优化、后台静默运行、游戏免打扰、免安装便携版，以及贯穿始终的「安全优先」原则。为什么我要做一个「只清理明确安全的系统冗余」的工具？</div>
+            <span class="blog-go" data-zh="阅读全文 →" data-en="Read more →">阅读全文 →</span>
+          </a>
+        </li>
+
+        <li class="blog-item blog-outline">
+          <details>
+            <summary>
+              <div>
+                <div class="blog-meta">预告 · Windows 优化</div>
+                <div class="blog-title">Windows 内存优化入门（系列大纲）<span class="tag-soon" data-zh="筹备中" data-en="In progress">筹备中</span></div>
+              </div>
+              <span class="chev" aria-hidden="true">▾</span>
+            </summary>
+            <div class="outline-body">
+              <div class="blog-excerpt" data-zh="计划中的系列文章，先放出大纲供参考，正式版本将逐篇发布：" data-en="Planned series — outline below; full posts will follow one by one:">计划中的系列文章，先放出大纲供参考，正式版本将逐篇发布：</div>
+              <ol>
+                <li data-zh="为什么 Windows 用久了会变卡：内存、缓存与常驻进程的真相" data-en="Why Windows slows down over time: memory, cache and resident processes">为什么 Windows 用久了会变卡：内存、缓存与常驻进程的真相</li>
+                <li data-zh="任务管理器看什么：一眼判断哪些进程在偷走内存" data-en="What to read in Task Manager: spotting memory hogs at a glance">任务管理器看什么：一眼判断哪些进程在偷走内存</li>
+                <li data-zh="清理还是优化？临时文件、注册表与内存压缩的区别" data-en="Clean vs optimize: temp files, registry and memory compression">清理还是优化？临时文件、注册表与内存压缩的区别</li>
+                <li data-zh="游戏玩家的系统设置：如何避免掉帧与被后台任务打断" data-en="Settings for gamers: avoiding frame drops and background interruptions">游戏玩家的系统设置：如何避免掉帧与被后台任务打断</li>
+                <li data-zh="CleanOpt 设计笔记：便携、静默、安全优先的工程取舍" data-en="CleanOpt design notes: the trade-offs behind portable, silent, safety-first">CleanOpt 设计笔记：便携、静默、安全优先的工程取舍</li>
+              </ol>
+            </div>
+          </details>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Back to home">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" href="../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="../settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script src="../auth.js?v=20260916b"></script>
+  <script src="../common.js?v=20260916b"></script>
+</body>
+</html>
+

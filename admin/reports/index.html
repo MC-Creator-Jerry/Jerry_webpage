@@ -54,7 +54,7 @@
   [hidden]{display:none!important;}
   @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260914ad" />
+  <link rel="stylesheet" href="../../common.css?v=20260916b" />
 </head>
 <body>
   <header class="topbar">
@@ -76,6 +76,7 @@
     <section class="hero"><h1 data-zh="举报审核后台" data-en="Report Review">举报审核后台</h1></section>
     <section class="toolbar" id="toolbar" hidden>
       <button class="btn" id="refresh" data-zh="刷新" data-en="Refresh">刷新</button>
+      <a class="btn" href="../../admin/ban/" data-zh="小黑屋" data-en="Ban List">小黑屋</a>
       <span class="stat" id="stat"></span>
     </section>
     <div id="list"></div>
@@ -89,7 +90,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="../../prefs.js?v=20260909a"></script>
-  <script src="../../auth.js?v=20260909a"></script>
+  <script src="../../auth.js?v=20260916b"></script>
   <script>
     (function () {
       var listEl = document.getElementById('list');
@@ -155,6 +156,7 @@
       load();
     })();
   </script>
-  <script src="../../common.js?v=20260914g"></script>
+  <script src="../../common.js?v=20260916b"></script>
 </body>
 </html>
+

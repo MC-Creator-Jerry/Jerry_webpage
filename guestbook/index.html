@@ -1,0 +1,328 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js?v=20260914ab"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>留言板 · Jerry's webpage</title>
+<meta name="description" content="在小蓝页留言板公开留一句话，无需登录。Jerry 会读，也会回复。" />
+<meta name="author" content="Jerry" />
+<meta name="og:type" content="website" />
+<meta name="og:title" content="留言板 · Jerry's webpage" />
+<meta name="og:description" content="公开留言板，无需登录。Jerry 会读，也会回复。" />
+<meta name="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="留言板 · Jerry's webpage" />
+<meta name="twitter:description" content="公开留言板，无需登录。" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px;
+    color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none; background: rgba(255,255,255,0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; line-height: 1; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255,255,255,0.18); }
+
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 24px; }
+  .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 12px; }
+  .hero p { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 680px; }
+
+  .card {
+    margin-top: 22px; background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 14px; }
+
+  /* 留言表单 */
+  .gb-form { display: flex; flex-direction: column; gap: 12px; }
+  .gb-row { display: flex; flex-direction: column; gap: 6px; }
+  .gb-label { font-size: 0.88rem; color: var(--muted); }
+  .gb-input, .gb-textarea {
+    width: 100%; border: 1px solid var(--card-border); border-radius: 10px;
+    background: var(--bg); color: var(--text); padding: 10px 12px; font-size: 1rem;
+    font-family: inherit;
+  }
+  .gb-input:focus, .gb-textarea:focus { outline: none; border-color: var(--accent); }
+  .gb-textarea { min-height: 96px; resize: vertical; line-height: 1.6; }
+  .gb-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .gb-count { font-size: 0.82rem; color: var(--muted); }
+  .gb-count.over { color: #d13438; font-weight: 700; }
+  .gb-submit {
+    align-self: flex-start; background: var(--accent); color: #fff; border: none;
+    border-radius: 999px; padding: 10px 24px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .gb-submit:hover { background: #005a9e; }
+  .gb-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+  .gb-note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+  .gb-hint-bad { color: #d13438; }
+
+  /* 留言列表 */
+  .gb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .gb-item {
+    background: var(--bg); border: 1px solid var(--card-border); border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .gb-item-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .gb-name { font-weight: 700; color: var(--text); font-size: 0.98rem; }
+  .gb-time { font-size: 0.78rem; color: var(--muted); }
+  .gb-msg { font-size: 0.98rem; line-height: 1.7; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .gb-empty { color: var(--muted); font-size: 0.95rem; line-height: 1.7; }
+
+  .site-footer {
+    border-top: 1px solid var(--card-border); margin-top: 48px;
+    padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+    .card { padding: 18px; }
+    .gb-submit { width: 100%; }
+  }
+  [hidden] { display: none !important; }
+</style>
+  <link rel="stylesheet" href="../common.css?v=20260916b" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" data-zh="留言板" data-en="Guestbook">留言板</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="留言板" data-en="Guestbook">留言板</h1>
+      <p data-zh="随便留一句话，无需登录。请友善、真实，勿留广告与违禁内容——垃圾信息会被自动过滤。" data-en="Leave a note — no login needed. Be kind and real; ads and forbidden content are auto-filtered.">随便留一句话，无需登录。请友善、真实，勿留广告与违禁内容——垃圾信息会被自动过滤。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="写留言" data-en="Write a note">写留言</h2>
+      <form class="gb-form" id="gbForm" novalidate>
+        <div class="gb-row">
+          <label class="gb-label" for="gbName" data-zh="昵称（可选）" data-en="Name (optional)">昵称（可选）</label>
+          <input class="gb-input" type="text" id="gbName" maxlength="40" autocomplete="off" data-ph-zh="不填则显示「匿名访客」" data-ph-en="Defaults to “Anonymous”" placeholder="不填则显示「匿名访客」" />
+        </div>
+        <div class="gb-row">
+          <label class="gb-label" for="gbMsg" data-zh="留言内容 *" data-en="Message *">留言内容 *</label>
+          <textarea class="gb-textarea" id="gbMsg" maxlength="800" data-ph-zh="说点什么吧…（最多 800 字）" data-ph-en="Say something… (max 800 chars)" placeholder="说点什么吧…（最多 800 字）"></textarea>
+        </div>
+        <div class="gb-meta">
+          <span class="gb-count" id="gbCount">0 / 800</span>
+          <button type="submit" class="gb-submit" id="gbSubmit" data-zh="发布留言" data-en="Post note">发布留言</button>
+        </div>
+        <p class="gb-note" id="gbHint" data-zh="公开可见，会显示你的昵称与留言时间。" data-en="Publicly visible, showing your name and timestamp.">公开可见，会显示你的昵称与留言时间。</p>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="大家说的话" data-en="What others said">大家说的话</h2>
+      <ul class="gb-list" id="gbList"></ul>
+      <p class="gb-empty" id="gbEmpty" data-zh="还没有人留言，来当第一个吧。" data-en="No messages yet — be the first.">还没有人留言，来当第一个吧。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Back to home">返回主页</a> · <a href="../about.html" data-zh="关于" data-en="About">关于</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" href="../language.html" target="_blank" rel="noopener" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="../settings/homepage.html" target="_blank" rel="noopener" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <div id="gbToast" style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:12px 20px;border-radius:10px;font-size:0.95rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:999;"></div>
+
+  <script>
+    (function () {
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function fmtTime(ts) {
+        try {
+          var d = new Date(ts);
+          if (isNaN(d.getTime())) return '';
+          return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
+            ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        } catch (e) { return ''; }
+      }
+      function toast(msg, bad) {
+        var t = document.getElementById('gbToast');
+        t.textContent = msg;
+        t.style.background = bad ? '#d13438' : 'var(--text)';
+        t.style.color = bad ? '#fff' : 'var(--bg)';
+        t.style.opacity = '1';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        clearTimeout(window.__gbToast);
+        window.__gbToast = setTimeout(function () {
+          t.style.opacity = '0';
+          t.style.transform = 'translateX(-50%) translateY(20px)';
+        }, 2600);
+      }
+
+      var nameEl = document.getElementById('gbName');
+      var msgEl = document.getElementById('gbMsg');
+      var countEl = document.getElementById('gbCount');
+      var submitEl = document.getElementById('gbSubmit');
+      var hintEl = document.getElementById('gbHint');
+      var listEl = document.getElementById('gbList');
+      var emptyEl = document.getElementById('gbEmpty');
+
+      function updateCount() {
+        var len = msgEl.value.length;
+        countEl.textContent = len + ' / 800';
+        countEl.classList.toggle('over', len > 800);
+      }
+      msgEl.addEventListener('input', updateCount);
+
+      function renderList(items) {
+        listEl.innerHTML = '';
+        if (!items || !items.length) { emptyEl.hidden = false; return; }
+        emptyEl.hidden = true;
+        items.forEach(function (it) {
+          var li = document.createElement('li');
+          li.className = 'gb-item';
+          var head = document.createElement('div');
+          head.className = 'gb-item-head';
+          var nm = document.createElement('span');
+          nm.className = 'gb-name';
+          nm.textContent = it.name || '匿名访客';
+          var tm = document.createElement('span');
+          tm.className = 'gb-time';
+          tm.textContent = fmtTime(it.ts);
+          head.appendChild(nm);
+          head.appendChild(tm);
+          var msg = document.createElement('div');
+          msg.className = 'gb-msg';
+          msg.textContent = it.message || '';   // textContent：天然防 XSS
+          li.appendChild(head);
+          li.appendChild(msg);
+          listEl.appendChild(li);
+        });
+      }
+
+      function loadList() {
+        fetch('../api/guestbook')
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.ok && Array.isArray(d.list)) renderList(d.list);
+            else emptyEl.hidden = false;
+          })
+          .catch(function () { emptyEl.hidden = false; });
+      }
+
+      document.getElementById('gbForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var message = msgEl.value.trim();
+        var name = nameEl.value.trim();
+        if (!message) { toast('留言内容不能为空', true); return; }
+        if (message.length > 800) { toast('留言太长（≤800 字）', true); return; }
+        submitEl.disabled = true;
+        fetch('../api/guestbook', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, message: message })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.ok) {
+              msgEl.value = '';
+              updateCount();
+              toast('已发布，感谢留言！');
+              loadList();
+            } else if (d && d.error === 'forbidden') {
+              toast('包含违禁词「' + (d.word || '') + '」，请修改后重试', true);
+            } else if (d && d.error === 'rate_limited') {
+              toast('留言太快了，请稍后再试', true);
+            } else {
+              toast(d && d.error ? ('发布失败：' + d.error) : '发布失败，请重试', true);
+            }
+          })
+          .catch(function () { toast('网络错误，请稍后重试', true); })
+          .finally(function () { submitEl.disabled = false; });
+      });
+
+      // 占位符随语言切换（与全站 applyLang 兼容）
+      function applyPh() {
+        var en = (localStorage.getItem('xl_lang') || 'zh') === 'en';
+        nameEl.placeholder = en ? 'Defaults to “Anonymous”' : '不填则显示「匿名访客」';
+        msgEl.placeholder = en ? 'Say something… (max 800 chars)' : '说点什么吧…（最多 800 字）';
+      }
+      window.addEventListener('storage', function (e) { if (e.key === 'xl_lang') applyPh(); });
+      applyPh();
+      updateCount();
+      loadList();
+    })();
+  </script>
+  <script src="../auth.js?v=20260916b"></script>
+  <script src="../common.js?v=20260916b"></script>
+</body>
+</html>

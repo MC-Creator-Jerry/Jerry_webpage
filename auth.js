@@ -181,6 +181,7 @@
   var helpIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>";
   var flagIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/><line x1='4' y1='22' x2='4' y2='15'/></svg>";
   var trafficIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 3v18h18'/><path d='M7 16l4-4 4 5 5-7'/></svg>";
+  var banIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><line x1='5.6' y1='5.6' x2='18.4' y2='18.4'/></svg>";
 
   // 蓝条「通知」红点：拉取未读总数（系统+消息+评论）并刷新
   var NOTIF_KEY = '__xl_notif', NOTIF_TTL = 30000;
@@ -452,6 +453,7 @@
           '<div class="hc-actions hc-actions-extras">' +
             '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'helpcenter/">' + helpIco + '<span>' + t('帮助中心', 'Help Center') + '</span></a>' +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/reports/">' + flagIco + '<span>' + t('举报后台', 'Reports') + '</span></a>' : '') +
+            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/ban/">' + banIco + '<span>' + t('小黑屋', 'Ban List') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'stats/">' + trafficIco + '<span>' + t('流量', 'Traffic') + '</span></a>' : '') +
           '</div>';
         var himg = card.querySelector('#hcAvatarImg');
@@ -464,9 +466,15 @@
       } else {
         card.innerHTML =
           '<div class="hc-avatar"><img src="' + DEFAULT_AVATAR + '" alt=""></div>' +
-          '<div class="hc-name">' + t('未登录', 'Not signed in') + '</div>' +
-          '<div class="hc-login">' + t('登录后可同步设置与数据', 'Sign in to sync settings & data') + '</div>' +
-          '<div class="hc-actions"><a class="hc-btn" href="#" id="hcLogin">' + t('登录', 'Sign in') + '</a></div>';
+          '<div class="hc-name">' + t('访客', 'Guest') + '</div>' +
+          '<div class="hc-login">@' + t('guest', 'guest') + '</div>' +
+          '<div class="hc-actions">' +
+            '<a class="hc-btn" href="#" id="hcLogin">' + t('登录', 'Sign in') + '</a>' +
+            '<a class="hc-btn ghost" href="' + BASE + 'subscribe/">' + t('订阅更新', 'Updates') + '</a>' +
+          '</div>' +
+          '<div class="hc-actions hc-actions-extras">' +
+            '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'helpcenter/">' + helpIco + '<span>' + t('帮助中心', 'Help Center') + '</span></a>' +
+          '</div>';
         var lb = card.querySelector('#hcLogin');
         if (lb) lb.addEventListener('click', function (e) { e.preventDefault(); if (window.JW_LOGIN) window.JW_LOGIN(); });
       }

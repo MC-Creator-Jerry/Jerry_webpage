@@ -447,6 +447,20 @@ a, button, .bar-btn, .fab, .btn, .icon-btn, .seg, .topic-chip,
   .topbar { padding-left: calc(14px + max(10px, env(safe-area-inset-left, 0px))); padding-right: calc(14px + max(10px, env(safe-area-inset-right, 0px))); }
 }
 
+/* ============ 17. 横屏内容加宽（"宽一点"）：桌面/横屏下放宽内容区与网格 ============ */
+@media (orientation: landscape) and (min-width: 760px) {
+  .content { max-width: 1180px !important; }
+  .hero p { max-width: 760px; }
+}
+@media (orientation: landscape) and (min-width: 1024px) {
+  .prod-grid, .user-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ============ 18. 回到顶部浮动按钮 ============ */
+.fab.xl-toplink { display: none; }
+.fab.xl-toplink.show { display: inline-flex; }
+
+
 /* 横屏矮屏（手机横屏）：顶栏按钮较多（新模式 + 快捷键）时允许横向滚动，避免溢出被裁 */
 @media (orientation: landscape) and (max-height: 560px) {
   .topbar { flex-wrap: nowrap; }

@@ -4,10 +4,11 @@
 //      · 点击已有文字元素 -> 就地编辑（contenteditable）
 //      · 点击图片 -> 弹出输入新地址换图
 //      · 工具栏分组：
-//          块   ＋新建 / ⧉复制 / ↑上移 / ↓下移 / 🗑删除
-//          媒体 🖼图片 / 🎬视频 / 🔍＋放大 / 🔍－缩小
-//          格式 B / I / U / S / 对齐 / 🔗链接 / ⛓解除 / 清格式
-//          样式 字体 / 字号 / 文字颜色
+//          插入 ＋ 一个大按钮，下拉菜单：文本框 / 图片 / 视频 / 文件（附件）
+//          块   ⧉复制 / ↑上移 / ↓下移 / 🗑删除
+//          尺寸 实时显示「宽 × 高」/ ⤢重置（改大小＝直接拖块的四角·四边，Microsoft 365 式：
+//               图片·视频按比例缩放，文本框·附件自由改长宽；尺寸随块保存，访客看到同一尺寸）
+//          格式 B / I / U / S / 对齐 / 🔗链接 / ⛓解除 / 字体 / 字号 / 颜色
 //      · 快捷键：Ctrl/Cmd+S 保存 · Esc 退出 · Ctrl/Cmd+B/I/U 粗斜下划线
 //                Delete/Backspace 删除选中块（未在输入时）
 //      · 有未保存修改时，退出或刷新前会提示；保存按钮显示「未保存」圆点
@@ -115,22 +116,34 @@
         a.href = b.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = b.url;
         wrap.appendChild(a);
       }
+    } else if (b.type === 'file') {
+      wrap.dataset.url = b.url || '';
+      wrap.dataset.name = b.name || '';
+      var link = document.createElement('a');
+      link.className = 'xl-file';
+      link.href = b.url || '#';
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.setAttribute('download', '');
+      var ico = document.createElement('span');
+      ico.className = 'xl-file-ico';
+      ico.textContent = '📎';
+      var nm = document.createElement('span');
+      nm.className = 'xl-file-name';
+      nm.textContent = b.name || '附件';
+      link.appendChild(ico); link.appendChild(nm);
+      wrap.appendChild(link);
     }
-    applyZoomTo(wrap, b.zoom);
+    applySizeTo(wrap, b.w, b.h);
     return wrap;
   }
 
-  function applyZoomTo(wrap, zoom) {
-    var z = parseFloat(zoom || '1') || 1;
-    if (z !== 1) {
-      wrap.dataset.zoom = z;
-      wrap.style.transform = 'scale(' + z + ')';
-      wrap.style.transformOrigin = 'top left';
-    } else {
-      delete wrap.dataset.zoom;
-      wrap.style.transform = '';
-      wrap.style.transformOrigin = '';
-    }
+  // 把保存的长宽写回块（0 / 空 = 自动，跟随内容）
+  function applySizeTo(wrap, w, h) {
+    w = parseInt(w, 10) || 0;
+    h = parseInt(h, 10) || 0;
+    if (w > 0) { wrap.style.width = w + 'px'; wrap.dataset.w = String(w); }
+    if (h > 0) { wrap.style.height = h + 'px'; wrap.dataset.h = String(h); }
   }
 
   // ---------- 应用已保存覆盖（所有访客） ----------
@@ -159,8 +172,17 @@
             else { node.innerHTML = nl2br(e.value); }   // 保留换行（Fix 2）
           } catch (_) {}
         });
+        // 幂等：先清空容器里已有的内容块，再按保存数据重建。
+        // 原来只 append 不清空，而 applySaved() 会在「页载入」和「每次退出编辑」时各跑一次，
+        // 于是同一批块被反复追加；保存又是从 DOM 全量收集 → 重复被写进 KV，每次更新翻一倍。
         var c = blocksContainer();
-        blocks.forEach(function (b) { c.appendChild(buildBlockEl(b)); });
+        $all('.xl-block', c).forEach(function (w) { w.remove(); });
+        var seen = {};
+        blocks.forEach(function (b) {
+          var id = b && b.id;
+          if (id) { if (seen[id]) return; seen[id] = 1; }
+          c.appendChild(buildBlockEl(b));
+        });
       })
       .catch(function () {});
   }
@@ -239,6 +261,144 @@
   function setActive(wrap) {
     activeWrap = wrap;
     $all('#xl-edit-blocks .xl-block').forEach(function (w) { w.classList.toggle('active', w === wrap); });
+    if (active && wrap) attachHandles(wrap); else detachHandles();
+    updateSizeRead();
+  }
+
+  // ---------- 长宽拖拽（Microsoft 365 式：4 角 + 4 边共 8 个手柄） ----------
+  var HANDLE_DIRS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+  var sizeBadge = null;   // 拖拽时跟随的「宽 × 高」气泡
+  var sizeRead = null;    // 工具栏里的尺寸读数（showUI 中创建）
+
+  // 图片 / 视频：任何手柄都保持原始比例（同 Word / PowerPoint 拖图片的行为）
+  // 文本框 / 附件：自由改长宽
+  function keepRatioType(t) { return t === 'image' || t === 'video'; }
+  function minBoxFor(t) { return keepRatioType(t) ? { w: 80, h: 45 } : { w: 120, h: 40 }; }
+
+  // 量「实际显示的内容」而不是外层容器：小图放在整宽容器里时，容器宽并不是图片宽
+  function boxTarget(wrap) {
+    return wrap.querySelector('img, video, iframe, .xl-file, .xl-block-inner') || wrap;
+  }
+  function currentBox(wrap) {
+    var r = boxTarget(wrap).getBoundingClientRect();
+    return { w: Math.round(r.width), h: Math.round(r.height) };
+  }
+
+  function attachHandles(wrap) {
+    detachHandles();
+    if (!wrap) return;
+    HANDLE_DIRS.forEach(function (dir) {
+      var h = document.createElement('span');
+      h.className = 'xl-rz xl-rz-' + dir;
+      h.dataset.dir = dir;
+      h.title = '拖动调整大小';
+      h.addEventListener('mousedown', function (e) { e.preventDefault(); e.stopPropagation(); });
+      h.addEventListener('pointerdown', startResize);
+      wrap.appendChild(h);
+    });
+  }
+  function detachHandles() {
+    $all('.xl-rz').forEach(function (h) { h.remove(); });
+  }
+
+  function showSizeBadge(text, x, y) {
+    if (!sizeBadge) {
+      sizeBadge = document.createElement('div');
+      sizeBadge.className = 'xl-size-badge';
+      document.body.appendChild(sizeBadge);
+    }
+    sizeBadge.textContent = text;
+    sizeBadge.style.left = Math.max(6, x) + 'px';
+    sizeBadge.style.top = Math.max(6, y) + 'px';
+    sizeBadge.classList.add('show');
+  }
+  function hideSizeBadge() { if (sizeBadge) sizeBadge.classList.remove('show'); }
+
+  function updateSizeRead() {
+    if (!sizeRead) return;
+    if (!activeWrap) { sizeRead.textContent = '未选中内容块'; return; }
+    var b = currentBox(activeWrap);
+    var auto = !activeWrap.dataset.w && !activeWrap.dataset.h;
+    sizeRead.textContent = b.w + ' × ' + b.h + (auto ? ' · 自适应' : '');
+  }
+
+  function startResize(e) {
+    var handle = e.currentTarget;
+    var wrap = handle.closest && handle.closest('.xl-block');
+    if (!wrap) return;
+    var dir = handle.dataset.dir || 'se';
+    e.preventDefault();
+    e.stopPropagation();
+
+    var type = wrap.dataset.type;
+    var ratioLocked = keepRatioType(type);
+    var target = boxTarget(wrap);
+    var startRect = target.getBoundingClientRect();
+    var startW = startRect.width;
+    var startH = startRect.height;
+    var ratio = startH > 0 ? startW / startH : 16 / 9;
+    // 图片优先用原始像素比例，避免被 CSS 拉伸时算错
+    if (target.tagName === 'IMG' && target.naturalWidth && target.naturalHeight) {
+      ratio = target.naturalWidth / target.naturalHeight;
+    }
+    var startX = e.clientX, startY = e.clientY;
+    var min = minBoxFor(type);
+
+    // 拖拽期间关掉 iframe/video 的指针事件，否则鼠标划过播放器会丢事件
+    document.body.classList.add('xl-resizing');
+
+    function move(ev) {
+      var dx = ev.clientX - startX;
+      var dy = ev.clientY - startY;
+      var horiz = dir.indexOf('e') !== -1 || dir.indexOf('w') !== -1;
+      var vert = dir.indexOf('n') !== -1 || dir.indexOf('s') !== -1;
+      var w = startW, h = startH;
+
+      if (horiz) w = startW + (dir.indexOf('e') !== -1 ? dx : -dx);
+      if (vert) h = startH + (dir.indexOf('s') !== -1 ? dy : -dy);
+      if (ratioLocked) {
+        if (horiz) h = w / ratio;      // 横向拖 → 以宽为准
+        else w = h * ratio;            // 纯纵向拖 → 以高为准
+      }
+
+      w = Math.max(min.w, Math.round(w));
+      h = Math.max(min.h, Math.round(h));
+
+      wrap.style.width = w + 'px';
+      wrap.style.height = h + 'px';
+      wrap.dataset.w = String(w);
+      wrap.dataset.h = String(h);
+
+      var b = wrap.getBoundingClientRect();
+      showSizeBadge(Math.round(b.width) + ' × ' + Math.round(b.height), b.left, b.top - 28);
+      updateSizeRead();
+    }
+
+    function up() {
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+      document.removeEventListener('pointercancel', up);
+      document.body.classList.remove('xl-resizing');
+      hideSizeBadge();
+      updateSizeRead();
+      markDirty();
+    }
+
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+    document.addEventListener('pointercancel', up);
+  }
+
+  // 恢复自适应尺寸（清掉写死的长宽）
+  function resetSize() {
+    if (!activeWrap) { toast('请先点选一个内容块'); return; }
+    activeWrap.style.width = '';
+    activeWrap.style.height = '';
+    delete activeWrap.dataset.w;
+    delete activeWrap.dataset.h;
+    updateSizeRead();
+    markDirty();
+    toast('已恢复为自适应尺寸');
   }
 
   // ---------- 富文本命令 ----------
@@ -305,8 +465,9 @@
     return /^https?:\/\//i.test(url) || /^\//.test(url) || /^data:image\//i.test(url) || /^\/api\/file/i.test(url);
   }
 
-  // 把本地文件上传到 /api/upload（需登录），返回可引用 URL /api/file?key=
-  function uploadFile(file, kind) {
+  // 把本地文件上传到 /api/upload（需登录），返回 { url, name }
+  // upload.js 不限制文件类型（单文件 ≤20MB），所以图片 / 视频 / 任意附件都走这一条路
+  function uploadFile(file) {
     return new Promise(function (resolve, reject) {
       var fd = new FormData();
       fd.append('file', file);
@@ -314,32 +475,63 @@
         .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
         .then(function (o) {
           if (!o.ok || !o.d.ok) { reject(new Error(o.d && o.d.error ? o.d.error : 'upload_failed')); return; }
-          resolve('/api/file?key=' + encodeURIComponent(o.d.key));
+          resolve({
+            url: '/api/file?key=' + encodeURIComponent(o.d.key),
+            name: o.d.name || file.name || ''
+          });
         })
         .catch(function (e) { reject(e); });
     });
   }
 
-  // 插入来源选择弹窗：本地文件 / 用链接
+  // 从链接里猜一个文件名，作为附件块的显示名
+  function nameFromUrl(url) {
+    var seg = '';
+    try {
+      seg = String(url).split('?')[0].split('/').filter(Boolean).pop() || '';
+      seg = decodeURIComponent(seg);
+    } catch (e) {}
+    return seg || String(url);
+  }
+
+  // 插入来源的文案配置（文本框不走弹窗，直接新建空文本框）
+  var INSERT_META = {
+    image: {
+      title: '插入图片', accept: 'image/*', local: '📁 本地图片', uploading: '图片上传中…',
+      promptText: '输入图片地址（http/https 或以 / 开头的站内路径）：'
+    },
+    video: {
+      title: '插入视频', accept: 'video/*', local: '📁 本地视频', uploading: '视频上传中…',
+      promptText: '输入视频地址（YouTube 链接，或 .mp4/.webm/.ogg 直链）：'
+    },
+    file: {
+      title: '插入文件', accept: '', local: '📁 本地文件', uploading: '文件上传中…',
+      promptText: '输入文件地址（http/https 或以 / 开头的站内路径）：'
+    }
+  };
+
+  // 插入来源选择弹窗：本地文件 / 用链接。cb 收到 { url, name }
   function pickInsertSource(kind, cb) {
+    var meta = INSERT_META[kind];
+    if (!meta) return;
     var overlay = document.createElement('div');
     overlay.className = 'xl-insert-modal';
     var box = document.createElement('div');
     box.className = 'xl-insert-box';
     var title = document.createElement('div');
     title.className = 'xl-insert-title';
-    title.textContent = kind === 'image' ? '插入图片' : '插入视频';
+    title.textContent = meta.title;
     box.appendChild(title);
 
     var fileIn = document.createElement('input');
     fileIn.type = 'file';
-    fileIn.accept = kind === 'image' ? 'image/*' : 'video/*';
+    if (meta.accept) fileIn.accept = meta.accept;
     fileIn.style.display = 'none';
     box.appendChild(fileIn);
 
     var optLocal = document.createElement('button');
     optLocal.type = 'button'; optLocal.className = 'xl-insert-opt';
-    optLocal.textContent = '📁 本地文件';
+    optLocal.textContent = meta.local;
     var optLink = document.createElement('button');
     optLink.type = 'button'; optLink.className = 'xl-insert-opt';
     optLink.textContent = '🔗 用链接';
@@ -360,11 +552,11 @@
         var f = fileIn.files && fileIn.files[0];
         if (!f) return;
         close();
-        toast(kind === 'image' ? '图片上传中…' : '视频上传中…');
-        uploadFile(f, kind).then(function (url) { cb(url); })
+        toast(meta.uploading);
+        uploadFile(f).then(function (r) { cb(r); })
           .catch(function (err) {
             window.alert('上传失败：' + (err && err.message ? err.message : '未知错误') +
-              '\n（需以站主账号登录，且文件 ≤ 20MB）');
+              '\n（需登录，且文件 ≤ 20MB）');
           });
       };
       fileIn.click();
@@ -372,27 +564,30 @@
 
     optLink.addEventListener('click', function () {
       close();
-      var url = window.prompt(
-        kind === 'image' ? '输入图片地址（http/https 或以 / 开头的站内路径）：'
-                         : '输入视频地址（YouTube 链接，或 .mp4/.webm/.ogg 直链）：', '');
+      var url = window.prompt(meta.promptText, '');
       if (url === null) return;
       url = url.trim();
       if (!url) return;
       if (!isValidMediaUrl(url)) { window.alert('地址不合法。'); return; }
-      cb(url);
+      cb({ url: url, name: nameFromUrl(url) });
     });
   }
 
   // ---------- 块操作 ----------
-  function makeTextbox() {
-    var b = buildBlockEl({ id: genId(), type: 'textbox', html: '' });
-    var inner = b.querySelector('.xl-block-inner');
-    inner.setAttribute('contenteditable', 'true');
+  // 统一的「落块」入口：追加 → 选中（自动挂上拖拽手柄）→ 标脏 → 滚入视野
+  function addBlock(b) {
     blocksContainer().appendChild(b);
     setActive(b);
-    activeInner = inner;
-    inner.focus();
     markDirty();
+    try { b.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {}
+    return b;
+  }
+
+  function makeTextbox() {
+    var b = addBlock(buildBlockEl({ id: genId(), type: 'textbox', html: '' }));
+    activeInner = b.querySelector('.xl-block-inner');
+    activeInner.setAttribute('contenteditable', 'true');
+    activeInner.focus();
   }
 
   function deleteActive() {
@@ -433,20 +628,20 @@
   }
 
   function insertImage() {
-    pickInsertSource('image', function (url) {
-      var b = buildBlockEl({ id: genId(), type: 'image', src: url, alt: '' });
-      blocksContainer().appendChild(b);
-      setActive(b);
-      markDirty();
+    pickInsertSource('image', function (r) {
+      addBlock(buildBlockEl({ id: genId(), type: 'image', src: r.url, alt: '' }));
     });
   }
 
   function insertVideo() {
-    pickInsertSource('video', function (url) {
-      var b = buildBlockEl({ id: genId(), type: 'video', url: url });
-      blocksContainer().appendChild(b);
-      setActive(b);
-      markDirty();
+    pickInsertSource('video', function (r) {
+      addBlock(buildBlockEl({ id: genId(), type: 'video', url: r.url }));
+    });
+  }
+
+  function insertFile() {
+    pickInsertSource('file', function (r) {
+      addBlock(buildBlockEl({ id: genId(), type: 'file', url: r.url, name: r.name }));
     });
   }
 
@@ -564,17 +759,9 @@
     markDirty();
   }
 
-  // 缩放选中的图片/视频块（0.2 ~ 4 倍）
-  function applyZoom(delta) {
-    if (!activeWrap) { toast('请先点选一个图片或视频块'); return; }
-    var t = activeWrap.dataset.type;
-    if (t !== 'image' && t !== 'video') { toast('放大/缩小仅适用于图片块或视频块'); return; }
-    var cur = parseFloat(activeWrap.dataset.zoom || '1') || 1;
-    var next = Math.min(4, Math.max(0.2, Math.round((cur + delta) * 100) / 100));
-    applyZoomTo(activeWrap, next);
-    markDirty();
-    toast('缩放 ' + Math.round(next * 100) + '%');
-  }
+  // 原「🔍＋ / 🔍－」按 transform:scale 缩放的做法已移除：
+  // 现在直接拖动内容块四角/四边改真实长宽（见 startResize / resetSize），
+  // 尺寸会随块一起保存，所有访客看到的都是同一尺寸。
 
   function insertLink() {
     if (!activeInner) { toast('请先点选一个文本框'); return; }
@@ -597,7 +784,7 @@
     row.className = 'xl-edit-row';
     var tip = document.createElement('span');
     tip.className = 'xl-edit-tip';
-    tip.innerHTML = '布局编辑模式 · 点文字直接改，点图片换图　<span class="xl-kbd">Ctrl/⌘+S</span> 保存　<span class="xl-kbd">Esc</span> 退出';
+    tip.innerHTML = '布局编辑模式 · 点文字直接改，点图片换图 · 选中内容块后拖四角/四边改长宽　<span class="xl-kbd">Ctrl/⌘+S</span> 保存　<span class="xl-kbd">Esc</span> 退出';
     saveBtn = document.createElement('button');
     saveBtn.type = 'button'; saveBtn.className = 'xl-edit-save'; saveBtn.textContent = '保存';
     var exit = document.createElement('button');
@@ -623,9 +810,68 @@
     function sep() { var s = document.createElement('span'); s.className = 'xl-tb-sep'; return s; }
     function group() { var g = document.createElement('div'); g.className = 'xl-tb-group'; return g; }
 
+    // — 插入：合并成一个大按钮（文本框 / 图片 / 视频 / 文件） —
+    var gInsert = group();
+    gInsert.classList.add('xl-tb-group-insert');
+    var insWrap = document.createElement('div');
+    insWrap.className = 'xl-tb-insert';
+    var insBtn = document.createElement('button');
+    insBtn.type = 'button';
+    insBtn.className = 'xl-tb-insert-btn';
+    insBtn.title = '插入：文本框 / 图片 / 视频 / 文件';
+    insBtn.innerHTML = '<span class="xl-tb-insert-plus">＋</span>' +
+                       '<span class="xl-tb-insert-label">插入</span>' +
+                       '<span class="xl-caret">▾</span>';
+    var insMenu = document.createElement('div');
+    insMenu.className = 'xl-tb-menu';
+    [['📝', '文本框', '插入一个可输入文字的文本框', makeTextbox],
+     ['🖼', '图片', '插入图片（本地文件或链接）', insertImage],
+     ['🎬', '视频', '插入视频（本地文件 / YouTube / 直链）', insertVideo],
+     ['📎', '文件', '插入任意文件附件（≤20MB）', insertFile]
+    ].forEach(function (it) {
+      var mi = document.createElement('button');
+      mi.type = 'button';
+      mi.className = 'xl-tb-menu-item';
+      mi.title = it[2];
+      mi.innerHTML = '<span class="xl-tb-menu-ico">' + it[0] + '</span>' +
+                     '<span class="xl-tb-menu-label">' + it[1] + '</span>';
+      mi.addEventListener('mousedown', keep);
+      mi.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeInsertMenu();
+        it[3]();
+      });
+      insMenu.appendChild(mi);
+    });
+    insWrap.appendChild(insBtn);
+    insWrap.appendChild(insMenu);
+
+    function closeInsertMenu() { insMenu.classList.remove('open'); }
+    function openInsertMenu() {
+      // 菜单是 position:fixed，位置按按钮实时算：
+      // 工具栏 overflow-x:auto，绝对定位会被裁掉
+      var r = insBtn.getBoundingClientRect();
+      insMenu.style.left = Math.max(8, Math.round(r.left)) + 'px';
+      insMenu.style.top = Math.round(r.bottom + 6) + 'px';
+      insMenu.classList.add('open');
+    }
+    insBtn.addEventListener('mousedown', keep);
+    insBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var isOpen = insMenu.classList.contains('open');
+      closeInsertMenu();
+      if (!isOpen) openInsertMenu();
+    });
+    document.addEventListener('mousedown', function (e) {
+      if (!insWrap.contains(e.target)) closeInsertMenu();
+    });
+
+    gInsert.appendChild(insWrap);
+    tb.appendChild(gInsert);
+    tb.appendChild(sep());
+
     // — 块操作 —
     var gBlock = group();
-    gBlock.appendChild(btn('＋ 新建', makeTextbox, { title: '新建一个文本框' }));
     gBlock.appendChild(btn('⧉ 复制', duplicateActive, { title: '复制选中的内容块' }));
     gBlock.appendChild(btn('↑ 上移', function () { moveActive(-1); }, { title: '把选中块往上移' }));
     gBlock.appendChild(btn('↓ 下移', function () { moveActive(1); }, { title: '把选中块往下移' }));
@@ -633,13 +879,15 @@
     tb.appendChild(gBlock);
     tb.appendChild(sep());
 
-    // — 媒体 —
-    var gMedia = group();
-    gMedia.appendChild(btn('🖼 图片', insertImage, { title: '插入图片（本地文件或链接）' }));
-    gMedia.appendChild(btn('🎬 视频', insertVideo, { title: '插入视频（本地文件或链接）' }));
-    gMedia.appendChild(btn('🔍＋', function () { applyZoom(0.2); }, { title: '放大选中块' }));
-    gMedia.appendChild(btn('🔍－', function () { applyZoom(-0.2); }, { title: '缩小选中块' }));
-    tb.appendChild(gMedia);
+    // — 尺寸：实时读数 + 重置（改大小直接拖块的四角 / 四边） —
+    var gSize = group();
+    sizeRead = document.createElement('span');
+    sizeRead.className = 'xl-tb-sizeread';
+    sizeRead.textContent = '未选中内容块';
+    sizeRead.title = '拖动选中块的四角或四边即可改变长宽';
+    gSize.appendChild(sizeRead);
+    gSize.appendChild(btn('⤢ 重置', resetSize, { title: '把选中块恢复为自适应尺寸' }));
+    tb.appendChild(gSize);
     tb.appendChild(sep());
 
     // — 行内格式 —
@@ -1098,17 +1346,25 @@
   function saveEdits() {
     if (saving) return;
     var blocks = [];
+    var seen = {};
     $all('#xl-edit-blocks .xl-block').forEach(function (wrap) {
       var type = wrap.dataset.type;
       var id = wrap.dataset.bid || genId();
+      // 同一 id 只提交一次：堵住「DOM 里的重复块再被写回 KV」的最后一道口子
+      if (seen[id]) return;
+      seen[id] = 1;
+      var w = parseInt(wrap.dataset.w || '0', 10) || 0;
+      var h = parseInt(wrap.dataset.h || '0', 10) || 0;
       if (type === 'textbox') {
         var inner = wrap.querySelector('.xl-block-inner');
-        blocks.push({ id: id, type: 'textbox', html: inner.innerHTML, style: inner.getAttribute('style') || '' });
+        blocks.push({ id: id, type: 'textbox', html: inner.innerHTML, style: inner.getAttribute('style') || '', w: w, h: h });
       } else if (type === 'image') {
         var img = wrap.querySelector('img');
-        blocks.push({ id: id, type: 'image', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '', zoom: Number(wrap.dataset.zoom || 1) });
+        blocks.push({ id: id, type: 'image', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '', w: w, h: h });
       } else if (type === 'video') {
-        blocks.push({ id: id, type: 'video', url: wrap.dataset.url || '', zoom: Number(wrap.dataset.zoom || 1) });
+        blocks.push({ id: id, type: 'video', url: wrap.dataset.url || '', w: w, h: h });
+      } else if (type === 'file') {
+        blocks.push({ id: id, type: 'file', url: wrap.dataset.url || '', name: wrap.dataset.name || '', w: w, h: h });
       }
     });
     saving = true;
@@ -1139,6 +1395,9 @@
     active = false;
     activeWrap = null; activeInner = null; savedRange = null;
     dirty = false; saving = false;
+    detachHandles();
+    hideSizeBadge();
+    document.body.classList.remove('xl-resizing');
     document.body.classList.remove('xl-editmode');
     document.removeEventListener('selectionchange', onSelChange);
     document.removeEventListener('keydown', onKeyDown);
@@ -1148,7 +1407,7 @@
     var b = document.querySelector('.xl-edit-banner');
     if (b) b.remove();
     if (miniToolbar) { miniToolbar.remove(); miniToolbar = null; miniFgPanel = null; miniBgPanel = null; }
-    banner = null; saveBtn = null; fgPanel = null; bgPanel = null;
+    banner = null; saveBtn = null; fgPanel = null; bgPanel = null; sizeRead = null;
     document.querySelectorAll('[data-xl-edit]').forEach(function (el) {
       el.removeAttribute('data-xl-edit');
       el.removeEventListener('click', onTextClick);

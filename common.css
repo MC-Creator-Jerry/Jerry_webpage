@@ -249,7 +249,8 @@ body.xl-bar-tile .bar-btn > .badge {
   .gh-icon { vertical-align: -0.15em; margin-right: 0.3em; }
   .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
   .fab { width: 42px; height: 38px; }
-  .float-actions .xl-float-links { bottom: calc(100% + 62px); height: 38px; }
+  .float-actions .xl-float-links { right: 54px; width: calc(100% - 54px); bottom: calc(100% + 12px); height: 38px; }
+  .float-actions .xl-toplink { bottom: calc(100% + 62px); }
 }
 
 /* ============ 16. 用户自定义产品区块 + 添加弹窗 ============ */
@@ -390,7 +391,8 @@ a, button, .bar-btn, .fab, .btn, .icon-btn, .seg, .topic-chip,
     gap: 8px;
   }
   html .float-actions .fab { width: 44px; height: 44px; border-radius: 12px; }
-  .float-actions .xl-float-links { bottom: calc(100% + 68px); height: 44px; border-radius: 12px; }
+  .float-actions .xl-float-links { right: 56px; width: calc(100% - 56px); bottom: calc(100% + 12px); height: 44px; border-radius: 12px; }
+  .float-actions .xl-toplink { bottom: calc(100% + 68px); }
 
   /* 小蓝条2号（竖屏底部导航条）：固定屏幕底部，搜索框靠左、其余按钮靠右，单行横向滚动，不折行 */
   .bar-right {
@@ -985,6 +987,7 @@ body::before {
   z-index: 150 !important;
   display: flex;
   gap: 12px;
+  min-width: 240px;
 }
 /* 帮助中心浮动按钮：浮在浮动簇右端（设置齿轮）正上方 */
 .float-actions .xl-help-fab {
@@ -992,13 +995,13 @@ body::before {
   right: 0;
   bottom: calc(100% + 12px);
 }
-/* 订阅 + 博客 合并长按钮：浮在帮助按钮正上方，占满整行 */
+/* 订阅 + 博客 合并长按钮：浮在帮助按钮左侧，与其同高 */
 .float-actions .xl-float-links {
   position: absolute;
-  right: 0;
-  width: 100%;
-  min-width: 154px;
-  bottom: calc(100% + 66px); /* 12 gap + 42 help + 12 gap */
+  right: 62px; /* 帮助按钮 50px + 间隙 12px */
+  width: calc(100% - 62px);
+  min-width: 120px;
+  bottom: calc(100% + 12px); /* 与帮助按钮同高 */
   height: 42px;
   display: flex;
   gap: 0;
@@ -1010,6 +1013,12 @@ body::before {
   border: 1px solid rgba(0, 0, 0, 0.10);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition: background .18s, transform .12s, box-shadow .18s;
+}
+/* 回到顶部浮动按钮：浮在帮助按钮正上方 */
+.float-actions .xl-toplink {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 66px); /* 12 gap + 42 help + 12 gap */
 }
 .float-actions .xl-float-links:hover { background: rgba(255, 255, 255, 0.97); transform: translateY(-2px); }
 .float-actions .xl-float-links:active { transform: scale(0.98); }
@@ -1081,12 +1090,14 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 @media (max-width: 560px) {
   .fab { width: 46px; height: 40px; border-radius: 12px; }
   .fab svg { width: 20px; height: 20px; }
-  .float-actions .xl-float-links { bottom: calc(100% + 64px); height: 40px; border-radius: 12px; }
+  .float-actions .xl-float-links { right: 58px; width: calc(100% - 58px); bottom: calc(100% + 12px); height: 40px; border-radius: 12px; }
+  .float-actions .xl-toplink { bottom: calc(100% + 64px); }
 }
 
 @media (orientation: landscape) and (max-width: 560px) {
   .float-actions { right: max(12px, env(safe-area-inset-right, 0px)) !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; gap: 8px !important; }
-  .float-actions .xl-float-links { bottom: calc(100% + 64px); height: 40px; border-radius: 12px; }
+  .float-actions .xl-float-links { right: 58px; width: calc(100% - 58px); bottom: calc(100% + 12px); height: 40px; border-radius: 12px; }
+  .float-actions .xl-toplink { bottom: calc(100% + 64px); }
 }
 
 /* ============ 布局编辑模式（站主） ============ */

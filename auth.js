@@ -233,7 +233,8 @@
   // 移除蓝条上不应出现的按钮（个人主页、退出）——集中在此处理，避免改 11 个页面
   function cleanupBar() {
     if (logoutBtn && logoutBtn.parentNode) logoutBtn.parentNode.removeChild(logoutBtn);
-    var ph = document.querySelector('.bar-right a.bar-btn[href="home.html"]');
+    // 个人主页按钮：首页 href="home.html"，附页 href="../home.html"，统一按 data-zh 文本匹配移除，避免附页残留
+    var ph = document.querySelector('.bar-right a.bar-btn[data-zh="个人主页"]');
     if (ph && ph.parentNode) ph.parentNode.removeChild(ph);
   }
   cleanupBar();

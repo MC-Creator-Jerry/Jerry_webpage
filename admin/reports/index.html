@@ -12,6 +12,7 @@
 <title>举报审核后台 · Jerry's webpage</title>
 <meta name="description" content="举报审核后台（仅管理员）。" />
 <meta name="author" content="Jerry" />
+<meta name="robots" content="noindex,nofollow" />
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
 <style>  
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -54,7 +55,7 @@
   [hidden]{display:none!important;}
   @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260916b" />
+  <link rel="stylesheet" href="../../common.css?v=20260916c" />
 </head>
 <body>
   <header class="topbar">
@@ -93,6 +94,18 @@
   <script src="../../auth.js?v=20260916b"></script>
   <script>
     (function () {
+      var _main = document.querySelector('main');
+      if (_main) _main.style.visibility = 'hidden';
+      fetch('/api/me')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (me) {
+          if (!me || !me.isAdmin) { location.replace('../../index.html'); return; }
+          if (_main) _main.style.visibility = '';
+          initReportsPage();
+        })
+        .catch(function () { location.replace('../../index.html'); });
+
+      function initReportsPage() {
       var listEl = document.getElementById('list');
       var emptyEl = document.getElementById('empty');
       var deniedEl = document.getElementById('denied');
@@ -154,9 +167,10 @@
 
       refreshBtn.addEventListener('click', load);
       load();
+      }
     })();
   </script>
-  <script src="../../common.js?v=20260916b"></script>
+  <script src="../../common.js?v=20260916c"></script>
 </body>
 </html>
 

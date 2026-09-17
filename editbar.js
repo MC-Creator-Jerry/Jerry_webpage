@@ -874,6 +874,7 @@
       var on = banner.classList.toggle('is-collapsed');
       document.body.classList.toggle('xl-rbn-collapsed', on);
       collapseBtn.textContent = on ? '⌄' : '⌃';
+      syncBannerHeight();
       try { localStorage.setItem(COLLAPSE_KEY, on ? '1' : '0'); } catch (e) {}
     });
     // 记住上次的收起状态
@@ -1510,6 +1511,13 @@
     exitEdit(false);
   }
 
+  // 让出 banner 实际高度，防止固定 margin-top 遮挡内容
+  function syncBannerHeight() {
+    if (!banner) return;
+    var h = banner.getBoundingClientRect().height || banner.offsetHeight || 160;
+    document.body.style.setProperty('--xl-banner-h', (h + 8) + 'px');
+  }
+
   // ---------- 进入 / 保存 / 退出 ----------
   function open() {
     if (active) return;
@@ -1517,6 +1525,11 @@
     dirty = false;
     document.body.classList.add('xl-editmode');
     showUI();
+    syncBannerHeight();
+    if (!window.__xlBannerRO && 'ResizeObserver' in window) {
+      window.__xlBannerRO = new ResizeObserver(function () { syncBannerHeight(); });
+      window.__xlBannerRO.observe(banner);
+    }
     document.querySelectorAll(TEXT_SEL).forEach(function (el) {
       if (inExcluded(el)) return;
       el.setAttribute('data-xl-edit', '');
@@ -1614,6 +1627,8 @@
     document.body.classList.remove('xl-resizing');
     document.body.classList.remove('xl-editmode');
     document.body.classList.remove('xl-rbn-collapsed');
+    document.body.style.removeProperty('--xl-banner-h');
+    if (window.__xlBannerRO) { window.__xlBannerRO.disconnect(); window.__xlBannerRO = null; }
     document.removeEventListener('selectionchange', onSelChange);
     document.removeEventListener('keydown', onKeyDown);
     window.removeEventListener('beforeunload', onBeforeUnload);

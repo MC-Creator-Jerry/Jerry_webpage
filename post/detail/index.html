@@ -83,6 +83,9 @@
   .comment .act { border: none; background: transparent; color: var(--muted); font-size: 0.82rem; cursor: pointer; padding: 0; font-weight: 600; }
   .comment .act:hover { color: var(--accent); }
   .comment .act.del { color: var(--muted); }
+  .comment .act.like { display: inline-flex; align-items: center; gap: 3px; }
+  .comment .act.like.on { color: var(--accent); }
+  .comment .act.like .like-ico { font-size: 0.9rem; line-height: 1; }
 
   .composer { margin-top: 22px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--card-shadow); position: relative; }
   .composer .reply-note { font-size: 0.82rem; color: var(--accent); margin-bottom: 8px; display: none; }
@@ -116,7 +119,7 @@
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 100px; } .post h1 { font-size: 1.3rem; } .post-btn { width: 100%; } }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260917e" />
+  <link rel="stylesheet" href="../../common.css?v=20260918a" />
 </head>
 <body>
   <header class="topbar">
@@ -333,12 +336,18 @@
               (c.replyTo ? '<div class="reply-to" style="margin-top:2px">'+replyTag+'</div>' : '') +
               '<div class="text"></div>' +
               '<div class="actions">' +
+                '<button class="act like' + (c.liked ? ' on' : '') + '" data-id="'+c.id+'" title="点赞">' +
+                  '<span class="like-ico">' + (c.liked ? '♥' : '♡') + '</span> ' +
+                  '<span class="like-count">' + (c.likeCount || 0) + '</span>' +
+                '</button>' +
                 '<button class="act reply" data-id="'+c.id+'" data-login="'+esc(c.login)+'" data-zh="回复" data-en="Reply">回复</button>' +
                 (canDel ? '<button class="act del" data-id="'+c.id+'">删除</button>' : '') +
               '</div>' +
             '</div>';
           row.querySelector('.text').innerHTML = linkify(c.body);
           row.querySelector('.reply').addEventListener('click', function () { startReply(c.id, c.login); });
+          var likeBtn = row.querySelector('.act.like');
+          if (likeBtn) likeBtn.addEventListener('click', function () { toggleLikeComment(c.id, likeBtn); });
           var delBtn = row.querySelector('.act.del');
           if (delBtn) delBtn.addEventListener('click', function () { delComment(c.id); });
           commentsEl.appendChild(row);
@@ -375,6 +384,32 @@
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) { if (res.ok) { toast('已删除 ✓'); loadComments(); } else { toast('删除失败', true); } })
           .catch(function () { toast('删除失败（网络错误）', true); });
+      }
+
+      function toggleLikeComment(cid, btn) {
+        if (!meLogin) { toast('请先登录', true); if (window.JW_LOGIN) window.JW_LOGIN(); return; }
+        btn.disabled = true;
+        var action = btn.classList.contains('on') ? 'unlike' : 'like';
+        fetch('/api/comment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post: postId, id: cid, action: action })
+        }).then(function (r) { return r.ok ? r.json() : { error: 'net' }; })
+          .then(function (res) {
+            btn.disabled = false;
+            if (res.ok) {
+              var liked = action === 'like';
+              btn.classList.toggle('on', liked);
+              btn.querySelector('.like-ico').textContent = liked ? '♥' : '♡';
+              var cnt = btn.querySelector('.like-count');
+              if (cnt) cnt.textContent = (res.likeCount || 0) + '';
+            } else if (res.error === 'unauthorized') {
+              toast('请先登录', true);
+            } else {
+              toast('操作失败', true);
+            }
+          })
+          .catch(function () { btn.disabled = false; toast('网络错误', true); });
       }
 
       function startReply(id, login) {
@@ -478,7 +513,7 @@
       }).catch(function () { loginHint.hidden = false; loadPost(); loadComments(); });
     })();
   </script>
-  <script src="../../common.js?v=20260917e"></script>
+  <script src="../../common.js?v=20260918a"></script>
 </body>
 </html>
 

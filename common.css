@@ -1363,7 +1363,11 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 /* ============ 编辑工具栏：「＋ 插入」大按钮 + 下拉菜单 + 尺寸读数 ============ */
 .xl-tb-group-insert { position: relative; }
 .xl-tb-insert { position: relative; }
-.xl-tb-insert-btn {
+/* 注意：这些按钮在 .xl-edit-banner 里，而 .xl-edit-banner button 的
+   「白字 + 半透明白底」规则选择器是 (0,1,1)，比单个类名 (0,1,0) 高一级，
+   会把这些按钮压成白字 —— 白底菜单上就等于隐形。
+   所以这里必须带上 .xl-edit-banner 前缀把优先度压回去。 */
+.xl-edit-banner .xl-tb-insert-btn {
   display: inline-flex; align-items: center; gap: 6px;
   font-family: inherit; font-size: 0.86rem; font-weight: 600;
   padding: 7px 14px;
@@ -1373,11 +1377,11 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
-.xl-tb-insert-btn:hover { background: #eef6ff; }
-.xl-tb-insert-btn:active { transform: translateY(1px); }
+.xl-edit-banner .xl-tb-insert-btn:hover { background: #eef6ff; color: var(--accent); }
+.xl-edit-banner .xl-tb-insert-btn:active { transform: translateY(1px); }
 .xl-tb-insert-plus { font-size: 1rem; font-weight: 800; line-height: 1; }
 .xl-tb-insert-label { letter-spacing: .02em; }
-.xl-tb-insert-btn .xl-caret { color: var(--accent); opacity: .75; }
+.xl-edit-banner .xl-tb-insert-btn .xl-caret { color: var(--accent); opacity: .75; }
 
 /* 下拉菜单：默认收起。
    用 position:fixed 由 JS 定位 —— 工具栏是 overflow-x:auto，
@@ -1394,17 +1398,17 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   padding: 6px;
 }
 .xl-tb-menu.open { display: block; }
-.xl-tb-menu-item {
+.xl-edit-banner .xl-tb-menu-item {
   display: flex; align-items: center; gap: 10px;
   width: 100%;
   padding: 9px 10px;
   border: 0; border-radius: 8px;
   background: none;
   color: var(--text, #1c2733);
-  font-family: inherit; font-size: 0.88rem;
+  font-family: inherit; font-size: 0.88rem; font-weight: 400;
   text-align: left; cursor: pointer;
 }
-.xl-tb-menu-item:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.xl-edit-banner .xl-tb-menu-item:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--text, #1c2733); }
 .xl-tb-menu-ico { width: 20px; text-align: center; font-size: 1rem; }
 .xl-tb-menu-label { flex: 1 1 auto; }
 html[data-theme="dark"] .xl-tb-menu { background: #1e2733; border-color: #34425a; }

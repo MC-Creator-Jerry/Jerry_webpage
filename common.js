@@ -925,10 +925,10 @@ window.XLTopics = (function () {
     }
     fa.insertBefore(bgBtn, themeBtn);
 
-    // 订阅 + 博客：合并为一个长浮动按钮，放在帮助按钮左侧顶带（已从小蓝条移除入口）
+    // 订阅 + 博客：合并为一个长浮动按钮，放在帮助按钮左侧（已从小蓝条移除入口）
     injectFloatLinks();
 
-    // 帮助中心：做成小浮动按钮，浮在「设置」齿轮正上方（已从小蓝条移除入口）
+    // 帮助中心：做成小浮动按钮，浮在浮动簇右端（回到顶部按钮下方，已从小蓝条移除入口）
     if (!fa.querySelector('#helpBtn')) {
       var helpA = document.createElement('a');
       helpA.className = 'fab xl-help-fab';

@@ -1025,7 +1025,7 @@ window.XLTopics = (function () {
     if (window.XLEdit) return;
     // 注意：脚本引用带 ?v= 版本号，src 不再以 "common.js" 结尾，必须用 *=
     var s = document.createElement('script');
-    s.src = scriptPrefix() + 'editbar.js?v=20260917e';
+    s.src = scriptPrefix() + 'editbar.js?v=20260918a';
     s.async = true;
     document.head.appendChild(s);
   }

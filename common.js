@@ -504,7 +504,8 @@ window.XLTopics = (function () {
 
 /* ============ 顶栏标准导航按钮兜底：保证每页小蓝条都含 消息中心/帖子中心/产品 ============ */
 /* 旧页面静态 HTML 的 .bar-right 不一致（有的缺 消息中心、有的缺 产品），统一在此兜底补齐全站；
-   按 href 判断是否存在，避免与「通知中心」等别名文本重复注入。登录/个人主页由 auth.js 按登录态处理。 */
+   以「解析后绝对 href + 文本别名」判断是否已存在，避免重复注入（根页 href 写作 "notice/" 无前导斜杠，
+   必须用 b.href 解析后再匹配）。登录/个人主页由 auth.js 按登录态处理。 */
 (function () {
   function prefix() {
     var sc = document.querySelector('script[src*="common.js"]');
@@ -512,10 +513,17 @@ window.XLTopics = (function () {
     var mm = src.match(/^((?:\.\.\/)*)/);
     return mm ? mm[1] : '';
   }
-  function hasHref(re) {
-    var btns = document.querySelectorAll('.bar-right .bar-btn');
+  // 按「解析后的绝对 href」+「按钮文字/别名」双重判定：
+  // 兼容根页写成 "notice/"/"post/"（无前导斜杠）的相对 href —— 用 b.href 拿解析后的绝对 URL 才能匹配 /\/notice\//。
+  // 作用域限定在当前 bar 内，避免跨 bar 误判或漏补。
+  function hasBtn(bar, keys, re) {
+    var btns = bar.querySelectorAll('.bar-btn');
     for (var i = 0; i < btns.length; i++) {
-      if (re.test(btns[i].getAttribute('href') || '')) return true;
+      var b = btns[i];
+      var h = b.href || b.getAttribute('href') || '';
+      if (re.test(h)) return true;
+      var t = (b.getAttribute('data-zh') || b.textContent || '').trim();
+      for (var k = 0; k < keys.length; k++) { if (t.indexOf(keys[k]) !== -1) return true; }
     }
     return false;
   }
@@ -534,9 +542,9 @@ window.XLTopics = (function () {
     var pre = prefix();
     bars.forEach(function (bar) {
       var ref = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
-      if (!hasHref(/\/notice\//)) bar.insertBefore(addBtn(pre + 'notice/', '消息中心', 'Messages'), ref);
-      if (!hasHref(/\/post\//)) bar.insertBefore(addBtn(pre + 'post/', '帖子中心', 'Post Center'), ref);
-      if (!hasHref(/products/)) bar.insertBefore(addBtn(pre + 'products.html', '产品', 'Products'), ref);
+      if (!hasBtn(bar, ['消息中心', '通知中心', '通知'], /\/notice\//)) bar.insertBefore(addBtn(pre + 'notice/', '消息中心', 'Messages'), ref);
+      if (!hasBtn(bar, ['帖子中心', '帖子'], /\/post\//)) bar.insertBefore(addBtn(pre + 'post/', '帖子中心', 'Post Center'), ref);
+      if (!hasBtn(bar, ['产品'], /products/)) bar.insertBefore(addBtn(pre + 'products.html', '产品', 'Products'), ref);
     });
     // 补完图标，与既有注入逻辑一致（已注图标者会被守卫跳过）
     if (window.__xlInjectBarIcons) window.__xlInjectBarIcons();

@@ -61,9 +61,17 @@
     if (document.readyState === 'complete') finish();
     else {
       window.addEventListener('load', finish);
-      setTimeout(finish, 2600); // 兜底：资源迟迟不触发 load 也收尾
+      // 兜底：DOM 已就绪即收尾，避免长时间等图片/iframe 卡在 92%；绝对上限再加一道保险
+      if (document.readyState !== 'loading') setTimeout(finish, 900);
+      setTimeout(finish, 1800);
     }
   }
+  // 暴露给键盘快捷键等「程序化站内跳转」：出发页立即盖白 + 目标页据此播放导航加载动画
+  // （点击 <a> 由下方 click 监听处理；location.href 直接跳转不会触发 click，故需此出口）
+  window.__xlNavStart = function () {
+    try { sessionStorage.setItem(KEY, '1'); } catch (e2) {}
+    show();
+  };
   // 出发页：点击站内链接 → 立即盖白 + 记录标记，目标页据此播放动画
   document.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('a') : null;
@@ -494,6 +502,49 @@ window.XLTopics = (function () {
   else run();
 })();
 
+/* ============ 顶栏标准导航按钮兜底：保证每页小蓝条都含 消息中心/帖子中心/产品 ============ */
+/* 旧页面静态 HTML 的 .bar-right 不一致（有的缺 消息中心、有的缺 产品），统一在此兜底补齐全站；
+   按 href 判断是否存在，避免与「通知中心」等别名文本重复注入。登录/个人主页由 auth.js 按登录态处理。 */
+(function () {
+  function prefix() {
+    var sc = document.querySelector('script[src*="common.js"]');
+    var src = sc ? (sc.getAttribute('src') || '') : '';
+    var mm = src.match(/^((?:\.\.\/)*)/);
+    return mm ? mm[1] : '';
+  }
+  function hasHref(re) {
+    var btns = document.querySelectorAll('.bar-right .bar-btn');
+    for (var i = 0; i < btns.length; i++) {
+      if (re.test(btns[i].getAttribute('href') || '')) return true;
+    }
+    return false;
+  }
+  function addBtn(href, zh, en) {
+    var a = document.createElement('a');
+    a.className = 'bar-btn';
+    a.href = href;
+    a.setAttribute('data-zh', zh);
+    a.setAttribute('data-en', en);
+    a.textContent = zh;
+    return a;
+  }
+  function run() {
+    var bars = document.querySelectorAll('.bar-right');
+    if (!bars.length) return;
+    var pre = prefix();
+    bars.forEach(function (bar) {
+      var ref = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
+      if (!hasHref(/\/notice\//)) bar.insertBefore(addBtn(pre + 'notice/', '消息中心', 'Messages'), ref);
+      if (!hasHref(/\/post\//)) bar.insertBefore(addBtn(pre + 'post/', '帖子中心', 'Post Center'), ref);
+      if (!hasHref(/products/)) bar.insertBefore(addBtn(pre + 'products.html', '产品', 'Products'), ref);
+    });
+    // 补完图标，与既有注入逻辑一致（已注图标者会被守卫跳过）
+    if (window.__xlInjectBarIcons) window.__xlInjectBarIcons();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+
 /* ============ 横竖屏切换：加载动画 + 按钮位移到对应位置 ============ */
 /* 触发条件：移动端 orientationchange 事件；桌面浏览器无该事件，则用 matchMedia('(orientation: portrait)') 的 change
  事件兜底。期间给 body 加 .xl-orient-anim，由 common.css 中的覆盖层 + 按钮位移动画完成「加载 + 移动」视觉效果。 */
@@ -550,6 +601,7 @@ window.XLTopics = (function () {
   function go(path) {
     if (location.pathname === path) return; // 已在目标页则不跳转（避免无谓刷新）
     try { sessionStorage.setItem('__xl_intra', '1'); } catch (e) {} // 站内跳转不重播开场动画
+    if (window.__xlNavStart) window.__xlNavStart(); // 出发页盖白 + 目标页播放导航加载动画
     location.href = path;
   }
   function loginOrMine() {
@@ -673,7 +725,7 @@ window.XLTopics = (function () {
   var BG_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>';
   var HELP = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg>';
   var SUBSCRIBE_ICON = '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>';
-  var BLOG_ICON = '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>';
+  var BLOG_ICON = '<text x="12" y="17" font-size="15" font-weight="700" text-anchor="middle" font-family="Arial,sans-serif" fill="currentColor" stroke="none">B</text>';
 
   function getTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
   function setTheme(t) {
@@ -1012,7 +1064,7 @@ window.XLTopics = (function () {
 /* ============ 回到顶部浮动按钮：滑到页面下部时显示，点击平滑回顶 ============ */
 (function () {
   'use strict';
-  var ARROW = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>';
+  var ARROW = '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" stroke="none"><text x="12" y="17" font-size="18" font-weight="700" text-anchor="middle" font-family="Arial,sans-serif">↑</text></svg>';
 
   function ensureFA() {
     var fa = document.querySelector('.float-actions');

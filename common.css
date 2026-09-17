@@ -249,6 +249,7 @@ body.xl-bar-tile .bar-btn > .badge {
   .gh-icon { vertical-align: -0.15em; margin-right: 0.3em; }
   .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
   .fab { width: 42px; height: 38px; }
+  .float-actions .xl-float-links { bottom: calc(100% + 62px); height: 38px; }
 }
 
 /* ============ 16. 用户自定义产品区块 + 添加弹窗 ============ */
@@ -389,6 +390,7 @@ a, button, .bar-btn, .fab, .btn, .icon-btn, .seg, .topic-chip,
     gap: 8px;
   }
   html .float-actions .fab { width: 44px; height: 44px; border-radius: 12px; }
+  .float-actions .xl-float-links { bottom: calc(100% + 68px); height: 44px; border-radius: 12px; }
 
   /* 小蓝条2号（竖屏底部导航条）：固定屏幕底部，搜索框靠左、其余按钮靠右，单行横向滚动，不折行 */
   .bar-right {
@@ -990,6 +992,52 @@ body::before {
   right: 0;
   bottom: calc(100% + 12px);
 }
+/* 订阅 + 博客 合并长按钮：浮在帮助按钮正上方，占满整行 */
+.float-actions .xl-float-links {
+  position: absolute;
+  right: 0;
+  width: 100%;
+  min-width: 154px;
+  bottom: calc(100% + 66px); /* 12 gap + 42 help + 12 gap */
+  height: 42px;
+  display: flex;
+  gap: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: background .18s, transform .12s, box-shadow .18s;
+}
+.float-actions .xl-float-links:hover { background: rgba(255, 255, 255, 0.97); transform: translateY(-2px); }
+.float-actions .xl-float-links:active { transform: scale(0.98); }
+.float-actions .xl-float-link {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  color: #1c2733;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  transition: background .15s;
+}
+.float-actions .xl-float-link:last-child { border-right: none; }
+.float-actions .xl-float-link:hover { background: rgba(0, 0, 0, 0.04); }
+.float-actions .xl-float-link svg { width: 18px; height: 18px; display: block; }
+html[data-theme="dark"] .float-actions .xl-float-links {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+html[data-theme="dark"] .float-actions .xl-float-links:hover { background: rgba(255, 255, 255, 0.22); }
+html[data-theme="dark"] .float-actions .xl-float-link { border-right-color: rgba(255, 255, 255, 0.12); }
+html[data-theme="dark"] .float-actions .xl-float-link:hover { background: rgba(255, 255, 255, 0.08); }
 .fab {
   width: 50px; height: 42px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -1033,10 +1081,12 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 @media (max-width: 560px) {
   .fab { width: 46px; height: 40px; border-radius: 12px; }
   .fab svg { width: 20px; height: 20px; }
+  .float-actions .xl-float-links { bottom: calc(100% + 64px); height: 40px; border-radius: 12px; }
 }
 
 @media (orientation: landscape) and (max-width: 560px) {
   .float-actions { right: max(12px, env(safe-area-inset-right, 0px)) !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; gap: 8px !important; }
+  .float-actions .xl-float-links { bottom: calc(100% + 64px); height: 40px; border-radius: 12px; }
 }
 
 /* ============ 布局编辑模式（站主） ============ */

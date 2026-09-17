@@ -1360,7 +1360,67 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   box-shadow: 0 0 0 2px rgba(0, 0, 0, .18);
 }
 
-/* 内容块（站主新建：文本框 / 图片 / 视频） */
+/* ============ 编辑工具栏：「＋ 插入」大按钮 + 下拉菜单 + 尺寸读数 ============ */
+.xl-tb-group-insert { position: relative; }
+.xl-tb-insert { position: relative; }
+.xl-tb-insert-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; font-size: 0.86rem; font-weight: 600;
+  padding: 7px 14px;
+  border: 1px solid #fff;
+  border-radius: 9px;
+  background: #fff; color: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+.xl-tb-insert-btn:hover { background: #eef6ff; }
+.xl-tb-insert-btn:active { transform: translateY(1px); }
+.xl-tb-insert-plus { font-size: 1rem; font-weight: 800; line-height: 1; }
+.xl-tb-insert-label { letter-spacing: .02em; }
+.xl-tb-insert-btn .xl-caret { color: var(--accent); opacity: .75; }
+
+/* 下拉菜单：默认收起。
+   用 position:fixed 由 JS 定位 —— 工具栏是 overflow-x:auto，
+   绝对定位的子元素会被裁掉（不覆盖出来，而是撑出一条滚动条）。 */
+.xl-tb-menu {
+  display: none;
+  position: fixed;
+  z-index: 1250;
+  min-width: 196px;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--card-border, #dbe3ec);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  padding: 6px;
+}
+.xl-tb-menu.open { display: block; }
+.xl-tb-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0; border-radius: 8px;
+  background: none;
+  color: var(--text, #1c2733);
+  font-family: inherit; font-size: 0.88rem;
+  text-align: left; cursor: pointer;
+}
+.xl-tb-menu-item:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.xl-tb-menu-ico { width: 20px; text-align: center; font-size: 1rem; }
+.xl-tb-menu-label { flex: 1 1 auto; }
+html[data-theme="dark"] .xl-tb-menu { background: #1e2733; border-color: #34425a; }
+html[data-theme="dark"] .xl-tb-menu-item { color: #e6edf5; }
+html[data-theme="dark"] .xl-tb-menu-item:hover { background: rgba(255, 255, 255, 0.10); }
+
+/* 尺寸读数 */
+.xl-tb-sizeread {
+  font-size: .78rem; color: #fff;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 8px; padding: 6px 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 内容块（站主新建：文本框 / 图片 / 视频 / 文件附件） */
 #xl-edit-blocks {
   max-width: 920px;
   margin: 18px auto;
@@ -1381,16 +1441,73 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 .xl-block .xl-video { width: 100%; aspect-ratio: 16 / 9; border: 0; }
 .xl-block a { color: var(--accent); word-break: break-all; }
 
-/* 编辑模式：选中高亮 + 删除提示 */
+/* 文件附件块 */
+.xl-block .xl-file {
+  display: inline-flex; align-items: center; gap: 10px;
+  max-width: 100%;
+  padding: 10px 14px; border-radius: 10px;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--card-border, #dbe3ec);
+  color: var(--text, #1c2733);
+  font-size: 0.92rem; font-weight: 600;
+  text-decoration: none; word-break: normal;
+}
+.xl-block .xl-file:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg, #fff)); }
+.xl-block .xl-file-ico { font-size: 1.1rem; line-height: 1; }
+.xl-block .xl-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-theme="dark"] .xl-block .xl-file { background: #1e2733; border-color: #34425a; color: #e6edf5; }
+
+/* 显式尺寸的块：内部内容铺满该尺寸。图片按比例内缩不拉伸，视频撑满但不变形 */
+.xl-block[data-w] > img { width: 100%; height: auto; }
+.xl-block[data-h] > img { height: 100%; object-fit: contain; }
+.xl-block[data-h] > .xl-video { height: 100%; aspect-ratio: auto; }
+.xl-block[data-h] > .xl-block-inner { height: 100%; overflow: auto; }
+
+/* 编辑模式：选中高亮 */
 .xl-editmode .xl-block { outline: 1px dashed rgba(0, 120, 212, 0.55); outline-offset: 4px; }
 .xl-editmode .xl-block.active { outline: 2px solid var(--accent); outline-offset: 4px; }
 .xl-editmode .xl-block-inner { cursor: text; }
-.xl-editmode .xl-block.active:after {
-  content: '已选中 · 可删除';
-  position: absolute; top: -10px; right: 8px;
-  background: var(--accent); color: #fff;
-  font-size: 0.7rem; padding: 2px 8px; border-radius: 999px;
+/* 原来的「已选中 · 可删除」角标已去掉：右上角要让给拖拽手柄与尺寸气泡 */
+
+/* ---------- 长宽拖拽手柄（Microsoft 365 式：4 角 + 4 边） ---------- */
+.xl-block .xl-rz {
+  position: absolute; z-index: 6;
+  display: none;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1.5px solid var(--accent, #0078d4);
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+  touch-action: none;
 }
+.xl-editmode .xl-block.active .xl-rz { display: block; }
+.xl-block .xl-rz:hover { background: var(--accent, #0078d4); }
+
+.xl-block .xl-rz-nw { width: 11px; height: 11px; left: -6px;  top: -6px;    cursor: nwse-resize; }
+.xl-block .xl-rz-ne { width: 11px; height: 11px; right: -6px; top: -6px;    cursor: nesw-resize; }
+.xl-block .xl-rz-se { width: 11px; height: 11px; right: -6px; bottom: -6px; cursor: nwse-resize; }
+.xl-block .xl-rz-sw { width: 11px; height: 11px; left: -6px;  bottom: -6px; cursor: nesw-resize; }
+.xl-block .xl-rz-n  { width: 15px; height: 9px;  left: 50%; top: -6px;      margin-left: -7px; cursor: ns-resize; }
+.xl-block .xl-rz-s  { width: 15px; height: 9px;  left: 50%; bottom: -6px;   margin-left: -7px; cursor: ns-resize; }
+.xl-block .xl-rz-w  { width: 9px;  height: 15px; top: 50%;  left: -6px;     margin-top: -7px;  cursor: ew-resize; }
+.xl-block .xl-rz-e  { width: 9px;  height: 15px; top: 50%;  right: -6px;    margin-top: -7px;  cursor: ew-resize; }
+
+/* 拖拽中：禁止选中文字，并让 iframe/video 交还指针事件（否则划过播放器会丢事件） */
+body.xl-resizing { user-select: none; -webkit-user-select: none; }
+body.xl-resizing iframe,
+body.xl-resizing video { pointer-events: none; }
+
+/* 拖拽时跟随鼠标的「宽 × 高」气泡 */
+.xl-size-badge {
+  position: fixed; z-index: 1400;
+  display: none;
+  background: rgba(28, 39, 51, 0.94); color: #fff;
+  font-size: 0.72rem; line-height: 1;
+  padding: 5px 9px; border-radius: 6px;
+  pointer-events: none; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.xl-size-badge.show { display: block; }
 
 /* 编辑模式：插入来源选择弹窗（本地文件 / 用链接） */
 .xl-insert-modal {

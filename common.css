@@ -1124,85 +1124,163 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   outline-offset: 3px;
   cursor: pointer;
 }
+/* ============ 编辑条：Microsoft 365 / Fluent 2 带状工具栏（Ribbon） ============
+   结构：标题行 → 选项卡 → 带状内容（每组按钮下方带组名，与 Word 网页版一致）
+   配色取 Fluent 2 浅色体系：底 #faf9f8 / 面板 #fff / 描边 #e0e0e0 / 次级文字 #616161
+   选择器注意：`.xl-edit-banner button` 特异度 (0,1,1) 会压过单个类名 (0,1,0)，
+   所以下面所有要覆盖它的规则都带 `.xl-edit-banner` 前缀 (0,2,0)。
+   ============================================================================ */
 .xl-edit-banner {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1200;
   display: flex; flex-direction: column;
-  background: color-mix(in srgb, var(--accent) 92%, #000 8%);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-  font-size: 0.9rem;
+  background: #faf9f8;
+  color: #242424;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
 }
-.xl-edit-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
-.xl-edit-banner .xl-edit-tip { flex: 1 1 auto; min-width: 0; }
+.xl-edit-row { position: relative; display: flex; align-items: center; gap: 10px; padding: 8px 14px 6px; }
+.xl-edit-banner .xl-edit-brand {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 700; font-size: 13.5px; color: var(--accent); white-space: nowrap;
+}
+.xl-edit-banner .xl-edit-brand-ico { font-size: 15px; line-height: 1; }
+.xl-edit-banner .xl-edit-tip {
+  flex: 1 1 auto; min-width: 0;
+  color: #616161; font-size: 12px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .xl-edit-banner button {
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 0.85rem;
+  font-family: inherit; font-size: 13px; line-height: 1.4;
+  border: 1px solid transparent;
+  background: transparent; color: #242424;
+  border-radius: 4px; padding: 4px 8px;
   cursor: pointer;
-  font-family: inherit;
 }
-.xl-edit-banner button:hover { background: rgba(255, 255, 255, 0.28); }
-.xl-edit-banner .xl-edit-save { background: #fff; color: var(--accent); font-weight: 700; border-color: #fff; }
-.xl-edit-banner .xl-edit-save:hover { background: #eef6ff; }
+.xl-edit-banner button:hover { background: #f0f0f0; }
+.xl-edit-banner .xl-edit-save {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+  font-weight: 600; padding: 6px 16px;
+}
+.xl-edit-banner .xl-edit-save:hover { background: color-mix(in srgb, var(--accent) 86%, #000); color: #fff; }
+.xl-edit-banner .xl-edit-save:disabled { opacity: .5; cursor: default; }
+.xl-edit-banner .xl-edit-exit {
+  background: #fff; color: #242424; border-color: #d1d1d1; padding: 6px 14px;
+}
+.xl-edit-banner .xl-edit-exit:hover { background: #f0f0f0; }
+/* 收起 / 展开带状内容（同 365 右上角的收起箭头），状态存 localStorage */
+.xl-edit-banner .xl-rbn-collapse { padding: 6px 9px; color: #616161; font-size: 12px; }
+.xl-edit-banner.is-collapsed .xl-rbn-collapse { color: var(--accent); }
+.xl-edit-banner.is-collapsed .xl-rbn-tabs,
+.xl-edit-banner.is-collapsed .xl-rbn-body { display: none; }
 
-/* 编辑工具栏（Word 式） */
-.xl-edit-toolbar {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 8px 16px 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
+/* ---------- 选项卡 ---------- */
+.xl-edit-banner .xl-rbn-tabs {
+  display: flex; align-items: flex-end; gap: 2px;
+  padding: 0 10px; background: #faf9f8;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
-.xl-tb-btn, .xl-tb-select, .xl-tb-color {
-  font-family: inherit; font-size: 0.82rem;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.15); color: #fff;
-  border-radius: 8px; padding: 6px 10px; cursor: pointer;
+.xl-edit-banner .xl-rbn-tab {
+  position: relative;
+  padding: 7px 12px 9px;
+  border: 0; background: none;
+  color: #424242; font-size: 13px;
+  border-radius: 4px 4px 0 0;
   white-space: nowrap;
 }
-.xl-tb-btn:hover, .xl-tb-select:hover, .xl-tb-color:hover { background: rgba(255, 255, 255, 0.28); }
-.xl-tb-select { padding-right: 6px; }
-.xl-tb-select option { color: #1c2733; }
-.xl-tb-sep { width: 1px; align-self: stretch; background: rgba(255, 255, 255, 0.35); margin: 2px 4px; }
-.xl-tb-color { display: inline-flex; align-items: center; gap: 6px; }
-.xl-tb-color input[type=color] { width: 22px; height: 22px; border: none; background: none; padding: 0; cursor: pointer; }
-
-/* ============ 编辑工具栏增强：字号输入 + 调色板按钮 + 下拉面板 ============ */
-.xl-tb-size {
-  width: 56px; font-family: inherit; font-size: 0.82rem;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.15); color: #fff;
-  border-radius: 8px; padding: 6px 8px;
+.xl-edit-banner .xl-rbn-tab:hover { background: #f0f0f0; color: #242424; }
+.xl-edit-banner .xl-rbn-tab.on { color: var(--accent); font-weight: 600; }
+.xl-edit-banner .xl-rbn-tab.on::after {
+  content: ''; position: absolute;
+  left: 8px; right: 8px; bottom: 2px; height: 2px;
+  border-radius: 1px; background: var(--accent);
 }
-.xl-tb-size::placeholder { color: rgba(255, 255, 255, 0.7); }
-.xl-tb-size:focus { outline: 2px solid rgba(255, 255, 255, 0.55); outline-offset: 1px; }
+/* 上下文选项卡：选中内容块时把这一页变成「图片 / 视频 / 文本框 / 附件」
+   （同 365 选中图片后冒出的「图片」页），左侧加一条强调竖线 */
+.xl-edit-banner .xl-rbn-tab.is-ctx { padding-left: 17px; color: var(--accent); }
+.xl-edit-banner .xl-rbn-tab.is-ctx::before {
+  content: ''; position: absolute;
+  left: 6px; top: 50%; width: 3px; height: 14px; margin-top: -7px;
+  border-radius: 2px; background: var(--accent);
+}
 
-/* 颜色按钮：「A」+ 颜色条 + 三角箭头，点击展开下拉 */
-.xl-tb-color-btn {
+/* ---------- 带状内容 ---------- */
+.xl-edit-banner .xl-rbn-body {
+  display: flex; align-items: stretch;
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  padding: 5px 8px 0;
+  min-height: 74px;
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.xl-edit-banner .xl-rbn-pane { display: none; align-items: stretch; width: 100%; }
+.xl-edit-banner .xl-rbn-pane.on { display: flex; }
+.xl-edit-banner .xl-rbn-grp {
+  display: flex; flex-direction: column;
+  padding: 0 9px; flex: 0 0 auto;
+  border-right: 1px solid #ededed;
+}
+.xl-edit-banner .xl-rbn-grp:last-child { border-right: 0; }
+.xl-edit-banner .xl-rbn-grp-body { display: flex; align-items: center; gap: 4px; flex: 1 1 auto; padding: 2px 0 3px; }
+.xl-edit-banner .xl-rbn-grp-name {
+  text-align: center; color: #8a8886; font-size: 10.5px;
+  padding: 2px 0 5px; white-space: nowrap; letter-spacing: .02em;
+}
+.xl-edit-banner .xl-rbn-stack { display: flex; flex-direction: column; gap: 3px; }
+.xl-edit-banner .xl-rbn-row { display: flex; align-items: center; gap: 2px; }
+.xl-edit-banner .xl-rbn-vsep { width: 1px; align-self: stretch; margin: 3px 4px; background: #e0e0e0; }
+.xl-edit-banner .xl-rbn-note { color: #616161; font-size: 11.5px; line-height: 1.75; white-space: nowrap; }
+
+/* ---------- 通用小按钮 / 下拉 / 分隔线 ---------- */
+.xl-edit-banner .xl-tb-btn,
+.xl-edit-banner .xl-tb-select,
+.xl-edit-banner .xl-tb-color {
+  font-family: inherit; font-size: 13px;
+  border: 1px solid transparent;
+  background: transparent; color: #242424;
+  border-radius: 4px; padding: 4px 8px;
+  cursor: pointer; white-space: nowrap;
+}
+.xl-edit-banner .xl-tb-btn { min-width: 26px; text-align: center; }
+.xl-edit-banner .xl-tb-btn:hover,
+.xl-edit-banner .xl-tb-select:hover,
+.xl-edit-banner .xl-tb-color:hover { background: #f0f0f0; }
+.xl-edit-banner .xl-tb-select { border-color: #d1d1d1; background: #fff; padding-right: 4px; }
+.xl-edit-banner .xl-tb-select option { color: #242424; }
+.xl-edit-banner .xl-tb-sep { width: 1px; align-self: stretch; margin: 3px 5px; background: #e0e0e0; }
+.xl-edit-banner .xl-tb-color { display: inline-flex; align-items: center; gap: 6px; }
+.xl-edit-banner .xl-tb-color input[type=color] { width: 22px; height: 22px; border: none; background: none; padding: 0; cursor: pointer; }
+
+/* 字体 / 字号输入框 */
+.xl-edit-banner .xl-tb-size {
+  width: 52px; font-family: inherit; font-size: 13px;
+  border: 1px solid #d1d1d1; background: #fff; color: #242424;
+  border-radius: 4px; padding: 3px 6px;
+}
+.xl-edit-banner .xl-tb-size::placeholder { color: #a19f9d; }
+.xl-edit-banner .xl-tb-size:focus { outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 0; }
+
+/* 颜色按钮：「A」+ 色条 + 箭头 */
+.xl-edit-banner .xl-tb-color-btn {
   position: relative;
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 8px 4px 4px;
-  font-family: inherit; font-size: 0.82rem;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.15); color: #fff;
-  border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 6px 3px 4px;
+  font-family: inherit; font-size: 13px;
+  border: 1px solid transparent; background: transparent; color: #242424;
+  border-radius: 4px; cursor: pointer;
 }
-.xl-tb-color-btn:hover { background: rgba(255, 255, 255, 0.28); }
-.xl-tb-color-letter, .xl-tb-color-bg-letter {
-  font-weight: 800; font-size: 1rem; line-height: 1; padding: 2px 4px;
-}
-.xl-tb-color-letter { color: #fff; text-shadow: 0 0 2px rgba(0,0,0,.8); }
-.xl-tb-color-bg-letter { background: var(--accent); color: #fff; }
-.xl-tb-color-bar {
-  display: inline-block; width: 16px; height: 3px; border-radius: 2px;
-  background: #222; margin-left: 1px;
-}
-.xl-caret { font-size: .6rem; opacity: .8; margin-left: 1px; }
+.xl-edit-banner .xl-tb-color-btn:hover { background: #f0f0f0; }
+.xl-edit-banner .xl-tb-color-letter,
+.xl-edit-banner .xl-tb-color-bg-letter { font-weight: 800; font-size: 14px; line-height: 1; padding: 1px 3px; }
+.xl-edit-banner .xl-tb-color-letter { color: #242424; }
+.xl-edit-banner .xl-tb-color-bg-letter { background: #fff36d; color: #242424; border-radius: 2px; }
+.xl-edit-banner .xl-tb-color-bar { display: inline-block; width: 15px; height: 3px; border-radius: 2px; margin-left: 1px; }
+.xl-edit-banner .xl-caret { font-size: .6rem; opacity: .7; margin-left: 1px; }
 
 /* 下拉调色板面板 */
 .xl-tb-color-panel {
@@ -1218,6 +1296,13 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   width: 232px;
 }
 .xl-tb-color-panel.open { display: block; }
+/* 带状工具栏里的面板必须改成 fixed：外层 .xl-rbn-body 是 overflow:auto，
+   绝对定位会被裁掉（不是溢出来，而是撑出一条滚动条）。位置由 JS 按按钮实时算。 */
+.xl-edit-banner .xl-rbn-body .xl-tb-color-panel {
+  position: fixed;
+  max-height: 70vh;
+  overflow-y: auto;
+}
 .xl-tb-color-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -1269,43 +1354,44 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   border-color: var(--danger, #d13438);
 }
 
-/* ============ 浮动迷你工具栏（Word 选中浮现式） ============ */
+/* ============ 浮动迷你工具栏（365 选中浮现式，浅色） ============ */
 .xl-mini-toolbar {
   display: none;
   position: fixed;
   z-index: 1240;
-  background: color-mix(in srgb, var(--accent) 95%, #000 5%);
-  color: #fff;
-  border-radius: 999px;
-  padding: 4px 6px;
+  background: #fff;
+  color: #242424;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 3px 4px;
   gap: 2px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
-  font-size: 0.85rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-size: 13px;
   align-items: center;
   white-space: nowrap;
 }
 .xl-mini-toolbar.open { display: inline-flex; }
 .xl-mini-toolbar button {
-  border: none; background: transparent; color: #fff;
-  padding: 5px 10px; border-radius: 999px; cursor: pointer;
-  font-family: inherit; font-size: 0.82rem;
+  border: 1px solid transparent; background: transparent; color: #242424;
+  padding: 4px 9px; border-radius: 4px; cursor: pointer;
+  font-family: inherit; font-size: 13px;
   font-weight: 700;
 }
-.xl-mini-toolbar button:hover { background: rgba(255, 255, 255, 0.25); }
+.xl-mini-toolbar button:hover { background: #f0f0f0; }
 .xl-mini-toolbar .xl-mini-fg, .xl-mini-toolbar .xl-mini-bg {
   position: relative;
-  padding: 5px 8px;
+  padding: 4px 7px;
 }
 .xl-mini-toolbar .xl-mini-fg-letter, .xl-mini-toolbar .xl-mini-bg-letter {
   display: inline-block; width: 14px; height: 14px;
   line-height: 14px; text-align: center; border-radius: 3px;
-  font-weight: 800; font-size: 0.85rem;
+  font-weight: 800; font-size: 13px;
 }
-.xl-mini-toolbar .xl-mini-fg-letter { background: #fff; color: #222; }
-.xl-mini-toolbar .xl-mini-bg-letter { background: #fff36d; color: #222; }
+.xl-mini-toolbar .xl-mini-fg-letter { background: #242424; color: #fff; }
+.xl-mini-toolbar .xl-mini-bg-letter { background: #fff36d; color: #242424; }
 .xl-mini-toolbar .xl-mini-fg-bar {
   display: block; height: 2px; width: 14px; margin: 1px auto 0;
-  background: #fff;
+  background: #242424;
 }
 .xl-mini-toolbar .xl-mini-fg-panel, .xl-mini-toolbar .xl-mini-bg-panel {
   display: none;
@@ -1317,39 +1403,76 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 .xl-mini-toolbar .xl-mini-fg-panel .xl-tb-color-panel,
 .xl-mini-toolbar .xl-mini-bg-panel .xl-tb-color-panel {
   position: static;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.28);
 }
 
-/* 工具栏分组：组内不拆行，窄屏时整组换行，避免按钮被拆得七零八落 */
-.xl-tb-group { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
-
-/* 开关型按钮（粗体/斜体/下划线/删除线/对齐）的激活态：反白高亮 */
-.xl-tb-btn.on {
-  background: #fff;
-  color: var(--accent, #0078d4);
-  border-color: #fff;
+/* 开关型按钮（粗体/斜体/下划线/删除线/对齐/列表）激活态：淡蓝底 + 蓝字 */
+.xl-edit-banner .xl-tb-btn.on {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent);
   font-weight: 700;
 }
-.xl-tb-btn:disabled { opacity: .55; cursor: not-allowed; }
-.xl-tb-btn:disabled:hover { background: rgba(255, 255, 255, 0.15); }
+.xl-edit-banner .xl-tb-btn:disabled { opacity: .45; cursor: not-allowed; }
+.xl-edit-banner .xl-tb-btn:disabled:hover { background: transparent; }
 
 /* B / I / U / S 用真实字形呈现，一眼可辨 */
-.xl-tb-btn.f-bold { font-weight: 800; }
-.xl-tb-btn.f-italic { font-style: italic; font-family: Georgia, serif; }
-.xl-tb-btn.f-underline { text-decoration: underline; }
-.xl-tb-btn.f-strike { text-decoration: line-through; }
-.xl-tb-btn.f-bold, .xl-tb-btn.f-italic,
-.xl-tb-btn.f-underline, .xl-tb-btn.f-strike {
-  min-width: 30px; padding: 6px 8px; text-align: center;
+.xl-edit-banner .xl-tb-btn.f-bold { font-weight: 800; }
+.xl-edit-banner .xl-tb-btn.f-italic { font-style: italic; font-family: Georgia, serif; }
+.xl-edit-banner .xl-tb-btn.f-underline { text-decoration: underline; }
+.xl-edit-banner .xl-tb-btn.f-strike { text-decoration: line-through; }
+.xl-edit-banner .xl-tb-btn.f-bold, .xl-edit-banner .xl-tb-btn.f-italic,
+.xl-edit-banner .xl-tb-btn.f-underline, .xl-edit-banner .xl-tb-btn.f-strike {
+  min-width: 26px; padding: 4px 6px; text-align: center;
 }
 
 /* 快捷键提示小键帽 */
 .xl-kbd {
-  display: inline-block; padding: 1px 6px; margin: 0 1px;
-  border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 5px;
-  background: rgba(255, 255, 255, 0.12);
-  font-size: .74rem; line-height: 1.5; white-space: nowrap;
+  display: inline-block; padding: 1px 5px; margin: 0 1px;
+  border: 1px solid var(--card-border, #d1d1d1); border-radius: 4px;
+  background: var(--card-bg, #fff);
+  font-size: 11px; line-height: 1.5; white-space: nowrap;
 }
+.xl-edit-banner .xl-kbd { border-color: #d1d1d1; background: #fff; color: #616161; }
+
+/* ---------- 深色主题 ---------- */
+html[data-theme="dark"] .xl-edit-banner {
+  background: #1b1a19; color: #f3f2f1; border-bottom-color: #3b3a39;
+}
+html[data-theme="dark"] .xl-edit-banner .xl-edit-tip { color: #a19f9d; }
+html[data-theme="dark"] .xl-edit-banner button { color: #f3f2f1; }
+html[data-theme="dark"] .xl-edit-banner button:hover { background: #333231; }
+html[data-theme="dark"] .xl-edit-banner .xl-edit-exit { background: #252423; color: #f3f2f1; border-color: #484644; }
+html[data-theme="dark"] .xl-edit-banner .xl-edit-exit:hover { background: #333231; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-collapse { color: #a19f9d; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-tabs { background: #1b1a19; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-tab { color: #c8c6c4; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-tab:hover { background: #292827; color: #f3f2f1; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-body { background: #252423; border-top-color: #3b3a39; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-grp { border-right-color: #3b3a39; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-grp-name { color: #a19f9d; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-note { color: #a19f9d; }
+html[data-theme="dark"] .xl-edit-banner .xl-rbn-vsep,
+html[data-theme="dark"] .xl-edit-banner .xl-tb-sep { background: #3b3a39; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-btn,
+html[data-theme="dark"] .xl-edit-banner .xl-tb-color-btn { color: #f3f2f1; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-btn:hover,
+html[data-theme="dark"] .xl-edit-banner .xl-tb-color-btn:hover { background: #333231; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-select,
+html[data-theme="dark"] .xl-edit-banner .xl-tb-size { background: #1b1a19; color: #f3f2f1; border-color: #484644; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-color-letter { color: #f3f2f1; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-sizeread { background: #292827; color: #f3f2f1; border-color: #3b3a39; }
+html[data-theme="dark"] .xl-edit-banner .xl-kbd { background: #292827; border-color: #484644; color: #c8c6c4; }
+html[data-theme="dark"] .xl-mini-toolbar { background: #252423; border-color: #3b3a39; color: #f3f2f1; }
+html[data-theme="dark"] .xl-mini-toolbar button { color: #f3f2f1; }
+html[data-theme="dark"] .xl-mini-toolbar button:hover { background: #333231; }
+html[data-theme="dark"] .xl-mini-toolbar .xl-mini-fg-letter { background: #f3f2f1; color: #242424; }
+html[data-theme="dark"] .xl-mini-toolbar .xl-mini-fg-bar { background: #f3f2f1; }
+
+/* 编辑模式：给内容块容器让出顶部空间（工具栏收起时只让一行）
+   —— 由 JS 在 body 上切换 .xl-rbn-collapsed 同步 */
+body.xl-editmode #xl-edit-blocks { margin-top: 156px; }
+body.xl-editmode.xl-rbn-collapsed #xl-edit-blocks { margin-top: 52px; }
 
 /* 保存按钮：有未保存修改时右上角显示琥珀色圆点 */
 .xl-edit-save.is-dirty { position: relative; }
@@ -1360,69 +1483,90 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
   box-shadow: 0 0 0 2px rgba(0, 0, 0, .18);
 }
 
-/* ============ 编辑工具栏：「＋ 插入」大按钮 + 下拉菜单 + 尺寸读数 ============ */
-.xl-tb-group-insert { position: relative; }
-.xl-tb-insert { position: relative; }
-/* 注意：这些按钮在 .xl-edit-banner 里，而 .xl-edit-banner button 的
-   「白字 + 半透明白底」规则选择器是 (0,1,1)，比单个类名 (0,1,0) 高一级，
-   会把这些按钮压成白字 —— 白底菜单上就等于隐形。
-   所以这里必须带上 .xl-edit-banner 前缀把优先度压回去。 */
+/* ============ 插入：主按钮 + 下拉菜单 + 快速插入 + 尺寸读数 ============ */
+.xl-edit-banner .xl-tb-insert { position: relative; }
+
+/* 主操作按钮走实心蓝（365 主按钮质感）。
+   必须带 .xl-edit-banner 前缀：`.xl-edit-banner button` 是 (0,1,1)，
+   单个类名 (0,1,0) 压不过它 —— 这里踩过坑，白底按钮被刷成白字看不见。 */
 .xl-edit-banner .xl-tb-insert-btn {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: inherit; font-size: 0.86rem; font-weight: 600;
-  padding: 7px 14px;
-  border: 1px solid #fff;
-  border-radius: 9px;
-  background: #fff; color: var(--accent);
+  font-family: inherit; font-size: 13.5px; font-weight: 600;
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent); color: #fff;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
-.xl-edit-banner .xl-tb-insert-btn:hover { background: #eef6ff; color: var(--accent); }
+.xl-edit-banner .xl-tb-insert-btn:hover { background: color-mix(in srgb, var(--accent) 86%, #000); color: #fff; }
 .xl-edit-banner .xl-tb-insert-btn:active { transform: translateY(1px); }
-.xl-tb-insert-plus { font-size: 1rem; font-weight: 800; line-height: 1; }
-.xl-tb-insert-label { letter-spacing: .02em; }
-.xl-edit-banner .xl-tb-insert-btn .xl-caret { color: var(--accent); opacity: .75; }
+.xl-edit-banner .xl-tb-insert-plus { font-size: 14px; font-weight: 800; line-height: 1; }
+.xl-edit-banner .xl-tb-insert-label { letter-spacing: .02em; }
+.xl-edit-banner .xl-tb-insert-btn .xl-caret { color: #fff; opacity: .85; }
 
-/* 下拉菜单：默认收起。
-   用 position:fixed 由 JS 定位 —— 工具栏是 overflow-x:auto，
-   绝对定位的子元素会被裁掉（不覆盖出来，而是撑出一条滚动条）。 */
+/* 快速插入：图标 + 小字的方形按钮（365 里也保留此类图标快捷方式） */
+.xl-edit-banner .xl-tb-quick {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1px; min-width: 42px; padding: 4px 4px 3px;
+  border: 1px solid transparent; border-radius: 4px;
+  background: transparent; color: #242424;
+  font-family: inherit; font-size: 10.5px; line-height: 1.2;
+  cursor: pointer; white-space: nowrap;
+}
+.xl-edit-banner .xl-tb-quick:hover { background: #f0f0f0; border-color: #e0e0e0; }
+.xl-edit-banner .xl-tb-quick-ico { font-size: 17px; line-height: 1; }
+
+/* 下拉菜单：默认收起。position:fixed 由 JS 定位 ——
+   外层 .xl-rbn-body 是 overflow:auto，绝对定位的子元素会被裁掉。 */
 .xl-tb-menu {
   display: none;
   position: fixed;
   z-index: 1250;
-  min-width: 196px;
-  background: var(--card-bg, #fff);
-  border: 1px solid var(--card-border, #dbe3ec);
-  border-radius: 12px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-  padding: 6px;
+  min-width: 232px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  padding: 5px;
 }
 .xl-tb-menu.open { display: block; }
 .xl-edit-banner .xl-tb-menu-item {
   display: flex; align-items: center; gap: 10px;
   width: 100%;
-  padding: 9px 10px;
-  border: 0; border-radius: 8px;
+  padding: 8px 10px;
+  border: 0; border-radius: 4px;
   background: none;
-  color: var(--text, #1c2733);
-  font-family: inherit; font-size: 0.88rem; font-weight: 400;
+  color: #242424;
+  font-family: inherit; font-size: 13px; font-weight: 400;
   text-align: left; cursor: pointer;
 }
-.xl-edit-banner .xl-tb-menu-item:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--text, #1c2733); }
-.xl-tb-menu-ico { width: 20px; text-align: center; font-size: 1rem; }
-.xl-tb-menu-label { flex: 1 1 auto; }
-html[data-theme="dark"] .xl-tb-menu { background: #1e2733; border-color: #34425a; }
-html[data-theme="dark"] .xl-tb-menu-item { color: #e6edf5; }
-html[data-theme="dark"] .xl-tb-menu-item:hover { background: rgba(255, 255, 255, 0.10); }
+.xl-edit-banner .xl-tb-menu-item:hover { background: #f0f0f0; color: #242424; }
+.xl-edit-banner .xl-tb-menu-ico { width: 20px; text-align: center; font-size: 15px; }
+.xl-edit-banner .xl-tb-menu-label { flex: 1 1 auto; }
+.xl-edit-banner .xl-tb-menu-hint { color: #8a8886; font-size: 11px; margin-left: auto; }
 
 /* 尺寸读数 */
-.xl-tb-sizeread {
-  font-size: .78rem; color: #fff;
-  background: rgba(0, 0, 0, 0.22);
-  border-radius: 8px; padding: 6px 10px;
+.xl-edit-banner .xl-tb-sizeread {
+  font-size: 12px; color: #424242;
+  background: #f3f2f1;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 5px 9px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* 内容块里的列表（新增的「项目符号 / 编号」按钮会插入 ul / ol） */
+.xl-block-inner ul, .xl-block-inner ol { margin: 6px 0; padding-left: 24px; }
+.xl-block-inner ul { list-style: disc; }
+.xl-block-inner ol { list-style: decimal; }
+.xl-block-inner li { margin: 2px 0; }
+
+html[data-theme="dark"] .xl-tb-menu { background: #252423; border-color: #484644; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-menu-item { color: #f3f2f1; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-menu-item:hover { background: #333231; color: #f3f2f1; }
+html[data-theme="dark"] .xl-edit-banner .xl-tb-menu-hint { color: #a19f9d; }
 
 /* 内容块（站主新建：文本框 / 图片 / 视频 / 文件附件） */
 #xl-edit-blocks {
@@ -1624,3 +1768,455 @@ html[data-theme="dark"] .xl-insert-cancel { background: #2a2a2a; border-color: #
   border-radius: 999px;
   transition: width 0.18s ease;
 }
+
+/* ================================================================
+   Fluent 2 / Microsoft 365 输入控件层
+   覆盖对象：所有「用户可输入」的功能 ——
+     发帖 / 评论 / 留言板 / 联系表单 / 订阅 / 搜索 /
+     通知与私信 / 个人资料 / 设置 / 产品页评论 / 管理后台 / 首页弹窗
+   实现前提：全站都是「先内联 <style>、后 link common.css」，
+     同级选择器由 common.css 胜出；这里再统一加 body / main / button
+     前缀，确保压得过 `.modal .edit-input`、`.modal-actions .primary`、
+     `.editor-toolbar .rt-btn` 这类复合选择器。
+   只改外观（描边/圆角/内距/字号/焦点环/主次按钮配色），
+     不改宽度、外边距与栅格，避免打乱各页既有布局。
+   破坏性按钮（.del / .danger-btn / .tool-btn.danger / .btn.danger /
+     .custom-del / .act.del）保持各页原有的红系样式，不做改动。
+   ================================================================ */
+
+/* ---------- 1. 文本类输入框：输入框 / 多行框 / 下拉 ---------- */
+body .edit-input,
+body .edit-textarea,
+body .modal .edit-input,
+body .modal .edit-textarea,
+body .rename-editor .edit-input,
+body .skills-add .edit-input,
+body .theme-row .edit-input,
+body .gb-input,
+body .gb-textarea,
+body .c-input,
+body .contact-form textarea.c-input,
+body .sub-input,
+body .feed-url,
+body .search-input,
+body .home-search-input,
+body .prio-sel,
+body .card input:not([class]):not([type="hidden"]),
+body .card select,
+body .card textarea,
+body main input[type="text"]:not([class]),
+body main input[type="search"]:not([class]),
+body main input[type="email"]:not([class]),
+body main input[type="password"]:not([class]),
+body main input[type="number"]:not([class]),
+body main select:not([class]),
+body main textarea:not([class]) {
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  background: var(--card-bg, #fff);
+  color: var(--text, #242424);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 10px;
+  line-height: 1.5;
+  transition: border-color .12s ease, box-shadow .12s ease, background .12s ease;
+}
+body .edit-input::placeholder,
+body .edit-textarea::placeholder,
+body .gb-input::placeholder,
+body .gb-textarea::placeholder,
+body .c-input::placeholder,
+body .sub-input::placeholder,
+body .search-input::placeholder,
+body .home-search-input::placeholder { color: #a19f9d; }
+
+/* 焦点：Fluent 2 的 1px 强调色描边（比原来的 3px 光晕更克制） */
+body .edit-input:focus,
+body .edit-textarea:focus,
+body .modal .edit-input:focus,
+body .modal .edit-textarea:focus,
+body .rename-editor .edit-input:focus,
+body .skills-add .edit-input:focus,
+body .theme-row .edit-input:focus,
+body .gb-input:focus,
+body .gb-textarea:focus,
+body .c-input:focus,
+body .contact-form textarea.c-input:focus,
+body .sub-input:focus,
+body .feed-url:focus,
+body .search-input:focus,
+body .home-search-input:focus,
+body .prio-sel:focus,
+body .card input:not([class]):focus,
+body .card select:focus,
+body .card textarea:focus,
+body main input[type="text"]:not([class]):focus,
+body main select:not([class]):focus,
+body main textarea:not([class]):focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* 禁用态 */
+body .edit-input:disabled,
+body .edit-textarea:disabled,
+body .sub-input:disabled,
+body .prio-sel:disabled {
+  background: #f3f2f1;
+  color: #a19f9d;
+  cursor: not-allowed;
+}
+
+/* ---------- 2. 字段标签与字数统计 ---------- */
+body .edit-label,
+body .modal .edit-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #424242;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+body .char-count {
+  display: block;
+  text-align: right;
+  font-size: 11.5px;
+  color: #8a8886;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+body .edit-note,
+body .hint,
+body .topic-tip { font-size: 12.5px; line-height: 1.7; }
+
+/* ---------- 3. 主按钮（实心强调色） ---------- */
+body button.post-btn:not(.secondary):not(.danger),
+body button.btn.primary,
+body button.primary,
+body .modal-actions button.primary,
+body .contact-form button.btn,
+body button.gb-submit,
+body button.sub-btn,
+body button.search-btn,
+body button.home-search-btn,
+body button.save,
+body button.save-btn,
+body button.send,
+body button.refresh-btn,
+body button.custom-save,
+body button.theme-save,
+body button.bg-save {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  padding: 7px 18px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  filter: none;
+  transition: background .12s ease, border-color .12s ease;
+}
+body button.post-btn:not(.secondary):not(.danger):hover,
+body button.btn.primary:hover,
+body button.primary:hover,
+body .modal-actions button.primary:hover,
+body .contact-form button.btn:hover,
+body button.gb-submit:hover,
+body button.sub-btn:hover,
+body button.search-btn:hover,
+body button.home-search-btn:hover,
+body button.save:hover,
+body button.save-btn:hover,
+body button.send:hover,
+body button.refresh-btn:hover,
+body button.custom-save:hover,
+body button.theme-save:hover,
+body button.bg-save:hover {
+  background: color-mix(in srgb, var(--accent) 86%, #000);
+  border-color: color-mix(in srgb, var(--accent) 86%, #000);
+  filter: none;
+}
+body button.post-btn:disabled,
+body button.save:disabled,
+body button.gb-submit:disabled,
+body button.sub-btn:disabled,
+body button.search-btn:disabled,
+body button.custom-save:disabled {
+  opacity: .5;
+  cursor: default;
+  filter: none;
+}
+
+/* ---------- 4. 次按钮（白底 / 描边灰） ---------- */
+body button.post-btn.secondary,
+body button.cancel,
+body button.custom-cancel,
+body button.theme-cancel,
+body button.bg-cancel,
+body button.modal-close,
+body button.back-btn,
+body button.secondary,
+body .modal-actions button.secondary,
+body button.btn:not(.primary):not(.danger),
+body .change-btn,
+body .bg-btn,
+body .copy-btn,
+body .tf-clear,
+body .theme-clear,
+body .bg-clear,
+body .edit-feature-btn,
+body button.pa-btn,
+body button.act.reply {
+  border: 1px solid #d1d1d1;
+  background: var(--card-bg, #fff);
+  color: #242424;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  filter: none;
+  transition: background .12s ease, border-color .12s ease;
+}
+body button.post-btn.secondary:hover,
+body button.cancel:hover,
+body button.custom-cancel:hover,
+body button.theme-cancel:hover,
+body button.bg-cancel:hover,
+body button.modal-close:hover,
+body button.back-btn:hover,
+body .modal-actions button.secondary:hover,
+body button.btn:not(.primary):not(.danger):hover,
+body .change-btn:hover,
+body .bg-btn:hover,
+body .copy-btn:hover,
+body .tf-clear:hover,
+body .theme-clear:hover,
+body .bg-clear:hover,
+body .edit-feature-btn:hover,
+body button.pa-btn:hover,
+body button.act.reply:hover {
+  background: #f3f2f1;
+  border-color: #c7c7c7;
+  filter: none;
+}
+
+/* ---------- 5. 工具型小按钮（工具栏 / 附件） ---------- */
+body button.tool-btn,
+body button.attach-btn {
+  border: 1px solid #d1d1d1;
+  background: var(--card-bg, #fff);
+  color: #242424;
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease;
+}
+body button.tool-btn:hover,
+body button.attach-btn:hover { background: #f3f2f1; border-color: #c7c7c7; }
+
+/* 新增类动作（虚线框） */
+body button.add-btn,
+body button.custom-add-btn,
+body button.poll-add-btn,
+body button.att-add-btn {
+  border: 1px dashed #d1d1d1;
+  background: var(--card-bg, #fff);
+  color: #616161;
+  border-radius: 4px;
+  padding: 9px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+body button.add-btn:hover,
+body button.custom-add-btn:hover,
+body button.poll-add-btn:hover,
+body button.att-add-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--card-bg, #fff));
+}
+
+/* ---------- 6. 发帖富文本编辑器（Ribbon-lite） ---------- */
+body .editor-wrap {
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  background: var(--card-bg, #fff);
+}
+body .editor-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+body .editor-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2px;
+  padding: 4px 6px;
+  background: #faf9f8;
+  border-bottom: 1px solid #e0e0e0;
+}
+body .editor-toolbar .rt-btn,
+body .editor-toolbar select,
+body .editor-toolbar input[type="color"] {
+  height: 28px; min-width: 28px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #242424;
+  border-radius: 4px;
+  font-size: 13px; line-height: 1;
+  padding: 0 7px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+body .editor-toolbar .rt-btn:hover,
+body .editor-toolbar select:hover { background: #f0f0f0; }
+body .editor-toolbar .rt-btn.on {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent);
+  border-color: transparent;
+}
+body .editor-toolbar select {
+  border-color: #d1d1d1;
+  background: #fff;
+  padding: 0 4px;
+}
+body .editor-toolbar input[type="color"] { padding: 2px; width: 30px; border-color: #d1d1d1; background: #fff; }
+body .editor-toolbar .tb-sep { width: 1px; height: 18px; background: #e0e0e0; margin: 0 4px; }
+body .editor {
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ---------- 7. 附件列表 ---------- */
+body .att-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: var(--card-bg, #fff);
+  padding: 7px 9px;
+}
+body .att-thumb { border-radius: 4px; }
+body .att-remove { border-radius: 4px; }
+body .att-name { font-size: 13px; }
+body .att-sub { font-size: 11.5px; color: #8a8886; }
+
+/* ---------- 8. 选择类控件（勾选 / 单选 / 滑块 / 取色） ---------- */
+body input[type="checkbox"],
+body input[type="radio"] {
+  accent-color: var(--accent);
+  width: 15px; height: 15px;
+  vertical-align: -2px;
+  cursor: pointer;
+}
+body input[type="range"] { accent-color: var(--accent); cursor: pointer; }
+body input[type="color"] {
+  width: 32px; height: 32px; padding: 2px;
+  border: 1px solid #d1d1d1; border-radius: 4px;
+  background: var(--card-bg, #fff);
+  cursor: pointer;
+}
+
+/* ---------- 9. 深色主题 ---------- */
+html[data-theme="dark"] body .edit-input,
+html[data-theme="dark"] body .edit-textarea,
+html[data-theme="dark"] body .modal .edit-input,
+html[data-theme="dark"] body .modal .edit-textarea,
+html[data-theme="dark"] body .rename-editor .edit-input,
+html[data-theme="dark"] body .skills-add .edit-input,
+html[data-theme="dark"] body .theme-row .edit-input,
+html[data-theme="dark"] body .gb-input,
+html[data-theme="dark"] body .gb-textarea,
+html[data-theme="dark"] body .c-input,
+html[data-theme="dark"] body .contact-form textarea.c-input,
+html[data-theme="dark"] body .sub-input,
+html[data-theme="dark"] body .feed-url,
+html[data-theme="dark"] body .search-input,
+html[data-theme="dark"] body .home-search-input,
+html[data-theme="dark"] body .prio-sel,
+html[data-theme="dark"] body .card input:not([class]):not([type="hidden"]),
+html[data-theme="dark"] body .card select,
+html[data-theme="dark"] body .card textarea,
+html[data-theme="dark"] body main input[type="text"]:not([class]),
+html[data-theme="dark"] body main input[type="search"]:not([class]),
+html[data-theme="dark"] body main input[type="email"]:not([class]),
+html[data-theme="dark"] body main select:not([class]),
+html[data-theme="dark"] body main textarea:not([class]) {
+  border-color: #484644;
+  background: #1b1a19;
+  color: #f3f2f1;
+}
+html[data-theme="dark"] body .edit-input:disabled,
+html[data-theme="dark"] body .edit-textarea:disabled { background: #292827; color: #8a8886; }
+html[data-theme="dark"] body .edit-label,
+html[data-theme="dark"] body .modal .edit-label { color: #c8c6c4; }
+html[data-theme="dark"] body button.post-btn.secondary,
+html[data-theme="dark"] body button.cancel,
+html[data-theme="dark"] body button.custom-cancel,
+html[data-theme="dark"] body button.theme-cancel,
+html[data-theme="dark"] body button.bg-cancel,
+html[data-theme="dark"] body button.modal-close,
+html[data-theme="dark"] body button.back-btn,
+html[data-theme="dark"] body button.secondary,
+html[data-theme="dark"] body .modal-actions button.secondary,
+html[data-theme="dark"] body button.btn:not(.primary):not(.danger),
+html[data-theme="dark"] body .change-btn,
+html[data-theme="dark"] body .bg-btn,
+html[data-theme="dark"] body .copy-btn,
+html[data-theme="dark"] body .tf-clear,
+html[data-theme="dark"] body .theme-clear,
+html[data-theme="dark"] body .bg-clear,
+html[data-theme="dark"] body .edit-feature-btn,
+html[data-theme="dark"] body button.pa-btn,
+html[data-theme="dark"] body button.act.reply,
+html[data-theme="dark"] body button.tool-btn,
+html[data-theme="dark"] body button.attach-btn {
+  background: #252423;
+  color: #f3f2f1;
+  border-color: #484644;
+}
+html[data-theme="dark"] body button.post-btn.secondary:hover,
+html[data-theme="dark"] body button.cancel:hover,
+html[data-theme="dark"] body button.custom-cancel:hover,
+html[data-theme="dark"] body button.theme-cancel:hover,
+html[data-theme="dark"] body button.bg-cancel:hover,
+html[data-theme="dark"] body button.back-btn:hover,
+html[data-theme="dark"] body .modal-actions button.secondary:hover,
+html[data-theme="dark"] body button.btn:not(.primary):not(.danger):hover,
+html[data-theme="dark"] body .change-btn:hover,
+html[data-theme="dark"] body .bg-btn:hover,
+html[data-theme="dark"] body .copy-btn:hover,
+html[data-theme="dark"] body .tf-clear:hover,
+html[data-theme="dark"] body .theme-clear:hover,
+html[data-theme="dark"] body .bg-clear:hover,
+html[data-theme="dark"] body .edit-feature-btn:hover,
+html[data-theme="dark"] body button.pa-btn:hover,
+html[data-theme="dark"] body button.act.reply:hover,
+html[data-theme="dark"] body button.tool-btn:hover,
+html[data-theme="dark"] body button.attach-btn:hover { background: #333231; border-color: #5c5a58; }
+html[data-theme="dark"] body button.add-btn,
+html[data-theme="dark"] body button.custom-add-btn,
+html[data-theme="dark"] body button.poll-add-btn,
+html[data-theme="dark"] body button.att-add-btn {
+  border-color: #484644; background: #252423; color: #c8c6c4;
+}
+html[data-theme="dark"] body .editor-wrap { border-color: #484644; }
+html[data-theme="dark"] body .editor-toolbar { background: #1b1a19; border-bottom-color: #3b3a39; }
+html[data-theme="dark"] body .editor-toolbar .rt-btn,
+html[data-theme="dark"] body .editor-toolbar input[type="color"] { color: #f3f2f1; }
+html[data-theme="dark"] body .editor-toolbar .rt-btn:hover,
+html[data-theme="dark"] body .editor-toolbar select:hover { background: #333231; }
+html[data-theme="dark"] body .editor-toolbar select { background: #252423; color: #f3f2f1; border-color: #484644; }
+html[data-theme="dark"] body .editor-toolbar .tb-sep { background: #3b3a39; }
+html[data-theme="dark"] body .att-item { border-color: #3b3a39; }
+html[data-theme="dark"] body input[type="color"] { border-color: #484644; }

@@ -263,6 +263,7 @@
     $all('#xl-edit-blocks .xl-block').forEach(function (w) { w.classList.toggle('active', w === wrap); });
     if (active && wrap) attachHandles(wrap); else detachHandles();
     updateSizeRead();
+    updateCtxTab();
   }
 
   // ---------- 长宽拖拽（Microsoft 365 式：4 角 + 4 边共 8 个手柄） ----------
@@ -414,7 +415,8 @@
 
   var STATE_CMDS = {
     bold: 'bold', italic: 'italic', underline: 'underline', strikeThrough: 'strike',
-    justifyLeft: 'aleft', justifyCenter: 'acenter', justifyRight: 'aright'
+    justifyLeft: 'aleft', justifyCenter: 'acenter', justifyRight: 'aright',
+    insertUnorderedList: 'ul', insertOrderedList: 'ol'
   };
   function updateToolbarState() {
     if (!banner) return;
@@ -594,6 +596,9 @@
     if (!activeWrap) { toast('请先点选要删除的内容块'); return; }
     activeWrap.remove();
     activeWrap = null; activeInner = null; savedRange = null;
+    detachHandles();
+    updateSizeRead();
+    updateCtxTab();
     markDirty();
     toast('已删除该内容块');
   }
@@ -775,26 +780,163 @@
     exec('createLink', url);
   }
 
-  // ---------- 顶部编辑条 ----------
+  // ---------- 顶部编辑条：Microsoft 365 带状工具栏（Ribbon） ----------
+  // 结构：标题行 → 选项卡 → 带状内容（每组按钮下方带组名，跟 Word 网页版一致）
+  var CTX_LABELS = { textbox: '文本框', image: '图片', video: '视频', file: '附件' };
+  var ctxTab = null;        // 第 3 个选项卡：平时叫「布局」，选中内容块后变身「图片 / 视频 / 文本框 / 附件」
+  var ctxTabLabel = null;
+  var ctxShownFor = null;   // 上一次因选中而自动切换的类型，避免反复抢用户手动选的页
+  var tabBtns = {};
+  var tabPanes = {};
+  var COLLAPSE_KEY = 'xl_edit_ribbon_collapsed';
+
+  function setTab(name) {
+    if (!tabBtns[name]) return;
+    Object.keys(tabBtns).forEach(function (k) { tabBtns[k].classList.toggle('on', k === name); });
+    Object.keys(tabPanes).forEach(function (k) { tabPanes[k].classList.toggle('on', k === name); });
+  }
+
+  // 选中内容块时把第 3 页变成对应的上下文格式页并自动激活（同 365 选中图片弹出「图片」页）
+  function updateCtxTab() {
+    if (!ctxTab) return;
+    var t = activeWrap ? (activeWrap.dataset.type || '') : '';
+    var isCtx = !!CTX_LABELS[t];
+    ctxTab.classList.toggle('is-ctx', isCtx);
+    ctxTabLabel.textContent = isCtx ? CTX_LABELS[t] : '布局';
+    if (t !== ctxShownFor) {
+      ctxShownFor = t;
+      if (isCtx) setTab('layout');
+    }
+  }
+
+  // 内容栏可用宽度（尺寸百分比预设要用）
+  function contentWidth() {
+    var c = blocksContainer();
+    var cs = window.getComputedStyle(c);
+    var pad = parseFloat(cs.paddingLeft || '0') + parseFloat(cs.paddingRight || '0');
+    if (isNaN(pad)) pad = 0;
+    return Math.max(160, Math.round(c.clientWidth - pad));
+  }
+
+  // 尺寸预设：按内容栏宽度百分比设宽；高度一律交回自适应
+  // （图片按原比例自动算高、视频按 16:9、文本框随内容长高）
+  function applySizePreset(pct) {
+    if (!activeWrap) { toast('请先点选一个内容块'); return; }
+    var w = Math.round(contentWidth() * pct / 100);
+    activeWrap.style.width = w + 'px';
+    activeWrap.style.height = '';
+    delete activeWrap.dataset.h;
+    activeWrap.dataset.w = String(w);
+    updateSizeRead();
+    markDirty();
+    toast('宽度设为内容栏的 ' + pct + '%（' + w + 'px）');
+  }
+
+  // 段落样式预设（作用于整个文本框，同 Word 的「样式」库）
+  function applyStylePreset(px, bold) {
+    if (!activeInner) { toast('请先点选一个文本框'); return; }
+    activeInner.style.fontSize = px + 'px';
+    activeInner.style.fontWeight = bold ? '700' : '400';
+    savedRange = null;
+    markDirty();
+    updateToolbarState();
+  }
+
   function showUI() {
+    function keep(e) { e.preventDefault(); }        // 点工具栏按钮不抢焦点 / 不丢选区
+
     banner = document.createElement('div');
     banner.className = 'xl-edit-banner';
+    tabBtns = {}; tabPanes = {}; ctxTab = null; ctxTabLabel = null; ctxShownFor = null;
 
+    // ===== 标题行（365 的标题栏：左侧标识 + 中间说明 + 右侧主次按钮） =====
     var row = document.createElement('div');
     row.className = 'xl-edit-row';
+    var brand = document.createElement('span');
+    brand.className = 'xl-edit-brand';
+    brand.innerHTML = '<span class="xl-edit-brand-ico">✎</span>布局编辑';
     var tip = document.createElement('span');
     tip.className = 'xl-edit-tip';
-    tip.innerHTML = '布局编辑模式 · 点文字直接改，点图片换图 · 选中内容块后拖四角/四边改长宽　<span class="xl-kbd">Ctrl/⌘+S</span> 保存　<span class="xl-kbd">Esc</span> 退出';
+    tip.innerHTML = '点文字直接改，点图片换图；选中内容块后可拖四角/四边改长宽　' +
+                    '<span class="xl-kbd">Ctrl/⌘+S</span> 保存　<span class="xl-kbd">Esc</span> 退出';
+
     saveBtn = document.createElement('button');
     saveBtn.type = 'button'; saveBtn.className = 'xl-edit-save'; saveBtn.textContent = '保存';
-    var exit = document.createElement('button');
-    exit.type = 'button'; exit.className = 'xl-edit-exit'; exit.textContent = '退出';
-    row.appendChild(tip); row.appendChild(saveBtn); row.appendChild(exit);
+    var exitBtn = document.createElement('button');
+    exitBtn.type = 'button'; exitBtn.className = 'xl-edit-exit'; exitBtn.textContent = '退出';
 
-    var tb = document.createElement('div');
-    tb.className = 'xl-edit-toolbar';
+    var collapseBtn = document.createElement('button');
+    collapseBtn.type = 'button';
+    collapseBtn.className = 'xl-rbn-collapse';
+    collapseBtn.title = '收起 / 展开工具栏';
+    collapseBtn.addEventListener('mousedown', keep);
+    collapseBtn.addEventListener('click', function () {
+      var on = banner.classList.toggle('is-collapsed');
+      document.body.classList.toggle('xl-rbn-collapsed', on);
+      collapseBtn.textContent = on ? '⌄' : '⌃';
+      try { localStorage.setItem(COLLAPSE_KEY, on ? '1' : '0'); } catch (e) {}
+    });
+    // 记住上次的收起状态
+    var collapsed = false;
+    try { collapsed = localStorage.getItem(COLLAPSE_KEY) === '1'; } catch (e) {}
+    if (collapsed) { banner.classList.add('is-collapsed'); }
+    collapseBtn.textContent = collapsed ? '⌄' : '⌃';
+    document.body.classList.toggle('xl-rbn-collapsed', collapsed);
 
-    function keep(e) { e.preventDefault(); }       // 点按钮不抢焦点
+    row.appendChild(brand); row.appendChild(tip);
+    row.appendChild(saveBtn); row.appendChild(exitBtn); row.appendChild(collapseBtn);
+
+    // ===== 选项卡 =====
+    var tabsBar = document.createElement('div');
+    tabsBar.className = 'xl-rbn-tabs';
+    function addTab(name, label) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'xl-rbn-tab';
+      var l = document.createElement('span');
+      l.className = 'xl-rbn-tab-label';
+      l.textContent = label;
+      b.appendChild(l);
+      b.addEventListener('mousedown', keep);
+      b.addEventListener('click', function (e) { e.stopPropagation(); setTab(name); });
+      tabsBar.appendChild(b);
+      tabBtns[name] = b;
+      return b;
+    }
+    addTab('home', '开始');
+    addTab('insert', '插入');
+    ctxTab = addTab('layout', '布局');
+    ctxTabLabel = ctxTab.querySelector('.xl-rbn-tab-label');
+    addTab('help', '帮助');
+
+    // ===== 带状内容 =====
+    var bodyEl = document.createElement('div');
+    bodyEl.className = 'xl-rbn-body';
+    function pane(name) {
+      var s = document.createElement('div');
+      s.className = 'xl-rbn-pane';
+      s.dataset.pane = name;
+      bodyEl.appendChild(s);
+      tabPanes[name] = s;
+      return s;
+    }
+    // 组：按钮区 + 下方组名（365 的组名居中显示在下方）
+    function grp(paneEl, title) {
+      var g = document.createElement('div');
+      g.className = 'xl-rbn-grp';
+      var gb = document.createElement('div');
+      gb.className = 'xl-rbn-grp-body';
+      var gn = document.createElement('div');
+      gn.className = 'xl-rbn-grp-name';
+      gn.textContent = title;
+      g.appendChild(gb); g.appendChild(gn);
+      paneEl.appendChild(g);
+      return gb;
+    }
+    function stack(parent) { var d = document.createElement('div'); d.className = 'xl-rbn-stack'; parent.appendChild(d); return d; }
+    function rrow(parent) { var d = document.createElement('div'); d.className = 'xl-rbn-row'; parent.appendChild(d); return d; }
+    function vsep() { var s = document.createElement('span'); s.className = 'xl-rbn-vsep'; return s; }
+
     function btn(label, fn, opts) {
       opts = opts || {};
       var x = document.createElement('button');
@@ -807,120 +949,33 @@
       x.addEventListener('click', fn);
       return x;
     }
-    function sep() { var s = document.createElement('span'); s.className = 'xl-tb-sep'; return s; }
-    function group() { var g = document.createElement('div'); g.className = 'xl-tb-group'; return g; }
-
-    // — 插入：合并成一个大按钮（文本框 / 图片 / 视频 / 文件） —
-    var gInsert = group();
-    gInsert.classList.add('xl-tb-group-insert');
-    var insWrap = document.createElement('div');
-    insWrap.className = 'xl-tb-insert';
-    var insBtn = document.createElement('button');
-    insBtn.type = 'button';
-    insBtn.className = 'xl-tb-insert-btn';
-    insBtn.title = '插入：文本框 / 图片 / 视频 / 文件';
-    insBtn.innerHTML = '<span class="xl-tb-insert-plus">＋</span>' +
-                       '<span class="xl-tb-insert-label">插入</span>' +
-                       '<span class="xl-caret">▾</span>';
-    var insMenu = document.createElement('div');
-    insMenu.className = 'xl-tb-menu';
-    [['📝', '文本框', '插入一个可输入文字的文本框', makeTextbox],
-     ['🖼', '图片', '插入图片（本地文件或链接）', insertImage],
-     ['🎬', '视频', '插入视频（本地文件 / YouTube / 直链）', insertVideo],
-     ['📎', '文件', '插入任意文件附件（≤20MB）', insertFile]
-    ].forEach(function (it) {
-      var mi = document.createElement('button');
-      mi.type = 'button';
-      mi.className = 'xl-tb-menu-item';
-      mi.title = it[2];
-      mi.innerHTML = '<span class="xl-tb-menu-ico">' + it[0] + '</span>' +
-                     '<span class="xl-tb-menu-label">' + it[1] + '</span>';
-      mi.addEventListener('mousedown', keep);
-      mi.addEventListener('click', function (e) {
-        e.stopPropagation();
-        closeInsertMenu();
-        it[3]();
-      });
-      insMenu.appendChild(mi);
-    });
-    insWrap.appendChild(insBtn);
-    insWrap.appendChild(insMenu);
-
-    function closeInsertMenu() { insMenu.classList.remove('open'); }
-    function openInsertMenu() {
-      // 菜单是 position:fixed，位置按按钮实时算：
-      // 工具栏 overflow-x:auto，绝对定位会被裁掉
-      var r = insBtn.getBoundingClientRect();
-      insMenu.style.left = Math.max(8, Math.round(r.left)) + 'px';
-      insMenu.style.top = Math.round(r.bottom + 6) + 'px';
-      insMenu.classList.add('open');
+    // 图标 + 小字的方形按钮（快速插入用）
+    function quick(ico, label, title, fn) {
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'xl-tb-quick';
+      x.title = title || label;
+      x.innerHTML = '<span class="xl-tb-quick-ico">' + ico + '</span>' +
+                    '<span class="xl-tb-quick-label">' + label + '</span>';
+      x.addEventListener('mousedown', keep);
+      x.addEventListener('click', fn);
+      return x;
     }
-    insBtn.addEventListener('mousedown', keep);
-    insBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var isOpen = insMenu.classList.contains('open');
-      closeInsertMenu();
-      if (!isOpen) openInsertMenu();
-    });
-    document.addEventListener('mousedown', function (e) {
-      if (!insWrap.contains(e.target)) closeInsertMenu();
-    });
 
-    gInsert.appendChild(insWrap);
-    tb.appendChild(gInsert);
-    tb.appendChild(sep());
+    var pHome = pane('home');
+    var pIns = pane('insert');
+    var pLay = pane('layout');
+    var pHelp = pane('help');
 
-    // — 块操作 —
-    var gBlock = group();
-    gBlock.appendChild(btn('⧉ 复制', duplicateActive, { title: '复制选中的内容块' }));
-    gBlock.appendChild(btn('↑ 上移', function () { moveActive(-1); }, { title: '把选中块往上移' }));
-    gBlock.appendChild(btn('↓ 下移', function () { moveActive(1); }, { title: '把选中块往下移' }));
-    gBlock.appendChild(btn('🗑 删除', deleteActive, { title: '删除选中的内容块（Delete）' }));
-    tb.appendChild(gBlock);
-    tb.appendChild(sep());
+    // ================= 开始 =================
+    // — 字体组（字体 / 字号 / 字形 / 颜色） —
+    var gFont = grp(pHome, '字体');
+    var fCo = stack(gFont);
 
-    // — 尺寸：实时读数 + 重置（改大小直接拖块的四角 / 四边） —
-    var gSize = group();
-    sizeRead = document.createElement('span');
-    sizeRead.className = 'xl-tb-sizeread';
-    sizeRead.textContent = '未选中内容块';
-    sizeRead.title = '拖动选中块的四角或四边即可改变长宽';
-    gSize.appendChild(sizeRead);
-    gSize.appendChild(btn('⤢ 重置', resetSize, { title: '把选中块恢复为自适应尺寸' }));
-    tb.appendChild(gSize);
-    tb.appendChild(sep());
-
-    // — 行内格式 —
-    var gFmt = group();
-    gFmt.appendChild(btn('B', function () { exec('bold'); }, { cmd: 'bold', cls: 'f-bold', title: '粗体 (Ctrl/⌘+B)' }));
-    gFmt.appendChild(btn('I', function () { exec('italic'); }, { cmd: 'italic', cls: 'f-italic', title: '斜体 (Ctrl/⌘+I)' }));
-    gFmt.appendChild(btn('U', function () { exec('underline'); }, { cmd: 'underline', cls: 'f-underline', title: '下划线 (Ctrl/⌘+U)' }));
-    gFmt.appendChild(btn('S', function () { exec('strikeThrough'); }, { cmd: 'strike', cls: 'f-strike', title: '删除线' }));
-    tb.appendChild(gFmt);
-    tb.appendChild(sep());
-
-    // — 对齐 —
-    var gAlign = group();
-    gAlign.appendChild(btn('⇤', function () { exec('justifyLeft'); }, { cmd: 'aleft', title: '左对齐' }));
-    gAlign.appendChild(btn('⇔', function () { exec('justifyCenter'); }, { cmd: 'acenter', title: '居中' }));
-    gAlign.appendChild(btn('⇥', function () { exec('justifyRight'); }, { cmd: 'aright', title: '右对齐' }));
-    tb.appendChild(gAlign);
-    tb.appendChild(sep());
-
-    // — 链接 / 清除 —
-    var gLink = group();
-    gLink.appendChild(btn('🔗 链接', insertLink, { title: '给选中的文字加链接' }));
-    gLink.appendChild(btn('⛓ 解除', function () { exec('unlink'); }, { title: '移除链接' }));
-    gLink.appendChild(btn('🧹 清格式', function () { exec('removeFormat'); }, { title: '清除选中文字的格式' }));
-    tb.appendChild(gLink);
-    tb.appendChild(sep());
-
-    // — 字体 / 字号 / 颜色（Word-like 增强版） —
-    var gStyle = group();
-
-    // 字体下拉（更多字体）
+    var fontRow = rrow(fCo);
     var font = document.createElement('select');
     font.className = 'xl-tb-select';
+    font.title = '字体（作用于整个文本框）';
     [['', '字体'], ['inherit', '继承'],
       ['sans-serif', '无衬线'], ['serif', '衬线'], ['monospace', '等宽'],
       ['system-ui, sans-serif', '系统默认'], ['-apple-system, BlinkMacSystemFont, sans-serif', '苹果系统'],
@@ -938,19 +993,20 @@
       ['Courier New, monospace', 'Courier'], ['Consolas, monospace', 'Consolas']]
       .forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; font.appendChild(op); });
     font.addEventListener('change', function () { if (font.value) applyFont(font.value); });
-    gStyle.appendChild(font);
+    fontRow.appendChild(font);
 
-    // 字号下拉（更宽的范围，支持手动输入）
+    var sizeRow = rrow(fCo);
     var size = document.createElement('input');
     size.className = 'xl-tb-size';
     size.type = 'text';
     size.placeholder = '字号';
+    size.title = '字号：输入 16 或 16px / 1.2em';
     size.setAttribute('list', 'xl-tb-size-list');
     var sizeList = document.createElement('datalist');
     sizeList.id = 'xl-tb-size-list';
     ['10','11','12','14','16','18','20','22','24','28','32','36','42','48','56','64','72','96']
       .forEach(function (s) { var op = document.createElement('option'); op.value = s; sizeList.appendChild(op); });
-    banner.appendChild(sizeList); // datalist 挂到 banner 上更安全
+    banner.appendChild(sizeList);   // datalist 挂到 banner 上更稳妥
     size.addEventListener('change', function () {
       var v = (size.value || '').trim();
       if (!v) return;
@@ -959,13 +1015,16 @@
       if (!/^[\d.]+(px|em|rem|%)$/.test(v)) { toast('字号格式不对，如 16 / 18px / 1.2em'); return; }
       applySize(v);
     });
-    gStyle.appendChild(size);
+    sizeRow.appendChild(size);
 
-    tb.appendChild(gStyle);
-
-    // — 颜色工具组（调色板 + 自定义 + 最近用色 + 背景色） —
-    var gColor = group();
-    gColor.classList.add('xl-tb-group-color');
+    gFont.appendChild(vsep());
+    var gGlyph = stack(gFont);
+    var gRow1 = rrow(gGlyph);
+    gRow1.appendChild(btn('B', function () { exec('bold'); }, { cmd: 'bold', cls: 'f-bold', title: '粗体 (Ctrl/⌘+B)' }));
+    gRow1.appendChild(btn('I', function () { exec('italic'); }, { cmd: 'italic', cls: 'f-italic', title: '斜体 (Ctrl/⌘+I)' }));
+    gRow1.appendChild(btn('U', function () { exec('underline'); }, { cmd: 'underline', cls: 'f-underline', title: '下划线 (Ctrl/⌘+U)' }));
+    gRow1.appendChild(btn('S', function () { exec('strikeThrough'); }, { cmd: 'strike', cls: 'f-strike', title: '删除线' }));
+    var gRow2 = rrow(gGlyph);
 
     // 文字颜色按钮（带下拉面板）
     var fgBtn = document.createElement('button');
@@ -973,7 +1032,7 @@
     fgBtn.className = 'xl-tb-color-btn';
     fgBtn.innerHTML = '<span class="xl-tb-color-letter">A</span><span class="xl-tb-color-bar" style="background:#222"></span><span class="xl-caret">▾</span>';
     fgBtn.title = '文字颜色';
-    gColor.appendChild(fgBtn);
+    gRow2.appendChild(fgBtn);
 
     // 背景颜色按钮（高亮）
     var bgBtn = document.createElement('button');
@@ -981,10 +1040,154 @@
     bgBtn.className = 'xl-tb-color-btn xl-tb-bg-btn';
     bgBtn.innerHTML = '<span class="xl-tb-color-bg-letter">A</span><span class="xl-tb-color-bar" style="background:#fff36d"></span><span class="xl-caret">▾</span>';
     bgBtn.title = '背景颜色（高亮）';
-    gColor.appendChild(bgBtn);
+    gRow2.appendChild(bgBtn);
 
-    // 调色板（STANDARD_COLORS / STANDARD_BG 已在 IIFE 模块级声明，此处直接复用）
+    var gRow3 = rrow(gGlyph);
+    gRow3.appendChild(btn('🧹 清格式', function () { applyClearFormat(); }, { title: '清除选中文字的所有格式（颜色、加粗等）' }));
 
+    // — 段落组 —
+    var gPara = grp(pHome, '段落');
+    var pCo = stack(gPara);
+    var pRow1 = rrow(pCo);
+    pRow1.appendChild(btn('⇤', function () { exec('justifyLeft'); }, { cmd: 'aleft', title: '左对齐' }));
+    pRow1.appendChild(btn('⇔', function () { exec('justifyCenter'); }, { cmd: 'acenter', title: '居中' }));
+    pRow1.appendChild(btn('⇥', function () { exec('justifyRight'); }, { cmd: 'aright', title: '右对齐' }));
+    var pRow2 = rrow(pCo);
+    pRow2.appendChild(btn('• 项目符号', function () { exec('insertUnorderedList'); }, { cmd: 'ul', title: '项目符号列表' }));
+    pRow2.appendChild(btn('1. 编号', function () { exec('insertOrderedList'); }, { cmd: 'ol', title: '编号列表' }));
+
+    // — 样式组（整块生效，同 Word 的样式库） —
+    var gStyle = grp(pHome, '样式');
+    var sCo = stack(gStyle);
+    var sRow1 = rrow(sCo);
+    sRow1.appendChild(btn('正文', function () { applyStylePreset(16, false); }, { title: '正文：16px、不加粗' }));
+    sRow1.appendChild(btn('标题 1', function () { applyStylePreset(32, true); }, { title: '标题 1：32px、加粗' }));
+    var sRow2 = rrow(sCo);
+    sRow2.appendChild(btn('标题 2', function () { applyStylePreset(24, true); }, { title: '标题 2：24px、加粗' }));
+    sRow2.appendChild(btn('小标题', function () { applyStylePreset(19, true); }, { title: '小标题：19px、加粗' }));
+
+    // ================= 插入 =================
+    var gIns = grp(pIns, '插入');
+    var insWrap = document.createElement('div');
+    insWrap.className = 'xl-tb-insert';
+    var insBtn = document.createElement('button');
+    insBtn.type = 'button';
+    insBtn.className = 'xl-tb-insert-btn';
+    insBtn.title = '插入：文本框 / 图片 / 视频 / 文件';
+    insBtn.innerHTML = '<span class="xl-tb-insert-plus">＋</span>' +
+                       '<span class="xl-tb-insert-label">插入</span>' +
+                       '<span class="xl-caret">▾</span>';
+    var insMenu = document.createElement('div');
+    insMenu.className = 'xl-tb-menu';
+    [['📝', '文本框', '插入一个可输入文字的文本框', '文字', makeTextbox],
+     ['🖼', '图片', '插入图片（本地文件或链接）', '本地/链接', insertImage],
+     ['🎬', '视频', '插入视频（本地文件 / YouTube / 直链）', '本地/链接', insertVideo],
+     ['📎', '文件', '插入任意文件附件（≤20MB）', '≤20MB', insertFile]
+    ].forEach(function (it) {
+      var mi = document.createElement('button');
+      mi.type = 'button';
+      mi.className = 'xl-tb-menu-item';
+      mi.title = it[2];
+      mi.innerHTML = '<span class="xl-tb-menu-ico">' + it[0] + '</span>' +
+                     '<span class="xl-tb-menu-label">' + it[1] + '</span>' +
+                     '<span class="xl-tb-menu-hint">' + it[3] + '</span>';
+      mi.addEventListener('mousedown', keep);
+      mi.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeInsertMenu();
+        it[4]();
+      });
+      insMenu.appendChild(mi);
+    });
+    insWrap.appendChild(insBtn);
+    insWrap.appendChild(insMenu);
+
+    function closeInsertMenu() { insMenu.classList.remove('open'); }
+    function openInsertMenu() {
+      // 菜单是 position:fixed，位置按按钮实时算：
+      // 工具栏是 overflow-x:auto，绝对定位会被裁掉
+      var r = insBtn.getBoundingClientRect();
+      var mw = insMenu.offsetWidth || 232;
+      insMenu.style.left = Math.max(8, Math.min(Math.round(r.left), window.innerWidth - mw - 8)) + 'px';
+      insMenu.style.top = Math.round(r.bottom + 6) + 'px';
+      insMenu.classList.add('open');
+    }
+    insBtn.addEventListener('mousedown', keep);
+    insBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var isOpen = insMenu.classList.contains('open');
+      closeInsertMenu();
+      if (!isOpen) openInsertMenu();
+    });
+    document.addEventListener('mousedown', function (e) {
+      if (!insWrap.contains(e.target)) closeInsertMenu();
+    });
+    gIns.appendChild(insWrap);
+
+    // — 快速插入：图标按钮（不想开菜单时一键到位） —
+    var gQuick = grp(pIns, '快速插入');
+    var qCo = stack(gQuick);
+    var qRow1 = rrow(qCo);
+    qRow1.appendChild(quick('📝', '文字', '插入文本框', makeTextbox));
+    qRow1.appendChild(quick('🖼', '图片', '插入图片', insertImage));
+    var qRow2 = rrow(qCo);
+    qRow2.appendChild(quick('🎬', '视频', '插入视频', insertVideo));
+    qRow2.appendChild(quick('📎', '文件', '插入文件附件', insertFile));
+
+    // — 链接组 —
+    var gLink = grp(pIns, '链接');
+    gLink.appendChild(btn('🔗 链接', insertLink, { title: '给选中的文字加链接' }));
+    gLink.appendChild(btn('⛓ 解除', function () { exec('unlink'); }, { title: '移除链接' }));
+
+    // ================= 布局 / 上下文格式 =================
+    var gSize = grp(pLay, '大小');
+    var zCo = stack(gSize);
+    var zRow1 = rrow(zCo);
+    sizeRead = document.createElement('span');
+    sizeRead.className = 'xl-tb-sizeread';
+    sizeRead.textContent = '未选中内容块';
+    sizeRead.title = '拖动选中块的四角或四边即可改变长宽';
+    zRow1.appendChild(sizeRead);
+    var zRow2 = rrow(zCo);
+    zRow2.appendChild(btn('25%', function () { applySizePreset(25); }, { title: '宽度 = 内容栏的 25%' }));
+    zRow2.appendChild(btn('50%', function () { applySizePreset(50); }, { title: '宽度 = 内容栏的 50%' }));
+    zRow2.appendChild(btn('75%', function () { applySizePreset(75); }, { title: '宽度 = 内容栏的 75%' }));
+    zRow2.appendChild(btn('100%', function () { applySizePreset(100); }, { title: '宽度 = 内容栏的 100%' }));
+    zRow2.appendChild(btn('⤢ 重置', resetSize, { title: '把选中块恢复为自适应尺寸' }));
+
+    var gArr = grp(pLay, '排列');
+    var aCo = stack(gArr);
+    var aRow1 = rrow(aCo);
+    aRow1.appendChild(btn('⧉ 复制', duplicateActive, { title: '复制选中的内容块' }));
+    aRow1.appendChild(btn('↑ 上移', function () { moveActive(-1); }, { title: '把选中块往上移' }));
+    var aRow2 = rrow(aCo);
+    aRow2.appendChild(btn('↓ 下移', function () { moveActive(1); }, { title: '把选中块往下移' }));
+    aRow2.appendChild(btn('🗑 删除', deleteActive, { title: '删除选中的内容块（Delete）' }));
+
+    var gNote = grp(pLay, '说明');
+    var noteEl = document.createElement('div');
+    noteEl.className = 'xl-rbn-note';
+    noteEl.innerHTML = '图片 / 视频拖角保持原比例<br>文本框 / 附件可自由改长宽';
+    gNote.appendChild(noteEl);
+
+    // ================= 帮助 =================
+    var gKeys = grp(pHelp, '快捷键');
+    var keysEl = document.createElement('div');
+    keysEl.className = 'xl-rbn-note';
+    keysEl.innerHTML =
+      '<span class="xl-kbd">Ctrl/⌘+S</span> 保存　<span class="xl-kbd">Esc</span> 退出编辑　' +
+      '<span class="xl-kbd">Delete</span> 删除选中块<br>' +
+      '<span class="xl-kbd">Ctrl/⌘+B</span> 粗体　<span class="xl-kbd">Ctrl/⌘+I</span> 斜体　' +
+      '<span class="xl-kbd">Ctrl/⌘+U</span> 下划线';
+    gKeys.appendChild(keysEl);
+
+    var gAbout = grp(pHelp, '说明');
+    var aboutEl = document.createElement('div');
+    aboutEl.className = 'xl-rbn-note';
+    aboutEl.innerHTML = '改动只有点「保存」后才会对访客生效<br>工具栏可用右上角的 ⌃ 收起';
+    gAbout.appendChild(aboutEl);
+
+    // ===== 调色板面板（标准色 + 最近用色 + 自定义） =====
     function buildPanel(which) {
       var panel = document.createElement('div');
       panel.className = 'xl-tb-color-panel';
@@ -1059,19 +1262,32 @@
     function closePanels() {
       [fgPanel, bgPanel].forEach(function (p) { p.classList.remove('open'); });
     }
+    // 面板在带状工具栏里是 position:fixed，位置按按钮实时算；贴边时自动翻转
+    function placePanel(anchorEl, panelEl) {
+      panelEl.classList.add('open');
+      var r = anchorEl.getBoundingClientRect();
+      var pw = panelEl.offsetWidth || 232;
+      var ph = panelEl.offsetHeight || 0;
+      var left = Math.round(r.left);
+      if (left + pw > window.innerWidth - 8) left = Math.max(8, window.innerWidth - pw - 8);
+      var top = Math.round(r.bottom + 6);
+      if (ph && top + ph > window.innerHeight - 8) top = Math.max(8, Math.round(r.top - ph - 6));
+      panelEl.style.left = left + 'px';
+      panelEl.style.top = top + 'px';
+    }
     fgBtn.addEventListener('mousedown', keep);
     bgBtn.addEventListener('mousedown', keep);
     fgBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       var wasOpen = fgPanel.classList.contains('open');
       closePanels();
-      if (!wasOpen) fgPanel.classList.add('open');
+      if (!wasOpen) placePanel(fgBtn, fgPanel);
     });
     bgBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       var wasOpen = bgPanel.classList.contains('open');
       closePanels();
-      if (!wasOpen) bgPanel.classList.add('open');
+      if (!wasOpen) placePanel(bgBtn, bgPanel);
     });
     // 点页面其他位置关闭
     document.addEventListener('mousedown', function (e) {
@@ -1079,26 +1295,24 @@
       if (!bgBtn.contains(e.target)) bgPanel.classList.remove('open');
     });
 
-    tb.appendChild(gColor);
-
-    // 清格式按钮
-    var gClear = group();
-    gClear.appendChild(btn('🧹 清格式', function () { applyClearFormat(); }, { title: '清除选中文字的所有格式（颜色、加粗等）' }));
-    tb.appendChild(gClear);
-
     // 初始化最近用色面板
     refreshRecents();
 
     banner.appendChild(row);
-    banner.appendChild(tb);
+    banner.appendChild(tabsBar);
+    banner.appendChild(bodyEl);
     document.body.appendChild(banner);
+
+    setTab('home');
+    updateCtxTab();
 
     // 创建浮动迷你工具栏（选中文字时浮现在选区上方）
     createMiniToolbar();
 
     saveBtn.addEventListener('click', saveEdits);
-    exit.addEventListener('click', requestExit);
+    exitBtn.addEventListener('click', requestExit);
     updateSaveBtn();
+    updateSizeRead();
   }
 
   // 浮动迷你工具栏（Word-like 选中浮现）
@@ -1399,6 +1613,7 @@
     hideSizeBadge();
     document.body.classList.remove('xl-resizing');
     document.body.classList.remove('xl-editmode');
+    document.body.classList.remove('xl-rbn-collapsed');
     document.removeEventListener('selectionchange', onSelChange);
     document.removeEventListener('keydown', onKeyDown);
     window.removeEventListener('beforeunload', onBeforeUnload);

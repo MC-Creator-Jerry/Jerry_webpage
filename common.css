@@ -1470,9 +1470,11 @@ html[data-theme="dark"] .xl-mini-toolbar .xl-mini-fg-letter { background: #f3f2f
 html[data-theme="dark"] .xl-mini-toolbar .xl-mini-fg-bar { background: #f3f2f1; }
 
 /* 编辑模式：给内容块容器让出顶部空间（工具栏收起时只让一行）
-   —— 由 JS 在 body 上切换 .xl-rbn-collapsed 同步 */
-body.xl-editmode #xl-edit-blocks { margin-top: 156px; }
-body.xl-editmode.xl-rbn-collapsed #xl-edit-blocks { margin-top: 52px; }
+   —— 由 JS 在 body 上切换 .xl-rbn-collapsed 同步。
+   高度不再写死：字体组因「清格式」等按钮实际超过 74px，固定 156px 会遮挡内容。
+   用 ResizeObserver 把 banner 实时高度写进 --xl-banner-h，CSS 取这个变量 + 8px 缓冲。 */
+body.xl-editmode #xl-edit-blocks { margin-top: var(--xl-banner-h, 160px); }
+body.xl-editmode.xl-rbn-collapsed #xl-edit-blocks { margin-top: var(--xl-banner-h, 56px); }
 
 /* 保存按钮：有未保存修改时右上角显示琥珀色圆点 */
 .xl-edit-save.is-dirty { position: relative; }

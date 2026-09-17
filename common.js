@@ -477,54 +477,6 @@ window.XLTopics = (function () {
     }
   }
 
-  function injectSubscribeBtn() {
-    // 降低登录门槛：在顶栏「登录」前注入「订阅」入口，非技术访客无需 GitHub 登录即可邮箱订阅更新。
-    var br = document.querySelector('.bar-right');
-    if (!br || br.querySelector('#subscribeBtn')) return;
-    var sc = document.querySelector('script[src*="common.js"]');
-    var src = sc ? (sc.getAttribute('src') || '') : '';
-    var mm = src.match(/^((?:\.\.\/)*)/);
-    var pre = mm ? mm[1] : '';
-    var a = document.createElement('a');
-    a.className = 'bar-btn';
-    a.id = 'subscribeBtn';
-    a.href = pre + 'subscribe/';
-    a.setAttribute('data-zh', '订阅');
-    a.setAttribute('data-en', 'Subscribe');
-    a.textContent = '订阅';
-    // 当前语言（默认 zh），避免注入晚于页面 applyLang 而残留中文
-    var lang = 'zh';
-    try { lang = localStorage.getItem('xl_lang') || 'zh'; } catch (e) {}
-    if (lang === 'en') a.textContent = 'Subscribe';
-    var login = br.querySelector('#loginBtn');
-    if (login) br.insertBefore(a, login);
-    else br.appendChild(a);
-  }
-
-  function injectBlogBtn() {
-    // 与「订阅」同源：在顶栏「订阅」前注入「博客」入口，引向站内博客板块。
-    var br = document.querySelector('.bar-right');
-    if (!br || br.querySelector('#blogBtn')) return;
-    var sc = document.querySelector('script[src*="common.js"]');
-    var src = sc ? (sc.getAttribute('src') || '') : '';
-    var mm = src.match(/^((?:\.\.\/)*)/);
-    var pre = mm ? mm[1] : '';
-    var a = document.createElement('a');
-    a.className = 'bar-btn';
-    a.id = 'blogBtn';
-    a.href = pre + 'blog/';
-    a.setAttribute('data-zh', '博客');
-    a.setAttribute('data-en', 'Blog');
-    a.textContent = '博客';
-    // 当前语言（默认 zh），避免注入晚于页面 applyLang 而残留中文
-    var lang = 'zh';
-    try { lang = localStorage.getItem('xl_lang') || 'zh'; } catch (e) {}
-    if (lang === 'en') a.textContent = 'Blog';
-    var sub = br.querySelector('#subscribeBtn') || br.querySelector('#loginBtn');
-    if (sub) br.insertBefore(a, sub);
-    else br.appendChild(a);
-  }
-
   function applyBarMode() {
     // 默认改为「图标加小文字」(tile)；新访客进来直接看到 tile，老用户保留自己存过的偏好。
     var m = 'tile';
@@ -537,7 +489,7 @@ window.XLTopics = (function () {
   window.__xlApplyBarMode = applyBarMode;
   window.__xlInjectBarIcons = injectIcons;
 
-  function run() { applyBarMode(); injectSubscribeBtn(); injectBlogBtn(); injectIcons(); }
+  function run() { applyBarMode(); injectIcons(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 })();
@@ -720,6 +672,8 @@ window.XLTopics = (function () {
   var EDIT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
   var BG_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>';
   var HELP = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg>';
+  var SUBSCRIBE_ICON = '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>';
+  var BLOG_ICON = '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>';
 
   function getTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
   function setTheme(t) {
@@ -919,6 +873,32 @@ window.XLTopics = (function () {
     return fa;
   }
 
+  // 订阅 + 博客：合并为一个长浮动按钮，放在帮助按钮左侧顶带
+  function injectFloatLinks() {
+    var fa = ensureFloatActions();
+    if (fa.querySelector('#floatLinks')) return;
+    var sc = document.querySelector('script[src*="common.js"]');
+    var src = sc ? (sc.getAttribute('src') || '') : '';
+    var mm = src.match(/^((?:\.\.\/)*)/);
+    var pre = mm ? mm[1] : '';
+    var lang = 'zh';
+    try { lang = localStorage.getItem('xl_lang') || 'zh'; } catch (e) {}
+    var wrap = document.createElement('div');
+    wrap.className = 'xl-float-links';
+    wrap.id = 'floatLinks';
+    var svgAttr = ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    wrap.innerHTML =
+      '<a class="xl-float-link" href="' + pre + 'subscribe/" target="_blank" rel="noopener" title="' + (lang === 'en' ? 'Subscribe' : '订阅') + '">' +
+        '<svg' + svgAttr + '>' + SUBSCRIBE_ICON + '</svg>' +
+        '<span data-zh="订阅" data-en="Subscribe">' + (lang === 'en' ? 'Subscribe' : '订阅') + '</span>' +
+      '</a>' +
+      '<a class="xl-float-link" href="' + pre + 'blog/" target="_blank" rel="noopener" title="' + (lang === 'en' ? 'Blog' : '博客') + '">' +
+        '<svg' + svgAttr + '>' + BLOG_ICON + '</svg>' +
+        '<span data-zh="博客" data-en="Blog">' + (lang === 'en' ? 'Blog' : '博客') + '</span>' +
+      '</a>';
+    fa.appendChild(wrap);
+  }
+
   function injectFloat() {
     // 预载编辑栏脚本：无论是否有浮动按钮，都让其应用已保存的页面覆盖
     loadEditbar();
@@ -944,6 +924,9 @@ window.XLTopics = (function () {
       bgBtn = fa.querySelector('#bgToggle');
     }
     fa.insertBefore(bgBtn, themeBtn);
+
+    // 订阅 + 博客：合并为一个长浮动按钮，放在帮助按钮左侧顶带（已从小蓝条移除入口）
+    injectFloatLinks();
 
     // 帮助中心：做成小浮动按钮，浮在「设置」齿轮正上方（已从小蓝条移除入口）
     if (!fa.querySelector('#helpBtn')) {

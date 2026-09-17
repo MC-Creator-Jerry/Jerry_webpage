@@ -67,6 +67,25 @@
   .foot-btn[disabled] { opacity: 0.55; cursor: default; }
   .post .cmlink { display: inline-block; margin-top: 10px; font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600; }
   .post .cmlink:hover { text-decoration: underline; }
+  /* 帖子卡片内嵌评论（默认折叠，仅显示点赞最高的 2 条） */
+  .inline-comments { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--card-border); }
+  .inline-comment { display: flex; gap: 10px; padding: 9px 0; cursor: pointer; }
+  .inline-comment:last-child { padding-bottom: 0; }
+  .inline-comment .ic-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: var(--card-border); flex: 0 0 auto; }
+  .inline-comment .ic-main { min-width: 0; flex: 1; }
+  .inline-comment .ic-row1 { display: flex; align-items: baseline; gap: 8px; }
+  .inline-comment .ic-author { font-weight: 700; color: var(--text); font-size: 0.88rem; text-decoration: none; }
+  .inline-comment .ic-author:hover { color: var(--accent); }
+  .inline-comment .ic-time { font-size: 0.7rem; color: var(--muted); }
+  .inline-comment .ic-text { font-size: 0.9rem; line-height: 1.55; color: var(--text); white-space: pre-wrap; word-break: break-word; margin-top: 1px; }
+  .inline-comment .ic-text .mention { color: var(--accent); font-weight: 700; text-decoration: none; }
+  .inline-comment .ic-actions { margin-top: 3px; }
+  .inline-comment .ic-like { border: none; background: transparent; color: var(--muted); font-size: 0.78rem; cursor: pointer; padding: 0; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
+  .inline-comment .ic-like:hover { color: var(--accent); }
+  .inline-comment .ic-like.on { color: var(--accent); }
+  .ic-rest.ic-collapsed { display: none; }
+  .ic-expand { display: block; width: 100%; margin-top: 8px; border: none; background: transparent; color: var(--accent); font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 7px 0; border-radius: 8px; }
+  .ic-expand:hover { background: rgba(0,120,212,0.08); }
   /* 排布方式切换：从新到旧 / 关注优先 */
   .sort-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
   .sort-tab { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
@@ -151,7 +170,7 @@
   body.modal-open { overflow: hidden; }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260917e" />
+  <link rel="stylesheet" href="../../common.css?v=20260918a" />
 </head>
 <body>
   <header class="topbar">
@@ -472,7 +491,11 @@
                 '<img class="ico" src="../../icons/' + (st && st.liked ? 'like-on' : 'like') + '.svg" alt="点赞"><span class="like-count">' + lc + '</span>' +
               '</button>' +
             '</div>' +
-            '<div class="post-actions" data-post="' + p.id + '"></div>' + edit + del;
+            '<div class="post-actions" data-post="' + p.id + '"></div>' + edit + del +
+            '<div class="inline-comments" data-post="' + p.id + '">' +
+              '<div class="ic-list"></div>' +
+              '<button class="ic-expand" type="button" hidden data-zh="展开评论" data-en="Expand comments">展开评论</button>' +
+            '</div>';
           card.querySelector('.ptitle').textContent = p.title || '（无标题）';
           var bodyEl = card.querySelector('.post-body');
           bodyEl.innerHTML = p.body || '';
@@ -494,6 +517,101 @@
           listEl.appendChild(card);
         });
         if (typeof window.applyAll === 'function') window.applyAll();
+      }
+
+      // ---- 帖子卡片内嵌评论：默认折叠，只显示点赞最高的 2 条 ----
+      function renderInlineComment(c, postId) {
+        var el = document.createElement('div'); el.className = 'inline-comment';
+        var avatar = 'https://github.com/' + encodeURIComponent(c.login) + '.png';
+        el.innerHTML =
+          '<img class="ic-avatar" src="' + avatar + '" alt="" onerror="this.onerror=null;this.src=initialAvatar(\'' + c.login + '\')">' +
+          '<div class="ic-main">' +
+            '<div class="ic-row1">' +
+              '<a class="ic-author" href="../../personal_profile/?user=' + encodeURIComponent(c.login) + '">@' + esc(c.login) + '</a>' +
+              '<span class="ic-time">' + fmtTime(c.ts) + '</span>' +
+            '</div>' +
+            '<div class="ic-text"></div>' +
+            '<div class="ic-actions">' +
+              '<button class="ic-like' + (c.liked ? ' on' : '') + '" data-id="' + c.id + '" title="点赞">' +
+                '<span>' + (c.liked ? '♥' : '♡') + '</span> ' + (c.likeCount || 0) +
+              '</button>' +
+            '</div>' +
+          '</div>';
+        el.querySelector('.ic-text').innerHTML = linkify(c.body);
+        var likeBtn = el.querySelector('.ic-like');
+        if (likeBtn) {
+          likeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleInlineLike(postId, c.id, likeBtn);
+          });
+        }
+        el.addEventListener('click', function (e) {
+          if (e.target.closest('a') || e.target.closest('button')) return;
+          openPost(postId);
+        });
+        return el;
+      }
+      function loadInlineComments(posts) {
+        posts.forEach(function (p) {
+          if (blockedSet.has(p.id)) return;
+          var container = listEl.querySelector('.inline-comments[data-post="' + p.id + '"]');
+          if (!container) return;
+          var icList = container.querySelector('.ic-list');
+          var expandBtn = container.querySelector('.ic-expand');
+          icList.innerHTML = '';
+          expandBtn.hidden = true;
+          fetch('/api/comment?post=' + encodeURIComponent(p.id))
+            .then(function (r) { return r.ok ? r.json() : { comments: [] }; })
+            .then(function (d) {
+              var list = (d.comments || []).slice();
+              if (!list.length) { container.hidden = true; return; }
+              container.hidden = false;
+              // 按点赞数降序，同赞按时间新到旧
+              list.sort(function (a, b) {
+                var la = a.likeCount || 0, lb = b.likeCount || 0;
+                if (lb !== la) return lb - la;
+                return (b.ts || 0) - (a.ts || 0);
+              });
+              var top2 = list.slice(0, 2);
+              var rest = list.slice(2);
+              top2.forEach(function (c) { icList.appendChild(renderInlineComment(c, p.id)); });
+              if (rest.length) {
+                var restWrap = document.createElement('div');
+                restWrap.className = 'ic-rest ic-collapsed';
+                rest.forEach(function (c) { restWrap.appendChild(renderInlineComment(c, p.id)); });
+                icList.appendChild(restWrap);
+                expandBtn.hidden = false;
+                expandBtn.textContent = '展开其余 ' + rest.length + ' 条评论';
+                expandBtn.onclick = function (e) {
+                  e.stopPropagation();
+                  var collapsed = restWrap.classList.contains('ic-collapsed');
+                  restWrap.classList.toggle('ic-collapsed');
+                  expandBtn.textContent = collapsed ? '收起评论' : '展开其余 ' + rest.length + ' 条评论';
+                };
+              }
+            })
+            .catch(function () { container.hidden = true; });
+        });
+      }
+      function toggleInlineLike(postId, cid, btn) {
+        if (!meLogin) { toast('请先登录', true); if (window.JW_LOGIN) window.JW_LOGIN(); return; }
+        btn.disabled = true;
+        var action = btn.classList.contains('on') ? 'unlike' : 'like';
+        fetch('/api/comment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post: postId, id: cid, action: action })
+        }).then(function (r) { return r.ok ? r.json() : { error: 'net' }; })
+          .then(function (res) {
+            btn.disabled = false;
+            if (res.ok) {
+              var liked = action === 'like';
+              btn.classList.toggle('on', liked);
+              btn.innerHTML = '<span>' + (liked ? '♥' : '♡') + '</span> ' + (res.likeCount || 0);
+            } else if (res.error === 'unauthorized') { toast('请先登录', true); }
+            else { toast('操作失败', true); }
+          })
+          .catch(function () { btn.disabled = false; toast('网络错误', true); });
       }
 
       function hotScore(p) {
@@ -552,6 +670,7 @@
             window.XLReactions.render(rbox, Object.assign({}, reactsMap[p.id], { post: p.id }), { compact: true });
           }
         });
+        loadInlineComments(sorted);
       }
 
       function load() {
@@ -902,7 +1021,7 @@
       }).catch(function () { mLoginHint.hidden = false; load(); });
     })();
   </script>
-  <script src="../../common.js?v=20260917e"></script>
+  <script src="../../common.js?v=20260918a"></script>
 </body>
 </html>
 

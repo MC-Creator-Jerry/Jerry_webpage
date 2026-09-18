@@ -140,6 +140,7 @@
       '.xl-hovercard .hc-col ul{list-style:none;margin:0;padding:0;font-size:.76rem;line-height:1.4}',
       '.xl-hovercard .hc-col li{padding:3px 0;border-top:1px solid #f0f3f7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
       '.xl-hovercard .hc-empty{color:#9aa6b2}',
+      '.xl-hovercard .hc-sp{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#1d9e75;color:#fff;font-size:.68rem;font-weight:700;vertical-align:1px}',
       '.xl-hovercard .hc-loading{font-size:.85rem;color:#6b7785;text-align:center;padding:8px}',
       /* ===== 头像菜单：等级 + 进度条 ===== */
       '.hc-level{margin:10px 0 12px;padding:10px 12px;background:#f5f8fb;border:1px solid #e7edf3;border-radius:10px}',
@@ -183,6 +184,7 @@
   var trafficIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 3v18h18'/><path d='M7 16l4-4 4 5 5-7'/></svg>";
   var banIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><line x1='5.6' y1='5.6' x2='18.4' y2='18.4'/></svg>";
   var fbIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z'/></svg>";
+  var ticketIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2.5 2.5 0 0 0 0-6z'/><path d='M13 5v14'/></svg>";
 
   // 蓝条「通知」红点：拉取未读总数（系统+消息+评论）并刷新
   var NOTIF_KEY = '__xl_notif', NOTIF_TTL = 30000;
@@ -443,7 +445,8 @@
         card.innerHTML =
           '<div class="hc-avatar"><img id="hcAvatarImg" src="' + av + '" alt=""></div>' +
           '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +
-          '<div class="hc-login">@' + esc(u.login) + (u.isAdmin ? ' · ' + t('管理员', 'Admin') : '') + '</div>' +
+          '<div class="hc-login">@' + esc(u.login) + (u.isAdmin ? ' · ' + t('管理员', 'Admin') : '') +
+            (u.sponsor ? '<span class="hc-sp">' + esc(u.sponsor.label || t('赞助者', 'Supporter')) + '</span>' : '') + '</div>' +
           '<div class="hc-level" id="hcLevel" hidden></div>' +
           '<div class="hc-actions">' +
             '<a class="hc-btn" href="' + BASE + 'personal_profile/">' + t('个人主页', 'Profile') + '</a>' +
@@ -454,7 +457,9 @@
           '</div>' +
           '<div class="hc-actions hc-actions-extras">' +
             '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'helpcenter/">' + helpIco + '<span>' + t('帮助中心', 'Help Center') + '</span></a>' +
+            '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'redeem/">' + ticketIco + '<span>' + t('兑换赞助码', 'Redeem code') + '</span></a>' +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/feedback/">' + fbIco + '<span>' + t('建议管理', 'Feedback') + '</span></a>' : '') +
+            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/sponsors/">' + ticketIco + '<span>' + t('赞助管理', 'Sponsors') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/reports/">' + flagIco + '<span>' + t('举报后台', 'Reports') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/ban/">' + banIco + '<span>' + t('小黑屋', 'Ban List') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'stats/">' + trafficIco + '<span>' + t('流量', 'Traffic') + '</span></a>' : '') +

@@ -584,7 +584,7 @@ window.XLTopics = (function () {
    直接并入 pinBarRight()/pinFloat() 的 inline bottom（!important），使底部条始终贴屏幕最底。
    具体实现见下方浮动按钮 IIFE 内的 vbOffset()/syncVB()。桌面 Chrome 的 offsetBottom 恒为 0，无副作用。 */
 
-/* ============ 键盘快捷键（单一来源 XL_KEYS）：N 通知中心 / S 搜索 / U 登录·用户 / H 帮助中心 / P 产品 / T 帖子中心 / B 博客 / L 语言 / O 设置 / M 切换深浅色 / I 自定义背景 / F 主页 / E 编辑当前页面布局(站主)；另：↑/↓ 双击=回顶/到底 ============ */
+/* ============ 键盘快捷键（单一来源 XL_KEYS）：N 通知中心 / S 搜索 / U 登录·用户 / H 帮助中心 / P 产品 / T 帖子中心 / B 博客 / V 订阅 / L 语言 / O 设置 / M 切换深浅色 / I 自定义背景 / F 主页 / E 编辑当前页面布局(站主)；另：↑/↓ 双击=回顶/到底 ============ */
 /* 说明：key=按键（小写，用于 keydown 匹配）；nav=目标路径；re=按钮 href 匹配（用于 Alt 键提示徽标，已兼容相对链接）；login=true 走 loginOrMine()，theme=true 走 window.__xlToggleTheme() */
 (function () {
   var XL_KEYS = [
@@ -595,6 +595,7 @@ window.XLTopics = (function () {
     { key: 'p', nav: '/products.html',    re: /\/products\.html/,       login: false },
     { key: 't', nav: '/post/center/',     re: /\/post\//,              login: false },
     { key: 'b', nav: '/blog/',            re: /\/blog\//,              login: false },
+    { key: 'v', nav: '/subscribe/',        re: /\/subscribe\//,          login: false },
     { key: 'l', nav: '/language',         re: /\blanguage\b/,          login: false },
     { key: 'o', nav: '/settings/homepage.html', re: /\bsettings\b/,     login: false },
     { key: 'f', nav: '/',                 re: /\/(index\.html)?$/,     login: false },
@@ -685,7 +686,7 @@ window.XLTopics = (function () {
 
 /* ============ Alt 键提示（类 Office keytip）：按 Alt 显示/隐藏顶栏按钮对应快捷键，再按一次或 Esc 隐藏 ============ */
 (function () {
-  var STYLE = '.bar-btn,.xl-search,.fab{position:relative}.xl-keycap{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:5px;background:#0078D4;color:#fff;font:600 11px/1.3 system-ui,"Segoe UI",sans-serif;padding:1px 7px;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:none;z-index:60;display:none;white-space:nowrap}body.xl-keytips .xl-keycap{display:block}';
+  var STYLE = '.bar-btn,.xl-search,.fab,.bar-avatar{position:relative}.xl-keycap{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:5px;background:#0078D4;color:#fff;font:600 11px/1.3 system-ui,"Segoe UI",sans-serif;padding:1px 7px;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:none;z-index:60;display:none;white-space:nowrap}body.xl-keytips .xl-keycap{display:block}';
   function ensureStyle() {
     if (document.getElementById('xl-keytip-css')) return;
     var s = document.createElement('style');
@@ -702,7 +703,7 @@ window.XLTopics = (function () {
       } else if (kk.bg) {
         if (btn.id === 'bgToggle') return kk.key.toUpperCase();
       } else if (kk.login) {
-        if (btn.id === 'loginBtn' || btn.id === 'logoutBtn') return kk.key.toUpperCase();
+        if (btn.id === 'loginBtn' || btn.id === 'logoutBtn' || btn.id === 'userAvatarBtn') return kk.key.toUpperCase();
       } else if (kk.edit) {
         if (btn.id === 'editLayoutBtn') return kk.key.toUpperCase();
       } else if (kk.re) {
@@ -714,14 +715,14 @@ window.XLTopics = (function () {
     return null;
   }
   function buildKeytips() {
-    if (window.__xlKeytipsBuilt) return;
-    window.__xlKeytipsBuilt = true;
+    // 不做 once 守卫：头像按钮(#userAvatarBtn)由 auth.js 动态注入，每次按 Alt 重新扫描可确保抓到
     ensureStyle();
     var targets = [];
     document.querySelectorAll('.bar-right .bar-btn').forEach(function (b) { targets.push(b); });
+    document.querySelectorAll('.bar-right .bar-avatar').forEach(function (b) { targets.push(b); }); // 登录后头像按钮(U)
     document.querySelectorAll('.xl-search').forEach(function (f) { targets.push(f); }); // 搜索框也提示 S
     document.querySelectorAll('a.fab, button.fab').forEach(function (f) { targets.push(f); }); // 浮动按钮：语言(L)/设置(O)/主题(M)
-    document.querySelectorAll('a.xl-float-link').forEach(function (f) { targets.push(f); }); // 浮动长条：博客(B)/订阅(无键)
+    document.querySelectorAll('a.xl-float-link').forEach(function (f) { targets.push(f); }); // 浮动长条：博客(B)/订阅(V)
     var editFab = document.getElementById('editLayoutBtn');
     if (editFab) targets.push(editFab); // 站主浮动按钮：编辑当前页面布局(E)
     document.querySelectorAll('a.site-name, a[data-zh="主页"]').forEach(function (f) { targets.push(f); }); // 主页(F)：站名 logo + 面包屑「主页」超链接

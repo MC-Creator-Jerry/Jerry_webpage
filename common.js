@@ -643,6 +643,7 @@ window.XLTopics = (function () {
     if (e.ctrlKey || e.metaKey || e.altKey) return;             // 不干扰组合键（如 Ctrl/Cmd+S 保存）；Alt 交由键提示 IIFE 处理
     if (typing(e)) return;                                       // 输入框内不触发
     if (document.body.classList.contains('xl-editmode')) return; // 站主编辑模式内不触发
+    if (e.repeat) return;                                        // 长按自动重复不重复触发（如按住 M 反复切主题）
     var k = (e.key || '').toLowerCase();
     for (var i = 0; i < XL_KEYS.length; i++) {
       if (k === XL_KEYS[i].key) {
@@ -663,6 +664,7 @@ window.XLTopics = (function () {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (typing(e)) return;
     if (document.body.classList.contains('xl-editmode')) return;
+    if (e.repeat) return;                                        // 长按方向键不触发双击（避免按住 ↑ 直接跳顶）
     var now = Date.now();
     if (e.key === 'ArrowUp') {
       if (now - _lastUp < XL_DBL) {

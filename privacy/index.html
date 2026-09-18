@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js?v=20260914ab"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>隐私政策 · Jerry's webpage</title>
+<meta name="description" content="小蓝页隐私政策：收集哪些数据、为什么收集、存在哪里、你的权利。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="隐私政策 · Jerry's webpage" />
+<meta property="og:description" content="小蓝页隐私政策：收集哪些数据、为什么收集、存在哪里、你的权利。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text); background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+  .topbar {
+    position: sticky; top: 0; z-index: 100; min-height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name { font-size: 1.25rem; font-weight: 700; color: var(--bar-fg); text-decoration: none; }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--bar-fg); opacity: 0.9; }
+  .breadcrumb .bc-sep { opacity: 0.7; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none; background: rgba(255, 255, 255, 0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+
+  .content { max-width: 820px; margin: 0 auto; padding: 40px 24px 110px; }
+  h1 { font-size: 1.85rem; line-height: 1.35; margin-bottom: 6px; }
+  .updated { color: var(--muted); font-size: 0.88rem; margin-bottom: 24px; }
+  .lead {
+    background: color-mix(in srgb, var(--accent) 7%, var(--card-bg));
+    border-left: 4px solid var(--accent); border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 26px; font-size: 0.96rem; line-height: 1.8;
+  }
+  h2 { font-size: 1.16rem; margin: 30px 0 10px; padding-left: 11px; border-left: 4px solid var(--accent); line-height: 1.35; }
+  p, li { font-size: 0.95rem; line-height: 1.85; }
+  p { margin: 9px 0; }
+  ul, ol { margin: 9px 0 9px 22px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 14px 0; font-size: 0.88rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; overflow: hidden; }
+  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--card-border); vertical-align: top; }
+  th { background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); font-size: 0.83rem; font-weight: 700; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  code { background: color-mix(in srgb, var(--muted) 12%, transparent); border-radius: 4px; padding: 1px 6px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+  .draft {
+    margin-top: 34px; padding: 14px 18px; border-radius: 10px; font-size: 0.88rem; line-height: 1.75;
+    background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #c2410c; color: #7c2d12;
+  }
+  a { color: var(--accent); }
+  .site-footer { border-top: 1px solid var(--card-border); padding: 26px 24px; text-align: center; color: var(--muted); font-size: 0.88rem; }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .content { padding: 26px 15px 96px; }
+    h1 { font-size: 1.45rem; }
+    table { font-size: 0.83rem; }
+    th, td { padding: 8px 8px; }
+  }
+</style>
+  <link rel="stylesheet" href="../common.css?v=20260918a" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" data-zh="隐私政策" data-en="Privacy Policy">隐私政策</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../support/" data-zh="支持与价格" data-en="Support">支持与价格</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1 data-zh="隐私政策" data-en="Privacy Policy">隐私政策</h1>
+    <div class="updated" data-zh="最后更新：2026-09-18" data-en="Last updated: 2026-09-18">最后更新：2026-09-18</div>
+
+    <div class="lead" data-zh="小蓝页是一个个人站点。我只收集让站点能正常运转所必需的数据，不做广告画像，不把数据卖给任何人。下面逐项说明。" data-en="Jerry's webpage is a personal site. I only collect the data required to keep it running. No ad profiling, and I never sell your data.">小蓝页是一个个人站点。我只收集让站点能正常运转所必需的数据，不做广告画像，不把数据卖给任何人。下面逐项说明。</div>
+
+    <h2 data-zh="一、收集哪些数据" data-en="1. What is collected">一、收集哪些数据</h2>
+    <table>
+      <thead>
+        <tr><th data-zh="类别" data-en="Category">类别</th><th data-zh="具体内容" data-en="Details">具体内容</th><th data-zh="什么时候产生" data-en="When">什么时候产生</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-zh="账号信息" data-en="Account">账号信息</td>
+          <td data-zh="GitHub 用户名、显示名、头像地址、用户 ID" data-en="GitHub username, display name, avatar URL, user ID">GitHub 用户名、显示名、头像地址、用户 ID</td>
+          <td data-zh="你使用 GitHub 登录时" data-en="When you sign in with GitHub">你使用 GitHub 登录时</td>
+        </tr>
+        <tr>
+          <td data-zh="你的自定义资料" data-en="Your profile">你的自定义资料</td>
+          <td data-zh="昵称、简介、自定义头像、主页背景、字体与主题偏好" data-en="Nickname, bio, custom avatar, page background, font and theme preferences">昵称、简介、自定义头像、主页背景、字体与主题偏好</td>
+          <td data-zh="你在设置页保存时" data-en="When you save them in settings">你在设置页保存时</td>
+        </tr>
+        <tr>
+          <td data-zh="你发布的内容" data-en="Content you post">你发布的内容</td>
+          <td data-zh="帖子、评论、留言、私信、群组内容及附件；发布时间" data-en="Posts, comments, guestbook entries, messages, group content and attachments, plus timestamps">帖子、评论、留言、私信、群组内容及附件；发布时间</td>
+          <td data-zh="你主动提交时" data-en="When you submit them">你主动提交时</td>
+        </tr>
+        <tr>
+          <td data-zh="联系表单" data-en="Contact form">联系表单</td>
+          <td data-zh="姓名、邮箱、反馈分类、来源页面、IP 地址、提交时间、正文" data-en="Name, email, feedback category, source page, IP address, timestamp, message">姓名、邮箱、反馈分类、来源页面、IP 地址、提交时间、正文</td>
+          <td data-zh="你提交留言或建议时" data-en="When you submit feedback">你提交留言或建议时</td>
+        </tr>
+        <tr>
+          <td data-zh="技术性数据" data-en="Technical data">技术性数据</td>
+          <td data-zh="访问计数、首次访问时间、用于限流的请求标识" data-en="Visit counts, first-seen time, and request identifiers used for rate limiting">访问计数、首次访问时间、用于限流的请求标识</td>
+          <td data-zh="你浏览页面或频繁请求接口时" data-en="When you browse pages or make frequent requests">你浏览页面或频繁请求接口时</td>
+        </tr>
+        <tr>
+          <td data-zh="封禁记录" data-en="Ban records">封禁记录</td>
+          <td data-zh="被处罚的用户名与到期时间" data-en="Username and expiry time of a penalty">被处罚的用户名与到期时间</td>
+          <td data-zh="仅在你违反站规被处理时" data-en="Only if you violate site rules">仅在你违反站规被处理时</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 data-zh="二、为什么收集" data-en="2. Why it is collected">二、为什么收集</h2>
+    <ul>
+      <li data-zh="登录与身份识别：知道「这条帖子是谁发的」。" data-en="Sign-in and identity: to know who posted what.">登录与身份识别：知道「这条帖子是谁发的」。</li>
+      <li data-zh="显示与个性化：头像、昵称、主题与字体偏好。" data-en="Display and personalisation: avatar, nickname, theme and font preferences.">显示与个性化：头像、昵称、主题与字体偏好。</li>
+      <li data-zh="回复你：联系表单收集的邮箱只用于回复你的问题，以及给你发一封自动确认信。" data-en="Replying to you: the email from the contact form is used only to answer you and to send one auto-confirmation.">回复你：联系表单收集的邮箱只用于回复你的问题，以及给你发一封自动确认信。</li>
+      <li data-zh="安全与防滥用：限流、防刷、处理举报与封禁。" data-en="Security and abuse prevention: rate limiting, anti-spam, handling reports and bans.">安全与防滥用：限流、防刷、处理举报与封禁。</li>
+      <li data-zh="了解大致流量：访问计数用于知道站点是否有在用。" data-en="Basic traffic insight: visit counts show whether the site is being used.">了解大致流量：访问计数用于知道站点是否有在用。</li>
+    </ul>
+    <p data-zh="不会做的事：不投放第三方广告画像、不把数据出售或出租给第三方、不用于与上述无关的用途。" data-en="What I do not do: no third-party ad profiling, no selling or renting your data, and no use unrelated to the purposes above.">不会做的事：不投放第三方广告画像、不把数据出售或出租给第三方、不用于与上述无关的用途。</p>
+
+    <h2 data-zh="三、存在哪里、留多久" data-en="3. Where it is stored, and for how long">三、存在哪里、留多久</h2>
+    <ul>
+      <li data-zh="站点部署在 Cloudflare Pages，数据存放在 Cloudflare 的键值存储（KV）中，由 Cloudflare 提供基础设施安全。" data-en="The site runs on Cloudflare Pages; data lives in Cloudflare's key-value store (KV), with Cloudflare providing infrastructure security.">站点部署在 Cloudflare Pages，数据存放在 Cloudflare 的键值存储（KV）中，由 Cloudflare 提供基础设施安全。</li>
+      <li data-zh="帖子、评论等内容会一直保留，直到你删除或注销账号。" data-en="Posts and comments are kept until you delete them or close your account.">帖子、评论等内容会一直保留，直到你删除或注销账号。</li>
+      <li data-zh="联系表单记录保留约 1 年。" data-en="Contact form entries are kept for about one year.">联系表单记录保留约 1 年。</li>
+      <li data-zh="限流用的计数器只在短时间内有效，过期自动清除。" data-en="Rate-limit counters expire automatically after a short window.">限流用的计数器只在短时间内有效，过期自动清除。</li>
+    </ul>
+
+    <h2 data-zh="四、Cookie 与浏览器本地存储" data-en="4. Cookies and local storage">四、Cookie 与浏览器本地存储</h2>
+    <ul>
+      <li data-zh="登录后会写入若干 Cookie（如 gh_user、gh_uid；访问令牌为 HttpOnly），用于识别你的登录状态。退出登录或注销账号会清除。" data-en="After signing in, a few cookies are set (e.g. gh_user, gh_uid; the access token is HttpOnly) to keep you signed in. They are cleared on sign-out or account closure.">登录后会写入若干 Cookie（如 gh_user、gh_uid；访问令牌为 HttpOnly），用于识别你的登录状态。退出登录或注销账号会清除。</li>
+      <li data-zh="浏览器本地存储（localStorage）保存你的语言、主题、字号等偏好，只存在你自己的设备上。" data-en="localStorage keeps your language, theme and font preferences — on your own device only.">浏览器本地存储（localStorage）保存你的语言、主题、字号等偏好，只存在你自己的设备上。</li>
+      <li data-zh="本站不使用广告 Cookie 或跨站追踪 Cookie。" data-en="No advertising or cross-site tracking cookies are used.">本站不使用广告 Cookie 或跨站追踪 Cookie。</li>
+    </ul>
+
+    <h2 data-zh="五、第三方服务" data-en="5. Third parties">五、第三方服务</h2>
+    <table>
+      <thead><tr><th data-zh="服务" data-en="Service">服务</th><th data-zh="用途" data-en="Purpose">用途</th></tr></thead>
+      <tbody>
+        <tr><td>Cloudflare</td><td data-zh="网站托管、数据存储、访问计数" data-en="Hosting, data storage, visit counting">网站托管、数据存储、访问计数</td></tr>
+        <tr><td>GitHub</td><td data-zh="第三方登录；头像图片可能来自 GitHub" data-en="Third-party sign-in; avatar images may be served by GitHub">第三方登录；头像图片可能来自 GitHub</td></tr>
+        <tr><td data-zh="网易邮箱（163）" data-en="NetEase Mail (163)">网易邮箱（163）</td><td data-zh="向你发送自动回复与通知邮件" data-en="Sending you auto-replies and notification emails">向你发送自动回复与通知邮件</td></tr>
+        <tr><td data-zh="第三方收款平台" data-en="Third-party payment platforms">第三方收款平台</td><td data-zh="若你通过支持页赞助，支付信息由该平台处理，本站不接触你的支付凭据" data-en="If you support via the support page, payment details are handled by that platform — this site never sees them">若你通过支持页赞助，支付信息由该平台处理，本站不接触你的支付凭据</td></tr>
+      </tbody>
+    </table>
+
+    <h2 data-zh="六、你的权利" data-en="6. Your rights">六、你的权利</h2>
+    <ul>
+      <li data-zh="查看与更正：在「设置」与「个人主页」里可以修改你的昵称、简介、头像与背景。" data-en="Access and correction: edit your nickname, bio, avatar and background in Settings and your profile.">查看与更正：在「设置」与「个人主页」里可以修改你的昵称、简介、头像与背景。</li>
+      <li data-zh="删除：你可以自行删除自己发布的帖子与评论。" data-en="Deletion: you can delete your own posts and comments.">删除：你可以自行删除自己发布的帖子与评论。</li>
+      <li data-zh="注销账号：在设置页可以注销，会清除你的资料、偏好与通知，并删除你发布的帖子。" data-en="Account closure: available in Settings; it clears your profile, preferences and notifications, and deletes your posts.">注销账号：在设置页可以注销，会清除你的资料、偏好与通知，并删除你发布的帖子。</li>
+      <li data-zh="其他请求：想导出或补删数据，可通过留言页或邮箱联系我。" data-en="Other requests: contact me via the contact page or email to export or further delete data.">其他请求：想导出或补删数据，可通过留言页或邮箱联系我。</li>
+    </ul>
+
+    <h2 data-zh="七、未成年人" data-en="7. Minors">七、未成年人</h2>
+    <p data-zh="本站不是面向儿童设计的服务。若你未满 14 周岁，请在监护人同意并指导下使用。" data-en="This site is not designed for children. If you are under 14, please use it only with a guardian's consent and guidance.">本站不是面向儿童设计的服务。若你未满 14 周岁，请在监护人同意并指导下使用。</p>
+
+    <h2 data-zh="八、政策变更" data-en="8. Changes">八、政策变更</h2>
+    <p data-zh="如果这份政策有实质性修改，我会更新本页顶部的日期。继续使用本站即视为接受更新后的版本。" data-en="If this policy changes materially, the date at the top of this page is updated. Continued use means you accept the revised version.">如果这份政策有实质性修改，我会更新本页顶部的日期。继续使用本站即视为接受更新后的版本。</p>
+
+    <h2 data-zh="九、联系方式" data-en="9. Contact">九、联系方式</h2>
+    <p data-zh="任何隐私相关的疑问或请求，都可以通过留言页或邮箱 jerryprdservice@163.com 联系我。" data-en="For any privacy question or request, reach me via the contact page or jerryprdservice@163.com.">任何隐私相关的疑问或请求，都可以通过留言页或邮箱 jerryprdservice@163.com 联系我。</p>
+
+    <div class="draft">
+      <strong data-zh="⚠️ 这份政策是按站点当前的真实实现写的草稿。" data-en="⚠️ This policy is a draft written from the site's current implementation.">⚠️ 这份政策是按站点当前的真实实现写的草稿。</strong>
+      <div data-zh="建议你发布前自己过一遍，重点核对：① 数据保留期限是否符合你的打算；② 如果将来接广告或引入新的第三方（分析、支付、CDN），需要补进第五节；③ 涉及正式商业运营时，请咨询专业人士。" data-en="Please review it before publishing. Check: (1) whether the retention periods match your intent; (2) if you later add ads or new third parties (analytics, payments, CDN), add them to section 5; (3) consult a professional for formal commercial operation.">建议你发布前自己过一遍，重点核对：① 数据保留期限是否符合你的打算；② 如果将来接广告或引入新的第三方（分析、支付、CDN），需要补进第五节；③ 涉及正式商业运营时，请咨询专业人士。</div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../support/" data-zh="支持与价格" data-en="Support">支持与价格</a> · <a href="../contact.html" data-zh="留言 / 建议" data-en="Contact">留言 / 建议</a></div>
+  </footer>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+      var cur = { lang: get(K.lang, 'zh'), theme: get(K.theme, 'light'), font: get(K.font, '1'), radius: get(K.radius, '14') };
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var en = cur.lang === 'en';
+        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      applyTheme(); applyFont(); applyRadius(); applyLang();
+    })();
+  </script>
+<script src="../auth.js?v=20260918g"></script>
+  <script src="../common.js?v=20260918h"></script>
+</body>
+</html>

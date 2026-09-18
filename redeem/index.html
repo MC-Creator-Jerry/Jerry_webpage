@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js?v=20260914ab"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>兑换赞助码 · Jerry's webpage</title>
+<meta name="description" content="在爱发电赞助后，把收到的一次性兑换码填进来，即可绑定你的小蓝页账号并解锁赞助者权益。" />
+<meta name="author" content="Jerry" />
+<meta name="robots" content="noindex" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="兑换赞助码 · Jerry's webpage" />
+<meta property="og:description" content="在爱发电赞助后，把收到的一次性兑换码填进来，即可绑定你的小蓝页账号并解锁赞助者权益。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条 ---- */
+  .topbar {
+    position: sticky; top: 0; z-index: 100; min-height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name { font-size: 1.25rem; font-weight: 700; color: var(--bar-fg); text-decoration: none; }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--bar-fg); opacity: 0.9; }
+  .breadcrumb .bc-sep { opacity: 0.7; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none; background: rgba(255, 255, 255, 0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+
+  .content { max-width: 760px; margin: 0 auto; padding: 40px 24px 110px; }
+  .hero { margin-bottom: 26px; }
+  .hero h1 { font-size: 1.95rem; line-height: 1.35; color: var(--text); }
+  .hero p { margin-top: 10px; color: var(--muted); font-size: 1rem; line-height: 1.75; }
+
+  .card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); box-shadow: var(--card-shadow);
+    padding: 22px 24px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 1.18rem; margin-bottom: 12px; color: var(--text); }
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--text); margin: 8px 0; }
+  .card .note { color: var(--muted); font-size: 0.86rem; }
+  .card ol, .card ul { margin: 8px 0 8px 22px; font-size: 0.93rem; line-height: 1.85; color: var(--text); }
+  .card li { margin: 3px 0; }
+
+  /* ---- 状态条 ---- */
+  .status {
+    border-radius: 12px; padding: 15px 18px; margin-bottom: 18px;
+    font-size: 0.94rem; line-height: 1.75;
+    border: 1px solid var(--card-border);
+    background: color-mix(in srgb, var(--muted) 7%, var(--card-bg));
+  }
+  .status.is-guest { border-left: 4px solid #ba7517; }
+  .status.is-on { border-left: 4px solid #1d9e75; background: color-mix(in srgb, #1d9e75 9%, var(--card-bg)); }
+  .status.is-off { border-left: 4px solid var(--accent); }
+  .status .st-title { font-weight: 700; font-size: 1.02rem; margin-bottom: 4px; }
+  .status .st-meta { color: var(--muted); font-size: 0.87rem; }
+  .status .st-badge {
+    display: inline-block; margin-left: 8px; padding: 2px 9px; border-radius: 999px;
+    background: #1d9e75; color: #fff; font-size: 0.76rem; font-weight: 700; vertical-align: 2px;
+  }
+
+  /* ---- 兑换表单 ---- */
+  .field { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; margin-top: 6px; }
+  #codeInput {
+    flex: 1 1 240px; min-width: 0;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Microsoft YaHei", monospace;
+    font-size: 1.24rem; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 12px 15px; border-radius: 11px;
+    border: 1px solid var(--card-border); background: var(--bg); color: var(--text);
+  }
+  #codeInput:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+  #codeInput:disabled { opacity: 0.55; }
+  #submitBtn {
+    flex: 0 0 auto; border: none; cursor: pointer;
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 0.98rem;
+    padding: 12px 26px; border-radius: 11px;
+  }
+  #submitBtn:hover { filter: brightness(1.07); }
+  #submitBtn:disabled { opacity: 0.55; cursor: default; filter: none; }
+  .btn-ghost {
+    border: 1px solid var(--accent); background: transparent; color: var(--accent);
+    font-weight: 700; font-size: 0.92rem; padding: 9px 20px; border-radius: 10px; cursor: pointer;
+  }
+  .btn-ghost:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
+  .msg { margin-top: 14px; font-size: 0.92rem; line-height: 1.7; min-height: 1.2em; }
+  .msg.ok { color: #0f6e56; }
+  .msg.err { color: #a32d2d; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; }
+    .content { padding: 26px 15px 96px; }
+    .hero h1 { font-size: 1.45rem; }
+    .card { padding: 18px 16px; border-radius: 12px; }
+    #codeInput { font-size: 1.08rem; letter-spacing: 0.1em; }
+    #submitBtn { flex: 1 1 100%; }
+  }
+</style>
+  <link rel="stylesheet" href="../common.css?v=20260918a" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" data-zh="兑换赞助码" data-en="Redeem">兑换赞助码</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../support/" data-zh="支持与价格" data-en="Support">支持与价格</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="🎟️ 兑换赞助码" data-en="🎟️ Redeem your code">🎟️ 兑换赞助码</h1>
+      <p data-zh="在爱发电赞助后，你会收到一条一次性兑换码。把它填进下面的框里，你的赞助者权益就会绑定到当前登录的小蓝页账号上。"
+         data-en="After sponsoring on Afdian you receive a one-off redeem code. Paste it below and your supporter benefits get bound to the account you are signed in with.">在爱发电赞助后，你会收到一条一次性兑换码。把它填进下面的框里，你的赞助者权益就会绑定到当前登录的小蓝页账号上。</p>
+    </section>
+
+    <div class="status" id="status">
+      <div class="st-title" data-zh="正在读取你的账号状态…" data-en="Checking your account…">正在读取你的账号状态…</div>
+    </div>
+
+    <section class="card">
+      <h2 data-zh="填写兑换码" data-en="Enter your code">填写兑换码</h2>
+      <div class="field">
+        <input id="codeInput" type="text" inputmode="latin" autocomplete="off" autocapitalize="characters"
+               spellcheck="false" maxlength="12" placeholder="XXXX-XXXX"
+               aria-label="兑换码" />
+        <button id="submitBtn" type="button" data-zh="兑换" data-en="Redeem">兑换</button>
+      </div>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+      <p class="note" data-zh="大小写和短横线都可以随便写，系统会自动识别。"
+         data-en="Case and dashes do not matter — they are normalised automatically.">大小写和短横线都可以随便写，系统会自动识别。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="码是从哪来的？" data-en="Where does the code come from?">码是从哪来的？</h2>
+      <ol>
+        <li data-zh="在支持页点「爱发电」，选一档赞助（或一次性打赏）。" data-en="Open the Support page, click Afdian, and pick a tier (or a one-off tip).">在支持页点「爱发电」，选一档赞助（或一次性打赏）。</li>
+        <li data-zh="付款完成后，爱发电会自动给你发一条消息，里面就是一条一次性兑换码。" data-en="Right after payment, Afdian sends you a message containing a one-off code.">付款完成后，爱发电会自动给你发一条消息，里面就是一条一次性兑换码。</li>
+        <li data-zh="回到这个页面（记得先登录），把码贴进上面的框里。" data-en="Come back here (signed in) and paste the code above.">回到这个页面（记得先登录），把码贴进上面的框里。</li>
+      </ol>
+      <p class="note" data-zh="如果你是在别的地方赞助的、没收到码，用联系表单告诉我你的付款信息，我手动处理。"
+         data-en="If you sponsored elsewhere and got no code, send me your payment details via the contact form and I will handle it manually.">如果你是在别的地方赞助的、没收到码，用联系表单告诉我你的付款信息，我手动处理。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="关于续费和到期" data-en="Renewals and expiry">关于续费和到期</h2>
+      <p data-zh="每一档赞助的有效期是 31 天。续费之后爱发电会再发给你一条新的码——回到这里再贴一次，到期时间就会自动往后顺延 31 天，不需要别的操作。"
+         data-en="Each tier lasts 31 days. When you renew, Afdian sends a brand-new code — paste it here again and the expiry date extends by another 31 days. Nothing else needed.">每一档赞助的有效期是 31 天。续费之后爱发电会再发给你一条新的码——回到这里再贴一次，到期时间就会自动往后顺延 31 天，不需要别的操作。</p>
+      <p class="note" data-zh="到期后徽章会自动消失，不会续费扣款，也不会影响你已发布的内容。"
+         data-en="When it expires the badge simply disappears — no auto-charging, and your published content is unaffected.">到期后徽章会自动消失，不会续费扣款，也不会影响你已发布的内容。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="还没赞助？" data-en="Not a supporter yet?">还没赞助？</h2>
+      <p data-zh="支持页有每一档的详细说明和价格。" data-en="The Support page lists every tier and what it includes.">支持页有每一档的详细说明和价格。</p>
+      <p><a class="btn-ghost" href="../support/" data-zh="去看支持与价格" data-en="See support & pricing">去看支持与价格</a></p>
+    </section>
+  </main>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../language.html" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../settings/homepage.html" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+      var cur = {
+        lang: get(K.lang, 'zh'), theme: get(K.theme, 'light'),
+        font: get(K.font, '1'), radius: get(K.radius, '14')
+      };
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var en = cur.lang === 'en';
+        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      applyTheme(); applyFont(); applyRadius(); applyLang();
+    })();
+  </script>
+
+  <script>
+    /* ---- 兑换逻辑 ---- */
+    (function () {
+      var isEn = (function () { try { return (localStorage.getItem('xl_lang') || 'zh') === 'en'; } catch (e) { return false; } })();
+      function t(zh, en) { return isEn ? en : zh; }
+
+      var input = document.getElementById('codeInput');
+      var btn = document.getElementById('submitBtn');
+      var msg = document.getElementById('msg');
+      var status = document.getElementById('status');
+      var busy = false;
+
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+      function fmtDate(ms) {
+        if (!ms) return '';
+        var d = new Date(ms);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+
+      function setMsg(text, kind) {
+        msg.className = 'msg' + (kind ? ' ' + kind : '');
+        msg.textContent = text || '';
+      }
+
+      // 只允许字母数字，输入时自动补短横线（贴进来带不带都行）
+      function normalize(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8); }
+      function pretty(v) { return v.length > 4 ? v.slice(0, 4) + '-' + v.slice(4) : v; }
+      input.addEventListener('input', function () {
+        var caretAtEnd = this.selectionStart >= this.value.length;
+        this.value = pretty(normalize(this.value));
+        if (caretAtEnd) { try { this.setSelectionRange(this.value.length, this.value.length); } catch (e) {} }
+      });
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+
+      /* ---- 状态渲染 ---- */
+      function renderGuest() {
+        status.className = 'status is-guest';
+        status.innerHTML =
+          '<div class="st-title">' + t('请先登录', 'Please sign in first') + '</div>' +
+          '<div class="st-meta">' + t('兑换码需要绑定到一个账号上，所以要先登录（用 GitHub 登录，只读取你的用户名和头像）。', 'Codes are bound to an account, so sign-in is required (GitHub sign-in; only your username and avatar are read).') + '</div>' +
+          '<p style="margin-top:10px"><button class="btn-ghost" id="loginNow" type="button">' + t('登录', 'Sign in') + '</button></p>';
+        var b = document.getElementById('loginNow');
+        if (b) b.addEventListener('click', function () { if (window.JW_LOGIN) window.JW_LOGIN(); });
+        input.disabled = true; btn.disabled = true;
+      }
+
+      function renderSponsor(sp) {
+        status.className = 'status is-on';
+        status.innerHTML =
+          '<div class="st-title">' + esc(sp.label || t('赞助者', 'Supporter')) +
+            '<span class="st-badge">' + t('已生效', 'Active') + '</span></div>' +
+          '<div class="st-meta">' + t('有效期至 ', 'Valid until ') + esc(fmtDate(sp.exp)) +
+            t('　　续费后拿到新码，贴进来即可顺延 31 天。', '    After renewing you get a new code — paste it here to extend by another 31 days.') + '</div>';
+        input.disabled = false; btn.disabled = false;
+      }
+
+      function renderNone(login) {
+        status.className = 'status is-off';
+        status.innerHTML =
+          '<div class="st-title">' + t('当前还没有生效的赞助', 'No active sponsorship yet') + '</div>' +
+          '<div class="st-meta">' + t('已登录为 @', 'Signed in as @') + esc(login || '') +
+            t('。把从爱发电收到的一次性码贴在下面即可解锁。', '. Paste the one-off code you received from Afdian below to unlock.') + '</div>';
+        input.disabled = false; btn.disabled = false;
+      }
+
+      function refresh() {
+        fetch('/api/redeem', { credentials: 'same-origin' })
+          .then(function (r) { if (r.status === 401) return { guest: true }; return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!d || d.guest) { renderGuest(); return; }
+            if (d.sponsor) renderSponsor(d.sponsor);
+            else renderNone(window.JW_AUTH && window.JW_AUTH.user ? window.JW_AUTH.user.login : '');
+          })
+          .catch(function () {
+            status.className = 'status is-guest';
+            status.innerHTML = '<div class="st-title">' + t('读取账号状态失败', 'Could not read account status') + '</div>' +
+              '<div class="st-meta">' + t('请刷新页面重试。', 'Please refresh and try again.') + '</div>';
+          });
+      }
+
+      /* ---- 提交兑换 ---- */
+      function submit() {
+        if (busy) return;
+        var code = normalize(input.value);
+        if (code.length !== 8) { setMsg(t('兑换码是 8 位字符，请检查一下。', 'A code is 8 characters — please check it.'), 'err'); return; }
+        busy = true; btn.disabled = true;
+        setMsg(t('正在校验…', 'Checking…'), '');
+        fetch('/api/redeem', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ code: code })
+        })
+          .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+          .then(function (res) {
+            var d = res.d || {};
+            if (d.ok) {
+              var phrase = d.reason === 'extended' ? t('续期成功，有效期已顺延 31 天 🎉', 'Renewed — extended by another 31 days 🎉')
+                : d.reason === 'already' ? t('这条码你之前已经兑换过了，有效期保持不变。', 'You already redeemed this code; expiry unchanged.')
+                : t('兑换成功，赞助者权益已生效 🎉', 'Redeemed successfully — your benefits are now active 🎉');
+              setMsg(phrase, 'ok');
+              input.value = '';
+              if (d.sponsor) renderSponsor(d.sponsor); else refresh();
+            } else {
+              var map = {
+                notfound: t('这个兑换码不存在，或者已经被作废了。', 'That code does not exist, or has been voided.'),
+                used: t('这个兑换码已经被使用过了。', 'That code has already been used.'),
+                format: t('兑换码格式不对，应该是 8 位字符。', 'That code is not in the right format (8 characters).'),
+                banned: t('当前账号处于限制状态，暂时无法兑换。', 'Your account is currently restricted and cannot redeem.'),
+                rate_limited: t('操作太频繁了，等一分钟再试。', 'Too many attempts — please wait a minute.'),
+                unauthorized: t('登录状态已失效，请重新登录。', 'Your session expired — please sign in again.'),
+                bad_json: t('请求格式错误，请刷新页面重试。', 'Bad request — please refresh and try again.'),
+                error: t('服务暂时不可用，请稍后再试。', 'Service temporarily unavailable — please try again later.')
+              };
+              setMsg(map[d.error] || t('兑换失败，请稍后再试。', 'Redeem failed — please try again later.'), 'err');
+            }
+          })
+          .catch(function () { setMsg(t('网络错误，请稍后再试。', 'Network error — please try again later.'), 'err'); })
+          .then(function () { busy = false; btn.disabled = false; });
+      }
+      btn.addEventListener('click', submit);
+
+      // auth.js 就绪后会回调这里，此时才知道自己是不是已登录
+      window.onAuthState = function () { refresh(); };
+      refresh();
+    })();
+  </script>
+<script src="../auth.js?v=20260918i"></script>
+  <script src="../common.js?v=20260918h"></script>
+</body>
+</html>

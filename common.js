@@ -586,6 +586,7 @@ window.XLTopics = (function () {
 
 /* ============ 键盘快捷键（单一来源 XL_KEYS）：N 通知中心 / S 搜索 / U 登录·用户 / H 帮助中心 / P 产品 / T 帖子中心 / B 博客 / V 订阅 / L 语言 / O 设置 / M 切换深浅色 / I 自定义背景 / F 主页 / E 编辑当前页面布局(站主)；另：↑/↓ 双击=回顶/到底 ============ */
 /* 说明：key=按键（小写，用于 keydown 匹配）；nav=目标路径；re=按钮 href 匹配（用于 Alt 键提示徽标，已兼容相对链接）；login=true 走 loginOrMine()，theme=true 走 window.__xlToggleTheme() */
+/* 快捷键总览：N 消息中心 · S 搜索 · U 我的 · H 帮助 · P 产品 · T 帖子中心 · B 博客 · V 订阅 · Z 支持 · L 语言 · O 设置 · F 主页 · M 主题 · I 背景 · E 编辑布局 */
 (function () {
   var XL_KEYS = [
     { key: 'n', nav: '/notice/',          re: /\/notice\//,            login: false },
@@ -596,6 +597,7 @@ window.XLTopics = (function () {
     { key: 't', nav: '/post/center/',     re: /\/post\//,              login: false },
     { key: 'b', nav: '/blog/',            re: /\/blog\//,              login: false },
     { key: 'v', nav: '/subscribe/',        re: /\/subscribe\//,          login: false },
+    { key: 'z', nav: '/support/',          re: /\/support\//,            login: false },
     { key: 'l', nav: '/language',         re: /\blanguage\b/,          login: false },
     { key: 'o', nav: '/settings/homepage.html', re: /\bsettings\b/,     login: false },
     { key: 'f', nav: '/',                 re: /\/(index\.html)?$/,     login: false },
@@ -722,7 +724,7 @@ window.XLTopics = (function () {
     document.querySelectorAll('.bar-right .bar-avatar').forEach(function (b) { targets.push(b); }); // 登录后头像按钮(U)
     document.querySelectorAll('.xl-search').forEach(function (f) { targets.push(f); }); // 搜索框也提示 S
     document.querySelectorAll('a.fab, button.fab').forEach(function (f) { targets.push(f); }); // 浮动按钮：语言(L)/设置(O)/主题(M)
-    document.querySelectorAll('a.xl-float-link').forEach(function (f) { targets.push(f); }); // 浮动长条：博客(B)/订阅(V)
+    document.querySelectorAll('a.xl-float-link').forEach(function (f) { targets.push(f); }); // 浮动长条：博客(B)/订阅(V)/支持(Z)
     var editFab = document.getElementById('editLayoutBtn');
     if (editFab) targets.push(editFab); // 站主浮动按钮：编辑当前页面布局(E)
     document.querySelectorAll('a.site-name, a[data-zh="主页"]').forEach(function (f) { targets.push(f); }); // 主页(F)：站名 logo + 面包屑「主页」超链接
@@ -762,6 +764,7 @@ window.XLTopics = (function () {
   var HELP = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg>';
   var SUBSCRIBE_ICON = '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>';
   var BLOG_ICON = '<text x="12" y="17" font-size="15" font-weight="700" text-anchor="middle" font-family="Arial,sans-serif" fill="currentColor" stroke="none">B</text>';
+  var SUPPORT_ICON = '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/>';
 
   function getTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
   function setTheme(t) {
@@ -961,7 +964,7 @@ window.XLTopics = (function () {
     return fa;
   }
 
-  // 订阅 + 博客：合并为一个长浮动按钮，放在帮助按钮左侧顶带
+  // 订阅 + 博客 + 支持：合并为一个长浮动按钮，放在帮助按钮左侧顶带
   function injectFloatLinks() {
     var fa = ensureFloatActions();
     if (fa.querySelector('#floatLinks')) return;
@@ -983,6 +986,10 @@ window.XLTopics = (function () {
       '<a class="xl-float-link" href="' + pre + 'blog/" title="' + (lang === 'en' ? 'Blog' : '博客') + '">' +
         '<svg' + svgAttr + '>' + BLOG_ICON + '</svg>' +
         '<span data-zh="博客" data-en="Blog">' + (lang === 'en' ? 'Blog' : '博客') + '</span>' +
+      '</a>' +
+      '<a class="xl-float-link" href="' + pre + 'support/" title="' + (lang === 'en' ? 'Support' : '支持') + '">' +
+        '<svg' + svgAttr + '>' + SUPPORT_ICON + '</svg>' +
+        '<span data-zh="支持" data-en="Support">' + (lang === 'en' ? 'Support' : '支持') + '</span>' +
       '</a>';
     fa.appendChild(wrap);
   }

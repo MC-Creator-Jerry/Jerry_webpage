@@ -454,6 +454,12 @@
       <p data-zh="不想用 GitHub？也可以邮箱订阅站点更新，无需登录：" data-en="Prefer not to use GitHub? Subscribe to updates by email — no login needed:">不想用 GitHub？也可以邮箱订阅站点更新，无需登录：<a class="inline-link" href="subscribe/" data-zh="邮箱订阅 →" data-en="Email subscribe →">邮箱订阅 →</a></p>
       <h3 class="contact-sub" data-zh="也可以直接给我留言" data-en="Or leave me a message">也可以直接给我留言</h3>
       <form id="contactForm" class="contact-form" novalidate onsubmit="return false;">
+        <select class="c-input" name="category" aria-label="分类">
+          <option value="建议" data-zh="💡 建议 / 意见" data-en="💡 Suggestion">💡 建议 / 意见</option>
+          <option value="Bug" data-zh="🐞 Bug 反馈" data-en="🐞 Bug report">🐞 Bug 反馈</option>
+          <option value="功能" data-zh="🧩 功能需求" data-en="🧩 Feature request">🧩 功能需求</option>
+          <option value="其他" data-zh="💬 其他" data-en="💬 Other">💬 其他</option>
+        </select>
         <input class="c-input" type="text" name="name" data-ph-zh="姓名" data-ph-en="Name" placeholder="姓名" />
         <input class="c-input" type="email" name="email" data-ph-zh="邮箱" data-ph-en="Email" placeholder="邮箱" />
         <textarea class="c-input" name="msg" rows="3" data-ph-zh="想说的话…" data-ph-en="Your message…" placeholder="想说的话…"></textarea>
@@ -611,8 +617,8 @@
       applyAll();
     })();
   </script>
-<script src="auth.js?v=20260916c"></script>
-  <script src="common.js?v=20260918f"></script>
+<script src="auth.js?v=20260918g"></script>
+  <script src="common.js?v=20260918g"></script>
 </body>
 </html>
 

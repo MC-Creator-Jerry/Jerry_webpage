@@ -976,11 +976,11 @@ window.XLTopics = (function () {
     wrap.id = 'floatLinks';
     var svgAttr = ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
     wrap.innerHTML =
-      '<a class="xl-float-link" href="' + pre + 'subscribe/" target="_blank" rel="noopener" title="' + (lang === 'en' ? 'Subscribe' : '订阅') + '">' +
+      '<a class="xl-float-link" href="' + pre + 'subscribe/" title="' + (lang === 'en' ? 'Subscribe' : '订阅') + '">' +
         '<svg' + svgAttr + '>' + SUBSCRIBE_ICON + '</svg>' +
         '<span data-zh="订阅" data-en="Subscribe">' + (lang === 'en' ? 'Subscribe' : '订阅') + '</span>' +
       '</a>' +
-      '<a class="xl-float-link" href="' + pre + 'blog/" target="_blank" rel="noopener" title="' + (lang === 'en' ? 'Blog' : '博客') + '">' +
+      '<a class="xl-float-link" href="' + pre + 'blog/" title="' + (lang === 'en' ? 'Blog' : '博客') + '">' +
         '<svg' + svgAttr + '>' + BLOG_ICON + '</svg>' +
         '<span data-zh="博客" data-en="Blog">' + (lang === 'en' ? 'Blog' : '博客') + '</span>' +
       '</a>';

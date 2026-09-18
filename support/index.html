@@ -130,6 +130,12 @@
     .plans { font-size: 0.84rem; }
     .plans th, .plans td { padding: 9px 8px; }
   }
+  .btn-ghost {
+    display: inline-block; border: 1px solid var(--accent); background: transparent; color: var(--accent);
+    font-weight: 700; font-size: 0.92rem; padding: 9px 20px; border-radius: 10px;
+    text-decoration: none; cursor: pointer;
+  }
+  .btn-ghost:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 </style>
   <link rel="stylesheet" href="../common.css?v=20260918a" />
 </head>
@@ -227,12 +233,17 @@
     <section class="card">
       <h2 data-zh="赞助之后怎么解锁" data-en="How unlocking works">赞助之后怎么解锁</h2>
       <ol class="steps">
-        <li data-zh="在第三方平台完成支付，拿到订单号或兑换码。" data-en="Pay on the third-party platform and get your order number or redeem code.">在第三方平台完成支付，拿到订单号或兑换码。</li>
-        <li data-zh="回到本站登录，到「留言 / 建议」页把兑换码发给我（或直接发邮件）。" data-en="Sign in here and send me the code via the contact page (or by email).">回到本站登录，到「留言 / 建议」页把兑换码发给我（或直接发邮件）。</li>
-        <li data-zh="我在 24 小时内把对应权益加到你的账号上。" data-en="I'll attach the benefits to your account within 24 hours.">我在 24 小时内把对应权益加到你的账号上。</li>
+        <li data-zh="在第三方平台完成支付。爱发电付款后会自动给你发一条消息，里面是一条一次性兑换码。" data-en="Pay on the third-party platform. On Afdian a message arrives straight after payment containing a one-off redeem code.">在第三方平台完成支付。爱发电付款后会自动给你发一条消息，里面是一条一次性兑换码。</li>
+        <li data-zh="回到本站登录（用 GitHub 登录），打开兑换页。" data-en="Come back here and sign in (GitHub), then open the redeem page.">回到本站登录（用 GitHub 登录），打开兑换页。</li>
+        <li data-zh="把兑换码贴进去，点「兑换」——权益当场生效，不需要等我人工处理。" data-en="Paste the code and hit Redeem. Benefits apply immediately — no waiting on me.">把兑换码贴进去，点「兑换」——权益当场生效，不需要等我人工处理。</li>
       </ol>
-      <p class="note" data-zh="目前是半自动流程（人工核销）。等跑通之后我会做成自动发放。"
-         data-en="This is a semi-manual process for now. Automation comes once the flow is proven.">目前是半自动流程（人工核销）。等跑通之后我会做成自动发放。</p>
+      <p class="note" data-zh="每一档有效期 31 天。续费之后平台会再发一条新的码，回兑换页再贴一次即可自动顺延。"
+         data-en="Each tier lasts 31 days. On renewal the platform sends a new code — paste it on the redeem page to extend automatically.">每一档有效期 31 天。续费之后平台会再发一条新的码，回兑换页再贴一次即可自动顺延。</p>
+      <p style="margin-top:12px">
+        <a class="btn-ghost" href="../redeem/" data-zh="去兑换赞助码" data-en="Redeem your code">去兑换赞助码</a>
+      </p>
+      <p class="note" data-zh="如果是在别的渠道赞助的、或者没收到码，把付款信息发到留言 / 建议页，我手动帮你处理。"
+         data-en="If you sponsored elsewhere or never got a code, send your payment details via the contact page and I'll sort it out manually.">如果是在别的渠道赞助的、或者没收到码，把付款信息发到留言 / 建议页，我手动帮你处理。</p>
     </section>
 
     <section class="card">
@@ -353,7 +364,7 @@
       applyTheme(); applyFont(); applyRadius(); applyLang(); renderPay();
     })();
   </script>
-<script src="../auth.js?v=20260918g"></script>
+<script src="../auth.js?v=20260918i"></script>
   <script src="../common.js?v=20260918h"></script>
 </body>
 </html>

@@ -221,6 +221,17 @@
       <h2 data-zh="邮箱" data-en="Email">邮箱</h2>
       <p>Email：<a class="inline-link" href="mailto:jerryprdservice@163.com">jerryprdservice@163.com</a></p>
     </section>
+
+    <section class="card">
+      <h2 data-zh="📝 给我留言 / 提建议" data-en="📝 Leave a message / suggestion">📝 给我留言 / 提建议</h2>
+      <p data-zh="填写后我会收到邮件，同时你也会收到一封自动回复确认信。" data-en="I'll get an email, and you'll receive an automatic confirmation.">填写后我会收到邮件，同时你也会收到一封自动回复确认信。</p>
+      <form id="contactForm" class="contact-form" novalidate onsubmit="return false;">
+        <input class="c-input" type="text" name="name" data-ph-zh="姓名" data-ph-en="Name" placeholder="姓名" />
+        <input class="c-input" type="email" name="email" data-ph-zh="邮箱" data-ph-en="Email" placeholder="邮箱" />
+        <textarea class="c-input" name="msg" rows="4" data-ph-zh="想说的话…" data-ph-en="Your message…" placeholder="想说的话…"></textarea>
+        <button type="button" id="contactSendBtn" class="btn" data-zh="发送留言 →" data-en="Send message →">发送留言 →</button>
+      </form>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -277,7 +288,7 @@
     })();
   </script>
 <script src="auth.js?v=20260916c"></script>
-  <script src="common.js?v=20260918e"></script>
+  <script src="common.js?v=20260918f"></script>
 </body>
 </html>
 

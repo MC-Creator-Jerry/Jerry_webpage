@@ -1138,3 +1138,61 @@ window.XLTopics = (function () {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+/* ============ 联系/建议表单（form.contact-form 或 #contactForm）：POST /api/contact ============ */
+/* 后端：存 KV + 给访客发自动回复 + 把建议转发到站长邮箱。任何含该表单的页面都会被自动接线。 */
+(function () {
+  function lang() { try { return localStorage.getItem('xl_lang') === 'en' ? 'en' : 'zh'; } catch (e) { return 'zh'; } }
+  function T(zh, en) { return lang() === 'en' ? en : zh; }
+  function wire(form) {
+    if (!form || form.__xlWired) return;
+    form.__xlWired = true;
+    var nameEl = form.querySelector('[name="name"]');
+    var emailEl = form.querySelector('[name="email"]');
+    var msgEl = form.querySelector('[name="msg"]');
+    var btn = document.getElementById('contactSendBtn') || form.querySelector('button');
+    if (!btn || !nameEl || !emailEl || !msgEl) return;
+    btn.removeAttribute('onclick'); // 去掉占位 alert('功能开发中')
+    form.addEventListener('submit', function (e) { e.preventDefault(); });
+    var busy = false;
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (busy) return;
+      var name = (nameEl.value || '').trim();
+      var email = (emailEl.value || '').trim();
+      var msg = (msgEl.value || '').trim();
+      if (!name || !email || !msg) { alert(T('请填写姓名、邮箱和留言内容。', 'Please fill in name, email and message.')); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert(T('请填写正确的邮箱地址。', 'Please enter a valid email address.')); return; }
+      busy = true;
+      var old = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = T('发送中…', 'Sending…');
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, msg: msg })
+      }).then(function (r) {
+        return r.json().then(function (j) { return { status: r.status, j: j }; }, function () { return { status: r.status, j: {} }; });
+      }).then(function (res) {
+        if (res.status === 200 && res.j && res.j.ok) {
+          alert(T('已发送！确认信已发往你的邮箱。', 'Sent! A confirmation email is on its way.'));
+          form.reset();
+        } else if (res.status === 429) {
+          alert(T('提交太频繁，请稍后再试。', 'Too many submissions, please try again later.'));
+        } else {
+          alert(T('发送失败，请稍后再试。', 'Failed to send, please try again later.'));
+        }
+      }).catch(function () {
+        alert(T('网络错误，请稍后再试。', 'Network error, please try again later.'));
+      }).then(function () {
+        busy = false; btn.disabled = false; btn.textContent = old;
+      });
+    });
+  }
+  function init() {
+    var forms = document.querySelectorAll('form.contact-form, #contactForm');
+    for (var i = 0; i < forms.length; i++) wire(forms[i]);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

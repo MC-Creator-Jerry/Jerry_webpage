@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../../boot.js?v=20260914ab"></script>
+<script>
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>建议/反馈管理 · Jerry's webpage</title>
+<meta name="description" content="建议与反馈管理后台（仅管理员）。" />
+<meta name="author" content="Jerry" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body { min-height:100%; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif; color:var(--text); background:var(--bg); transition:background .25s,color .25s; }
+  .topbar { position:sticky; top:0; z-index:100; min-height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; background-color:var(--bar-top); background-image:linear-gradient(180deg,var(--bar-top) 0%,var(--bar-top) 45%,var(--bar-bottom) 100%); color:var(--bar-fg); box-shadow:0 2px 10px rgba(0,0,0,0.18); }
+  .bar-left { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+  .site-name { font-size:1.25rem; font-weight:700; color:var(--bar-fg); text-decoration:none; }
+  .breadcrumb { display:flex; align-items:center; gap:4px; font-size:0.78rem; color:var(--bar-fg); opacity:0.9; }
+  .breadcrumb a { color:var(--bar-fg); text-decoration:none; }
+  .bar-right { display:flex; align-items:center; gap:8px; }
+  .bar-btn { border:none; background:rgba(255,255,255,0.08); color:var(--bar-fg); border-radius:0; padding:6px 11px; font-size:0.9rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+  .bar-btn:hover { background:rgba(255,255,255,0.18); }
+  .content { max-width:920px; margin:0 auto; padding:40px 24px 96px; }
+  .hero { margin-bottom:20px; }
+  .hero h1 { font-size:1.9rem; color:var(--text); }
+  .toolbar { display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+  .btn { border:1px solid var(--card-border); background:var(--card-bg); color:var(--text); border-radius:10px; padding:8px 14px; font-size:0.9rem; font-weight:600; cursor:pointer; text-decoration:none; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .btn.danger { color:var(--danger); border-color:color-mix(in srgb,var(--danger) 40%,var(--card-border)); }
+  .btn.danger:hover { background:color-mix(in srgb,var(--danger) 10%,var(--card-bg)); }
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .chip { border:1px solid var(--card-border); background:var(--card-bg); color:var(--muted); border-radius:999px; padding:5px 14px; font-size:0.85rem; font-weight:600; cursor:pointer; }
+  .chip:hover { border-color:var(--accent); color:var(--accent); }
+  .chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stat { font-size:0.9rem; color:var(--muted); }
+  .fb { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px; box-shadow:var(--card-shadow); }
+  .fb .f-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .fb .f-title { font-weight:700; color:var(--text); }
+  .fb .f-meta { font-size:0.8rem; color:var(--muted); }
+  .badge { font-size:0.72rem; font-weight:700; border-radius:999px; padding:2px 10px; white-space:nowrap; }
+  .badge.c-建议 { background:color-mix(in srgb,var(--accent) 14%,transparent); color:var(--accent); }
+  .badge.c-Bug { background:color-mix(in srgb,var(--danger) 14%,transparent); color:var(--danger); }
+  .badge.c-功能 { background:color-mix(in srgb,#1f9d55 14%,transparent); color:#1f9d55; }
+  .badge.c-其他 { background:color-mix(in srgb,#8a8f98 16%,transparent); color:#666; }
+  .fb .f-msg { font-size:0.94rem; color:var(--text); margin:10px 0; line-height:1.65; white-space:pre-wrap; word-break:break-word; }
+  .fb .f-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .fb .f-sub { font-size:0.78rem; color:var(--muted); }
+  .empty { color:var(--muted); opacity:0.8; font-style:italic; padding:20px 0; }
+  .denied { text-align:center; padding:60px 0; color:var(--muted); }
+  .toast { position:fixed; left:50%; top:22px; transform:translateX(-50%); z-index:300; background:#1c2733; color:#fff; padding:10px 18px; border-radius:10px; font-size:0.9rem; box-shadow:0 6px 20px rgba(0,0,0,0.3); opacity:0; transition:opacity .25s; pointer-events:none; }
+  .toast.show { opacity:1; }
+  .site-footer { border-top:1px solid var(--card-border); margin-top:40px; padding:24px; text-align:center; color:var(--muted); font-size:0.9rem; }
+  .site-footer a { color:var(--accent); text-decoration:none; }
+  [hidden]{display:none!important;}
+  @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} .filters{gap:6px;} .chip{padding:4px 10px;font-size:0.8rem;} }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20260918a" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb"><a href="../../index.html">主页</a><span class="bc-sep">›</span><span class="bc-sub">建议/反馈管理</span></nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../../home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero"><h1 data-zh="📮 建议 / 反馈管理" data-en="📮 Feedback Inbox">📮 建议 / 反馈管理</h1></section>
+    <section class="toolbar" id="toolbar" hidden>
+      <button class="btn" id="refresh" data-zh="刷新" data-en="Refresh">刷新</button>
+      <a class="btn" href="../../admin/reports/" data-zh="举报后台" data-en="Reports">举报后台</a>
+      <a class="btn" href="../../admin/ban/" data-zh="小黑屋" data-en="Ban List">小黑屋</a>
+      <span class="stat" id="stat"></span>
+    </section>
+    <div class="filters" id="filters" hidden></div>
+    <div id="list"></div>
+    <div id="empty" class="empty" hidden data-zh="暂无反馈。" data-en="No feedback yet.">暂无反馈。</div>
+    <div id="denied" class="denied" hidden>
+      <p data-zh="无访问权限（仅管理员）。" data-en="No access (admin only).">无访问权限（仅管理员）。</p>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div></footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="../../prefs.js?v=20260909a"></script>
+  <script src="../../auth.js?v=20260918g"></script>
+  <script>
+    (function () {
+      var _main = document.querySelector('main');
+      if (_main) _main.style.visibility = 'hidden';
+      fetch('/api/me')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (me) {
+          if (!me || !me.isAdmin) { location.replace('../../index.html'); return; }
+          if (_main) _main.style.visibility = '';
+          initPage();
+        })
+        .catch(function () { location.replace('../../index.html'); });
+
+      function initPage() {
+        var CATS = ['建议', 'Bug', '功能', '其他'];
+        var listEl = document.getElementById('list');
+        var emptyEl = document.getElementById('empty');
+        var deniedEl = document.getElementById('denied');
+        var toolbar = document.getElementById('toolbar');
+        var filtersEl = document.getElementById('filters');
+        var statEl = document.getElementById('stat');
+        var toastEl = document.getElementById('toast');
+        var all = [];
+        var filter = '全部';
+
+        function toast(m){ toastEl.textContent=m; toastEl.className='toast show'; setTimeout(function(){toastEl.className='toast';},2200); }
+        function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+        function fmt(ts){ try{return new Date(ts).toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(e){return '';} }
+        function cat(r){ return CATS.indexOf(r.category) >= 0 ? r.category : '其他'; }
+
+        function renderFilters() {
+          var counts = { '全部': all.length };
+          CATS.forEach(function(c){ counts[c] = all.filter(function(r){ return cat(r)===c; }).length; });
+          var keys = ['全部'].concat(CATS);
+          filtersEl.innerHTML = '';
+          keys.forEach(function(k){
+            if (k !== '全部' && !counts[k]) return; // 没有的分类不显示
+            var b = document.createElement('button');
+            b.className = 'chip' + (k === filter ? ' active' : '');
+            b.textContent = k + ' ' + counts[k];
+            b.addEventListener('click', function(){ filter = k; render(); });
+            filtersEl.appendChild(b);
+          });
+        }
+
+        function render() {
+          renderFilters();
+          var rows = filter === '全部' ? all : all.filter(function(r){ return cat(r) === filter; });
+          statEl.textContent = '共 ' + all.length + ' 条 · 当前显示 ' + rows.length + ' 条';
+          if (!rows.length) { emptyEl.hidden = false; listEl.innerHTML = ''; return; }
+          emptyEl.hidden = true;
+          listEl.innerHTML = '';
+          rows.forEach(function(r){
+            var card = document.createElement('div');
+            card.className = 'fb';
+            card.innerHTML =
+              '<div class="f-head">' +
+                '<span class="badge c-' + cat(r) + '">' + esc(cat(r)) + '</span>' +
+                '<span class="f-title"></span>' +
+                '<span class="f-meta">' + fmt(r.ts) + '</span>' +
+              '</div>' +
+              '<div class="f-msg"></div>' +
+              '<div class="f-actions">' +
+                '<a class="btn" data-act="reply" href="#"></a>' +
+                '<span class="f-sub"></span>' +
+                '<button class="btn danger" data-act="delete" data-id="' + esc(r.id) + '">删除</button>' +
+              '</div>';
+            card.querySelector('.f-title').textContent = r.name || '（匿名）';
+            card.querySelector('.f-msg').textContent = r.msg || '';
+            var mail = card.querySelector('[data-act="reply"]');
+            mail.textContent = '✉ ' + (r.email || '');
+            mail.setAttribute('href', 'mailto:' + (r.email || '') + '?subject=' + encodeURIComponent('Re: 小蓝页反馈'));
+            card.querySelector('.f-sub').textContent = (r.page ? '来自 ' + r.page : '') + (r.ip ? ' · IP ' + r.ip : '');
+            listEl.appendChild(card);
+          });
+          listEl.querySelectorAll('button[data-act="delete"]').forEach(function(b){
+            b.addEventListener('click', function(){ del(b.getAttribute('data-id')); });
+          });
+        }
+
+        function load() {
+          fetch('/api/contact')
+            .then(function(r){ return r.ok ? r.json() : { error:'forbidden', status:r.status }; })
+            .then(function(d){
+              if (d.error === 'forbidden' || d.error === 'unauthorized') { deniedEl.hidden=false; toolbar.hidden=true; filtersEl.hidden=true; return; }
+              toolbar.hidden = false;
+              filtersEl.hidden = false;
+              all = d.list || [];
+              render();
+            })
+            .catch(function(){ deniedEl.hidden=false; deniedEl.querySelector('p').textContent='加载失败，请重试。'; });
+        }
+
+        function del(id) {
+          if (!id) return;
+          if (!confirm('确定删除这条反馈？此操作不可恢复。')) return;
+          fetch('/api/contact?id=' + encodeURIComponent(id), { method:'DELETE' })
+            .then(function(r){ return r.ok ? r.json() : { ok:false }; })
+            .then(function(d){ if (d.ok) { toast('已删除 ✓'); load(); } else { toast('删除失败'); } })
+            .catch(function(){ toast('删除失败（网络错误）'); });
+        }
+
+        document.getElementById('refresh').addEventListener('click', load);
+        load();
+      }
+    })();
+  </script>
+  <script src="../../common.js?v=20260918g"></script>
+</body>
+</html>

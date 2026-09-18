@@ -182,6 +182,7 @@
   var flagIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/><line x1='4' y1='22' x2='4' y2='15'/></svg>";
   var trafficIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 3v18h18'/><path d='M7 16l4-4 4 5 5-7'/></svg>";
   var banIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><line x1='5.6' y1='5.6' x2='18.4' y2='18.4'/></svg>";
+  var fbIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z'/></svg>";
 
   // 蓝条「通知」红点：拉取未读总数（系统+消息+评论）并刷新
   var NOTIF_KEY = '__xl_notif', NOTIF_TTL = 30000;
@@ -453,6 +454,7 @@
           '</div>' +
           '<div class="hc-actions hc-actions-extras">' +
             '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'helpcenter/">' + helpIco + '<span>' + t('帮助中心', 'Help Center') + '</span></a>' +
+            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/feedback/">' + fbIco + '<span>' + t('建议管理', 'Feedback') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/reports/">' + flagIco + '<span>' + t('举报后台', 'Reports') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/ban/">' + banIco + '<span>' + t('小黑屋', 'Ban List') + '</span></a>' : '') +
             (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'stats/">' + trafficIco + '<span>' + t('流量', 'Traffic') + '</span></a>' : '') +

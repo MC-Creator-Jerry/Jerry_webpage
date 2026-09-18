@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../../boot.js?v=20260914ab"></script>
+<script>
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>赞助管理 · Jerry's webpage</title>
+<meta name="description" content="赞助者名单与兑换码管理（仅管理员）。" />
+<meta name="author" content="Jerry" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body { min-height:100%; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif; color:var(--text); background:var(--bg); transition:background .25s,color .25s; }
+  .topbar { position:sticky; top:0; z-index:100; min-height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; background-color:var(--bar-top); background-image:linear-gradient(180deg,var(--bar-top) 0%,var(--bar-top) 45%,var(--bar-bottom) 100%); color:var(--bar-fg); box-shadow:0 2px 10px rgba(0,0,0,0.18); border-radius:0; }
+  .bar-left { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+  .site-name { font-size:1.25rem; font-weight:700; color:var(--bar-fg); text-decoration:none; }
+  .breadcrumb { display:flex; align-items:center; gap:4px; font-size:0.78rem; color:var(--bar-fg); opacity:0.9; }
+  .breadcrumb a { color:var(--bar-fg); text-decoration:none; }
+  .bar-right { display:flex; align-items:center; gap:8px; }
+  .bar-btn { border:none; background:rgba(255,255,255,0.08); color:var(--bar-fg); border-radius:0; padding:6px 11px; font-size:0.9rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+  .bar-btn:hover { background:rgba(255,255,255,0.18); }
+  .content { max-width:920px; margin:0 auto; padding:40px 24px 96px; }
+  .hero { margin-bottom:20px; }
+  .hero h1 { font-size:1.9rem; color:var(--text); }
+  .hero p { color:var(--muted); margin-top:6px; font-size:.95rem; line-height:1.7; }
+  .btn { border:1px solid var(--card-border); background:var(--card-bg); color:var(--text); border-radius:10px; padding:8px 14px; font-size:0.9rem; font-weight:600; cursor:pointer; font-family:inherit; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .btn.danger { color:var(--danger); border-color:color-mix(in srgb,var(--danger) 40%,var(--card-border)); }
+  .btn.danger:hover { background:color-mix(in srgb,var(--danger) 10%,var(--card-bg)); }
+  .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn.primary:hover { color:#fff; filter:brightness(1.07); }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .stat { font-size:0.9rem; color:var(--muted); }
+  .empty { color:var(--muted); opacity:0.8; font-style:italic; padding:16px 0; }
+  .denied { text-align:center; padding:60px 0; color:var(--muted); }
+  .toast { position:fixed; left:50%; top:22px; transform:translateX(-50%); z-index:300; background:#1c2733; color:#fff; padding:10px 18px; border-radius:10px; font-size:0.9rem; box-shadow:0 6px 20px rgba(0,0,0,0.3); opacity:0; transition:opacity .25s; pointer-events:none; }
+  .toast.show { opacity:1; }
+
+  .panel { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:18px 20px; margin-bottom:18px; box-shadow:var(--card-shadow); }
+  .panel h2 { font-size:1.05rem; margin-bottom:6px; color:var(--accent); }
+  .panel .sub { font-size:.83rem; color:var(--muted); line-height:1.7; margin-bottom:12px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+  .field { display:flex; flex-direction:column; gap:4px; }
+  .field label { font-size:.82rem; color:var(--muted); }
+  .field input, .field select { padding:9px 11px; border:1px solid var(--card-border); border-radius:9px; background:var(--bg); color:var(--text); font:inherit; min-width:130px; }
+  .field input:focus, .field select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent); }
+  .hint { font-size:.78rem; color:var(--muted); margin-top:10px; opacity:.9; line-height:1.7; }
+
+  /* 生成结果 */
+  #genBox { margin-top:14px; }
+  #genOut {
+    width:100%; min-height:132px; resize:vertical; padding:12px 14px; border-radius:10px;
+    border:1px solid var(--card-border); background:var(--bg); color:var(--text);
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.92rem; line-height:1.75; letter-spacing:.06em;
+  }
+  .gen-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+  /* 表格 */
+  .tbl { width:100%; border-collapse:separate; border-spacing:0; font-size:.88rem; }
+  .tbl th, .tbl td { padding:9px 11px; text-align:left; border-bottom:1px solid var(--card-border); vertical-align:middle; }
+  .tbl th { background:color-mix(in srgb,var(--accent) 8%,var(--card-bg)); font-size:.8rem; font-weight:700; white-space:nowrap; }
+  .tbl tr:last-child td { border-bottom:none; }
+  .tbl td.mono { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.06em; white-space:nowrap; }
+  .tbl td.nowrap { white-space:nowrap; }
+  .tbl a { color:var(--accent); text-decoration:none; }
+  .tbl a:hover { text-decoration:underline; }
+  .tag { display:inline-block; padding:2px 9px; border-radius:999px; font-size:.74rem; font-weight:700; white-space:nowrap; }
+  .tag.on { background:#1d9e75; color:#fff; }
+  .tag.off { background:color-mix(in srgb,var(--muted) 22%,var(--card-bg)); color:var(--muted); }
+  .tag.used { background:color-mix(in srgb,var(--accent) 18%,var(--card-bg)); color:var(--accent); }
+  .tbl-wrap { overflow-x:auto; }
+  .sum { display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px; }
+  .sum .s { font-size:.9rem; color:var(--muted); }
+  .sum .s b { color:var(--text); font-size:1.05rem; font-variant-numeric:tabular-nums; }
+
+  .site-footer { border-top:1px solid var(--card-border); margin-top:40px; padding:24px; text-align:center; color:var(--muted); font-size:0.9rem; }
+  .site-footer a { color:var(--accent); text-decoration:none; }
+  [hidden]{display:none!important;}
+  @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} .panel{padding:15px 14px;} }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20260918a" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb"><a href="../../index.html">主页</a><span class="bc-sep">›</span><a href="../../support/">支持与价格</a><span class="bc-sep">›</span><span class="bc-sub">赞助管理</span></nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../../home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1>赞助管理</h1>
+      <p>生成一次性兑换码贴进爱发电的「自动随机回复」，管理赞助者名单与续期/作废。</p>
+    </section>
+
+    <section class="panel" id="genPanel" hidden>
+      <h2>生成兑换码</h2>
+      <div class="sub">生成后把这些码整批贴进爱发电后台「编辑方案 → 添加赞助奖励 → 自动随机回复」的输入框里。开启后，每个赞助者付款时会随机领到其中一条。</div>
+      <div class="row">
+        <div class="field">
+          <label>数量</label>
+          <input type="number" id="genCount" value="50" min="1" max="500" step="10" />
+        </div>
+        <div class="field">
+          <label>档位</label>
+          <select id="genTier">
+            <option value="supporter" selected>赞助者（¥19/月）</option>
+            <option value="pro">Pro（¥99/月）</option>
+          </select>
+        </div>
+        <button class="btn primary" id="genBtn">生成</button>
+      </div>
+      <div class="hint">每条码只能被兑换一次。每档有效期 31 天；用户续费会拿到新码，再兑一次即自动顺延。</div>
+      <div id="genBox" hidden>
+        <textarea id="genOut" readonly spellcheck="false"></textarea>
+        <div class="gen-actions">
+          <button class="btn" id="copyBtn">复制全部</button>
+          <button class="btn" id="dlBtn">下载 .txt</button>
+          <span class="stat" id="genStat"></span>
+        </div>
+        <div class="hint">现在整批复制，直接贴进爱发电的「自动随机回复」框里即可。码同时也存在服务端，之后能在下面的列表里查到。</div>
+      </div>
+    </section>
+
+    <section class="panel" id="sumPanel" hidden>
+      <h2>总览</h2>
+      <div class="sum">
+        <span class="s">生效中赞助者 <b id="nSponsors">0</b></span>
+        <span class="s">已生成码 <b id="nCodes">0</b></span>
+        <span class="s">已使用 <b id="nUsed">0</b></span>
+        <span class="s">可用 <b id="nUnused">0</b></span>
+        <span class="s">竞态冲突 <b id="nConf">0</b></span>
+      </div>
+      <div class="row">
+        <button class="btn" id="refresh">刷新</button>
+      </div>
+    </section>
+
+    <section class="panel" id="spPanel" hidden>
+      <h2>生效中的赞助者</h2>
+      <div class="sub">「撤销」用于退款或纠纷处理，会立即移除其赞助者权益。</div>
+      <div class="tbl-wrap"><table class="tbl" id="spTbl">
+        <thead><tr><th>用户</th><th>档位</th><th>到期日</th><th>首次赞助</th><th>已兑换码</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <div class="empty" id="spEmpty" hidden>目前还没有生效中的赞助者。</div>
+    </section>
+
+    <section class="panel" id="codePanel" hidden>
+      <h2>兑换码</h2>
+      <div class="sub">「作废」只能作用于还没被使用的码；已经兑换出去的码要停权，请去上面撤销该赞助者。</div>
+      <div class="tbl-wrap"><table class="tbl" id="codeTbl">
+        <thead><tr><th>码</th><th>档位</th><th>状态</th><th>使用者</th><th>兑换时间</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <div class="empty" id="codeEmpty" hidden>还没有生成过兑换码。</div>
+      <div class="hint">这个页面仅管理员可见。如果赞助者说「码丢了」，可以在这里查到他对应的码。</div>
+    </section>
+
+    <div id="denied" class="denied" hidden>
+      <p>无访问权限（仅管理员）。</p>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../admin/reports/">举报后台</a></div></footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="../../prefs.js?v=20260909a"></script>
+  <script src="../../auth.js?v=20260918i"></script>
+  <script>
+    (function () {
+      // ===== 安全前置：非管理员（含未登录）直接跳走，不渲染后台界面 =====
+      // isAdmin 由服务端 /api/me 计算，不可前端伪造；真正的门禁在后端 sponsor-admin.js。
+      var _main = document.querySelector('main');
+      if (_main) _main.style.visibility = 'hidden';
+
+      var toastEl = document.getElementById('toast');
+      var toastTimer = null;
+      function toast(m) {
+        toastEl.textContent = m;
+        toastEl.className = 'toast show';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toastEl.className = 'toast'; }, 2200);
+      }
+
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+      function fmtDate(ms) {
+        if (!ms) return '—';
+        var d = new Date(ms);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+      function fmtDT(ms) {
+        if (!ms) return '—';
+        var d = new Date(ms);
+        return fmtDate(ms) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      }
+      function daysLeft(ms) {
+        if (!ms) return '';
+        var n = Math.ceil((ms - Date.now()) / 86400000);
+        return n > 0 ? '（剩 ' + n + ' 天）' : '';
+      }
+
+      var TIER_LABEL = { supporter: '赞助者', pro: 'Pro' };
+      var lastCodes = [];
+
+      /* ---- 数据加载 ---- */
+      function load(showSpinner) {
+        if (showSpinner) toast('正在读取…');
+        fetch('/api/sponsor-admin', { credentials: 'same-origin' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!d || !d.ok) { toast('读取失败'); return; }
+            render(d);
+          })
+          .catch(function () { toast('网络错误'); });
+      }
+
+      function render(d) {
+        var t = d.totals || {};
+        document.getElementById('nSponsors').textContent = t.sponsors || 0;
+        document.getElementById('nCodes').textContent = t.codes || 0;
+        document.getElementById('nUsed').textContent = t.used || 0;
+        document.getElementById('nUnused').textContent = t.unused || 0;
+        document.getElementById('nConf').textContent = t.conflicts || 0;
+
+        // 赞助者
+        var spBody = document.querySelector('#spTbl tbody');
+        spBody.innerHTML = '';
+        (d.sponsors || []).forEach(function (s) {
+          var tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td><a href="https://github.com/' + encodeURIComponent(s.login) + '" target="_blank" rel="noopener">@' + esc(s.login) + '</a></td>' +
+            '<td class="nowrap"><span class="tag on">' + esc(s.label || TIER_LABEL[s.tier] || s.tier) + '</span></td>' +
+            '<td class="nowrap">' + esc(fmtDate(s.exp)) + '<span class="stat">' + esc(daysLeft(s.exp)) + '</span></td>' +
+            '<td class="nowrap">' + esc(fmtDate(s.since)) + '</td>' +
+            '<td class="mono">' + esc((s.codes || []).length ? (s.codes || []).length + ' 条' : '—') + '</td>' +
+            '<td><button class="btn danger" data-revoke="' + esc(s.login) + '">撤销</button></td>';
+          spBody.appendChild(tr);
+        });
+        document.getElementById('spEmpty').hidden = (d.sponsors || []).length > 0;
+
+        // 码
+        var cBody = document.querySelector('#codeTbl tbody');
+        cBody.innerHTML = '';
+        (d.codes || []).forEach(function (c) {
+          var tr = document.createElement('tr');
+          var used = !!c.usedBy;
+          tr.innerHTML =
+            '<td class="mono">' + esc(c.code) + '</td>' +
+            '<td class="nowrap">' + esc(TIER_LABEL[c.tier] || c.tier) + '</td>' +
+            '<td class="nowrap"><span class="tag ' + (used ? 'used' : 'off') + '">' + (used ? '已兑换' : '可用') + '</span></td>' +
+            '<td class="nowrap">' + (used ? '<a href="https://github.com/' + encodeURIComponent(c.usedBy) + '" target="_blank" rel="noopener">@' + esc(c.usedBy) + '</a>' : '—') + '</td>' +
+            '<td class="nowrap">' + esc(fmtDT(c.usedAt)) + '</td>' +
+            '<td>' + (used ? '' : '<button class="btn danger" data-void="' + esc(c.code) + '">作废</button>') + '</td>';
+          cBody.appendChild(tr);
+        });
+        document.getElementById('codeEmpty').hidden = (d.codes || []).length > 0;
+      }
+
+      /* ---- 生成码 ---- */
+      document.getElementById('genBtn').addEventListener('click', function () {
+        var btn = this;
+        var count = parseInt(document.getElementById('genCount').value, 10) || 20;
+        var tier = document.getElementById('genTier').value;
+        btn.disabled = true;
+        fetch('/api/sponsor-admin', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'gen', count: count, tier: tier })
+        })
+          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (res) {
+            if (!res.ok || !res.d.ok) { toast('生成失败'); return; }
+            lastCodes = res.d.codes || [];
+            document.getElementById('genOut').value = lastCodes.join('\n');
+            document.getElementById('genStat').textContent = '共 ' + lastCodes.length + ' 条 · ' + (TIER_LABEL[res.d.tier] || res.d.tier);
+            document.getElementById('genBox').hidden = false;
+            toast('已生成 ' + lastCodes.length + ' 条');
+            load(false);
+          })
+          .catch(function () { toast('网络错误'); })
+          .then(function () { btn.disabled = false; });
+      });
+
+      document.getElementById('copyBtn').addEventListener('click', function () {
+        var ta = document.getElementById('genOut');
+        if (!ta.value) return;
+        var done = function () { toast('已复制 ' + lastCodes.length + ' 条'); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(ta.value).then(done).catch(function () { ta.select(); document.execCommand('copy'); done(); });
+        } else {
+          ta.select(); document.execCommand('copy'); done();
+        }
+      });
+
+      document.getElementById('dlBtn').addEventListener('click', function () {
+        if (!lastCodes.length) return;
+        var blob = new Blob([lastCodes.join('\n') + '\n'], { type: 'text/plain;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'sponsor-codes-' + fmtDate(Date.now()).replace(/-/g, '') + '.txt';
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+      });
+
+      /* ---- 撤销 / 作废 ---- */
+      document.addEventListener('click', function (e) {
+        var rb = e.target.closest ? e.target.closest('[data-revoke]') : null;
+        if (rb) {
+          var login = rb.getAttribute('data-revoke');
+          if (!confirm('撤销 @' + login + ' 的赞助者权益？\n\n这会立即移除他的徽章和权益，操作不可撤销。')) return;
+          rb.disabled = true;
+          fetch('/api/sponsor-admin', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ action: 'revoke', login: login })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { toast(d && d.ok ? '已撤销 @' + login : '操作失败'); load(false); })
+            .catch(function () { toast('网络错误'); rb.disabled = false; });
+          return;
+        }
+        var vb = e.target.closest ? e.target.closest('[data-void]') : null;
+        if (vb) {
+          var code = vb.getAttribute('data-void');
+          if (!confirm('作废这条码？\n\n该码将无法再被兑换。')) return;
+          vb.disabled = true;
+          fetch('/api/sponsor-admin', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ action: 'void', code: code })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { toast(d && d.ok ? '已作废' : '作废失败'); load(false); })
+            .catch(function () { toast('网络错误'); vb.disabled = false; });
+        }
+      });
+
+      document.getElementById('refresh').addEventListener('click', function () { load(true); });
+
+      /* ---- 管理员门禁 ---- */
+      fetch('/api/me')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (me) {
+          if (!me || !me.isAdmin) { location.replace('../../index.html'); return; }
+          if (_main) _main.style.visibility = '';
+          ['genPanel', 'sumPanel', 'spPanel', 'codePanel'].forEach(function (id) {
+            document.getElementById(id).hidden = false;
+          });
+          load(false);
+        })
+        .catch(function () {
+          if (_main) _main.style.visibility = '';
+          document.getElementById('denied').hidden = false;
+        });
+    })();
+  </script>
+  <script src="../../common.js?v=20260918h"></script>
+</body>
+</html>

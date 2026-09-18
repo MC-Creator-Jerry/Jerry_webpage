@@ -113,6 +113,25 @@
   .download-btn:active { transform: translateY(0); }
   .download-meta { font-size: 0.9rem; color: var(--muted); }
 
+  /* ===== 支持 / 赞助入口 ===== */
+  .support-strip {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin-top: 18px; padding: 14px 16px;
+    border: 1px solid var(--card-border); border-radius: 12px;
+    background: color-mix(in srgb, var(--accent) 5%, var(--card-bg));
+  }
+  .support-strip .ss-icon { font-size: 1.5rem; line-height: 1; }
+  .support-strip .ss-text { flex: 1 1 260px; min-width: 0; font-size: 0.9rem; line-height: 1.7; color: var(--text); }
+  .support-strip .ss-text strong { display: block; font-size: 0.95rem; }
+  .support-strip .ss-text span { color: var(--muted); }
+  .support-strip .ss-btn {
+    flex: 0 0 auto; text-decoration: none; font-weight: 700; font-size: 0.9rem;
+    padding: 8px 16px; border-radius: 999px;
+    background: var(--accent); color: #fff; border: 1px solid var(--accent);
+  }
+  .support-strip .ss-btn:hover { filter: brightness(1.08); }
+  @media (max-width: 560px) { .support-strip .ss-btn { width: 100%; text-align: center; } }
+
   .disclaimer {
     background: var(--danger-bg); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
     border-radius: var(--radius); padding: 18px 20px;
@@ -295,6 +314,14 @@
           <span data-zh="下载 CleanOpt" data-en="Download CleanOpt">下载 CleanOpt</span>
         </a>
         <span class="download-meta" id="downloadMeta">.zip · ~54 KB</span>
+      </div>
+      <div class="support-strip">
+        <span class="ss-icon">💙</span>
+        <span class="ss-text">
+          <strong data-zh="CleanOpt 一直是免费开源的。" data-en="CleanOpt is free.">CleanOpt 一直是免费开源的。</strong>
+          <span data-zh="如果你觉得它省下了你的时间，可以到支持页请我喝杯咖啡；赞助者可以优先提需求、拿到 Pro 版。" data-en="If it saved you time, you can buy me a coffee on the support page. Supporters get priority on feature requests and access to Pro.">如果你觉得它省下了你的时间，可以到支持页请我喝杯咖啡；赞助者可以优先提需求、拿到 Pro 版。</span>
+        </span>
+        <a class="ss-btn" href="../../support/" data-zh="支持 / 价格" data-en="Support &amp; Pricing">支持 / 价格</a>
       </div>
     </section>
 
@@ -527,7 +554,7 @@
     })();
   </script>
 <script src="../../auth.js?v=20260918g"></script>
-  <script src="../../common.js?v=20260918g"></script>
+  <script src="../../common.js?v=20260918h"></script>
 </body>
 </html>
 

@@ -1150,6 +1150,7 @@ window.XLTopics = (function () {
     var nameEl = form.querySelector('[name="name"]');
     var emailEl = form.querySelector('[name="email"]');
     var msgEl = form.querySelector('[name="msg"]');
+    var catEl = form.querySelector('[name="category"]');
     var btn = document.getElementById('contactSendBtn') || form.querySelector('button');
     if (!btn || !nameEl || !emailEl || !msgEl) return;
     btn.removeAttribute('onclick'); // 去掉占位 alert('功能开发中')
@@ -1170,7 +1171,11 @@ window.XLTopics = (function () {
       fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, email: email, msg: msg })
+        body: JSON.stringify({
+          name: name, email: email, msg: msg,
+          category: catEl ? (catEl.value || '') : '',
+          page: location.pathname + location.search
+        })
       }).then(function (r) {
         return r.json().then(function (j) { return { status: r.status, j: j }; }, function () { return { status: r.status, j: {} }; });
       }).then(function (res) {

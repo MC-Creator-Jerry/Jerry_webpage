@@ -6,44 +6,23 @@
 // POST { post, action, reason? }
 //      action: follow|unfollow|block|unblock|report|like|unlike|fav|unfav
 //      -> { ok, followed, blocked, reported, liked, likeCount, faved, favCount }
-// Storage (KV USER_PREFS):
-//   followers:post:<id>  -> [login,...]        关注该帖的用户
-//   follow:<login>       -> [postId,...]       该用户关注的帖子
-//   block:<login>        -> [postId,...]       该用户屏蔽的帖子
-//   reports:post:<id>    -> [{reporter,ts,reason},...]
-//   reports:list         -> [{id,postId,reporter,postLogin,title,ts,reason,status}]  (审核后台)
-//   likes:post:<id>      -> [login,...]        点赞该帖的用户
-//   fav:<login>          -> [postId,...]       该用户收藏的帖子
-//   favcount:<id>        -> "N"               帖子的收藏计数
+//
+// 所有互动 KV 读写统一经 _lib/engage.js（容错 + 计数快照 + 自愈），
+// 不再在本文件裸写 JSON.parse —— 历史上那会让一个坏值把整页点赞数打成 0。
 import { getLogin, isAdminLogin, json, OWNER } from '../_lib/auth.js';
 import { pushMessage } from '../_lib/notif.js';
 import { rateLimit } from '../_lib/rate.js';
+import {
+  safeJSON, readArr, writeArr,
+  likesKey, followersKey, reportsKey, favKey, blockKey, followKey, favCountKey,
+  readCounts, patchCounts,
+} from '../_lib/engage.js';
 
-const followersKey = (id) => 'followers:post:' + id;
-const followKey = (login) => 'follow:' + login;
-const blockKey = (login) => 'block:' + login;
-const reportKey = (id) => 'reports:post:' + id;
-const likesKey = (id) => 'likes:post:' + id;
-const favKey = (login) => 'fav:' + login;
-const favCountKey = (id) => 'favcount:' + id;
 const reportsListKey = 'reports:list';
 
-async function readArr(kv, key) {
-  const raw = await kv.get(key);
-  const a = raw ? JSON.parse(raw) : [];
-  return Array.isArray(a) ? a : [];
-}
-async function writeArr(kv, key, arr) { await kv.put(key, JSON.stringify(arr)); }
-async function readNum(kv, key) {
-  const raw = await kv.get(key);
-  const n = raw ? parseInt(raw, 10) : 0;
-  return isNaN(n) ? 0 : n;
-}
-
 async function postExists(kv, postId) {
-  const raw = await kv.get('posts:list');
-  const list = raw ? JSON.parse(raw) : [];
-  return Array.isArray(list) ? list.find((p) => p.id === postId) : null;
+  const list = safeJSON(await kv.get('posts:list'), []);
+  return Array.isArray(list) ? list.find((p) => p && p.id === postId) : null;
 }
 
 export async function onRequestGet(context) {
@@ -66,36 +45,53 @@ export async function onRequestGet(context) {
     if (login) { myBlocks = await readArr(kv, blockKey(login)); myFavs = await readArr(kv, favKey(login)); }
     const myBlockSet = new Set(myBlocks), myFavSet = new Set(myFavs);
     for (const id of ids) {
+      // 计数走专用快照：每帖 1 次读（缺快照时自动自愈重建）
+      const counts = await readCounts(kv, id);
       let followed = false, reported = false, liked = false;
-      const likes = await readArr(kv, likesKey(id));
-      const likeCount = likes.length;
-      let favCount = await readNum(kv, favCountKey(id));
       if (login) {
         const followers = await readArr(kv, followersKey(id));
         followed = followers.includes(login);
-        const reports = await readArr(kv, reportKey(id));
-        reported = reports.some((r) => r.reporter === login);
+        const reports = await readArr(kv, reportsKey(id));
+        reported = reports.some((r) => r && r.reporter === login);
+        const likes = await readArr(kv, likesKey(id));
         liked = likes.includes(login);
       }
-      states[id] = { followed, blocked: myBlockSet.has(id), reported, liked, likeCount, faved: myFavSet.has(id), favCount };
+      states[id] = {
+        followed,
+        blocked: myBlockSet.has(id),
+        reported,
+        liked,
+        likeCount: counts.like,
+        faved: myFavSet.has(id),
+        favCount: counts.fav,
+      };
     }
     return json({ states });
   }
 
   const postId = url.searchParams.get('post');
   if (!postId) return json({ error: 'missing_post' }, 400);
-  const likes = await readArr(kv, likesKey(postId));
-  const likeCount = likes.length;
-  let favCount = await readNum(kv, favCountKey(postId));
-  const res = { login: login || null, post: postId, followed: false, blocked: false, reported: false, liked: false, likeCount, faved: false, favCount };
+  const counts = await readCounts(kv, postId);
+  const res = {
+    login: login || null,
+    post: postId,
+    followed: false,
+    blocked: false,
+    reported: false,
+    liked: false,
+    likeCount: counts.like,
+    faved: false,
+    favCount: counts.fav,
+  };
   if (login) {
     const followers = await readArr(kv, followersKey(postId));
     const blocks = await readArr(kv, blockKey(login));
-    const reports = await readArr(kv, reportKey(postId));
+    const reports = await readArr(kv, reportsKey(postId));
     const favs = await readArr(kv, favKey(login));
+    const likes = await readArr(kv, likesKey(postId));
     res.followed = followers.includes(login);
     res.blocked = blocks.includes(postId);
-    res.reported = reports.some((r) => r.reporter === login);
+    res.reported = reports.some((r) => r && r.reporter === login);
     res.liked = likes.includes(login);
     res.faved = favs.includes(postId);
   }
@@ -117,36 +113,32 @@ export async function onRequestPost(context) {
   const post = await postExists(kv, postId);
   if (!post) return json({ error: 'post_not_found' }, 404);
 
-  let followed = false, blocked = false, reported = false, liked = false, faved = false;
-
   if (action === 'follow' || action === 'unfollow') {
     const followers = await readArr(kv, followersKey(postId));
-    let fi = followers.indexOf(login);
+    const fi = followers.indexOf(login);
     if (action === 'follow') { if (fi === -1) followers.push(login); }
     else { if (fi !== -1) followers.splice(fi, 1); }
     await writeArr(kv, followersKey(postId), followers);
     const my = await readArr(kv, followKey(login));
-    let mi = my.indexOf(postId);
+    const mi = my.indexOf(postId);
     if (action === 'follow') { if (mi === -1) my.push(postId); }
     else { if (mi !== -1) my.splice(mi, 1); }
     await writeArr(kv, followKey(login), my);
-    followed = action === 'follow';
+    await patchCounts(kv, postId, { flw: followers.length });
   } else if (action === 'block' || action === 'unblock') {
     if (action === 'block' && post.login === OWNER) return json({ error: 'block_owner_forbidden' }, 403);
     const blocks = await readArr(kv, blockKey(login));
-    let bi = blocks.indexOf(postId);
+    const bi = blocks.indexOf(postId);
     if (action === 'block') { if (bi === -1) blocks.push(postId); }
     else { if (bi !== -1) blocks.splice(bi, 1); }
     await writeArr(kv, blockKey(login), blocks);
-    blocked = action === 'block';
   } else if (action === 'report') {
     const reason = String(body.reason || '').slice(0, 200);
-    const reports = await readArr(kv, reportKey(postId));
-    if (!reports.some((r) => r.reporter === login)) {
+    const reports = await readArr(kv, reportsKey(postId));
+    if (!reports.some((r) => r && r.reporter === login)) {
       reports.unshift({ reporter: login, ts: Date.now(), reason });
-      await writeArr(kv, reportKey(postId), reports);
+      await writeArr(kv, reportsKey(postId), reports);
     }
-    reported = true;
     // 写入审核后台列表（结构化的举报工单）
     try {
       const list = await readArr(kv, reportsListKey);
@@ -175,39 +167,39 @@ export async function onRequestPost(context) {
     } catch (e) { /* 通知失败不影响举报结果 */ }
   } else if (action === 'like' || action === 'unlike') {
     const likes = await readArr(kv, likesKey(postId));
-    let li = likes.indexOf(login);
+    const li = likes.indexOf(login);
     if (action === 'like') { if (li === -1) likes.push(login); }
     else { if (li !== -1) likes.splice(li, 1); }
     await writeArr(kv, likesKey(postId), likes);
-    liked = action === 'like';
+    await patchCounts(kv, postId, { like: likes.length });
   } else if (action === 'fav' || action === 'unfav') {
     const favs = await readArr(kv, favKey(login));
-    let fi = favs.indexOf(postId);
+    const fi = favs.indexOf(postId);
     const willFav = action === 'fav';
     if (willFav) { if (fi === -1) favs.push(postId); }
     else { if (fi !== -1) favs.splice(fi, 1); }
     await writeArr(kv, favKey(login), favs);
-    let fc = await readNum(kv, favCountKey(postId));
-    fc = Math.max(0, fc + (willFav ? 1 : -1));
+    const cur = await readCounts(kv, postId);
+    const fc = Math.max(0, cur.fav + (willFav ? 1 : -1));
     await kv.put(favCountKey(postId), String(fc));
-    faved = willFav;
+    await patchCounts(kv, postId, { fav: fc });
   }
 
-  // 重新计算状态
+  // 重新计算状态（全部容错读取：任一处坏值只降级为 0，不会让整页归零）
+  const counts = await readCounts(kv, postId);
   const followers = await readArr(kv, followersKey(postId));
   const blocks = await readArr(kv, blockKey(login));
-  const reports = await readArr(kv, reportKey(postId));
+  const reports = await readArr(kv, reportsKey(postId));
   const likes = await readArr(kv, likesKey(postId));
   const favs = await readArr(kv, favKey(login));
-  let favCount = await readNum(kv, favCountKey(postId));
   return json({
     ok: true,
     followed: followers.includes(login),
     blocked: blocks.includes(postId),
-    reported: reports.some((r) => r.reporter === login),
+    reported: reports.some((r) => r && r.reporter === login),
     liked: likes.includes(login),
-    likeCount: likes.length,
+    likeCount: counts.like,
     faved: favs.includes(postId),
-    favCount,
+    favCount: counts.fav,
   });
 }

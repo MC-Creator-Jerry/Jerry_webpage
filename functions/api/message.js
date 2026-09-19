@@ -9,6 +9,7 @@
 import { getLogin, isAdminLogin, json } from '../_lib/auth.js';
 import { pushMessage } from '../_lib/notif.js';
 import { rateLimit } from '../_lib/rate.js';
+import { isBanned } from '../_lib/ban.js';
 
 const msgKey = (id) => 'msg:' + id;
 const inboxKey = (login) => 'inbox:' + login;
@@ -60,6 +61,8 @@ export async function onRequestGet(context) {
 export async function onRequestPost(context) {
   const login = getLogin(context);
   if (!login) return json({ error: 'unauthorized' }, 401);
+  const banned = await isBanned(context, login);
+  if (banned) return json({ error: 'banned', until: banned.until }, 403);
   const rl = await rateLimit(context.env.USER_PREFS, 'dm', login, { limit: 30, windowSec: 60 });
   if (!rl.ok) return json({ error: 'rate_limited', retryAfter: rl.retryAfter }, 429);
 

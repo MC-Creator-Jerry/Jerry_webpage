@@ -99,8 +99,9 @@
     } catch (e) {}
   };
 
-  // 兜底：无论如何都在 2.4s 后强制揭晓，避免内容被永久隐藏（run 内会按 HOLD 重新设定）
-  var safety = setTimeout(safeReveal, 2400);
+  // 兜底（绝对上限，run() 永不清除）：任何路径（含 HOLD / reduced / run 异常）都保证 ≤3.2s 揭晓，
+  // 避免内容被永久隐藏在加载层之下。2026-09-19 修复：旧逻辑 clearTimeout 后若 run() 在重建前抛错会卡死。
+  setTimeout(safeReveal, 3200);
 
   var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
@@ -168,16 +169,20 @@
   }
 
   function run() {
-    clearTimeout(safety);
     HOLD = !!window.__xlHoldReveal;
-    if (reduced || intra) { if (HOLD) return; safeReveal(); return; }
+    // 无障碍：reduced-motion 用户直接揭晓，不播放开场动画
+    if (reduced) { safeReveal(); return; }
+    // 站内跳转：内容已在目标页就绪，不重播开场动画、不盖加载层。
+    // 2026-09-19 修复：原 reduced||intra 合并分支在「reduced + HOLD 页」时会直接 return 且不揭晓，
+    // 导致加载层（白底 + 蓝方块）永久残留，刷新后卡在加载页。
+    if (intra) { return; }
 
     var loader = buildLoader();
     refreshLoaderLogin(); // 若 cookie 不可读，通过 /api/me 更新为欢迎回来
     requestAnimationFrame(function () { loader.classList.add('xl-show'); });
 
     // 整段序列兜底：比正常流程略长，保证异常时也能揭晓（HOLD 时给页面更多渲染时间）
-    safety = setTimeout(safeReveal, HOLD ? 2600 : 2400);
+    setTimeout(safeReveal, HOLD ? 2600 : 2400);
 
     // ---- 阶段一：左上角标题 + 左侧竖直进度条（从上往下）----
     var intro = loader.querySelector('.xl-intro');

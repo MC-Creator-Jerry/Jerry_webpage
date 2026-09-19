@@ -79,6 +79,8 @@
   .plans tr:last-child td { border-bottom: none; }
   .plans .price { font-weight: 800; color: var(--accent); white-space: nowrap; font-size: 1.02rem; }
   .plans .plan-name { font-weight: 700; white-space: nowrap; }
+  .plans .plan-act { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .plans .plan-act .btn-ghost { width: 100%; text-align: center; box-sizing: border-box; }
 
   /* ---- 收款按钮 ---- */
   .pay-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
@@ -195,6 +197,7 @@
             <th data-zh="档位" data-en="Tier">档位</th>
             <th data-zh="价格" data-en="Price">价格</th>
             <th data-zh="包含" data-en="Includes">包含</th>
+            <th data-zh="操作" data-en="Action">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -202,19 +205,27 @@
             <td class="plan-name" data-zh="免费" data-en="Free">免费</td>
             <td class="price" data-zh="¥0" data-en="Free">¥0</td>
             <td data-zh="全部公开内容：帖子、话题、评论、每日要闻、CleanOpt 正式版下载。" data-en="All public content: posts, topics, comments, the daily news digest, and CleanOpt downloads.">全部公开内容：帖子、话题、评论、每日要闻、CleanOpt 正式版下载。</td>
+            <td class="plan-act" data-zh="—" data-en="—">—</td>
           </tr>
           <tr>
             <td class="plan-name" data-zh="赞助者" data-en="Supporter">赞助者</td>
             <td class="price" data-zh="¥20 / 月" data-en="¥20 / mo">¥20 / 月</td>
             <td data-zh="感谢署名 + 赞助者徽章 + 需求优先 + 回复优先；加入感谢名单，公开鸣谢。" data-en="Credit on the supporters list, a Supporter badge, priority requests, and priority replies.">感谢署名 + 赞助者徽章 + 需求优先 + 回复优先；加入感谢名单，公开鸣谢。</td>
+            <td class="plan-act"><a class="btn-ghost plan-buy" data-tier="supporter" data-zh="去赞助" data-en="Sponsor" href="#" target="_blank" rel="noopener">去赞助</a></td>
           </tr>
           <tr>
             <td class="plan-name" data-zh="小蓝页·1级成员" data-en="Level 1 Member">小蓝页·1级成员</td>
             <td class="price" data-zh="¥32.50 / 月（或 ¥360 / 年）" data-en="¥32.50 / mo (or ¥360 / yr)">¥32.50 / 月（或 ¥360 / 年）</td>
             <td data-zh="赞助者全部权益 + 提前看到新作品。" data-en="Everything in Supporter, plus early access to new works.">赞助者全部权益 + 提前看到新作品。</td>
+            <td class="plan-act">
+              <a class="btn-ghost plan-buy" data-tier="member1" data-zh="月付 · 去赞助" data-en="Monthly · Sponsor" href="#" target="_blank" rel="noopener">月付 · 去赞助</a>
+              <a class="btn-ghost plan-buy" data-tier="member1yr" data-zh="年付 ¥360 · 去赞助" data-en="Yearly ¥360 · Sponsor" href="#" target="_blank" rel="noopener">年付 ¥360 · 去赞助</a>
+            </td>
           </tr>
         </tbody>
       </table>
+      <p class="note" data-zh="💡 点「去赞助」会跳到爱发电对应档位的下单页。付款时请在「订单留言」里写上你的小蓝页用户名（GitHub 登录名，例如 MC-Creator-Jerry），权益就会在付款后自动到账，不用再走兑换流程。"
+         data-en="💡 “Sponsor” opens the matching Afdian checkout page. Put your site username in the order note (your GitHub sign-in name, e.g. MC-Creator-Jerry) — benefits then activate automatically, no redeem step needed.">💡 点「去赞助」会跳到爱发电对应档位的下单页。付款时请在「订单留言」里写上你的小蓝页用户名（GitHub 登录名，例如 MC-Creator-Jerry），权益就会在付款后自动到账，不用再走兑换流程。</p>
       <p class="note" data-zh="⚠️ 价格仍在试水阶段，随时可能调整；调整前已付款的档位按付款时的约定执行。也欢迎到留言页告诉我你觉得什么更值。"
          data-en="⚠️ Pricing is still being tested and may change. Existing purchases keep the terms agreed at checkout. Tell me what you'd find valuable via the contact page.">⚠️ 价格仍在试水阶段，随时可能调整；调整前已付款的档位按付款时的约定执行。也欢迎到留言页告诉我你觉得什么更值。</p>
     </section>
@@ -286,6 +297,14 @@
   <script>
     window.XL_SUPPORT = {
       afdian:  'https://ifdian.net/a/mc-creator-Jerry',   // 爱发电主页（已启用）
+      // 各档位直跳爱发电下单页的 plan_id（在爱发电后台改套餐后需同步更新这里）
+      afdianPlans: {
+        supporter:  '76588066b37111f19efb5254001e7c00',        // 赞助者 ¥20/月
+        member1:   '700bd638b37411f19f0a52540025c377',         // 小蓝页·1级成员 ¥32.50/月
+        member1yr: '07d51df0b37811f1a7ea52540025c377'          // 小蓝页·1级成员 ¥360/年（更划算）
+      },
+      wechat:  '',   // 微信收款链接（点链接/扫码直接付款）
+      alipay: '',   // 支付宝收款链接
       zsxq:    '',   // 知识星球，例：https://wx.zsxq.com/group/12345678
       xiaobt:  '',   // 小报童专栏，例：https://xiaobot.net/p/yourcolumn
       gumroad: '',   // Gumroad / Lemon Squeezy 商品页（面向海外）
@@ -329,6 +348,8 @@
       function L(zh, en) { return isEn ? en : zh; }
       var DEFS = [
         { k: 'afdian',  emoji: '💙', zh: '爱发电',            en: 'Afdian',        zh2: '按月赞助或一次性打赏（国内推荐）', en2: 'Monthly or one-off support (best for CN)' },
+        { k: 'wechat',  emoji: '💚', zh: '微信赞赏',          en: 'WeChat Pay',    zh2: '扫码或点链接直接付款（国内推荐）', en2: 'Scan or tap to pay (CN)' },
+        { k: 'alipay',  emoji: '🔵', zh: '支付宝',            en: 'Alipay',        zh2: '扫码或点链接直接付款',            en2: 'Scan or tap to pay' },
         { k: 'zsxq',    emoji: '🟠', zh: '知识星球',          en: 'Zsxq',          zh2: '付费社群，长期交流',            en2: 'Paid community for ongoing discussion' },
         { k: 'xiaobt',  emoji: '📘', zh: '小报童专栏',        en: 'Xiaobot',       zh2: '付费专栏 / 连载',               en2: 'Paid column / series' },
         { k: 'gumroad', emoji: '🌍', zh: 'Gumroad / 海外',    en: 'Gumroad',       zh2: '国际支付，适合海外用户',        en2: 'International cards, for overseas users' }
@@ -364,7 +385,19 @@
         if (qr && box) { box.hidden = false; document.getElementById('qrImg').src = qr; }
       }
 
-      applyTheme(); applyFont(); applyRadius(); applyLang(); renderPay();
+      /* ---- 价格表「去赞助」按钮：按配置拼成爱发电对应档位直跳下单链接 ---- */
+      function wirePlanButtons() {
+        var plans = (window.XL_SUPPORT && window.XL_SUPPORT.afdianPlans) || {};
+        var btns = document.querySelectorAll('.plan-buy');
+        for (var i = 0; i < btns.length; i++) {
+          var b = btns[i];
+          var tier = b.getAttribute('data-tier');
+          var pid = plans[tier];
+          if (pid) b.setAttribute('href', 'https://ifdian.net/order/create?plan_id=' + pid);
+        }
+      }
+
+      applyTheme(); applyFont(); applyRadius(); applyLang(); renderPay(); wirePlanButtons();
     })();
   </script>
 <script src="../auth.js?v=20260918i"></script>

@@ -6,6 +6,7 @@
 import { getLogin, isAdminLogin, json } from '../_lib/auth.js';
 import { scanTexts } from '../_lib/forbidden.js';
 import { parseMentions, knownLogins, pushCommentNotif } from '../_lib/notif.js';
+import { isBanned } from '../_lib/ban.js';
 
 const KEY = (post) => 'cmts:' + post;
 
@@ -24,19 +25,47 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const postId = url.searchParams.get('post');
   if (!postId) return json({ error: 'missing_post' }, 400);
+  const login = getLogin(context);
   const arr = await readComments(context.env.USER_PREFS, postId);
-  return json({ comments: arr, count: arr.length });
+  const out = arr.map((c) => {
+    const likes = Array.isArray(c.likes) ? c.likes : [];
+    const liked = login ? likes.includes(login) : false;
+    // 不把 likes 数组泄漏给前端，只返回计数与当前用户状态
+    const { likes: _omit, ...rest } = c;
+    return { ...rest, likeCount: likes.length, liked };
+  });
+  return json({ comments: out, count: out.length });
 }
 
 export async function onRequestPost(context) {
   const login = getLogin(context);
   if (!login) return json({ error: 'unauthorized' }, 401);
+  const banned = await isBanned(context, login);
+  if (banned) return json({ error: 'banned', until: banned.until }, 403);
   const kv = context.env.USER_PREFS;
   const body = await context.request.json().catch(() => ({}));
   const postId = String(body.post || '');
+  if (!postId) return json({ error: 'missing_post' }, 400);
+
+  // 评论点赞 / 取消点赞
+  if (body.action === 'like' || body.action === 'unlike') {
+    const cid = String(body.id || '');
+    if (!cid) return json({ error: 'missing_comment_id' }, 400);
+    const arr = await readComments(kv, postId);
+    const c = arr.find((x) => x.id === cid);
+    if (!c) return json({ error: 'comment_not_found' }, 404);
+    c.likes = Array.isArray(c.likes) ? c.likes : [];
+    if (body.action === 'like') {
+      if (!c.likes.includes(login)) c.likes.push(login);
+    } else {
+      c.likes = c.likes.filter((l) => l !== login);
+    }
+    await kv.put(KEY(postId), JSON.stringify(arr));
+    return json({ ok: true, likeCount: c.likes.length, liked: body.action === 'like' });
+  }
+
   const text = String(body.body || '').slice(0, 2000).trim();
   const replyTo = body.replyTo ? String(body.replyTo) : null;
-  if (!postId) return json({ error: 'missing_post' }, 400);
   if (!text) return json({ error: 'empty' }, 400);
   const bad = scanTexts([text]);
   if (bad) return json({ error: 'forbidden', word: bad }, 400);
@@ -57,6 +86,7 @@ export async function onRequestPost(context) {
   const comment = {
     id, ts: Date.now(), postId, login, name,
     body: text, replyTo, mentions,
+    likes: [],
   };
   const arr = await readComments(kv, postId);
   arr.push(comment);

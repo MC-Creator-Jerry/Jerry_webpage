@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script src="../boot.js?v=20260919a"></script>
+<script>
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>订阅和博客 · Jerry's webpage</title>
+<meta name="description" content="订阅站点更新，或前往博客阅读开发笔记与工具测评。" />
+<meta name="author" content="Jerry" />
+<meta name="og:type" content="website" />
+<meta name="og:title" content="订阅和博客 · Jerry's webpage" />
+<meta name="og:description" content="订阅站点更新，或前往博客阅读开发笔记与工具测评。" />
+<meta name="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="订阅和博客 · Jerry's webpage" />
+<meta name="twitter:description" content="订阅站点更新，或前往博客阅读开发笔记与工具测评。" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+  .topbar {
+    position: sticky; top: 0; z-index: 100; min-height: 64px;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg); box-shadow: 0 2px 10px rgba(0,0,0,0.18); border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px; color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer; }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--bar-fg); white-space: nowrap; opacity: 0.9; }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a { color: var(--bar-fg); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none; background: rgba(255,255,255,0.08); color: var(--bar-fg);
+    border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; line-height: 1; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255,255,255,0.18); }
+
+  .content { max-width: 760px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 8px; }
+  .hero h1 { font-size: 1.9rem; line-height: 1.25; color: var(--text); margin-bottom: 12px; }
+  .hero p { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 640px; }
+
+  .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+  .big-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    padding: 44px 24px; border-radius: var(--radius); text-decoration: none;
+    background: var(--card-bg); border: 1px solid var(--card-border); box-shadow: var(--card-shadow);
+    color: var(--text); transition: transform .15s, box-shadow .15s, border-color .15s;
+  }
+  .big-btn:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 26px rgba(20,35,59,.16); }
+  .big-btn svg { width: 48px; height: 48px; color: var(--accent); }
+  .big-btn .t { font-size: 1.35rem; font-weight: 700; }
+  .big-btn .d { font-size: 0.95rem; color: var(--muted); text-align: center; line-height: 1.6; }
+
+  .site-footer { border-top: 1px solid var(--card-border); margin-top: 48px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .content { padding: 36px 16px 48px; }
+    .sub-grid { grid-template-columns: 1fr; }
+    .big-btn { padding: 32px 20px; }
+  }
+  [hidden] { display: none !important; }
+</style>
+  <link rel="stylesheet" href="../common.css?v=20260919a" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" data-zh="订阅和博客" data-en="Subscribe &amp; Blog">订阅和博客</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" href="../home.html" data-zh="个人主页" data-en="Profile">个人主页</a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="订阅和博客" data-en="Subscribe &amp; Blog">订阅和博客</h1>
+      <p data-zh="想第一时刻收到更新，还是想慢慢读背后的思考？选一个入口就好。" data-en="Get updates the moment they land, or read the thinking behind the projects — pick an entry.">想第一时刻收到更新，还是想慢慢读背后的思考？选一个入口就好。</p>
+    </section>
+
+    <section class="sub-grid">
+      <a class="big-btn" href="../blog/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="t" data-zh="📖 博客" data-en="📖 Blog">📖 博客</span>
+        <span class="d" data-zh="开发笔记、工具测评与独立开发经验" data-en="Dev notes, tool reviews and indie-dev experience">开发笔记、工具测评与独立开发经验</span>
+      </a>
+      <a class="big-btn" href="../subscribe/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        <span class="t" data-zh="✉️ 订阅" data-en="✉️ Subscribe">✉️ 订阅</span>
+        <span class="d" data-zh="RSS 源或邮箱订阅，更新自动送达" data-en="RSS feed or email — updates delivered to you">RSS 源或邮箱订阅，更新自动送达</span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Back to home">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  </footer>
+
+  <div class="float-actions">
+    <a class="fab" href="../language.html" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" href="../settings/homepage.html" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script src="../auth.js?v=20260918i"></script>
+  <script src="../common.js?v=20260920c"></script>
+</body>
+</html>

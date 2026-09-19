@@ -184,6 +184,41 @@
   .shot-note { font-size: 0.82rem; color: var(--muted); margin-top: 10px; line-height: 1.6; }
   @media (max-width: 560px) { .feat-list { grid-template-columns: 1fr; } }
 
+  /* ===== 界面截图画廊 ===== */
+  .shot-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 14px; }
+  .shot-cap { font-size: 0.82rem; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+  /* ===== 系统要求 ===== */
+  .req-list { list-style: none; margin: 14px 0 0; padding: 0; }
+  .req-row { display: flex; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--card-border); }
+  .req-row:last-child { border-bottom: none; }
+  .req-key { flex: 0 0 128px; font-weight: 700; color: var(--text); font-size: 0.95rem; }
+  .req-val { flex: 1; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+  .req-val b { color: var(--text); }
+
+  /* ===== 安装 / 使用说明 ===== */
+  .howto { list-style: none; counter-reset: step; margin: 14px 0 0; padding: 0; display: grid; gap: 16px; }
+  .howto li { display: flex; gap: 14px; align-items: flex-start; }
+  .howto .num {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem;
+  }
+  .howto .ht { color: var(--text); font-size: 0.98rem; line-height: 1.7; }
+  .howto .ht b { color: var(--text); }
+  .howto code { background: var(--bg); border: 1px solid var(--card-border); border-radius: 6px; padding: 1px 6px; font-size: 0.88rem; }
+  .howto .sub { color: var(--muted); font-size: 0.9rem; margin-top: 4px; line-height: 1.6; }
+
+  /* ===== 常见问题 ===== */
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; transition: transform .2s; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+  details.faq .faq-body b { color: var(--text); }
+
   .admin-only { display: none; }
   body.is-admin .admin-only { display: block; }
 
@@ -326,41 +361,119 @@
     </section>
 
     <section class="card">
-      <h2 data-zh="界面预览" data-en="Preview">界面预览</h2>
-      <p data-zh="CleanOpt 主界面示意：左侧功能导航，中间实时内存占用与趋势，一键「立即清理」。" data-en="CleanOpt main UI preview: left nav, live memory usage &amp; trend in the center, one-tap “Clean now”.">CleanOpt 主界面示意：左侧功能导航，中间实时内存占用与趋势，一键「立即清理」。</p>
-      <div class="shot">
-        <svg viewBox="0 0 720 400" role="img" aria-label="CleanOpt 界面预览">
-          <defs>
-            <linearGradient id="coTitle" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/>
-            </linearGradient>
-            <linearGradient id="coMem" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#2e9e5b"/><stop offset="0.6" stop-color="#e0a800"/><stop offset="1" stop-color="#d13438"/>
-            </linearGradient>
-          </defs>
-          <rect x="1" y="1" width="718" height="398" rx="14" fill="#ffffff" stroke="#dfe5ee"/>
-          <path d="M14 1 H706 a13 13 0 0 1 13 13 V46 H1 V14 a13 13 0 0 1 13 -13 Z" fill="url(#coTitle)"/>
-          <circle cx="26" cy="24" r="6" fill="#ff5f57"/><circle cx="46" cy="24" r="6" fill="#febc2e"/><circle cx="66" cy="24" r="6" fill="#28c840"/>
-          <text x="360" y="29" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">CleanOpt</text>
-          <rect x="1" y="46" width="150" height="353" fill="#f4f7fb" stroke="#e3e9f1"/>
-          <rect x="14" y="70" width="122" height="30" rx="7" fill="#0078d4" opacity="0.14"/>
-          <text x="28" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0078d4" font-weight="600">清理</text>
-          <text x="28" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6b80">内存</text>
-          <text x="28" y="166" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6b80">设置</text>
-          <text x="180" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#1b2733">内存占用</text>
-          <rect x="180" y="96" width="420" height="16" rx="8" fill="#eef1f6"/>
-          <rect x="180" y="96" width="262" height="16" rx="8" fill="url(#coMem)"/>
-          <text x="610" y="109" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6b80">62%</text>
-          <polyline points="180,200 250,180 320,190 390,150 460,165 530,130 600,145" fill="none" stroke="#0078d4" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-          <polygon points="180,200 250,180 320,190 390,150 460,165 530,130 600,145 600,212 180,212" fill="#0078d4" opacity="0.10"/>
-          <text x="180" y="240" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6b80">近 1 小时内存趋势</text>
-          <rect x="180" y="270" width="150" height="42" rx="21" fill="#0078d4"/>
-          <text x="255" y="296" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">立即清理</text>
-          <circle cx="190" cy="345" r="5" fill="#28c840"/>
-          <text x="204" y="349" font-family="Segoe UI, Arial, sans-serif" font-size="12.5" fill="#3a4a5c">后台静默运行中 · 游戏免打扰已开启</text>
-        </svg>
+      <h2 data-zh="界面截图" data-en="Screenshots">界面截图</h2>
+      <p data-zh="下面是 CleanOpt 几个主要界面的示意（矢量绘制，非运行截图）。把真实截图放进 products/cleanopt/img/ 后，可直接替换本区块。" data-en="Illustrations of CleanOpt's main screens (vector, not real captures). Drop real screenshots into products/cleanopt/img/ to replace these anytime.">下面是 CleanOpt 几个主要界面的示意（矢量绘制，非运行截图）。把真实截图放进 products/cleanopt/img/ 后，可直接替换本区块。</p>
+      <div class="shot-gallery">
+        <div>
+          <div class="shot">
+            <svg viewBox="0 0 720 400" role="img" aria-label="CleanOpt 主界面">
+              <defs>
+                <linearGradient id="coTitle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient>
+                <linearGradient id="coMem" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2e9e5b"/><stop offset="0.6" stop-color="#e0a800"/><stop offset="1" stop-color="#d13438"/></linearGradient>
+              </defs>
+              <rect x="1" y="1" width="718" height="398" rx="14" fill="#ffffff" stroke="#dfe5ee"/>
+              <path d="M14 1 H706 a13 13 0 0 1 13 13 V46 H1 V14 a13 13 0 0 1 13 -13 Z" fill="url(#coTitle)"/>
+              <circle cx="26" cy="24" r="6" fill="#ff5f57"/><circle cx="46" cy="24" r="6" fill="#febc2e"/><circle cx="66" cy="24" r="6" fill="#28c840"/>
+              <text x="360" y="29" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">CleanOpt</text>
+              <rect x="1" y="46" width="150" height="353" fill="#f4f7fb" stroke="#e3e9f1"/>
+              <rect x="14" y="70" width="122" height="30" rx="7" fill="#0078d4" opacity="0.14"/>
+              <text x="28" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0078d4" font-weight="600">清理</text>
+              <text x="28" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6b80">内存</text>
+              <text x="28" y="166" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6b80">设置</text>
+              <text x="180" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#1b2733">内存占用</text>
+              <rect x="180" y="96" width="420" height="16" rx="8" fill="#eef1f6"/>
+              <rect x="180" y="96" width="262" height="16" rx="8" fill="url(#coMem)"/>
+              <text x="610" y="109" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6b80">62%</text>
+              <polyline points="180,200 250,180 320,190 390,150 460,165 530,130 600,145" fill="none" stroke="#0078d4" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <polygon points="180,200 250,180 320,190 390,150 460,165 530,130 600,145 600,212 180,212" fill="#0078d4" opacity="0.10"/>
+              <text x="180" y="240" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6b80">近 1 小时内存趋势</text>
+              <rect x="180" y="270" width="150" height="42" rx="21" fill="#0078d4"/>
+              <text x="255" y="296" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">立即清理</text>
+              <circle cx="190" cy="345" r="5" fill="#28c840"/>
+              <text x="204" y="349" font-family="Segoe UI, Arial, sans-serif" font-size="12.5" fill="#3a4a5c">后台静默运行中 · 游戏免打扰已开启</text>
+            </svg>
+          </div>
+          <p class="shot-cap" data-zh="主界面：实时内存占用与一键清理" data-en="Main: live memory & one-tap clean">主界面：实时内存占用与一键清理</p>
+        </div>
+        <div>
+          <div class="shot">
+            <svg viewBox="0 0 720 400" role="img" aria-label="CleanOpt 清理结果">
+              <defs><linearGradient id="coTitle2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs>
+              <rect x="1" y="1" width="718" height="398" rx="14" fill="#ffffff" stroke="#dfe5ee"/>
+              <path d="M14 1 H706 a13 13 0 0 1 13 13 V46 H1 V14 a13 13 0 0 1 13 -13 Z" fill="url(#coTitle2)"/>
+              <circle cx="26" cy="24" r="6" fill="#ff5f57"/><circle cx="46" cy="24" r="6" fill="#febc2e"/><circle cx="66" cy="24" r="6" fill="#28c840"/>
+              <text x="360" y="29" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">CleanOpt · 清理完成</text>
+              <rect x="180" y="72" width="440" height="56" rx="12" fill="#eaf7ef" stroke="#bfe6cd"/>
+              <text x="200" y="98" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f7a47" font-weight="700">本次共释放</text>
+              <text x="200" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#1f7a47" font-weight="800">2.34 GB</text>
+              <text x="372" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#3a4a5c">耗时 8 秒 · 0 个文件被移动</text>
+              <g font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#3a4a5c">
+                <rect x="180" y="148" width="440" height="34" rx="8" fill="#f4f7fb"/>
+                <text x="196" y="170">系统临时文件</text><text x="604" y="170" text-anchor="end" fill="#0078d4" font-weight="700">1.18 GB</text>
+                <rect x="180" y="188" width="440" height="34" rx="8" fill="#f4f7fb"/>
+                <text x="196" y="210">浏览器缓存</text><text x="604" y="210" text-anchor="end" fill="#0078d4" font-weight="700">0.71 GB</text>
+                <rect x="180" y="228" width="440" height="34" rx="8" fill="#f4f7fb"/>
+                <text x="196" y="250">回收站冗余</text><text x="604" y="250" text-anchor="end" fill="#0078d4" font-weight="700">0.45 GB</text>
+              </g>
+              <rect x="180" y="300" width="150" height="42" rx="21" fill="#0078d4"/>
+              <text x="255" y="326" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">再次清理</text>
+              <circle cx="190" cy="360" r="5" fill="#28c840"/>
+              <text x="204" y="364" font-family="Segoe UI, Arial, sans-serif" font-size="12.5" fill="#3a4a5c">下次自动维护：明天 03:00</text>
+            </svg>
+          </div>
+          <p class="shot-cap" data-zh="清理结果：本次释放空间与清理明细" data-en="Result: space freed & itemised list">清理结果：本次释放空间与清理明细</p>
+        </div>
+        <div>
+          <div class="shot">
+            <svg viewBox="0 0 720 400" role="img" aria-label="CleanOpt 设置">
+              <defs><linearGradient id="coTitle3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs>
+              <rect x="1" y="1" width="718" height="398" rx="14" fill="#ffffff" stroke="#dfe5ee"/>
+              <path d="M14 1 H706 a13 13 0 0 1 13 13 V46 H1 V14 a13 13 0 0 1 13 -13 Z" fill="url(#coTitle3)"/>
+              <circle cx="26" cy="24" r="6" fill="#ff5f57"/><circle cx="46" cy="24" r="6" fill="#febc2e"/><circle cx="66" cy="24" r="6" fill="#28c840"/>
+              <text x="360" y="29" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">CleanOpt · 设置</text>
+              <g font-family="Segoe UI, Arial, sans-serif">
+                <text x="32" y="92" font-size="14" font-weight="700" fill="#1b2733">自动维护</text>
+                <text x="32" y="112" font-size="12" fill="#5b6b80">每天定时后台清理一次</text>
+                <rect x="600" y="84" width="44" height="24" rx="12" fill="#0078d4"/><circle cx="628" cy="96" r="9" fill="#fff"/>
+                <text x="32" y="152" font-size="14" font-weight="700" fill="#1b2733">游戏免打扰</text>
+                <text x="32" y="172" font-size="12" fill="#5b6b80">检测到游戏时暂停清理</text>
+                <rect x="600" y="144" width="44" height="24" rx="12" fill="#0078d4"/><circle cx="628" cy="156" r="9" fill="#fff"/>
+                <text x="32" y="212" font-size="14" font-weight="700" fill="#1b2733">开机自启</text>
+                <text x="32" y="232" font-size="12" fill="#5b6b80">登录后自动后台运行</text>
+                <rect x="600" y="204" width="44" height="24" rx="12" fill="#0078d4"/><circle cx="628" cy="216" r="9" fill="#fff"/>
+                <text x="32" y="272" font-size="14" font-weight="700" fill="#1b2733">清理前预览</text>
+                <text x="32" y="292" font-size="12" fill="#5b6b80">执行前先列出将清理的项</text>
+                <rect x="600" y="264" width="44" height="24" rx="12" fill="#cfd6e0"/><circle cx="616" cy="276" r="9" fill="#fff"/>
+                <rect x="32" y="326" width="120" height="40" rx="20" fill="#0078d4"/>
+                <text x="92" y="351" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">保存设置</text>
+              </g>
+            </svg>
+          </div>
+          <p class="shot-cap" data-zh="设置：自动维护 / 游戏免打扰 / 开机自启" data-en="Settings: auto-maintain / game mode / autostart">设置：自动维护 / 游戏免打扰 / 开机自启</p>
+        </div>
       </div>
-      <p class="shot-note" data-zh="说明：上图为界面示意。把真实截图放入 products/cleanopt/img/ 后，用图片替换本区块即可。" data-en="Note: the figure above is an illustration. After adding real screenshots to products/cleanopt/img/, replace this block with an image.">说明：上图为界面示意。把真实截图放入 products/cleanopt/img/ 后，用图片替换本区块即可。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="系统要求" data-en="System Requirements">系统要求</h2>
+      <ul class="req-list">
+        <li class="req-row"><span class="req-key" data-zh="操作系统" data-en="OS">操作系统</span><span class="req-val" data-zh="Windows 10 / 11（64 位）。Windows 7/8 未测试，不保证可用。" data-en="Windows 10 / 11 (64-bit). Windows 7/8 are untested.">Windows 10 / 11（64 位）。Windows 7/8 未测试，不保证可用。</span></li>
+        <li class="req-row"><span class="req-key" data-zh="运行环境" data-en="Runtime">运行环境</span><span class="req-val" data-zh="PowerShell 5.1 与 .NET Framework 4.5+，均为 Windows 10/11 内置，无需额外安装。" data-en="PowerShell 5.1 and .NET Framework 4.5+, both built into Windows 10/11 — no extra install needed.">PowerShell 5.1 与 .NET Framework 4.5+，均为 Windows 10/11 内置，无需额外安装。</span></li>
+        <li class="req-row"><span class="req-key" data-zh="权限" data-en="Privileges">权限</span><span class="req-val" data-zh="普通用户即可运行；清理系统级目录时部分项会提示用管理员身份运行，不会悄悄提权。" data-en="Runs as a normal user; cleaning system paths may prompt for admin — it never elevates silently.">普通用户即可运行；清理系统级目录时部分项会提示用管理员身份运行，不会悄悄提权。</span></li>
+        <li class="req-row"><span class="req-key" data-zh="磁盘空间" data-en="Disk">磁盘空间</span><span class="req-val" data-zh="解压后约 1 MB；运行时零写入系统盘，不写注册表、不建服务。" data-en="About 1 MB extracted; writes nothing to the system drive at runtime — no registry, no service.">解压后约 1 MB；运行时零写入系统盘，不写注册表、不建服务。</span></li>
+        <li class="req-row"><span class="req-key" data-zh="内存占用" data-en="Memory">内存占用</span><span class="req-val" data-zh="后台常驻约数十 MB 级（视系统而定），可在设置里关闭自动维护改为手动，进一步降低占用。" data-en="Background resident uses tens of MB (varies); turn off auto-maintain in Settings to go manual and lower it further.">后台常驻约数十 MB 级（视系统而定），可在设置里关闭自动维护改为手动，进一步降低占用。</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="安装与使用" data-en="Install &amp; Use">安装与使用</h2>
+      <ol class="howto">
+        <li><span class="num">1</span><div><div class="ht" data-zh="下载：在本页点「下载 CleanOpt」，得到一个 .zip 压缩包。" data-en="Download: click “Download CleanOpt” above to get a .zip.">下载：在本页点「下载 CleanOpt」，得到一个 .zip 压缩包。</div></div></li>
+        <li><span class="num">2</span><div><div class="ht" data-zh="解压：右键压缩包 →「全部解压缩」到任意文件夹（桌面、D 盘都行）。不要放在 C 盘 Windows 系统目录里。" data-en="Extract: right-click the zip → “Extract all” to any folder. Don't place it inside Windows system dirs.">解压：右键压缩包 →「全部解压缩」到任意文件夹（桌面、D 盘都行）。不要放在 C 盘 Windows 系统目录里。</div></div></li>
+        <li><span class="num">3</span><div><div class="ht" data-zh="运行：双击 CleanOpt.ps1（或打包好的 .exe）即可启动，无需安装、不写注册表。" data-en="Run: double-click CleanOpt.ps1 (or the bundled .exe) — no install, no registry.">运行：双击 CleanOpt.ps1（或打包好的 .exe）即可启动，无需安装、不写注册表。</div><div class="sub" data-zh="首次运行若被 SmartScreen 拦截：点「更多信息」→「仍要运行」。这是未签名脚本的正常提示，文件来自本页即可信。" data-en="If SmartScreen blocks the first run: click “More info” → “Run anyway”. Normal for an unsigned script; files from this site are safe.">首次运行若被 SmartScreen 拦截：点「更多信息」→「仍要运行」。这是未签名脚本的正常提示，文件来自本页即可信。</div></div></li>
+        <li><span class="num">4</span><div><div class="ht" data-zh="清理：在「清理」页点「立即清理」，会先列出将要清理的项，确认后再执行；也可在「设置」里开启自动维护，让它每天定时后台清理。" data-en="Clean: on the Clean tab click “Clean now” — it lists what it will clean first, then runs on confirm. Or enable auto-maintain in Settings for daily background runs.">清理：在「清理」页点「立即清理」，会先列出将要清理的项，确认后再执行；也可在「设置」里开启自动维护，让它每天定时后台清理。</div></div></li>
+      </ol>
+      <p style="margin-top:14px;color:var(--muted);font-size:0.9rem;line-height:1.7" data-zh="提示：PowerShell 脚本默认可能被系统禁止运行。若双击无反应，用管理员 PowerShell 执行 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned 后再双击即可。" data-en="Tip: PowerShell scripts may be blocked by default. If double-click does nothing, run “Set-ExecutionPolicy -Scope CurrentUser RemoteSigned” in admin PowerShell, then retry.">提示：PowerShell 脚本默认可能被系统禁止运行。若双击无反应，用管理员 PowerShell 执行 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned 后再双击即可。</p>
     </section>
 
     <section class="card disclaimer">
@@ -378,6 +491,22 @@
         <p class="history-empty" id="historyEmpty" data-zh="暂无历史版本记录。" data-en="No version history yet.">暂无历史版本记录。</p>
       </div>
     </details>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+      <details class="faq">
+        <summary data-zh="会不会误删我的文件？" data-en="Will it delete my files by mistake?">会不会误删我的文件？</summary>
+        <div class="faq-body" data-zh="不会。CleanOpt 只清理明确安全的系统冗余——临时文件、浏览器/系统缓存、回收站残留、无效缩略图等；不碰你的文档、图片、下载、桌面等个人文件。执行前还会先列出将要清理的项，确认后才会动手。任何清理工具都有极小风险，重要数据请先备份。" data-en="No. CleanOpt only clears clearly-safe system leftovers — temp files, browser/system caches, recycle-bin leftovers, stale thumbnails. It never touches your documents, photos, downloads or desktop. Before acting it lists what it will clean, and only runs after you confirm. Any cleaner carries a tiny risk, so back up important data first.">不会。CleanOpt 只清理明确安全的系统冗余——临时文件、浏览器/系统缓存、回收站残留、无效缩略图等；不碰你的文档、图片、下载、桌面等个人文件。执行前还会先列出将要清理的项，确认后才会动手。任何清理工具都有极小风险，重要数据请先备份。</div>
+      </details>
+      <details class="faq">
+        <summary data-zh="占多少内存 / 资源？" data-en="How much memory / resources?">占多少内存 / 资源？</summary>
+        <div class="faq-body" data-zh="很轻量。后台常驻约数十 MB 内存（视系统而定），CPU 只在清理那一刻短暂占用，平时几乎为零。不需要时可到「设置」关闭自动维护，改为手动点「立即清理」，占用降到最低。" data-en="Very light. Resident in the background uses tens of MB of RAM (varies by system); CPU only spikes briefly during a clean and is near zero otherwise. Turn off auto-maintain in Settings and clean manually to minimise it.">很轻量。后台常驻约数十 MB 内存（视系统而定），CPU 只在清理那一刻短暂占用，平时几乎为零。不需要时可到「设置」关闭自动维护，改为手动点「立即清理」，占用降到最低。</div>
+      </details>
+      <details class="faq">
+        <summary data-zh="会开机自启吗？" data-en="Does it start on boot?">会开机自启吗？</summary>
+        <div class="faq-body" data-zh="默认不会强制开机自启。首次运行只是普通启动，不会偷偷塞进开机启动项。想让它开机自动后台运行，可在「设置」打开「开机自启」（或手动把快捷方式放进「启动」文件夹）。所有开关都靠你主动点，没有隐藏行为。" data-en="No forced autostart by default. The first run is a normal launch — it won't sneak into your startup items. To run automatically in the background, enable “Autostart” in Settings (or drop a shortcut into the Startup folder). Every switch is something you click; there are no hidden behaviours.">默认不会强制开机自启。首次运行只是普通启动，不会偷偷塞进开机启动项。想让它开机自动后台运行，可在「设置」打开「开机自启」（或手动把快捷方式放进「启动」文件夹）。所有开关都靠你主动点，没有隐藏行为。</div>
+      </details>
+    </section>
 
     <section class="card admin-only" id="adminEditor">
       <h2 data-zh="管理员编辑" data-en="Admin Editor">管理员编辑</h2>

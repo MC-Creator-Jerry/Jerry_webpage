@@ -6,8 +6,21 @@
 // 避免出现「切个页面就莫名登出」的问题。
 import { getCookie, isAdminLogin, OWNER, json } from '../_lib/auth.js';
 import { fetchAndCacheAvatar, getCachedAvatar } from '../_lib/avatar.js';
+import { readSponsor, publicSponsor } from '../_lib/sponsor.js';
 
 const PROFILE_TTL = 600; // 10 分钟：缓存 GitHub 资料，降低限流触发概率
+
+// 赞助状态：先按 cookie 里的 login 查（兑换时就是用它写的键），
+// 若没命中再用 GitHub 返回的规范 login 兜一次——防止账号改名导致大小写不一致而查不到。
+async function sponsorOf(context, login, canonical) {
+  const direct = await readSponsor(context, login);
+  if (direct) return publicSponsor(direct);
+  if (canonical && canonical !== login) {
+    const alt = await readSponsor(context, canonical);
+    if (alt) return publicSponsor(alt);
+  }
+  return null;
+}
 
 export async function onRequestGet(context) {
   const login = getCookie(context.request, 'gh_user');
@@ -60,17 +73,17 @@ export async function onRequestGet(context) {
         const profile = { id: u.id, login: u.login, name: u.name || u.login, avatar_url: cloudAvatar || u.avatar_url };
         await writeProfile(profile, login);
         try { await recordActiveLogin(context.env.USER_PREFS, u.login); } catch (e) {}
-        return json({ id: u.id, login: profile.login, name: profile.name, avatar_url: profile.avatar_url, isAdmin });
+        return json({ id: u.id, login: profile.login, name: profile.name, avatar_url: profile.avatar_url, isAdmin, sponsor: await sponsorOf(context, login, profile.login) });
       }
     } catch (e) { /* 继续走缓存回退 */ }
     const c = await readByLogin(login);
     if (c) {
       const cloudAvatar = c.id ? await getCachedAvatar(context.env.USER_PREFS, c.login || login, c.id) : null;
       try { await recordActiveLogin(context.env.USER_PREFS, c.login || login); } catch (e) {}
-      return json({ id: c.id, login: c.login || login, name: c.name, avatar_url: cloudAvatar || c.avatar_url, isAdmin });
+      return json({ id: c.id, login: c.login || login, name: c.name, avatar_url: cloudAvatar || c.avatar_url, isAdmin, sponsor: await sponsorOf(context, login, c.login) });
     }
     try { await recordActiveLogin(context.env.USER_PREFS, login); } catch (e) {}
-    return json({ login, isAdmin, degraded: true });
+    return json({ login, isAdmin, degraded: true, sponsor: await sponsorOf(context, login, null) });
   }
 
   // 无 token：用 login 别名找缓存；命中即可拿到改名后的真实 login/头像
@@ -78,10 +91,10 @@ export async function onRequestGet(context) {
   if (c) {
     const cloudAvatar = c.id ? await getCachedAvatar(context.env.USER_PREFS, c.login || login, c.id) : null;
     try { await recordActiveLogin(context.env.USER_PREFS, c.login || login); } catch (e) {}
-    return json({ id: c.id, login: c.login || login, name: c.name, avatar_url: cloudAvatar || c.avatar_url, isAdmin });
+    return json({ id: c.id, login: c.login || login, name: c.name, avatar_url: cloudAvatar || c.avatar_url, isAdmin, sponsor: await sponsorOf(context, login, c.login) });
   }
   try { await recordActiveLogin(context.env.USER_PREFS, login); } catch (e) {}
-  return json({ login, isAdmin, degraded: true });
+  return json({ login, isAdmin, degraded: true, sponsor: await sponsorOf(context, login, null) });
 }
 
 // 记录当日活跃登录：每个 UTC+8 自然日最多计 1 次，累计到 logins:<login>

@@ -362,7 +362,7 @@
           <div class="prod-icon">🧹</div>
           <div class="prod-name" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</div>
           <div class="prod-desc" data-zh="Windows 系统清理与内存优化小工具，后台静默运行。" data-en="Windows cleanup and memory optimizer that runs silently in the background.">Windows 系统清理与内存优化小工具，后台静默运行。</div>
-          <div class="prod-soon" data-zh="v1.0.0 · 立即下载" data-en="v1.0.0 · Download now">v1.0.0 · 立即下载</div>
+          <div class="prod-soon" id="cleanoptVer" data-zh="v1.0.0 · 立即下载" data-en="v1.0.0 · Download now">v1.0.0 · 立即下载</div>
           <div class="prod-tag t-live" data-zh="✅ 持续维护中" data-en="✅ Maintained">✅ 持续维护中</div>
         </a>
         <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener">
@@ -613,6 +613,26 @@
         window.__toastT = setTimeout(function () { toast.classList.remove('show'); }, 2600);
       }
       // 留言功能开发中：发送按钮仅弹出提示，不提交
+
+      // 联网拉取 CleanOpt 版本，避免主页产品卡与详情页 / 接口漂移（GitHub 静态镜像无 API 时回退到硬编码文本）
+      (function syncCleanoptVer() {
+        try {
+          var el = document.getElementById('cleanoptVer');
+          if (!el) return;
+          fetch('/api/product-meta?id=cleanopt')
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (!d || !d.ok || !d.product || !d.product.version) return;
+              var v = d.product.version;
+              var zh = v + ' · 立即下载';
+              var en = v + ' · Download now';
+              el.setAttribute('data-zh', zh);
+              el.setAttribute('data-en', en);
+              el.textContent = (cur.lang === 'en') ? en : zh;
+            })
+            .catch(function () {});
+        } catch (e) {}
+      })();
 
       applyAll();
     })();

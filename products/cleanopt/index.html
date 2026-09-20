@@ -595,10 +595,19 @@
         if (!list) return;
         list.innerHTML = '';
         var items = [];
-        if (p.version) items.push({ version: p.version, date: '', notes: '', current: true });
+        if (p.version) {
+          var cur = { version: p.version, date: '', notes: '', current: true };
+          if (Array.isArray(p.history)) {
+            for (var i = 0; i < p.history.length; i++) {
+              var h0 = p.history[i];
+              if (h0 && h0.version === p.version) { cur.date = h0.date || ''; cur.notes = h0.notes || ''; break; }
+            }
+          }
+          items.push(cur);
+        }
         if (Array.isArray(p.history)) {
           p.history.forEach(function (h) {
-            if (h && h.version) items.push({ version: h.version, date: h.date || '', notes: h.notes || '', current: false });
+            if (h && h.version && h.version !== p.version) items.push({ version: h.version, date: h.date || '', notes: h.notes || '', current: false });
           });
         }
         if (items.length === 0) { if (empty) empty.hidden = false; return; }

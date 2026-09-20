@@ -891,14 +891,14 @@ html.xl-entered body { animation: xlPageIn .55s cubic-bezier(.2, .7, .3, 1) both
 html[data-theme="dark"] .xl-search-input { color: #fff; }
 @media (max-width: 560px) { .xl-search-input { width: 92px; } }
 
-/* 桌面 / 横屏（≥721px）：搜索框移到最左（紧邻站点名），动作按钮整体靠右。
-   背景：.topbar 用 justify-content:space-between 把 .bar-right 推到最右，搜索框作为其子元素也跟着贴右。
-   这里让 .bar-right 占满中间剩余宽度、搜索框 order:-1 排到最左并 margin-right:auto 吃掉空隙，
-   其余按钮自然靠右；justify-content:flex-end 兜底「无搜索框的页面（如 /search/）」仍右对齐。
+/* 桌面 / 横屏（≥721px）：搜索框紧跟在「通知中心（消息中心）」按钮左侧、与之相邻，动作按钮整体靠右。
+   背景：.topbar 用 justify-content:space-between 把 .bar-right 推到最右；搜索框按 DOM 顺序由 common.js
+   insertBefore(#noticeBtn) 放进通知中心之前，故不再用 order:-1 / margin-right:auto 把它推到最左，
+   而是让它随按钮簇一起右对齐、紧邻通知中心。
+   justify-content:flex-end 兜底「无搜索框的页面（如 /search/）」仍右对齐。
    竖屏（含大平板竖屏）不适用——那里是底部导航条的另一套设计，保持原样。 */
 @media (min-width: 721px) and (orientation: landscape) {
   .topbar > .bar-right { flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
-  .topbar > .bar-right > .xl-search { order: -1; margin-left: 18px; margin-right: auto; }
 }
 
 /* 管理员专属入口（仅 body.is-admin 时可见） */

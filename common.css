@@ -250,7 +250,6 @@ body.xl-bar-tile .bar-btn > .badge {
   .float-actions { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
   /* 必须用 html .float-actions .fab 提高优先度，否则被下方 @media(orientation:landscape) 的 50×42 覆盖 */
   html .float-actions .fab { width: 42px; height: 38px; }
-  .float-actions .xl-float-links { right: 54px; width: calc(100% - 54px); bottom: calc(100% + 12px); height: 38px; }
   .float-actions .xl-toplink { bottom: calc(100% + 62px); }
 }
 
@@ -392,8 +391,6 @@ a, button, .bar-btn, .fab, .btn, .icon-btn, .seg, .topic-chip,
     gap: 8px;
   }
   html .float-actions .fab { width: 44px; height: 44px; border-radius: 12px; }
-  /* 长条右端偏移 = 帮助按钮宽(44) + 簇间距(8)，保证「长条+？ = 下排整行宽」 */
-  .float-actions .xl-float-links { right: 52px; width: calc(100% - 52px); bottom: calc(100% + 12px); height: 44px; border-radius: 12px; }
   .float-actions .xl-toplink { bottom: calc(100% + 68px); }
 
   /* 小蓝条2号（竖屏底部导航条）：固定屏幕底部，搜索框靠左、其余按钮靠右，单行横向滚动，不折行 */
@@ -1014,58 +1011,12 @@ body::before {
   right: 0;
   bottom: calc(100% + 12px);
 }
-/* 订阅 + 博客 合并长按钮：浮在帮助按钮左侧，与其同高 */
-.float-actions .xl-float-links {
-  position: absolute;
-  right: 62px; /* 帮助按钮 50px + 间隙 12px */
-  width: calc(100% - 62px);
-  min-width: 120px;
-  bottom: calc(100% + 12px); /* 与帮助按钮同高 */
-  height: 42px;
-  display: flex;
-  gap: 0;
-  border-radius: 14px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.92);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
-  backdrop-filter: blur(14px) saturate(180%);
-  border: 1px solid rgba(0, 0, 0, 0.10);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  transition: background .18s, transform .12s, box-shadow .18s;
-}
 /* 回到顶部浮动按钮：浮在帮助按钮正上方 */
 .float-actions .xl-toplink {
   position: absolute;
   right: 0;
   bottom: calc(100% + 66px); /* 12 gap + 42 help + 12 gap */
 }
-.float-actions .xl-float-links:hover { background: rgba(255, 255, 255, 0.97); transform: translateY(-2px); }
-.float-actions .xl-float-links:active { transform: scale(0.98); }
-.float-actions .xl-float-link {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  text-decoration: none;
-  color: #1c2733;
-  font-size: 0.88rem;
-  font-weight: 600;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
-  transition: background .15s;
-}
-.float-actions .xl-float-link:last-child { border-right: none; }
-.float-actions .xl-float-link:hover { background: rgba(0, 0, 0, 0.04); }
-.float-actions .xl-float-link svg { width: 18px; height: 18px; display: block; }
-html[data-theme="dark"] .float-actions .xl-float-links {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-html[data-theme="dark"] .float-actions .xl-float-links:hover { background: rgba(255, 255, 255, 0.22); }
-html[data-theme="dark"] .float-actions .xl-float-link { border-right-color: rgba(255, 255, 255, 0.12); }
-html[data-theme="dark"] .float-actions .xl-float-link:hover { background: rgba(255, 255, 255, 0.08); }
 .fab {
   width: 50px; height: 42px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -1118,7 +1069,6 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 @media (orientation: landscape) and (max-width: 560px) {
   .float-actions { right: max(12px, env(safe-area-inset-right, 0px)) !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; gap: 8px !important; }
   /* 横屏窄屏按钮仍为 50×42（.float-actions .fab），故长条偏移 = 50 + 8 = 58，高度 42 */
-  .float-actions .xl-float-links { right: 58px; width: calc(100% - 58px); bottom: calc(100% + 12px); height: 42px; border-radius: 12px; }
   .float-actions .xl-toplink { bottom: calc(100% + 66px); }
 }
 

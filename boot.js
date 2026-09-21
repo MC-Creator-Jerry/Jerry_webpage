@@ -105,6 +105,22 @@
 
   var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
+  // 跳过开场动画：GitHub 镜像页（github.io）会立即跨源跳到 CF 主站，播开场动画只会「闪一下」再跳走；
+  // 从自有站点（CF 主站 / GH 镜像）跳来时也跳过，避免站间切换重复播 2 秒开场，体感更连贯。
+  // 注：sessionStorage 是按源隔离的，跨站时 __xl_intra 传不过来，故这里用 hostname/referrer 兜住跨站场景。
+  var skipIntro = false;
+  try {
+    if (location.hostname.indexOf('github.io') !== -1) skipIntro = true;
+    else {
+      var _ref = document.referrer || '';
+      if (_ref) {
+        var _rh = '';
+        try { _rh = new URL(_ref).hostname; } catch (e2) {}
+        if (_rh === 'mc-creator-jerry-webpage.pages.dev' || _rh === 'mc-creator-jerry.github.io') skipIntro = true;
+      }
+    }
+  } catch (e) {}
+
   // 判断是否「站内跳转」（跳过开场动画）：主信号是 __xl_intra（同源链接点击或程序化跳转前已置位，
   // 且经 location.replace 同源跳转会保留）。
   // 仅在 navType 明确为 reload / back_forward（刷新、前进后退）时排除，确保这些场景仍照常播放开场动画；
@@ -120,8 +136,8 @@
   } catch (e) {}
 
   // 标记加载中，隐藏真实内容（先加类，首帧即生效，避免闪烁）
-  // 站内跳转不遮挡正文：过渡交给 common.js 的导航加载动画，正文本就已在目标页就绪
-  if (!intra) doc.documentElement.classList.add('xl-booting');
+  // 站内跳转 / 跨站跳过开场时不遮挡正文：过渡交给 common.js 的导航加载动画，正文本就已在目标页就绪
+  if (!intra && !skipIntro) doc.documentElement.classList.add('xl-booting');
 
   // 同源链接点击：标记「本站内跳转」，目标页据此不重播开场动画
   // 关键修复：仅对「真实站内跳转」置位；被其它处理器拦截 / 弹窗 / 自链接 / 修饰键 / download 等情况不置位，
@@ -170,8 +186,8 @@
 
   function run() {
     HOLD = !!window.__xlHoldReveal;
-    // 无障碍：reduced-motion 用户直接揭晓，不播放开场动画
-    if (reduced) { safeReveal(); return; }
+    // 无障碍：reduced-motion 用户直接揭晓；跨站（镜像页 / 从自有站点跳来）同样跳过开场动画，直接揭晓
+    if (reduced || skipIntro) { safeReveal(); return; }
     // 站内跳转：内容已在目标页就绪，不重播开场动画、不盖加载层。
     // 2026-09-19 修复：原 reduced||intra 合并分支在「reduced + HOLD 页」时会直接 return 且不揭晓，
     // 导致加载层（白底 + 蓝方块）永久残留，刷新后卡在加载页。

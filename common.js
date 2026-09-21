@@ -445,11 +445,26 @@ window.XLTopics = (function () {
       injectBarExtras(bar);
     });
     // 实时刷新：后台轮询通知徽标（免 VAPID，纯前端轮询）
+    // 优化：未登录访客无需刷新徽标；页面隐藏时暂停轮询；间隔拉长到 90s，省 Functions 费用与访客带宽
     if (!window.__xlRealtimeStarted) {
       window.__xlRealtimeStarted = true;
-      setInterval(function () {
-        try { if (window.JW_REFRESH_BADGE) window.JW_REFRESH_BADGE(); } catch (e) {}
-      }, 45000);
+      var xlPollTimer = null;
+      function xlPollOnce() {
+        try { if (window.JW_REFRESH_BADGE && window.JW_REFRESH_BADGE()) {} } catch (e) {}
+      }
+      function xlStartPoll() {
+        if (xlPollTimer) return;
+        if (!window.JW_AUTH) return;            // 未登录：不轮询
+        if (document.hidden) return;           // 页面隐藏：不轮询
+        xlPollTimer = setInterval(xlPollOnce, 90000);
+      }
+      function xlStopPoll() {
+        if (xlPollTimer) { clearInterval(xlPollTimer); xlPollTimer = null; }
+      }
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) xlStopPoll(); else xlStartPoll();
+      });
+      xlStartPoll();
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
@@ -471,9 +486,7 @@ window.XLTopics = (function () {
     { keys: ['主页', '首页'], href: /(index\.html|\/(index)?$)/, svg: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>' },
     { keys: ['群组'], href: /\/groups\//, svg: '<circle cx="9" cy="9" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5"/><path d="M15 19c.5-2 2.5-3.5 5-3.5"/>' },
     { keys: ['个人主页', '我的主页', '个人'], href: /(personal_profile|home\.html)/, svg: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>' },
-    { keys: ['搜索'], href: /\/search\//, svg: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' },
-    { keys: ['订阅'], id: 'subscribeBtn', svg: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>' },
-    { keys: ['博客'], id: 'blogBtn', svg: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' }
+    { keys: ['搜索'], href: /\/search\//, svg: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' }
   ];
 
   function pickIcon(btn) {
@@ -588,6 +601,64 @@ window.XLTopics = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
+})();
+
+/* ============ 顶栏按钮顺序归一化：保证全站 .bar-right 顺序一致 ============ */
+/* 各页静态 HTML 的按钮顺序 + 上方注入 IIFE（搜索/订阅和博客/支持与付款/兜底补 消息中心·帖子中心·产品）
+   的插入锚点不同，导致部分页面顺序错乱。本步把所有已知按钮按唯一规范序列重排，
+   与「是否登录 / 是否含上下文按钮（新加帖子·群组）」无关，全站一致。登录/头像恒在最右。 */
+(function () {
+  function bText(b) { return (b.getAttribute('data-zh') || b.textContent || '').trim(); }
+  function slotOf(b) {
+    var tag = b.tagName ? b.tagName.toLowerCase() : '';
+    var cls = b.className || '';
+    var id = b.id || '';
+    var href = (b.getAttribute && b.getAttribute('href')) || b.href || '';
+    var txt = bText(b);
+    if (tag === 'form' && /(^|\s)xl-search(\s|$)/.test(cls)) return 'search';
+    if (/(^|\s)bar-avatar(\s|$)/.test(cls)) return 'login';
+    if (id === 'loginBtn' || id === 'logoutBtn') return 'login';
+    if (id === 'noticeBtn' || id === 'noticeBadge' || /\/notice\//.test(href) || /消息中心|通知中心|通知/.test(txt)) return 'notice';
+    if (id === 'newPostBtn' || /新加帖子/.test(txt)) return 'newPost';
+    if (/\/groups\//.test(href) || /群组/.test(txt)) return 'groups';
+    if (id === 'subBlogBtn' || /\/sub-blog\//.test(href) || /订阅和博客/.test(txt)) return 'subBlog';
+    if (id === 'supportPayBtn' || /\/support\//.test(href) || /支持与付款/.test(txt)) return 'support';
+    if (/\/home\.html$/.test(href) || /个人主页/.test(txt)) return 'home';
+    if (/\/products\.html/.test(href) || /产品/.test(txt)) return 'products';
+    if (/\/post\//.test(href) || /帖子中心|帖子/.test(txt)) return 'post';
+    return 'other';
+  }
+  // 规范顺序（左→右）：个人主页 → 搜索 → 消息中心 → 帖子中心 → 新加帖子 → 群组 → 产品 → 订阅和博客 → 支持与付款 → 其它 → 登录/头像
+  var SEQ = ['home', 'search', 'notice', 'post', 'newPost', 'groups', 'products', 'subBlog', 'support', 'other', 'login'];
+  function isBarEl(n) {
+    if (n.nodeType !== 1) return false;
+    var cls = n.className || '';
+    var t = n.tagName ? n.tagName.toLowerCase() : '';
+    return /(^|\s)(bar-btn|xl-search|bar-avatar)(\s|$)/.test(cls) || n.id === 'loginBtn' || n.id === 'logoutBtn' || t === 'form';
+  }
+  function run() {
+    var bars = document.querySelectorAll('.bar-right');
+    for (var bi = 0; bi < bars.length; bi++) {
+      var bar = bars[bi];
+      var kids = [];
+      var cn = bar.childNodes;
+      for (var i = 0; i < cn.length; i++) { if (isBarEl(cn[i])) kids.push(cn[i]); }
+      if (!kids.length) continue;
+      var bySlot = {};
+      for (var k = 0; k < kids.length; k++) {
+        var s = slotOf(kids[k]);
+        (bySlot[s] = bySlot[s] || []).push(kids[k]);
+      }
+      // 按规范序列重新追加（appendChild 会移动节点，保持原有内部结构不变）
+      for (var si = 0; si < SEQ.length; si++) {
+        var arr = bySlot[SEQ[si]];
+        if (arr) for (var a = 0; a < arr.length; a++) bar.appendChild(arr[a]);
+      }
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+  window.__xlNormalizeBar = run;
 })();
 
 /* ============ 横竖屏切换：加载动画 + 按钮位移到对应位置 ============ */
@@ -761,7 +832,6 @@ window.XLTopics = (function () {
     document.querySelectorAll('.bar-right .bar-avatar').forEach(function (b) { targets.push(b); }); // 登录后头像按钮(U)
     document.querySelectorAll('.xl-search').forEach(function (f) { targets.push(f); }); // 搜索框也提示 S
     document.querySelectorAll('a.fab, button.fab').forEach(function (f) { targets.push(f); }); // 浮动按钮：语言(L)/设置(O)/主题(M)
-    document.querySelectorAll('a.xl-float-link').forEach(function (f) { targets.push(f); }); // 浮动长条：博客(B)/订阅(V)/支持(Z)
     var editFab = document.getElementById('editLayoutBtn');
     if (editFab) targets.push(editFab); // 站主浮动按钮：编辑当前页面布局(E)
     document.querySelectorAll('a.site-name, a[data-zh="主页"]').forEach(function (f) { targets.push(f); }); // 主页(F)：站名 logo + 面包屑「主页」超链接
@@ -1001,9 +1071,6 @@ window.XLTopics = (function () {
     return fa;
   }
 
-  // 订阅 / 博客 / 支持入口已统一移到顶栏，保留空函数以免旧调用报错
-  function injectFloatLinks() {}
-
   function injectFloat() {
     // 预载编辑栏脚本：无论是否有浮动按钮，都让其应用已保存的页面覆盖
     loadEditbar();
@@ -1068,8 +1135,10 @@ window.XLTopics = (function () {
   function loadEditbar() {
     if (window.XLEdit) return;
     // 注意：脚本引用带 ?v= 版本号，src 不再以 "common.js" 结尾，必须用 *=
+    // ⚠️ editbar.js 版本号必须与本文件（common.js?v=20260921b）同步 bump：
+    //    改 editbar.js 后务必同时改这里，否则访客端仍加载旧版编辑栏。
     var s = document.createElement('script');
-    s.src = scriptPrefix() + 'editbar.js?v=20260918a';
+    s.src = scriptPrefix() + 'editbar.js?v=20260921a';
     s.async = true;
     document.head.appendChild(s);
   }

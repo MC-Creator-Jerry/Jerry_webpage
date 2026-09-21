@@ -1,12 +1,16 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260919a"></script>
+  <script src="../boot.js?v=20260921c"></script>
 <script>
   // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
+  // 加载衔接（A）：告诉 boot.js「等资料渲染完成后再揭晓」，
+  // 避免开场动画先结束、资料后填充造成的「先空一下再填」。
+  // 站内跳转 / 跳过开场等场景 boot.js 会直接揭晓，此标记无副作用。
+  window.__xlHoldReveal = true;
 </script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,6 +18,10 @@
 <meta name="description" content="个人资料：展示你的名字、简介、技能与链接。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<!-- 首屏提速（B）：头像来自 GitHub（会重定向到 avatars.githubusercontent.com），提前建连省 DNS/TLS 往返 -->
+<link rel="preconnect" href="https://github.com" crossorigin />
+<link rel="preconnect" href="https://avatars.githubusercontent.com" crossorigin />
+<link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
 <style>  
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -276,6 +284,114 @@
   .my-msg-card .my-msg-actions { display: flex; flex-wrap: wrap; gap: 10px; }
   .my-msg-card .msg-entry-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--accent); border-radius: 999px; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; text-decoration: none; }
   .my-msg-card .msg-entry-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); }
+
+  /* ============================================================
+     2026-09-21 体验优化：整体视觉（E）+ 移动端排版（C）+ 无障碍
+     仅动本页样式，不改任何数据与接口。
+     ============================================================ */
+  html { scroll-behavior: smooth; }
+
+  /* 强调色 / 主题切换更顺滑（预设主题、自定义主题色） */
+  .topbar, .tag, .card, .change-btn, .bg-btn, .follow-btn,
+  .profile-theme-strip, .msg-entry-btn { transition: color .25s ease, background-color .25s ease, border-color .25s ease; }
+
+  /* 卡片标题前加一条小色条：层级更清楚，一眼看出分节 */
+  .card h2 { position: relative; padding-left: 13px; }
+  .card h2::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 4px; height: 1.05em; border-radius: 3px; background: var(--accent); opacity: .92;
+  }
+  .card-head h2 { padding-left: 13px; }
+
+  /* 卡片悬浮反馈（仅指针设备；触屏不触发，避免"粘住"） */
+  @media (hover: hover) and (pointer: fine) {
+    .card { transition: box-shadow .2s ease, border-color .25s ease; }
+    .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .10); }
+    html[data-theme="dark"] .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .5); }
+  }
+
+  /* 空状态：从"一句灰斜体"改成一块轻量提示区，更易读也不刺眼 */
+  .hint-empty {
+    display: flex; align-items: center; gap: 8px; font-style: normal;
+    font-size: .95rem; color: var(--muted); opacity: .9;
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--accent) 26%, var(--card-border));
+    border-radius: 12px; padding: 13px 16px; margin-top: 4px;
+  }
+  .hint-empty::before { content: '∅'; opacity: .55; font-size: 1.05em; line-height: 1; }
+
+  /* 标签微交互 */
+  .tag { transition: transform .14s ease, box-shadow .14s ease; }
+  @media (hover: hover) {
+    .tag:hover { transform: translateY(-1px); box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 22%, transparent); }
+  }
+
+  /* 头像加一圈主题色高光，视觉焦点更明确 */
+  .avatar { box-shadow: 0 3px 12px rgba(0, 0, 0, .18), 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent); }
+
+  /* 姓名 / 账号：字距微调，读起来更稳 */
+  .profile-name, .profile-meta { letter-spacing: .2px; }
+
+  /* 链接行：分隔更清晰，长链接不挤成一坨 */
+  .link-row { padding: 7px 0; border-bottom: 1px dashed color-mix(in srgb, var(--card-border) 85%, transparent); }
+  .link-row:last-child { border-bottom: none; }
+
+  /* 键盘可见焦点（无障碍） */
+  a:focus-visible, button:focus-visible, input:focus-visible,
+  textarea:focus-visible, .theme-swatch:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px;
+  }
+
+  /* 保存按钮的"保存中…"禁用态 */
+  button[disabled] { opacity: .6; cursor: default; filter: none !important; }
+
+  /* 简介字数：贴着文本框右下 */
+  #aboutEditor .char-count { display: block; margin-top: 6px; text-align: right; }
+
+  /* 头像预览：未设置时用主题色底，避免一片空白 */
+  .avatar-preview { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); }
+
+  /* ---- 移动端排版（C） ---- */
+  @media (max-width: 640px) {
+    .content { padding: 22px 14px 40px; }
+    .card { padding: 18px 16px; margin-top: 18px; }
+    .card h2 { font-size: 1.08rem; }
+    /* 头像与资料纵向居中排布，比左右挤更耐看 */
+    .profile-head { gap: 14px; justify-content: center; text-align: center; }
+    .profile-head > div { width: 100%; min-width: 0; }
+    .profile-head > .avatar-stack { width: auto; }
+    .profile-name-row { justify-content: center; }
+    .profile-tagline { max-width: 100%; }
+    .avatar { width: 80px; height: 80px; }
+    .avatar > .avatar-text { font-size: 1.95rem; }
+    .avatar-opts { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    .profile-tools { flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .bg-btn { font-size: .84rem; padding: 7px 12px; }
+    .rename-editor { justify-content: center; }
+    .rename-editor .edit-input { min-width: 0; flex: 1 1 100%; }
+    .sec-actions { flex-wrap: wrap; }
+    .sec-actions .save, .sec-actions .cancel { flex: 1 1 auto; }
+    .skills-add { flex-wrap: wrap; }
+    .skills-add .edit-input { flex: 1 1 100%; }
+    .skills-add .add-btn { width: 100%; }
+    .theme-row { flex-wrap: wrap; }
+    .theme-row .edit-input { flex: 1 1 100%; }
+    .banner-mode { top: 8px; right: 8px; }
+    .banner-mode button { font-size: .74rem; padding: 5px 10px; }
+    .bg-sheet, .theme-sheet { padding: 18px 16px; }
+    .theme-swatch { width: 30px; height: 30px; }
+    .msg-entry-btn { width: 100%; justify-content: center; }
+  }
+  /* 超窄屏：顶栏按钮别太挤 */
+  @media (max-width: 380px) {
+    .bar-btn { padding: 6px 8px; font-size: .82rem; }
+    .site-name { font-size: .98rem; }
+  }
+  /* 尊重"减少动态效果"偏好 */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .card, .tag, .bg-btn { transition: none !important; }
+  }
 </style>
   <link rel="stylesheet" href="../common.css?v=20260921a" />
 </head>
@@ -317,7 +433,7 @@
       <div class="profile-head">
         <div class="avatar-stack">
           <div class="avatar" id="avatar">
-            <img id="avatarImg" alt="" />
+            <img id="avatarImg" alt="" decoding="async" />
             <span id="avatarText" class="avatar-text" hidden></span>
           </div>
           <div class="avatar-opts" id="avatarOpts" hidden>
@@ -365,7 +481,8 @@
         <p class="hint-empty" id="aboutEmpty" hidden>（还没有简介）</p>
       </div>
       <div id="aboutEditor" hidden>
-        <textarea class="edit-textarea auto-grow" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……"></textarea>
+        <textarea class="edit-textarea auto-grow" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……（Ctrl/⌘ + Enter 保存，Esc 取消）"></textarea>
+        <span class="char-count" data-for="aboutInput"></span>
         <div class="sec-actions">
           <button class="save" data-save="about">保存</button>
           <button class="cancel" data-cancel="about">取消</button>
@@ -385,7 +502,7 @@
       <div id="skillsEditor" hidden>
         <div class="tags" id="skillsEditList"></div>
         <div class="skills-add">
-          <input class="edit-input" id="skillInput" placeholder="添加技能，回车或点「添加」" maxlength="30" />
+          <input class="edit-input" id="skillInput" placeholder="添加技能，回车或点「添加」（可用逗号一次加多个）" maxlength="160" />
           <button class="add-btn" id="skillAdd">添加</button>
         </div>
         <div class="sec-actions">
@@ -635,8 +752,8 @@
         renderBanner();
       }
       function loadBg(login) {
-        if (!login) return;
-        fetch('/api/bg?user=' + encodeURIComponent(login))
+        if (!login) return Promise.resolve();
+        return fetch('/api/bg?user=' + encodeURIComponent(login))
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (d) { if (d) { state.bg = { banner: d.banner || null, bg: d.bg || null }; applyBg(); } })
           .catch(function () {});
@@ -767,7 +884,14 @@
 
       /* ---------- 编辑器开关 ---------- */
       function openEditor(sec) {
-        if (sec === 'about') { aboutInput.value = (state.data && state.data.about) || ''; aboutView.hidden = true; aboutEditor.hidden = false; aboutInput.focus(); }
+        if (sec === 'about') {
+          aboutInput.value = (state.data && state.data.about) || '';
+          aboutView.hidden = true; aboutEditor.hidden = false;
+          aboutInput.focus();
+          // 编辑器刚从 hidden 显示：补发一次 input，让 common.js 重新计算自动高度与字数
+          // （隐藏时 offsetParent 为空，自动高度会被跳过）
+          try { aboutInput.dispatchEvent(new Event('input')); } catch (e) {}
+        }
         if (sec === 'skills') { state.draft = { skills: ((state.data && state.data.skills) || []).slice() }; skillsView.hidden = true; skillsEditor.hidden = false; renderSkillsEdit(); }
         if (sec === 'links') { state.draft = { links: ((state.data && state.data.links) || []).map(function (l) { return { label: l.label || '', url: l.url || '' }; }) }; linksView.hidden = true; linksEditor.hidden = false; renderLinksEdit(); }
         if (sec === 'avatar') { avatarUrl.value = ''; avatarPreview.src = (state.data && state.data.avatar) || ''; ghAvatarSync.checked = !!(state.data && state.data.ghAvatar); updateGhSyncUI(); avatarEditor.hidden = false; }
@@ -800,15 +924,31 @@
           span.appendChild(x); skillsEditList.appendChild(span);
         });
       }
+      var SKILL_MAX = 20; // 与后端一致（profile.js：最多 20 个、每个 30 字）
       function addSkill() {
-        var v = skillInput.value.trim(); if (!v) return;
-        var w = findForbidden(v); if (w) { toast('技能含违禁词：「' + w + '」', true); return; }
-        state.draft.skills.push(v); skillInput.value = ''; renderSkillsEdit();
+        var raw = skillInput.value;
+        if (!raw || !raw.trim()) return;
+        // 支持一次写多个：用 , ， 、 ; ； / | 分隔，逐个加入（也自动去重）
+        var parts = raw.split(/[,，、;；\/|]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+        if (!parts.length) return;
+        var added = 0, dup = 0;
+        for (var i = 0; i < parts.length; i++) {
+          var v = parts[i].slice(0, 30);
+          var w = findForbidden(v);
+          if (w) { toast('技能含违禁词：「' + w + '」', true); return; }
+          if (state.draft.skills.indexOf(v) !== -1) { dup++; continue; }
+          if (state.draft.skills.length >= SKILL_MAX) { toast('技能最多 ' + SKILL_MAX + ' 个', true); break; }
+          state.draft.skills.push(v); added++;
+        }
+        skillInput.value = ''; renderSkillsEdit();
+        if (added > 1) toast('已添加 ' + added + ' 个技能 ✓');
+        else if (!added && dup) toast('该技能已在列表中');
       }
       skillAdd.onclick = addSkill;
       skillInput.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } };
 
       /* ---------- 链接编辑 ---------- */
+      var LINK_MAX = 10; // 与后端一致（profile.js：最多 10 条；label ≤ 40、url ≤ 500）
       function renderLinksEdit() {
         linksEditList.innerHTML = '';
         state.draft.links.forEach(function (l, idx) {
@@ -818,14 +958,18 @@
           var del = document.createElement('button'); del.className = 'link-del'; del.textContent = '删除';
           del.onclick = function () { state.draft.links.splice(idx, 1); renderLinksEdit(); };
           head.appendChild(t); head.appendChild(del); row.appendChild(head);
-          var li = document.createElement('input'); li.className = 'edit-input'; li.placeholder = '显示名（可空）'; li.value = l.label || '';
-          var lu = document.createElement('input'); lu.className = 'edit-input'; lu.placeholder = '链接地址，如 https://...'; lu.value = l.url || '';
+          var li = document.createElement('input'); li.className = 'edit-input'; li.placeholder = '显示名（可空）'; li.value = l.label || ''; li.maxLength = 40;
+          var lu = document.createElement('input'); lu.className = 'edit-input'; lu.type = 'url'; lu.inputMode = 'url';
+          lu.placeholder = '链接地址，如 https://…（不写 https:// 会自动补）'; lu.value = l.url || ''; lu.maxLength = 500;
           row.appendChild(li); row.appendChild(lu);
           l._label = li; l._url = lu;
           linksEditList.appendChild(row);
         });
       }
-      linkAdd.onclick = function () { state.draft.links.push({ label: '', url: '' }); renderLinksEdit(); };
+      linkAdd.onclick = function () {
+        if (state.draft.links.length >= LINK_MAX) { toast('链接最多 ' + LINK_MAX + ' 条', true); return; }
+        state.draft.links.push({ label: '', url: '' }); renderLinksEdit();
+      };
 
       /* ---------- 头像上传 ---------- */
       avatarFile.onchange = function () {
@@ -851,7 +995,20 @@
       ghAvatarSync.onchange = updateGhSyncUI;
 
       /* ---------- 保存（整份资料） ---------- */
-      function saveProfile(patch, done) {
+      // 保存按钮「保存中…」态：防连点重复提交，同时给出明确反馈
+      function setBtnBusy(btn, on) {
+        if (!btn) return function () {};
+        if (on) {
+          btn.dataset.xlLabel = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = '保存中…';
+        }
+        return function () {
+          btn.disabled = false;
+          btn.textContent = btn.dataset.xlLabel || '保存';
+        };
+      }
+      function saveProfile(patch, done, btn) {
         var d = JSON.parse(JSON.stringify(state.data || {}));
         Object.assign(d, patch);
         var payload = {
@@ -871,33 +1028,47 @@
           payload.skills.map(findForbidden).find(Boolean) ||
           payload.links.map(function (l) { return findForbidden(l.label + ' ' + l.url); }).find(Boolean);
         if (bad) { toast('内容含违禁词：「' + bad + '」，请修改后再保存。', true); return; }
+        var busy = setBtnBusy(btn, true);
         fetch('/api/profile', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
+            busy(false);
             if (res.ok) { state.data = d; toast('已保存到云端 ✓'); if (done) done(); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else { toast('保存失败，请重试', true); }
           })
-          .catch(function () { toast('保存失败（网络错误）', true); });
+          .catch(function () { busy(false); toast('保存失败（网络错误）', true); });
       }
 
       document.querySelectorAll('[data-save]').forEach(function (btn) {
         btn.onclick = function () {
           var sec = btn.getAttribute('data-save');
-          if (sec === 'about') { saveProfile({ about: aboutInput.value.trim() }, function () { closeEditor('about'); }); }
-          else if (sec === 'skills') { saveProfile({ skills: state.draft.skills }, function () { closeEditor('skills'); }); }
+          if (sec === 'about') { saveProfile({ about: aboutInput.value.trim() }, function () { closeEditor('about'); }, btn); }
+          else if (sec === 'skills') { saveProfile({ skills: state.draft.skills }, function () { closeEditor('skills'); }, btn); }
           else if (sec === 'links') {
-            state.draft.links.forEach(function (l) { l.label = l._label ? l._label.value.trim() : l.label; l.url = l._url ? l._url.value.trim() : l.url; });
-            saveProfile({ links: state.draft.links }, function () { closeEditor('links'); });
+            state.draft.links.forEach(function (l) {
+              l.label = String(l._label ? l._label.value : (l.label || '')).trim().slice(0, 40);
+              var u = String(l._url ? l._url.value : (l.url || '')).trim();
+              // 自动补协议：写「example.com」也能存成可用链接
+              if (u && !/^(https?:\/\/|mailto:)/i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
+              l.url = u.slice(0, 500);
+            });
+            // 丢掉没填地址的空行；超出后端上限（10 条）先提示再截断
+            state.draft.links = state.draft.links.filter(function (l) { return l.url; });
+            if (state.draft.links.length > LINK_MAX) {
+              toast('链接最多 ' + LINK_MAX + ' 条，已只保留前 ' + LINK_MAX + ' 条', true);
+              state.draft.links = state.draft.links.slice(0, LINK_MAX);
+            }
+            saveProfile({ links: state.draft.links }, function () { closeEditor('links'); }, btn);
           }
           else if (sec === 'avatar') {
             var av = avatarUrl.value.trim();
             var patch = { ghAvatar: ghAvatarSync.checked };
             if (!ghAvatarSync.checked) patch.avatar = av; // 关闭同步时才写自定义头像；开启同步时不覆盖已有自定义头像
-            saveProfile(patch, function () { closeEditor('avatar'); });
+            saveProfile(patch, function () { closeEditor('avatar'); }, btn);
           }
         };
       });
@@ -912,6 +1083,7 @@
         nameRow.hidden = true;
         renameEditor.hidden = false;
         renameInput.focus();
+        renameInput.select(); // 选中原文，直接输入即可替换
       };
       renameCancel.onclick = function () {
         renameEditor.hidden = true;
@@ -931,6 +1103,18 @@
       renameInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') { e.preventDefault(); renameSave.click(); }
         else if (e.key === 'Escape') { e.preventDefault(); renameCancel.click(); }
+      });
+
+      // 简介编辑框：Ctrl/⌘ + Enter 保存、Esc 取消（长文编辑不用来回找按钮）
+      aboutInput.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          var b = document.querySelector('[data-save="about"]');
+          if (b) b.click();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeEditor('about');
+        }
       });
 
       /* ---------- 个人主页主题（预设主题 + 自定义主题色） ---------- */
@@ -1192,31 +1376,62 @@
           .catch(function () { favEmpty.hidden = false; favEmpty.textContent = '（加载收藏失败）'; });
       }
 
-      /* ---------- 加载 ---------- */
-      function loadOwn() {
-        fetch('/api/profile')
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { state.data = d; renderDisplay(); loadBg(d.login); loadFavs(); })
-          .catch(function () { loginPrompt.hidden = false; });
+      /* ---------- 揭晓衔接（A）：资料（含背景）就绪后再收起开场动画 ---------- */
+      // boot.js 读到 window.__xlHoldReveal 会「保持加载层」，等页面调用 window.__xlReveal()。
+      // 这里保证两件事：
+      //   ① 不早于开场动画自然收尾（否则会「闪一下」就进正文）；
+      //   ② 资料与背景都拿到后再揭晓，杜绝「开场动画结束、资料还在异步填」的空窗。
+      // 站内跳转 / 跳过开场时页面里不存在 #xlLoader，本函数自动空转（不会额外播放入场动画）。
+      // boot.js 另有 2.6s / 3.2s 两道兜底，即使接口异常也一定会揭晓。
+      var _revealed = false, _revealTimer = null;
+      var _t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+      var REVEAL_MIN_MS = 2200; // 开场动画约 1.8~2s，留一点余量再接上正文
+      function doReveal() {
+        if (_revealed) return;
+        _revealed = true;
+        try {
+          if (document.getElementById('xlLoader') && typeof window.__xlReveal === 'function') window.__xlReveal();
+        } catch (e) {}
       }
-      function loadPublic(login) {
-        fetch('/api/profile?user=' + encodeURIComponent(login))
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { state.data = d; renderDisplay(); loadBg(d.login); })
-          .catch(function () {});
+      function revealWhenReady() {
+        if (_revealed) return;
+        var now = (window.performance && performance.now) ? performance.now() : Date.now();
+        var wait = REVEAL_MIN_MS - (now - _t0);
+        if (wait > 0) { if (!_revealTimer) _revealTimer = setTimeout(doReveal, wait); return; }
+        doReveal();
       }
 
-      fetch('/api/me')
+      /* ---------- 加载（B：并行请求，省掉串行往返） ---------- */
+      // 原实现串行三次往返：/api/me → /api/profile → /api/bg。
+      // 现在 /api/me 与资料请求同时发出；看他人主页时背景也一并并行（login 已知，无需等资料）。
+      var ME_P = fetch('/api/me')
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (me) {
-          if (me && me.login) {
-            MY_LOGIN = me.login;
-            if (VIEW_USER) loadPublic(VIEW_USER); else loadOwn();
-          } else {
-            if (VIEW_USER) loadPublic(VIEW_USER); else loginPrompt.hidden = false;
-          }
-        })
-        .catch(function () { if (VIEW_USER) loadPublic(VIEW_USER); else loginPrompt.hidden = false; });
+        .catch(function () { return null; });
+      var PROF_P = (VIEW_USER
+        ? fetch('/api/profile?user=' + encodeURIComponent(VIEW_USER))
+        : fetch('/api/profile'))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+      var BG_P = VIEW_USER ? loadBg(VIEW_USER) : null;
+
+      ME_P.then(function (me) {
+        if (me && me.login) MY_LOGIN = me.login;
+        return PROF_P;
+      }).then(function (d) {
+        if (!d || !d.login) {
+          // 未登录（自己的主页）或接口异常：给出登录提示，别让加载层一直空转
+          loginPrompt.hidden = false;
+          revealWhenReady();
+          return;
+        }
+        state.data = d;
+        renderDisplay(); // 此时 MY_LOGIN 已就绪，编辑按钮/关注按钮的可见性一次算对
+        var bgs;
+        if (VIEW_USER) bgs = BG_P || Promise.resolve();
+        else { loadFavs(); bgs = loadBg(d.login); }
+        // 资料 + 背景都就绪后再揭晓，避免头图/大背景「后到」造成跳动
+        Promise.resolve(bgs).then(revealWhenReady, revealWhenReady);
+      }).catch(function () { loginPrompt.hidden = false; revealWhenReady(); });
 
       /* ---------- 中英切换（i18n 引擎，修复遗留 P1） ---------- */
       function applyLang() {

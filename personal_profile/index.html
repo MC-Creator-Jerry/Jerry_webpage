@@ -277,7 +277,7 @@
   .my-msg-card .msg-entry-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--accent); border-radius: 999px; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; text-decoration: none; }
   .my-msg-card .msg-entry-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260920d" />
+  <link rel="stylesheet" href="../common.css?v=20260921a" />
 </head>
 <body>
   <header class="topbar">
@@ -440,7 +440,7 @@
         <input type="file" id="avatarFile" accept="image/*" />
         <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
         <input class="edit-input" id="avatarUrl" placeholder="https://..." />
-        <img id="avatarPreview" class="avatar avatar-preview" alt="" />
+        <img id="avatarPreview" class="avatar avatar-preview" alt="" onerror="this.onerror=null;this.src=window.initialAvatarSvg?window.initialAvatarSvg(''):''" />
       </div>
       <div class="sec-actions">
         <button class="save" data-save="avatar">保存</button>
@@ -1245,7 +1245,7 @@
       window.addEventListener('pageshow', function (e) { if (e.persisted) applyLang(); });
     })();
   </script>
-  <script src="../common.js?v=20260920c"></script>
+  <script src="../common.js?v=20260921b"></script>
 </body>
 </html>
 

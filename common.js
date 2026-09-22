@@ -628,9 +628,9 @@ window.XLTopics = (function () {
     if (/\/post\//.test(href) || /帖子中心|帖子/.test(txt)) return 'post';
     return 'other';
   }
-  // 规范顺序（左→右）：个人主页 → 搜索 → 消息中心 → 订阅和博客 → 支持与付款 → 帖子中心 → 新加帖子 → 群组 → 产品 → 其它 → 登录/头像
-  // 2026-09-21 按 Jerry 要求调整：订阅和博客 / 支持与付款 提到 帖子中心 / 产品 之前；新加帖子·群组仍紧跟帖子中心。
-  var SEQ = ['home', 'search', 'notice', 'subBlog', 'support', 'post', 'newPost', 'groups', 'products', 'other', 'login'];
+  // 规范顺序（左→右）：搜索 → 消息中心 → 订阅和博客 → 支持与付款 → 帖子中心 → 新加帖子 → 群组 → 产品 → 其它 → 登录/头像
+  // 2026-09-22 按 Jerry 要求移除 legacy「个人主页」(home) 槽位：顶栏从「搜索框」起头；个人主页入口已由 auth.js 改为最右头像，home.html 仅 301 跳板。新加帖子·群组仍紧跟帖子中心。
+  var SEQ = ['search', 'notice', 'subBlog', 'support', 'post', 'newPost', 'groups', 'products', 'other', 'login'];
   function isBarEl(n) {
     if (n.nodeType !== 1) return false;
     var cls = n.className || '';
@@ -1136,7 +1136,7 @@ window.XLTopics = (function () {
   function loadEditbar() {
     if (window.XLEdit) return;
     // 注意：脚本引用带 ?v= 版本号，src 不再以 "common.js" 结尾，必须用 *=
-    // ⚠️ editbar.js 版本号必须与本文件（common.js?v=20260921d）同步 bump：
+    // ⚠️ editbar.js 版本号必须与本文件（common.js?v=20260922a）同步 bump：
     //    改 editbar.js 后务必同时改这里，否则访客端仍加载旧版编辑栏。
     var s = document.createElement('script');
     s.src = scriptPrefix() + 'editbar.js?v=20260921a';

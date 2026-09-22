@@ -284,6 +284,28 @@
       </div>
     </section>
 
+    <section class="card" id="bindCard" hidden>
+      <h2 data-zh="绑定邮箱 / GitHub" data-en="Link email / GitHub">绑定邮箱 / GitHub</h2>
+      <p class="set-hint" data-zh="用同一邮箱登录 GitHub 与邮箱，即可合并为同一账户；绑定后两边数据互通。" data-en="Use the same email for GitHub and email login to merge into one account; linked data is shared.">用同一邮箱登录 GitHub 与邮箱，即可合并为同一账户；绑定后两边数据互通。</p>
+      <div class="account-status" id="bindStatus"></div>
+      <div id="bindEmailBox" hidden>
+        <div class="set-row">
+          <span class="set-label" data-zh="邮箱" data-en="Email">邮箱</span>
+          <input type="email" id="bindEmailInput" placeholder="you@example.com" style="width:100%;padding:10px 12px;border:1px solid var(--card-border);border-radius:9px;box-sizing:border-box;font-size:.95rem" />
+        </div>
+        <button class="seg" id="bindEmailSend" type="button" data-zh="发送验证码" data-en="Send code">发送验证码</button>
+        <div class="set-row">
+          <span class="set-label" data-zh="验证码" data-en="Code">验证码</span>
+          <input type="text" id="bindEmailCode" placeholder="6 位" maxlength="6" inputmode="numeric" style="width:100%;padding:10px 12px;border:1px solid var(--card-border);border-radius:9px;box-sizing:border-box;font-size:.95rem" />
+        </div>
+        <button class="neutral-btn" id="bindEmailConfirm" type="button" data-zh="确认绑定" data-en="Confirm link">确认绑定</button>
+      </div>
+      <div class="set-opts" id="bindActions" style="margin-top:12px;gap:10px">
+        <button class="seg" id="bindEmailBtn" type="button" data-zh="绑定邮箱" data-en="Link email">绑定邮箱</button>
+        <button class="seg" id="bindGhBtn" type="button" data-zh="用 GitHub 绑定" data-en="Link with GitHub">用 GitHub 绑定</button>
+      </div>
+    </section>
+
     <section class="card" id="statsCard" hidden>
       <h2 data-zh="站点数据" data-en="Site data">站点数据</h2>
       <p class="set-hint" data-zh="查看站点访问量、热门页面与来源（仅管理员）。" data-en="View page views, top pages and referrers (admin only).">查看站点访问量、热门页面与来源（仅管理员）。</p>
@@ -544,6 +566,73 @@
       };
       if (window.JW_AUTH) window.onAuthState(window.JW_AUTH);
 
+      // 绑定邮箱 / GitHub（合并账号）
+      (function () {
+        var bindCard = document.getElementById('bindCard');
+        if (!bindCard) return;
+        var statusEl = document.getElementById('bindStatus');
+        var box = document.getElementById('bindEmailBox');
+        var emailInput = document.getElementById('bindEmailInput');
+        var codeInput = document.getElementById('bindEmailCode');
+        var sendBtn = document.getElementById('bindEmailSend');
+        var confirmBtn = document.getElementById('bindEmailConfirm');
+        var emailBtn = document.getElementById('bindEmailBtn');
+        var ghBtn = document.getElementById('bindGhBtn');
+        function en() { return document.documentElement.lang === 'en'; }
+        function refreshBind() {
+          fetch('/api/account/status', { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+              if (!d || d.error) { bindCard.hidden = true; return; }
+              bindCard.hidden = false;
+              var parts = [];
+              if (d.email) parts.push((en() ? 'Email: ' : '邮箱：') + d.email + (d.email_verified ? '' : (' (' + (en() ? 'unverified' : '未验证') + ')')));
+              else parts.push((en() ? 'Email: not linked' : '邮箱：未绑定'));
+              parts.push((en() ? 'GitHub: ' : 'GitHub：') + (d.github_linked ? (d.github_login || '✓') : (en() ? 'not linked' : '未绑定')));
+              statusEl.textContent = parts.join('　·　');
+              if (d.email) box.hidden = true;
+            })
+            .catch(function () { bindCard.hidden = true; });
+        }
+        if (emailBtn) emailBtn.addEventListener('click', function () { box.hidden = !box.hidden; });
+        if (ghBtn) ghBtn.addEventListener('click', function () { if (window.JW_LOGIN) window.JW_LOGIN(); });
+        if (sendBtn) sendBtn.addEventListener('click', function () {
+          var email = (emailInput.value || '').trim();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { statusEl.textContent = en() ? 'Invalid email' : '邮箱格式不正确'; return; }
+          sendBtn.disabled = true; statusEl.textContent = en() ? 'Sending…' : '发送中…';
+          fetch('/api/email/send', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: email, intent: 'bind' }) })
+            .then(function (r) { return r.json().then(function (x) { return { ok: r.ok, d: x }; }); })
+            .then(function (res) {
+              sendBtn.disabled = false; var x = res.d || {};
+              if (res.ok && x.ok) statusEl.textContent = (en() ? 'Code sent to ' : '验证码已发送到 ') + email;
+              else if (x.error === 'too_frequent') statusEl.textContent = (en() ? 'Too frequent, wait ' : '发送过于频繁，请 ') + (x.retryAfter || 60) + (en() ? 's' : '秒后再试');
+              else if (x.error === 'send_failed') statusEl.textContent = en() ? 'Send failed' : '邮件发送失败';
+              else statusEl.textContent = en() ? 'Send failed' : '发送失败';
+            })
+            .catch(function () { sendBtn.disabled = false; statusEl.textContent = en() ? 'Network error' : '网络错误'; });
+        });
+        if (confirmBtn) confirmBtn.addEventListener('click', function () {
+          var email = (emailInput.value || '').trim();
+          var code = (codeInput.value || '').trim();
+          if (!/^\d{6}$/.test(code)) { statusEl.textContent = en() ? 'Enter 6-digit code' : '请输入 6 位验证码'; return; }
+          confirmBtn.disabled = true; statusEl.textContent = en() ? 'Linking…' : '绑定中…';
+          fetch('/api/bind/email', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: email, code: code }) })
+            .then(function (r) { return r.json().then(function (x) { return { ok: r.ok, d: x }; }); })
+            .then(function (res) {
+              confirmBtn.disabled = false; var x = res.d || {};
+              if (res.ok && x.login) { statusEl.textContent = (en() ? 'Linked: ' : '已绑定：') + email; box.hidden = true; refreshBind(); if (window.xlToast) window.xlToast((en() ? 'Linked: ' : '已绑定：') + email); }
+              else if (x.error === 'expired') statusEl.textContent = en() ? 'Code expired' : '验证码已过期';
+              else if (x.error === 'invalid_code') statusEl.textContent = en() ? 'Wrong code' : '验证码不正确';
+              else if (x.error === 'not_logged_in') statusEl.textContent = en() ? 'Please sign in first' : '请先登录';
+              else statusEl.textContent = en() ? 'Failed' : '绑定失败';
+            })
+            .catch(function () { confirmBtn.disabled = false; statusEl.textContent = en() ? 'Network error' : '网络错误'; });
+        });
+        var _orig = window.onAuthState;
+        window.onAuthState = function (auth) { if (_orig) _orig(auth); refreshBind(); };
+        refreshBind();
+      })();
+
       // 流量看板入口：仅管理员可见
       (function () {
         var statsCard = document.getElementById('statsCard');
@@ -555,8 +644,8 @@
       })();
     })();
   </script>
-<script src="../auth.js?v=20260918i"></script>
-  <script src="../common.js?v=20260921d"></script>
+<script src="../auth.js?v=20260922b"></script>
+  <script src="../common.js?v=20260922a"></script>
 </body>
 </html>
 

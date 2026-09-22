@@ -233,12 +233,9 @@
     if (typeof window.__xlInjectBarIcons === 'function') window.__xlInjectBarIcons();
   }
 
-  // 移除蓝条上不应出现的按钮（个人主页、退出）——集中在此处理，避免改 11 个页面
+  // 移除蓝条上不应出现的「退出」按钮（登出已并入头像下拉菜单 JW_LOGOUT）
   function cleanupBar() {
     if (logoutBtn && logoutBtn.parentNode) logoutBtn.parentNode.removeChild(logoutBtn);
-    // 个人主页按钮：首页 href="home.html"，附页 href="../home.html"，统一按 data-zh 文本匹配移除，避免附页残留
-    var ph = document.querySelector('.bar-right a.bar-btn[data-zh="个人主页"]');
-    if (ph && ph.parentNode) ph.parentNode.removeChild(ph);
   }
   cleanupBar();
 
@@ -310,7 +307,136 @@
       '&state=' + encodeURIComponent(state);
     window.location.href = url;
   }
-  window.JW_LOGIN = doLogin;
+  window.JW_LOGIN = openEmailModal; // 改为打开「邮箱登录/注册」弹窗（内含 GitHub 登录入口）
+
+  // —— 邮箱登录/注册弹窗（含 GitHub 登录入口）——
+  var EMAIL_MASK, EMAIL_INPUT, EMAIL_CODE, EMAIL_SEND, EMAIL_SUBMIT, EMAIL_MSG, EMAIL_GH;
+  function ensureEmailModal() {
+    if (EMAIL_MASK) return;
+    var ms = document.createElement('style');
+    ms.textContent = [
+      '.xl-email-mask{position:fixed;inset:0;background:rgba(10,18,30,.55);display:flex;align-items:center;justify-content:center;z-index:3000;padding:20px}',
+      '.xl-email-mask[hidden]{display:none}',
+      '.xl-email-box{background:var(--card-bg,#fff);color:var(--text,#1c2733);width:100%;max-width:360px;border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative}',
+      '.xl-email-box h3{font-size:1.15rem;margin-bottom:6px}',
+      '.xl-email-sub{font-size:.86rem;color:var(--muted,#6b7785);margin-bottom:16px;line-height:1.5}',
+      '.xl-email-box label{display:block;font-size:.85rem;font-weight:600;margin:12px 0 6px}',
+      '.xl-email-box input{width:100%;padding:10px 12px;border:1px solid var(--card-border,#e3e8ef);border-radius:9px;font-size:.95rem;background:var(--input-bg,#fff);color:var(--text,#1c2733);box-sizing:border-box}',
+      '.xl-email-box input:focus{outline:none;border-color:var(--accent,#0078d4)}',
+      '.xl-email-send{margin-top:10px;width:100%;padding:10px;border:none;border-radius:9px;background:var(--panel-bg,#eef2f7);color:var(--text,#1c2733);font-weight:600;cursor:pointer}',
+      '.xl-email-send:disabled{opacity:.6;cursor:not-allowed}',
+      '.xl-email-primary{margin-top:14px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent,#0078d4);color:#fff;font-weight:700;font-size:.98rem;cursor:pointer}',
+      '.xl-email-primary:hover{filter:brightness(1.06)}',
+      '.xl-email-primary:disabled{opacity:.6;cursor:not-allowed}',
+      '.xl-email-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--muted,#9aa6b2);font-size:.8rem}',
+      '.xl-email-divider:before,.xl-email-divider:after{content:"";flex:1;height:1px;background:var(--card-border,#e3e8ef)}',
+      '.xl-email-gh{width:100%;padding:11px;border:1px solid var(--card-border,#e3e8ef);border-radius:10px;background:var(--card-bg,#fff);color:var(--text,#1c2733);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}',
+      '.xl-email-gh:hover{background:var(--panel-bg,#f1f5fa)}',
+      '.xl-email-msg{margin-top:12px;font-size:.85rem;min-height:1.1em;line-height:1.5}',
+      '.xl-email-msg.err{color:#d13438}',
+      '.xl-email-msg.ok{color:#1d9e75}',
+      '.xl-email-close{position:absolute;top:12px;right:14px;border:none;background:transparent;font-size:1.4rem;line-height:1;color:var(--muted,#9aa6b2);cursor:pointer}',
+      '.xl-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:rgba(28,39,51,.94);color:#fff;padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:4000;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transition:opacity .2s ease}',
+      '.xl-toast.show{opacity:1}',
+      '.xl-toast.err{background:rgba(178,43,47,.96)}'
+    ].join('\n');
+    document.head.appendChild(ms);
+
+    EMAIL_MASK = document.createElement('div');
+    EMAIL_MASK.className = 'xl-email-mask';
+    EMAIL_MASK.hidden = true;
+    EMAIL_MASK.innerHTML =
+      '<div class="xl-email-box" role="dialog" aria-modal="true">' +
+      '<button class="xl-email-close" id="xlEmailClose" aria-label="关闭">×</button>' +
+      '<h3 id="xlEmailTitle">登录 / 注册</h3>' +
+      '<div class="xl-email-sub" id="xlEmailSub">用邮箱验证码登录；新邮箱将自动注册为账户。</div>' +
+      '<label for="xlEmailInput">邮箱</label>' +
+      '<input type="email" id="xlEmailInput" placeholder="you@example.com" autocomplete="email" />' +
+      '<button class="xl-email-send" id="xlEmailSend" type="button">发送验证码</button>' +
+      '<label for="xlEmailCode">验证码</label>' +
+      '<input type="text" id="xlEmailCode" placeholder="6 位验证码" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />' +
+      '<button class="xl-email-primary" id="xlEmailSubmit" type="button">登录 / 注册</button>' +
+      '<div class="xl-email-divider"><span>或</span></div>' +
+      '<button class="xl-email-gh" id="xlEmailGh" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.6 18 4.9 18 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>使用 GitHub 登录</button>' +
+      '<div class="xl-email-msg" id="xlEmailMsg"></div>' +
+      '</div>';
+    document.body.appendChild(EMAIL_MASK);
+
+    EMAIL_INPUT = document.getElementById('xlEmailInput');
+    EMAIL_CODE = document.getElementById('xlEmailCode');
+    EMAIL_SEND = document.getElementById('xlEmailSend');
+    EMAIL_SUBMIT = document.getElementById('xlEmailSubmit');
+    EMAIL_MSG = document.getElementById('xlEmailMsg');
+    EMAIL_GH = document.getElementById('xlEmailGh');
+
+    EMAIL_MASK.addEventListener('click', function (e) { if (e.target === EMAIL_MASK) closeEmailModal(); });
+    document.getElementById('xlEmailClose').addEventListener('click', closeEmailModal);
+    EMAIL_SEND.addEventListener('click', onEmailSend);
+    EMAIL_SUBMIT.addEventListener('click', onEmailVerify);
+    EMAIL_CODE.addEventListener('keydown', function (e) { if (e.key === 'Enter') onEmailVerify(); });
+    EMAIL_INPUT.addEventListener('keydown', function (e) { if (e.key === 'Enter') onEmailSend(); });
+    EMAIL_GH.addEventListener('click', function () { closeEmailModal(); doLogin(); });
+  }
+  function openEmailModal() {
+    ensureEmailModal();
+    EMAIL_MSG.textContent = '';
+    EMAIL_MSG.className = 'xl-email-msg';
+    EMAIL_MASK.hidden = false;
+    try { EMAIL_INPUT.focus(); } catch (e) {}
+  }
+  function closeEmailModal() { if (EMAIL_MASK) EMAIL_MASK.hidden = true; }
+  function setEmailMsg(text, kind) { if (!EMAIL_MSG) return; EMAIL_MSG.textContent = text; EMAIL_MSG.className = 'xl-email-msg' + (kind ? ' ' + kind : ''); }
+  function onEmailSend() {
+    var email = (EMAIL_INPUT.value || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailMsg('请输入有效的邮箱地址', 'err'); return; }
+    EMAIL_SEND.disabled = true;
+    setEmailMsg('发送中…', '');
+    fetch('/api/email/send', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: email, intent: 'login' }) })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        EMAIL_SEND.disabled = false;
+        var d = res.d || {};
+        if (res.ok && d.ok) { setEmailMsg('验证码已发送到 ' + email + '（10 分钟内有效）', 'ok'); try { EMAIL_CODE.focus(); } catch (e) {} }
+        else if (d.error === 'too_frequent') setEmailMsg('发送过于频繁，请 ' + (d.retryAfter || 60) + ' 秒后再试', 'err');
+        else if (d.error === 'too_many') setEmailMsg('尝试次数过多，请稍后再试', 'err')
+        else if (d.error === 'bad_email') setEmailMsg('邮箱格式不正确', 'err')
+        else if (d.error === 'send_failed') setEmailMsg('邮件发送失败，请稍后重试', 'err')
+        else setEmailMsg('发送失败，请重试', 'err');
+      })
+      .catch(function () { EMAIL_SEND.disabled = false; setEmailMsg('网络错误，请重试', 'err'); });
+  }
+  function onEmailVerify() {
+    var email = (EMAIL_INPUT.value || '').trim();
+    var code = (EMAIL_CODE.value || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailMsg('请输入有效的邮箱地址', 'err'); return; }
+    if (!/^\d{6}$/.test(code)) { setEmailMsg('请输入 6 位验证码', 'err'); return; }
+    EMAIL_SUBMIT.disabled = true;
+    setEmailMsg('验证中…', '');
+    fetch('/api/email/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: email, code: code }) })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        EMAIL_SUBMIT.disabled = false;
+        var d = res.d || {};
+        if (res.ok && d.login) {
+          setEmailMsg('登录成功，欢迎 ' + (d.display_name || d.login), 'ok');
+          closeEmailModal();
+          ME_PROMISE = null; clearMeCache(); loadMe();
+          xlToast('已登录：' + (d.display_name || d.login));
+        } else if (d.error === 'expired') setEmailMsg('验证码已过期，请重新获取', 'err')
+        else if (d.error === 'invalid_code') setEmailMsg('验证码不正确', 'err')
+        else setEmailMsg('验证失败，请重试', 'err');
+      })
+      .catch(function () { EMAIL_SUBMIT.disabled = false; setEmailMsg('网络错误，请重试', 'err'); });
+  }
+  function xlToast(msg, kind) {
+    var t = document.createElement('div');
+    t.className = 'xl-toast' + (kind ? ' ' + kind : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    setTimeout(function () { t.classList.remove('show'); setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 250); }, 2200);
+  }
+  window.xlToast = xlToast;
 
   // 注入头像按钮 + 下拉菜单（蓝条最右侧）
   (function buildAvatarMenu() {
@@ -368,7 +494,7 @@
     if (loginItem) loginItem.addEventListener('click', function (e) {
       e.preventDefault();
       pop.hidden = true;
-      doLogin();
+      openEmailModal();
     });
 
     // 让下拉项跟随当前语言
@@ -628,6 +754,6 @@
 
   if (loginBtn) loginBtn.addEventListener('click', function (e) {
     e.preventDefault();
-    doLogin();
+    openEmailModal();
   });
 })();

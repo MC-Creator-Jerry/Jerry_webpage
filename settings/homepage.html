@@ -60,6 +60,7 @@
   .set-opts { display: flex; gap: 8px; flex-wrap: wrap; }
   .seg { border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text); border-radius: 8px; padding: 7px 14px; font-size: 0.9rem; cursor: pointer; }
   .seg.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .seg:disabled { background: var(--panel-bg); color: #8a8886; border-color: var(--card-border); cursor: not-allowed; opacity: .8; }
   .set-row input[type="range"] { width: 100%; accent-color: var(--accent); }
   .set-hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
   .back-home { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 10px 16px; border-radius: 8px; background: var(--accent); color: #fff; text-decoration: none; font-size: 0.95rem; font-weight: 600; }
@@ -579,6 +580,21 @@
         var emailBtn = document.getElementById('bindEmailBtn');
         var ghBtn = document.getElementById('bindGhBtn');
         function en() { return document.documentElement.lang === 'en'; }
+        // 已绑定 -> 按钮显示「已绑定」并置灰禁用；未绑定 -> 还原为可点的绑定按钮
+        function applyBound(btn, bound, zhOn, enOn, zhOff, enOff) {
+          if (!btn) return;
+          if (bound) {
+            btn.setAttribute('data-zh', zhOn); btn.setAttribute('data-en', enOn);
+            btn.textContent = en() ? enOn : zhOn;
+            btn.disabled = true;
+            btn.title = en() ? 'Already linked' : '已绑定';
+          } else {
+            btn.setAttribute('data-zh', zhOff); btn.setAttribute('data-en', enOff);
+            btn.textContent = en() ? enOff : zhOff;
+            btn.disabled = false;
+            btn.removeAttribute('title');
+          }
+        }
         function refreshBind() {
           fetch('/api/account/status', { credentials: 'same-origin' })
             .then(function (r) { return r.ok ? r.json() : null; })
@@ -590,6 +606,8 @@
               else parts.push((en() ? 'Email: not linked' : '邮箱：未绑定'));
               parts.push((en() ? 'GitHub: ' : 'GitHub：') + (d.github_linked ? (d.github_login || '✓') : (en() ? 'not linked' : '未绑定')));
               statusEl.textContent = parts.join('　·　');
+              applyBound(emailBtn, !!d.email, '已绑定邮箱', 'Email linked', '绑定邮箱', 'Link email');
+              applyBound(ghBtn, !!d.github_linked, '已绑定 GitHub', 'GitHub linked', '用 GitHub 绑定', 'Link with GitHub');
               if (d.email) box.hidden = true;
             })
             .catch(function () { bindCard.hidden = true; });

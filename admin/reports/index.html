@@ -65,7 +65,7 @@
     </div>
     <div class="bar-right">
       <a class="bar-btn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
-      <a class="bar-btn" href="../../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      
       <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
@@ -143,7 +143,7 @@
                   (resolved
                     ? '<button class="btn" data-act="reopen" data-id="'+r.id+'">重新打开</button>'
                     : '<button class="btn primary" data-act="resolve" data-id="'+r.id+'">标记已处理</button>') +
-                  '<a class="btn" href="../../post/detail/?post='+encodeURIComponent(r.postId)+'">查看帖子</a>' +
+                  // 查看帖子：帖子系统已移除（2026-09-23）
                   '<button class="btn danger" data-act="delete" data-id="'+r.id+'">删除工单</button>' +
                 '</div>';
               card.querySelector('.r-title').textContent = r.title || '（无标题）';

@@ -26,7 +26,7 @@
   } catch (e) {}
 
   var doc = document;
-  var HOLD = false;       // 页面要求等数据渲染完成后再揭晓（如帖子中心）
+  var HOLD = false;       // 页面要求等数据渲染完成后再揭晓
   var revealed = false;   // safeReveal 幂等保护
 
   // 从 cookie 读取登录账号（callback.js 写入 gh_user）

@@ -18,7 +18,7 @@
 import { json, getCookie, isAdminLogin, OWNER } from '../_lib/auth.js';
 import { queryOrder } from '../_lib/afdian.js';
 import {
-  isOrderProcessed, markOrderProcessed, grantSponsor,
+  isOrderProcessed, markOrderProcessed, grantSponsor, grantTeahousePlus,
   addPending, listPending, tierFromAmount,
 } from '../_lib/sponsor.js';
 
@@ -78,7 +78,12 @@ export async function onRequestPost(context) {
   const months = Math.max(1, parseInt(o.month, 10) || 1);
   const login = extractLogin(o.remark);
   if (login) {
-    await grantSponsor(context, login, tier, months, o.out_trade_no);
+    // 茶馆·发布功能升级是叠加型权益 → 走独立记录，不能覆盖主档位
+    if (tier === 'teahouse_plus') {
+      await grantTeahousePlus(context, login, months, o.out_trade_no);
+    } else {
+      await grantSponsor(context, login, tier, months, o.out_trade_no);
+    }
     await markOrderProcessed(context, no, login, months, tier);
   } else {
     // 留言里没写站内用户名 → 挂起，等管理员手动绑定

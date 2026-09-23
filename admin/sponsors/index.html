@@ -120,6 +120,7 @@
           <select id="genTier">
             <option value="supporter" selected>赞助者（¥19/月）</option>
             <option value="pro">Pro（¥99/月）</option>
+            <option value="teahouse_plus">茶馆·发布功能升级（¥13.25/月）</option>
           </select>
         </div>
         <button class="btn primary" id="genBtn">生成</button>
@@ -144,6 +145,7 @@
         <span class="s">已使用 <b id="nUsed">0</b></span>
         <span class="s">可用 <b id="nUnused">0</b></span>
         <span class="s">竞态冲突 <b id="nConf">0</b></span>
+        <span class="s">茶馆加成 <b id="nTp">0</b></span>
       </div>
       <div class="row">
         <button class="btn" id="refresh">刷新</button>
@@ -158,6 +160,16 @@
         <tbody></tbody>
       </table></div>
       <div class="empty" id="spEmpty" hidden>目前还没有生效中的赞助者。</div>
+    </section>
+
+    <section class="panel" id="tpPanel" hidden>
+      <h2>茶馆·发布功能升级</h2>
+      <div class="sub">叠加型权益，与上面的赞助档位互不影响（一个人可同时拥有两者）。「撤销」会立即移除其茶馆发帖加成。</div>
+      <div class="tbl-wrap"><table class="tbl" id="tpTbl">
+        <thead><tr><th>用户</th><th>档位</th><th>到期日</th><th>首次开通</th><th>最近来源</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <div class="empty" id="tpEmpty" hidden>目前还没有开通茶馆·发布功能升级的用户。</div>
     </section>
 
     <section class="panel" id="codePanel" hidden>
@@ -225,7 +237,7 @@
         return n > 0 ? '（剩 ' + n + ' 天）' : '';
       }
 
-      var TIER_LABEL = { supporter: '赞助者', pro: '小蓝页·1级成员' };
+      var TIER_LABEL = { supporter: '赞助者', pro: '小蓝页·1级成员', teahouse_plus: '茶馆·发布功能升级' };
       var lastCodes = [];
 
       /* ---- 数据加载 ---- */
@@ -247,6 +259,7 @@
         document.getElementById('nUsed').textContent = t.used || 0;
         document.getElementById('nUnused').textContent = t.unused || 0;
         document.getElementById('nConf').textContent = t.conflicts || 0;
+        document.getElementById('nTp').textContent = t.teahousePlus || 0;
 
         // 赞助者
         var spBody = document.querySelector('#spTbl tbody');
@@ -263,6 +276,23 @@
           spBody.appendChild(tr);
         });
         document.getElementById('spEmpty').hidden = (d.sponsors || []).length > 0;
+
+        // 茶馆·发布功能升级（叠加型）
+        var tpBody = document.querySelector('#tpTbl tbody');
+        tpBody.innerHTML = '';
+        (d.teahousePlus || []).forEach(function (s) {
+          var tr = document.createElement('tr');
+          var refs = s.refs || [];
+          tr.innerHTML =
+            '<td><a href="https://github.com/' + encodeURIComponent(s.login) + '" target="_blank" rel="noopener">@' + esc(s.login) + '</a></td>' +
+            '<td class="nowrap"><span class="tag on">' + esc(s.label || TIER_LABEL[s.tier] || s.tier) + '</span></td>' +
+            '<td class="nowrap">' + esc(fmtDate(s.exp)) + '<span class="stat">' + esc(daysLeft(s.exp)) + '</span></td>' +
+            '<td class="nowrap">' + esc(fmtDate(s.since)) + '</td>' +
+            '<td class="mono">' + esc(refs.length ? refs[refs.length - 1] : '—') + '</td>' +
+            '<td><button class="btn danger" data-revoke-thplus="' + esc(s.login) + '">撤销</button></td>';
+          tpBody.appendChild(tr);
+        });
+        document.getElementById('tpEmpty').hidden = (d.teahousePlus || []).length > 0;
 
         // 码
         var cBody = document.querySelector('#codeTbl tbody');
@@ -363,6 +393,21 @@
             .catch(function () { toast('网络错误'); rb.disabled = false; });
           return;
         }
+        var tpb = e.target.closest ? e.target.closest('[data-revoke-thplus]') : null;
+        if (tpb) {
+          var tlogin = tpb.getAttribute('data-revoke-thplus');
+          if (!confirm('撤销 @' + tlogin + ' 的「茶馆·发布功能升级」？\n\n这会立即移除其茶馆发帖加成，操作不可撤销。')) return;
+          tpb.disabled = true;
+          fetch('/api/sponsor-admin', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ action: 'revoke-thplus', login: tlogin })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { toast(d && d.ok ? '已撤销 @' + tlogin + ' 的茶馆加成' : '操作失败'); load(false); })
+            .catch(function () { toast('网络错误'); tpb.disabled = false; });
+          return;
+        }
         var cb = e.target.closest ? e.target.closest('[data-claim]') : null;
         if (cb) {
           var no2 = cb.getAttribute('data-claim');
@@ -405,7 +450,7 @@
         .then(function (me) {
           if (!me || !me.isAdmin) { location.replace('../../index.html'); return; }
           if (_main) _main.style.visibility = '';
-          ['genPanel', 'sumPanel', 'spPanel', 'codePanel', 'pendPanel'].forEach(function (id) {
+          ['genPanel', 'sumPanel', 'spPanel', 'tpPanel', 'codePanel', 'pendPanel'].forEach(function (id) {
             document.getElementById(id).hidden = false;
           });
           load(false);

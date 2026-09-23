@@ -5,6 +5,7 @@
 // 切换页面时若 GitHub 偶发限流/超时/5xx，只返回 degraded（仍视为已登录），
 // 避免出现「切个页面就莫名登出」的问题。
 import { getCookie, isAdminLogin, OWNER, json } from '../_lib/auth.js';
+import { getSessionAcct, publicProfile } from '../_lib/account.js';
 import { fetchAndCacheAvatar, getCachedAvatar } from '../_lib/avatar.js';
 import { readSponsor, publicSponsor } from '../_lib/sponsor.js';
 
@@ -23,6 +24,17 @@ async function sponsorOf(context, login, canonical) {
 }
 
 export async function onRequestGet(context) {
+  // 邮箱会话（xl_sid，HttpOnly opaque）优先；不存在或不合法再退回 GitHub 路径
+  const sid = getCookie(context.request, 'xl_sid');
+  if (sid) {
+    const acct = await getSessionAcct(context);
+    if (acct) {
+      const isAdmin = acct.login === OWNER || (await isAdminLogin(context, acct.login));
+      try { await recordActiveLogin(context.env.USER_PREFS, acct.login); } catch (e) {}
+      return json(publicProfile(acct, isAdmin));
+    }
+  }
+
   const login = getCookie(context.request, 'gh_user');
   if (!login) return json({ error: 'unauthorized' }, 401);
 

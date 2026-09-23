@@ -476,7 +476,6 @@ window.XLTopics = (function () {
   // 按钮 → SVG 路径（viewBox 0 0 24 24，stroke=currentColor）。匹配按 id 优先，其次 data-zh/文本，最后 href 正则。
   var ICON_MAP = [
     { keys: ['消息中心', '通知中心', '通知'], href: /\/notice\//, svg: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>' },
-    { keys: ['帖子中心', '帖子'], href: /\/post\//, svg: '<path d="M4 4h12a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M4 18h14"/><path d="M8 8h6M8 12h6M8 16h4"/>' },
     { keys: ['产品'], href: /products/, svg: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>' },
     { keys: ['帮助中心', '帮助'], href: /helpcenter/, svg: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><circle cx="12" cy="17" r=".8" fill="currentColor"/>' },
     { keys: ['登录'], id: 'loginBtn', svg: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>' },
@@ -593,7 +592,6 @@ window.XLTopics = (function () {
     bars.forEach(function (bar) {
       var ref = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
       if (!hasBtn(bar, ['消息中心', '通知中心', '通知'], /\/notice\//)) bar.insertBefore(addBtn(pre + 'notice/', '消息中心', 'Messages'), ref);
-      if (!hasBtn(bar, ['帖子中心', '帖子'], /\/post\//)) bar.insertBefore(addBtn(pre + 'post/', '帖子中心', 'Post Center'), ref);
       if (!hasBtn(bar, ['产品'], /products/)) bar.insertBefore(addBtn(pre + 'products.html', '产品', 'Products'), ref);
     });
     // 补完图标，与既有注入逻辑一致（已注图标者会被守卫跳过）
@@ -619,18 +617,16 @@ window.XLTopics = (function () {
     if (/(^|\s)bar-avatar(\s|$)/.test(cls)) return 'login';
     if (id === 'loginBtn' || id === 'logoutBtn') return 'login';
     if (id === 'noticeBtn' || id === 'noticeBadge' || /\/notice\//.test(href) || /消息中心|通知中心|通知/.test(txt)) return 'notice';
-    if (id === 'newPostBtn' || /新加帖子/.test(txt)) return 'newPost';
     if (/\/groups\//.test(href) || /群组/.test(txt)) return 'groups';
     if (id === 'subBlogBtn' || /\/sub-blog\//.test(href) || /订阅和博客/.test(txt)) return 'subBlog';
     if (id === 'supportPayBtn' || /\/support\//.test(href) || /支持与付款/.test(txt)) return 'support';
     if (/\/home\.html$/.test(href) || /个人主页/.test(txt)) return 'home';
     if (/\/products\.html/.test(href) || /产品/.test(txt)) return 'products';
-    if (/\/post\//.test(href) || /帖子中心|帖子/.test(txt)) return 'post';
     return 'other';
   }
   // 规范顺序（左→右）：搜索 → 消息中心 → 订阅和博客 → 支持与付款 → 帖子中心 → 新加帖子 → 群组 → 产品 → 其它 → 登录/头像
   // 2026-09-22 按 Jerry 要求移除 legacy「个人主页」(home) 槽位：顶栏从「搜索框」起头；个人主页入口已由 auth.js 改为最右头像，home.html 仅 301 跳板。新加帖子·群组仍紧跟帖子中心。
-  var SEQ = ['search', 'notice', 'subBlog', 'support', 'post', 'newPost', 'groups', 'products', 'other', 'login'];
+  var SEQ = ['search', 'notice', 'subBlog', 'support', 'groups', 'products', 'other', 'login'];
   function isBarEl(n) {
     if (n.nodeType !== 1) return false;
     var cls = n.className || '';
@@ -703,7 +699,6 @@ window.XLTopics = (function () {
     { key: 'u', nav: '/personal_profile/', login: true },
     { key: 'h', nav: '/helpcenter/',      re: /\/helpcenter\//,         login: false },
     { key: 'p', nav: '/products.html',    re: /\/products\.html/,       login: false },
-    { key: 't', nav: '/post/center/',     re: /\/post\//,              login: false },
     { key: 'b', nav: '/sub-blog/',       re: /\/sub-blog\//,          login: false },
     { key: 'v', nav: '/sub-blog/',       re: /\/sub-blog\//,          login: false },
     { key: 'z', nav: '/support/',         re: /\/support\//,            login: false },

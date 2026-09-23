@@ -240,103 +240,6 @@ window.XLMedia = (function () {
   return { url: url, isVideoOnly: isVideoOnly, build: build };
 })();
 
-/* ============ 话题（#hashtag）：把正文里的 #话题 渲染成可点击标签 ============ */
-window.XLTopics = (function () {
-  var STOP = /[\s#,.!?;:，。！？；：、)\]【】{}（）「」『』"'“”‘’《》<>|\\/~^$&*+=`]/;
-  var WORDISH = /[A-Za-z0-9_\/]/;
-  var TRAILING = /[.,!?;:，。！？；：、]+$/;
-  var MAX_LEN = 30;
-
-  function basePrefix() {
-    var sc = document.querySelector('script[src*="common.js"]');
-    var src = sc ? (sc.getAttribute('src') || '') : '';
-    var m = src.match(/^((?:\.\.\/)*)/);
-    return m ? m[1] : '';
-  }
-
-  function extract(text, limit) {
-    limit = limit || 10;
-    var s = String(text || '');
-    var out = [], seen = {};
-    for (var i = 0; i < s.length; i++) {
-      if (s[i] !== '#') continue;
-      var prev = i > 0 ? s[i - 1] : '';
-      if (prev && WORDISH.test(prev)) continue; // URL 锚点等
-      var j = i + 1, name = '';
-      while (j < s.length && name.length < MAX_LEN) {
-        if (STOP.test(s[j])) break;
-        name += s[j]; j++;
-      }
-      name = name.replace(TRAILING, '');
-      if (!name) continue;
-      var key = name.toLowerCase();
-      if (!seen[key]) {
-        seen[key] = 1;
-        out.push(name);
-        if (out.length >= limit) break;
-      }
-      i = j - 1;
-    }
-    return out;
-  }
-
-  function topicHref(name) {
-    return basePrefix() + 'post/center/?topic=' + encodeURIComponent(name);
-  }
-
-  function makeLink(name) {
-    var a = document.createElement('a');
-    a.className = 'topic-link';
-    a.href = topicHref(name);
-    a.textContent = '#' + name;
-    return a;
-  }
-
-  function replaceInTextNode(node) {
-    var s = node.nodeValue || '';
-    var frag = document.createDocumentFragment();
-    var last = 0, changed = false;
-    for (var i = 0; i < s.length; i++) {
-      if (s[i] !== '#') continue;
-      var prev = i > 0 ? s[i - 1] : '';
-      if (prev && WORDISH.test(prev)) continue;
-      var j = i + 1, name = '';
-      while (j < s.length && name.length < MAX_LEN) {
-        if (STOP.test(s[j])) break;
-        name += s[j]; j++;
-      }
-      name = name.replace(TRAILING, '');
-      if (!name) continue;
-      if (last < i) frag.appendChild(document.createTextNode(s.slice(last, i)));
-      frag.appendChild(makeLink(name));
-      last = j; changed = true;
-      i = j - 1;
-    }
-    if (!changed) return;
-    if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
-    node.parentNode.replaceChild(frag, node);
-  }
-
-  // 遍历文本节点做替换（用 DOM API 构造，天然防 XSS）
-  function linkify(root) {
-    if (!root || !document.createTreeWalker) return;
-    var targets = [];
-    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
-    while (walker.nextNode()) {
-      var node = walker.currentNode;
-      if (node.nodeValue.indexOf('#') === -1) continue;
-      var p = node.parentElement;
-      if (!p) continue;
-      if (p.className && String(p.className).indexOf('topic-link') !== -1) continue;
-      if (p.closest && p.closest('a, code, pre, script, style, textarea')) continue;
-      targets.push(node);
-    }
-    targets.forEach(replaceInTextNode);
-  }
-
-  return { extract: extract, linkify: linkify, href: topicHref };
-})();
-
 /* ============ 流量埋点：页面加载后上报一次 PV/UV ============ */
 (function () {
   function getVid() {
@@ -441,7 +344,7 @@ window.XLTopics = (function () {
       var formRef = notice || login;
       if (formRef) { bar.insertBefore(form, formRef); }
       else { bar.appendChild(form); }
-      // 注：群组入口不再全局注入；已在「通知中心」(notice/index.html) 与「帖子中心」(post/center/index.html) 两页顶栏显式放置
+      // 注：群组入口不再全局注入；已在「通知中心」(notice/index.html) 顶栏显式放置
       injectBarExtras(bar);
     });
     // 实时刷新：后台轮询通知徽标（免 VAPID，纯前端轮询）
@@ -551,7 +454,7 @@ window.XLTopics = (function () {
   else run();
 })();
 
-/* ============ 顶栏标准导航按钮兜底：保证每页小蓝条都含 消息中心/帖子中心/产品 ============ */
+/* ============ 顶栏标准导航按钮兜底：保证每页小蓝条都含 消息中心/产品 ============ */
 /* 旧页面静态 HTML 的 .bar-right 不一致（有的缺 消息中心、有的缺 产品），统一在此兜底补齐全站；
    以「解析后绝对 href + 文本别名」判断是否已存在，避免重复注入（根页 href 写作 "notice/" 无前导斜杠，
    必须用 b.href 解析后再匹配）。登录/个人主页由 auth.js 按登录态处理。 */
@@ -602,9 +505,9 @@ window.XLTopics = (function () {
 })();
 
 /* ============ 顶栏按钮顺序归一化：保证全站 .bar-right 顺序一致 ============ */
-/* 各页静态 HTML 的按钮顺序 + 上方注入 IIFE（搜索/订阅和博客/支持与付款/兜底补 消息中心·帖子中心·产品）
+/* 各页静态 HTML 的按钮顺序 + 上方注入 IIFE（搜索/订阅和博客/支持与付款/兜底补 消息中心·产品）
    的插入锚点不同，导致部分页面顺序错乱。本步把所有已知按钮按唯一规范序列重排，
-   与「是否登录 / 是否含上下文按钮（新加帖子·群组）」无关，全站一致。登录/头像恒在最右。 */
+   与「是否登录 / 是否含上下文按钮（群组）」无关，全站一致。登录/头像恒在最右。 */
 (function () {
   function bText(b) { return (b.getAttribute('data-zh') || b.textContent || '').trim(); }
   function slotOf(b) {
@@ -624,8 +527,8 @@ window.XLTopics = (function () {
     if (/\/products\.html/.test(href) || /产品/.test(txt)) return 'products';
     return 'other';
   }
-  // 规范顺序（左→右）：搜索 → 消息中心 → 订阅和博客 → 支持与付款 → 帖子中心 → 新加帖子 → 群组 → 产品 → 其它 → 登录/头像
-  // 2026-09-22 按 Jerry 要求移除 legacy「个人主页」(home) 槽位：顶栏从「搜索框」起头；个人主页入口已由 auth.js 改为最右头像，home.html 仅 301 跳板。新加帖子·群组仍紧跟帖子中心。
+  // 规范顺序（左→右）：搜索 → 消息中心 → 订阅和博客 → 支持与付款 → 群组 → 产品 → 其它 → 登录/头像
+  // 2026-09-22 按 Jerry 要求移除 legacy「个人主页」(home) 槽位：顶栏从「搜索框」起头；个人主页入口已由 auth.js 改为最右头像，home.html 仅 301 跳板。群组入口保留。
   var SEQ = ['search', 'notice', 'subBlog', 'support', 'groups', 'products', 'other', 'login'];
   function isBarEl(n) {
     if (n.nodeType !== 1) return false;
@@ -689,9 +592,9 @@ window.XLTopics = (function () {
    直接并入 pinBarRight()/pinFloat() 的 inline bottom（!important），使底部条始终贴屏幕最底。
    具体实现见下方浮动按钮 IIFE 内的 vbOffset()/syncVB()。桌面 Chrome 的 offsetBottom 恒为 0，无副作用。 */
 
-/* ============ 键盘快捷键（单一来源 XL_KEYS）：N 通知中心 / S 搜索 / U 登录·用户 / H 帮助中心 / P 产品 / T 帖子中心 / B 订阅和博客 / V 订阅和博客 / Z 支持与付款 / L 语言 / O 设置 / M 切换深浅色 / I 自定义背景 / F 主页 / E 编辑当前页面布局(站主)；另：↑/↓ 双击=回顶/到底 ============ */
+/* ============ 键盘快捷键（单一来源 XL_KEYS）：N 通知中心 / S 搜索 / U 登录·用户 / H 帮助中心 / P 产品 / B 订阅和博客 / V 订阅和博客 / Z 支持与付款 / L 语言 / O 设置 / M 切换深浅色 / I 自定义背景 / F 主页 / E 编辑当前页面布局(站主)；另：↑/↓ 双击=回顶/到底 ============ */
 /* 说明：key=按键（小写，用于 keydown 匹配）；nav=目标路径；re=按钮 href 匹配（用于 Alt 键提示徽标，已兼容相对链接）；login=true 走 loginOrMine()，theme=true 走 window.__xlToggleTheme() */
-/* 快捷键总览：N 消息中心 · S 搜索 · U 我的 · H 帮助 · P 产品 · T 帖子中心 · B/V 订阅和博客 · Z 支持与付款 · L 语言 · O 设置 · F 主页 · M 主题 · I 背景 · E 编辑布局 */
+/* 快捷键总览：N 消息中心 · S 搜索 · U 我的 · H 帮助 · P 产品 · B/V 订阅和博客 · Z 支持与付款 · L 语言 · O 设置 · F 主页 · M 主题 · I 背景 · E 编辑布局 */
 (function () {
   var XL_KEYS = [
     { key: 'n', nav: '/notice/',          re: /\/notice\//,            login: false },

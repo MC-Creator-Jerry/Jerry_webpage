@@ -7,7 +7,7 @@
 // 已自带内联偏好脚本的页面（index / helpcenter 等）不要重复引入本文件，
 // 否则两套引擎会各应用一次（虽不致命，但会在动态插入节点后互相覆盖）。
 //
-// 同时把 applyAll 暴露到 window，供 auth.js 与 post/center 等页面
+// 同时把 applyAll 暴露到 window，供 auth.js 等页面
 // 在「动态渲染完内容后」重新套用一次语言与主题。
 (function () {
   'use strict';

@@ -10,7 +10,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>订阅 · Jerry's webpage</title>
-<meta name="description" content="RSS 订阅源与邮件订阅。" />
+<meta name="description" content="邮件订阅。" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>  
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -60,17 +60,7 @@
 
   <main class="content">
     <h1 class="page-title">订阅 Jerry's webpage</h1>
-    <p class="sub">用 RSS 阅读器订阅最新帖子，或留下邮箱加入邮件订阅名单（后续邮件群发上线后自动通知）。</p>
-
-    <section class="card">
-      <h2>RSS 订阅源</h2>
-      <p class="desc">把下面这个地址添加到任意 RSS 阅读器（如 Feedly、Inoreader、NetNewsWire）即可。源会随新帖自动更新。</p>
-      <div class="feed-row">
-        <input class="feed-url" id="feedUrl" readonly value="" />
-        <button class="copy-btn" id="copyBtn" type="button">复制</button>
-      </div>
-      <p class="hint"><a id="feedOpen" href="" target="_blank" rel="noopener">在新标签页打开源 ↗</a></p>
-    </section>
+    <p class="sub">留下邮箱加入邮件订阅名单（后续邮件群发上线后自动通知）。</p>
 
     <section class="card">
       <h2>邮件订阅</h2>
@@ -88,25 +78,12 @@
   <script src="../auth.js?v=20260922b"></script>
   <script>
     (function () {
-      var feedUrl = location.origin + '/feed.xml';
-      document.getElementById('feedUrl').value = feedUrl;
-      document.getElementById('feedOpen').href = feedUrl;
-
       var toastEl = document.getElementById('toast');
       function toast(msg, isErr) {
         toastEl.textContent = msg;
         toastEl.className = 'toast show' + (isErr ? ' err' : '');
         setTimeout(function () { toastEl.className = 'toast' + (isErr ? ' err' : ''); }, 2600);
       }
-
-      document.getElementById('copyBtn').addEventListener('click', function () {
-        var inp = document.getElementById('feedUrl');
-        inp.select();
-        try {
-          if (navigator.clipboard) navigator.clipboard.writeText(inp.value).then(function () { toast('已复制 RSS 地址 ✓'); }, function () { document.execCommand('copy'); toast('已复制 RSS 地址 ✓'); });
-          else { document.execCommand('copy'); toast('已复制 RSS 地址 ✓'); }
-        } catch (e) { toast('复制失败，请手动复制', true); }
-      });
 
       var subBtn = document.getElementById('subBtn');
       var emailEl = document.getElementById('email');

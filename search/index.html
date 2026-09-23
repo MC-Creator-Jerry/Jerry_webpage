@@ -10,7 +10,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>搜索 · Jerry's webpage</title>
-<meta name="description" content="全站搜索：帖子 / 用户 / 话题。" />
+<meta name="description" content="全站搜索：用户。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>  
@@ -82,7 +82,7 @@
       <h1 data-zh="全站搜索" data-en="Search">全站搜索</h1>
     </section>
     <div class="search-bar">
-      <input class="search-input" id="q" placeholder="搜索帖子、用户或话题……" maxlength="80" />
+      <input class="search-input" id="q" placeholder="搜索用户……" maxlength="80" />
       <button class="search-btn" id="go" data-zh="搜索" data-en="Search">搜索</button>
     </div>
     <div id="results"></div>
@@ -128,23 +128,13 @@
         hint.hidden = true;
         results.innerHTML = '<div class="empty">搜索中……</div>';
         fetch('/api/search?q=' + encodeURIComponent(q))
-          .then(function (r) { return r.ok ? r.json() : { posts: [], users: [], topics: [] }; })
+          .then(function (r) { return r.ok ? r.json() : { users: [] }; })
           .then(function (d) {
             results.innerHTML = '';
-            var posts = d.posts || [], users = d.users || [], topics = d.topics || [];
-            if (!posts.length && !users.length && !topics.length) {
+            var users = d.users || [];
+            if (!users.length) {
               results.innerHTML = '<div class="empty">没有找到与「' + esc(q) + '」相关的内容。</div>';
               return;
-            }
-            if (posts.length) {
-              var h = document.createElement('div'); h.className = 'sec-title'; h.textContent = '帖子'; results.appendChild(h);
-              posts.forEach(function (p) {
-                var a = document.createElement('a'); a.className = 'card post-item'; a.href = '../post/detail/?post=' + encodeURIComponent(p.id);
-                a.innerHTML = '<div><span class="pi-title"></span><span class="pi-author">@' + esc(p.login) + '</span></div><div class="pi-snippet"></div>';
-                a.querySelector('.pi-title').textContent = p.title || '（无标题）';
-                a.querySelector('.pi-snippet').textContent = stripTags(p.body || '').slice(0, 140);
-                results.appendChild(a);
-              });
             }
             if (users.length) {
               var h2 = document.createElement('div'); h2.className = 'sec-title'; h2.textContent = '用户'; results.appendChild(h2);
@@ -154,15 +144,6 @@
                 a.querySelector('.ub').textContent = u.name !== u.login ? (u.name + (u.bio ? ' · ' + u.bio : '')) : (u.bio || '');
                 results.appendChild(a);
               });
-            }
-            if (topics.length) {
-              var h3 = document.createElement('div'); h3.className = 'sec-title'; h3.textContent = '话题'; results.appendChild(h3);
-              var wrap = document.createElement('div');
-              topics.forEach(function (t) {
-                var c = document.createElement('a'); c.className = 'topic-chip'; c.href = '../post/center/?topic=' + encodeURIComponent(t.name);
-                c.textContent = '#' + t.name + ' ' + t.count; wrap.appendChild(c);
-              });
-              results.appendChild(wrap);
             }
           })
           .catch(function () { results.innerHTML = '<div class="empty">搜索失败，请重试。</div>'; });

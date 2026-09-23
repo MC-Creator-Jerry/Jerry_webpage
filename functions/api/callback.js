@@ -2,6 +2,7 @@
 // GitHub OAuth redirect target. Exchanges ?code for a token (using server-side
 // GITHUB_CLIENT_SECRET), then sets httpOnly cookies and redirects home.
 import { fetchAndCacheAvatar } from '../_lib/avatar.js';
+import { linkGithub } from '../_lib/account.js';
 
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
@@ -30,6 +31,21 @@ export async function onRequestGet(context) {
     });
     const u = await gu.json();
 
+    // 取 GitHub 主验证邮箱（用于与邮箱账户自动合并；邮箱可能为空=用户设为私有）
+    let ghEmail = null;
+    try {
+      const em = await fetch('https://api.github.com/user/emails', {
+        headers: { Authorization: 'Bearer ' + data.access_token, 'User-Agent': 'jerry-webpage' },
+      });
+      if (em.ok) {
+        const arr = await em.json();
+        if (Array.isArray(arr)) {
+          const primary = arr.find((e) => e.primary && e.verified) || arr.find((e) => e.verified);
+          if (primary && primary.email) ghEmail = String(primary.email).toLowerCase();
+        }
+      }
+    } catch (e) { /* 邮箱取不到不影响 GitHub 登录 */ }
+
     const maxAge = 60 * 60 * 24 * 30;
     const resp = new Response(null, { status: 302, headers: { Location: url.origin + '/' } });
     resp.headers.append('Set-Cookie',
@@ -44,9 +60,20 @@ export async function onRequestGet(context) {
     try {
       const cloudAvatar = await fetchAndCacheAvatar(context.env.USER_PREFS, u.avatar_url, u.login, u.id);
       const profile = { id: u.id, login: u.login, name: u.name || u.login, avatar_url: cloudAvatar || u.avatar_url };
-      await context.env.USER_PREFS.put('ghprofile:id:' + u.id, JSON.stringify(profile), { expirationTtl: 600 });
-      await context.env.USER_PREFS.put('ghprofile:login:' + u.login, JSON.stringify({ id: u.id }), { expirationTtl: 600 });
+      await context.env.USER_PREFS.put('ghprofile:id:' + u.id, JSON.stringify(profile), { expirationTtl: 2592000 }); // 30 天：登录名↔id 映射应长期有效，10 分钟会频繁失效
+      await context.env.USER_PREFS.put('ghprofile:login:' + u.login, JSON.stringify({ id: u.id }), { expirationTtl: 2592000 });
     } catch (e) {}
+
+    // 合并到统一账户：以「已验证邮箱」为 canonical key；无邮箱则按 gh_id 关联。
+    // 这样同一邮箱的 GitHub 登录与邮箱登录会落到同一账户（合并账号功能）。
+    try {
+      const acct = await linkGithub(context.env.USER_PREFS, ghEmail, u.id, u.login);
+      if (u.avatar_url && !acct.avatar_url) {
+        acct.avatar_url = u.avatar_url;
+        await context.env.USER_PREFS.put('acct:' + acct.id, JSON.stringify(acct));
+      }
+    } catch (e) {}
+
     return resp;
   } catch (e) {
     return json({ error: 'exchange_error' }, 500);

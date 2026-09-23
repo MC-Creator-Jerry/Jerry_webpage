@@ -407,7 +407,7 @@
     </div>
     <div class="bar-right">
       <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
-      <a class="bar-btn" href="../post/" data-zh="帖子中心" data-en="Post Center">帖子中心</a>
+      
       <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
       <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
       <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
@@ -529,16 +529,7 @@
           <button class="cancel" data-cancel="links">取消</button>
         </div>
       </div>
-    </section>
-
-    <section class="card" id="favCard" hidden>
-      <div class="card-head">
-        <h2 data-zh="我的收藏" data-en="My Favorites">我的收藏</h2>
-      </div>
-      <div id="favList"></div>
-      <p class="hint-empty" id="favEmpty" hidden>（还没有收藏任何帖子）</p>
-    </section>
-
+    </section>
     <section class="card" id="avatarEditor" hidden>
       <div class="card-head">
         <h2 data-zh="自定义头像" data-en="Custom Avatar">自定义头像</h2>
@@ -719,9 +710,7 @@
       var avatarEditor = $('avatarEditor'), avatarFile = $('avatarFile'), avatarUrl = $('avatarUrl'), avatarPreview = $('avatarPreview');
       var ghAvatarSync = $('ghAvatarSync'), avatarCustomWrap = $('avatarCustomWrap');
       var loginPrompt = $('loginPrompt'), toastEl = $('toast');
-      var followBtn = $('followBtn');
-      var favCard = $('favCard'), favList = $('favList'), favEmpty = $('favEmpty');
-
+      var followBtn = $('followBtn');
       var MY_LOGIN = null;
       var VIEW_USER = new URLSearchParams(location.search).get('user');
       var state = { data: null, draft: null, bg: { banner: null, bg: null } };
@@ -874,10 +863,7 @@
         renameEditor.hidden = true;
         renameBtn.hidden = !isOwn();
         // 设置背景按钮：仅本人可见
-        $('profileTools').hidden = !isOwn();
-        // 我的收藏：仅本人可见
-        favCard.hidden = !isOwn();
-        // 关注按钮：仅查看他人时可见
+        $('profileTools').hidden = !isOwn();        // 关注按钮：仅查看他人时可见
         updateFollowBtn();
         loadFollowState();
       }
@@ -1346,35 +1332,6 @@
       if (bmTheme) bmTheme.onclick = function () { setBannerMode('theme'); };
       if (bmImage) bmImage.onclick = function () { setBannerMode('image'); };
 
-      /* ---------- 我的收藏 ---------- */
-      function loadFavs() {
-        fetch('/api/post-actions?favs=1')
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) {
-            var ids = (d && d.favs) || [];
-            if (!ids.length) { favEmpty.hidden = false; favList.innerHTML = ''; return; }
-            favEmpty.hidden = true;
-            return fetch('/api/post?ids=' + encodeURIComponent(ids.join(',')))
-              .then(function (r) { return r.ok ? r.json() : { posts: [] }; })
-              .then(function (j) {
-                var posts = (j && j.posts) || [];
-                favList.innerHTML = '';
-                if (!posts.length) { favEmpty.hidden = false; return; }
-                favEmpty.hidden = true;
-                posts.forEach(function (p) {
-                  var a = document.createElement('a');
-                  a.className = 'fav-item';
-                  a.href = '../post/detail/?post=' + encodeURIComponent(p.id);
-                  var t = document.createElement('div'); t.className = 'fi-title'; t.textContent = p.title || '（无标题）';
-                  var m = document.createElement('div'); m.className = 'fi-meta';
-                  m.textContent = '@' + (p.login || '?') + ' · ' + new Date(p.ts || Date.now()).toLocaleDateString();
-                  a.appendChild(t); a.appendChild(m);
-                  favList.appendChild(a);
-                });
-              });
-          })
-          .catch(function () { favEmpty.hidden = false; favEmpty.textContent = '（加载收藏失败）'; });
-      }
 
       /* ---------- 揭晓衔接（A）：资料（含背景）就绪后再收起开场动画 ---------- */
       // boot.js 读到 window.__xlHoldReveal 会「保持加载层」，等页面调用 window.__xlReveal()。
@@ -1428,7 +1385,7 @@
         renderDisplay(); // 此时 MY_LOGIN 已就绪，编辑按钮/关注按钮的可见性一次算对
         var bgs;
         if (VIEW_USER) bgs = BG_P || Promise.resolve();
-        else { loadFavs(); bgs = loadBg(d.login); }
+        else { bgs = loadBg(d.login); }
         // 资料 + 背景都就绪后再揭晓，避免头图/大背景「后到」造成跳动
         Promise.resolve(bgs).then(revealWhenReady, revealWhenReady);
       }).catch(function () { loginPrompt.hidden = false; revealWhenReady(); });

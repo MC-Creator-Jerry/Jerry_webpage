@@ -81,11 +81,11 @@ export async function onRequestPost(context) {
   const msg = { id, from: login, to, body: text, ts: Date.now(), read: false };
   await kv.put(msgKey(id), JSON.stringify(msg));
 
-  const myIn = await readArr(kv, inboxKey(login));
-  myIn.push(msg); if (myIn.length > MAX) myIn.length = MAX;
+  let myIn = await readArr(kv, inboxKey(login));
+  myIn.push(msg); if (myIn.length > MAX) myIn = myIn.slice(-MAX); // 保留最新 MAX 条（勿从末尾截断，否则丢最新消息）
   await kv.put(inboxKey(login), JSON.stringify(myIn));
-  const peerIn = await readArr(kv, inboxKey(to));
-  peerIn.push(msg); if (peerIn.length > MAX) peerIn.length = MAX;
+  let peerIn = await readArr(kv, inboxKey(to));
+  peerIn.push(msg); if (peerIn.length > MAX) peerIn = peerIn.slice(-MAX);
   await kv.put(inboxKey(to), JSON.stringify(peerIn));
 
   // 推送“消息”通知（复用既有通知红点）

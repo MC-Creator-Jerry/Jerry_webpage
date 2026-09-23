@@ -222,6 +222,12 @@
               <a class="btn-ghost plan-buy" data-tier="member1yr" data-zh="年付 ¥360 · 去赞助" data-en="Yearly ¥360 · Sponsor" href="#" target="_blank" rel="noopener">年付 ¥360 · 去赞助</a>
             </td>
           </tr>
+          <tr>
+            <td class="plan-name" data-zh="茶馆·发布功能升级" data-en="Teahouse Post Boost">茶馆·发布功能升级</td>
+            <td class="price" data-zh="¥13.25 / 月" data-en="¥13.25 / mo">¥13.25 / 月</td>
+            <td data-zh="茶馆内每日发帖上限 +10（普通用户 10 → 20），并解锁茶馆高级版功能。与小蓝页档位互相独立、可叠加。" data-en="+10 daily posts in the Teahouse (10 → 20 for regular users), plus Teahouse premium features. Independent of, and stacks with, any Xiaolan tier.">茶馆内每日发帖上限 +10（普通用户 10 → 20），并解锁茶馆高级版功能。与小蓝页档位互相独立、可叠加。</td>
+            <td class="plan-act"><a class="btn-ghost plan-buy" data-tier="teahouse_plus" data-zh="去赞助" data-en="Sponsor" href="#" target="_blank" rel="noopener">去赞助</a></td>
+          </tr>
         </tbody>
       </table>
       <p class="note" data-zh="💡 点「去赞助」会跳到爱发电对应档位的下单页。付款时请在「订单留言」里写上你的小蓝页用户名（GitHub 登录名，例如 MC-Creator-Jerry），权益就会在付款后自动到账，不用再走兑换流程。"
@@ -301,7 +307,8 @@
       afdianPlans: {
         supporter:  '76588066b37111f19efb5254001e7c00',        // 赞助者 ¥20/月
         member1:   '700bd638b37411f19f0a52540025c377',         // 小蓝页·1级成员 ¥32.50/月
-        member1yr: '07d51df0b37811f1a7ea52540025c377'          // 小蓝页·1级成员 ¥360/年（更划算）
+        member1yr: '07d51df0b37811f1a7ea52540025c377',         // 小蓝页·1级成员 ¥360/年（更划算）
+        teahouse_plus: ''                                      // 茶馆·发布功能升级 ¥13.25/月（在爱发电建好该套餐后，把 plan_id 填这里）
       },
       wechat:  '',   // 微信收款链接（点链接/扫码直接付款）
       alipay: '',   // 支付宝收款链接
@@ -393,7 +400,13 @@
           var b = btns[i];
           var tier = b.getAttribute('data-tier');
           var pid = plans[tier];
-          if (pid) b.setAttribute('href', 'https://ifdian.net/order/create?plan_id=' + pid);
+          if (pid) {
+            b.setAttribute('href', 'https://ifdian.net/order/create?plan_id=' + pid);
+          } else {
+            // 该档位还没在爱发电建好（plan_id 未填）→ 退到爱发电主页，避免死链
+            var home = (window.XL_SUPPORT && window.XL_SUPPORT.afdian) || '';
+            if (home) b.setAttribute('href', home);
+          }
         }
       }
 

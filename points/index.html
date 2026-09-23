@@ -10,7 +10,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>积分榜 · Jerry's webpage</title>
-<meta name="description" content="用户积分与排行榜：帖子榜、登录榜与等级。" />
+<meta name="description" content="用户积分与排行榜：登录榜与等级。" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <style>  
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -106,23 +106,7 @@
   <main class="content">
     <section class="hero">
       <h1>积分榜</h1>
-      <p>发帖与登录都有排名。看看谁是本站最活跃的作者，谁又是出勤最稳定的老朋友。</p>
-    </section>
-
-    <section class="card board">
-      <div class="board-head">
-        <h2>帖子榜</h2>
-        <div class="prio">
-          <label class="prio-label" for="prioPost" data-zh="显示优先级" data-en="Priority">显示优先级</label>
-          <select class="prio-sel" id="prioPost">
-            <option value="none" data-zh="无" data-en="None">无</option>
-            <option value="follow" data-zh="关注" data-en="Followed">关注</option>
-            <option value="friend" data-zh="好友优先" data-en="Friends first">好友优先</option>
-          </select>
-        </div>
-      </div>
-      <div class="lb" id="lbPost"></div>
-      <p class="prio-note hidden" id="prioPostNote" data-zh="「关注 / 好友优先」会按你关注的人排序，登录后可用。" data-en="Follow/friends priority sorts by people you follow (requires sign-in).">「关注 / 好友优先」会按你关注的人排序，登录后可用。</p>
+      <p>按登录活跃天数排名。看看谁是本站出勤最稳定的老朋友。</p>
     </section>
 
     <section class="card board">
@@ -142,7 +126,6 @@
 
     <section class="card">
       <p class="rule">
-        帖子榜：每发布 1 篇帖子 = 10 分，按积分排序。<br>
         登录榜：累计「活跃天数」（每天访问本站计 1 天）。等级越高，每升一级所需天数越多——Lv1→2 需 10 天，之后每升一级再 +5 天；最高 Lv.100，到顶即满级。进度条显示距下一级还需几天。<br>
         显示优先级：选「关注」把你关注的用户排在最前；选「好友优先」把互相关注（好友）的用户排在最前，其次是你关注的用户。
       </p>
@@ -168,13 +151,10 @@
   <script src="../auth.js?v=20260922b"></script>
   <script>
     (function () {
-      var lbPost = document.getElementById('lbPost');
       var lbLogin = document.getElementById('lbLogin');
-      var prioPost = document.getElementById('prioPost');
       var prioLogin = document.getElementById('prioLogin');
-      var prioPostNote = document.getElementById('prioPostNote');
 
-      var postBoard = [], loginBoard = [];
+      var loginBoard = [];
       var followSet = new Set(), friendSet = new Set();
       var ME = (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login) || null;
       var loggedIn = !!ME;
@@ -185,22 +165,6 @@
         return el;
       }
       function cell(cls) { var d = document.createElement('div'); d.className = cls; return d; }
-
-      function renderPost(rows, me) {
-        if (!rows.length) { lbPost.innerHTML = '<div class="empty">还没有任何帖子，快来发布第一篇吧！</div>'; return; }
-        lbPost.innerHTML = '';
-        rows.forEach(function (r) {
-          var el = rowEl(me && r.login === me ? 'me' : '');
-          var rk = cell('rank' + (r.rank <= 3 ? ' r' + r.rank : '')); rk.textContent = r.rank;
-          var nm = cell('name');
-          var a = document.createElement('a'); a.href = '../personal_profile/?user=' + encodeURIComponent(r.login); a.textContent = '@' + r.login;
-          nm.appendChild(a);
-          var ps = cell('posts'); ps.textContent = r.posts + ' 帖';
-          var pt = cell('pts'); pt.textContent = r.points;
-          el.appendChild(rk); el.appendChild(nm); el.appendChild(ps); el.appendChild(pt);
-          lbPost.appendChild(el);
-        });
-      }
 
       function renderLogin(rows, me) {
         if (!rows.length) { lbLogin.innerHTML = '<div class="empty">还没有登录记录。</div>'; return; }
@@ -242,23 +206,19 @@
       }
 
       function refresh() {
-        renderPost(applyPriority(postBoard, prioPost.value), ME);
         renderLogin(applyPriority(loginBoard, prioLogin.value), ME);
       }
 
-      prioPost.addEventListener('change', refresh);
       prioLogin.addEventListener('change', refresh);
 
       if (!loggedIn) {
-        prioPost.disabled = true; prioLogin.disabled = true;
-        prioPost.title = '登录后可用'; prioLogin.title = '登录后可用';
-        if (prioPostNote) prioPostNote.classList.remove('hidden');
+        prioLogin.disabled = true;
+        prioLogin.title = '登录后可用';
       }
 
       fetch('/api/points')
-        .then(function (r) { return r.ok ? r.json() : { postBoard: [], loginBoard: [] }; })
+        .then(function (r) { return r.ok ? r.json() : { loginBoard: [] }; })
         .then(function (d) {
-          postBoard = d.postBoard || [];
           loginBoard = d.loginBoard || [];
           if (loggedIn) {
             fetch('/api/ufollow')
@@ -277,7 +237,6 @@
           }
         })
         .catch(function () {
-          lbPost.innerHTML = '<div class="empty">加载失败</div>';
           lbLogin.innerHTML = '<div class="empty">加载失败</div>';
         });
     })();

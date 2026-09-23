@@ -353,9 +353,10 @@
           var card = document.createElement('div'); card.className = 'cmt-notif';
           var ico = c.type === 'mention' ? '📣' : (c.type === 'reply' ? '↩️' : '💬');
           var txt;
-          if (c.type === 'mention') txt = '<a href="../post/detail/?post=' + encodeURIComponent(c.postId) + '">@' + esc(c.fromLogin) + '</a> 在评论中 @ 了你';
-          else if (c.type === 'reply') txt = '<a href="../post/detail/?post=' + encodeURIComponent(c.postId) + '">@' + esc(c.fromLogin) + '</a> 回复了你的评论';
-          else txt = '<a href="../post/detail/?post=' + encodeURIComponent(c.postId) + '">@' + esc(c.fromLogin) + '</a> 评论了你的帖子《' + esc(c.postTitle) + '》';
+          var who = '@' + esc(c.fromLogin);
+          if (c.type === 'mention') txt = who + ' 在评论中 @ 了你';
+          else if (c.type === 'reply') txt = who + ' 回复了你的评论';
+          else txt = who + ' 评论了你的帖子《' + esc(c.postTitle) + '》';
           card.innerHTML =
             '<div class="ico">' + ico + '</div>' +
             '<div class="main">' +

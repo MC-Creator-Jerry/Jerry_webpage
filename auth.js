@@ -651,7 +651,7 @@
     window.__avatarHover = avatarHover;
     window.__noticeHover = noticeHover;
 
-    // 其余蓝条按钮的悬浮预览（帖子中心 / 产品 / 帮助中心 / 登录）
+    // 其余蓝条按钮的悬浮预览（产品 / 帮助中心 / 登录）
     function buildInfo(card, opts) {
       var html =
         '<div class="hc-name" style="text-align:left">' + esc(opts.title) + '</div>' +
@@ -666,14 +666,6 @@
         if (b) b.onclick = function (e) { if (opts.href === '#') e.preventDefault(); opts.onClick(); };
       }
     }
-    var postHover = makeHover(document.querySelector('.bar-right a[href$="post/"]'), function (c) {
-      buildInfo(c, {
-        title: t('帖子中心', 'Post Center'),
-        desc: t('浏览社区帖子，或发布你的内容。', 'Browse community posts or publish your own.'),
-        btnText: t('进入帖子中心 ›', 'Open Post Center ›'),
-        href: BASE + 'post/', self: true
-      });
-    });
     var prodHover = makeHover(document.querySelector('.bar-right a[href*="products.html"]'), function (c) {
       buildInfo(c, {
         title: t('产品', 'Products'),

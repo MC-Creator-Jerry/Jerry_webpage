@@ -302,7 +302,7 @@
     clearMeCache();
     try { sessionStorage.setItem('gh_oauth_state', state); } catch (x) {}
     var url = 'https://github.com/login/oauth/authorize?client_id=' + encodeURIComponent(CLIENT_ID) +
-      '&redirect_uri=' + encodeURIComponent(REDIRECT) +
+      '&redirect_uri=' + encodeURIComponent('https://mc-creator-jerry-webpage.pages.dev/api/callback') +
       '&scope=' + encodeURIComponent('read:user user:email') +
       '&state=' + encodeURIComponent(state);
     window.location.href = url;

@@ -716,7 +716,8 @@
     return;
   }
 
-  var REDIRECT = window.location.origin + '/api/callback';
+  // 固定回调到 CF 生产主站；避免 GH 镜像 / preview 子域名因 origin 不同被 GitHub OAuth 拒绝
+  var REDIRECT = 'https://mc-creator-jerry-webpage.pages.dev/api/callback';
   function randState() {
     var a = new Uint8Array(16);
     (window.crypto || window.msCrypto).getRandomValues(a);

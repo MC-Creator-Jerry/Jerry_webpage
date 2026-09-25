@@ -686,7 +686,7 @@
       buildInfo(c, {
         title: t('登录', 'Sign in'),
         desc: t('登录以同步你的设置与数据到云端。', 'Sign in to sync your settings and data to the cloud.'),
-        btnText: t('使用 GitHub 登录', 'Sign in with GitHub'),
+        btnText: t('登录 / 注册', 'Sign in / Register'),
         href: '#',
         onClick: function () { if (window.JW_LOGIN) window.JW_LOGIN(); }
       });

@@ -380,6 +380,7 @@ window.XLMedia = (function () {
   var ICON_MAP = [
     { keys: ['消息中心', '通知中心', '通知'], href: /\/notice\//, svg: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>' },
     { keys: ['产品'], href: /products/, svg: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>' },
+    { keys: ['兑换码', '兑换'], href: /\/redeem\//, svg: '<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M13 7v10"/><path d="M7 11h2"/><path d="M7 13h2"/>' },
     { keys: ['帮助中心', '帮助'], href: /helpcenter/, svg: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><circle cx="12" cy="17" r=".8" fill="currentColor"/>' },
     { keys: ['登录'], id: 'loginBtn', svg: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>' },
     { keys: ['退出'], id: 'logoutBtn', svg: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>' },
@@ -495,6 +496,7 @@ window.XLMedia = (function () {
     bars.forEach(function (bar) {
       var ref = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
       if (!hasBtn(bar, ['消息中心', '通知中心', '通知'], /\/notice\//)) bar.insertBefore(addBtn(pre + 'notice/', '消息中心', 'Messages'), ref);
+      if (!hasBtn(bar, ['兑换码', '兑换'], /\/redeem\//)) bar.insertBefore(addBtn(pre + 'redeem/', '兑换码', 'Redeem'), ref);
       if (!hasBtn(bar, ['产品'], /products/)) bar.insertBefore(addBtn(pre + 'products.html', '产品', 'Products'), ref);
     });
     // 补完图标，与既有注入逻辑一致（已注图标者会被守卫跳过）
@@ -520,6 +522,7 @@ window.XLMedia = (function () {
     if (/(^|\s)bar-avatar(\s|$)/.test(cls)) return 'login';
     if (id === 'loginBtn' || id === 'logoutBtn') return 'login';
     if (id === 'noticeBtn' || id === 'noticeBadge' || /\/notice\//.test(href) || /消息中心|通知中心|通知/.test(txt)) return 'notice';
+    if (id === 'redeemBtn' || /\/redeem\//.test(href) || /兑换码|兑换/.test(txt)) return 'redeem';
     if (/\/groups\//.test(href) || /群组/.test(txt)) return 'groups';
     if (id === 'subBlogBtn' || /\/sub-blog\//.test(href) || /订阅和博客/.test(txt)) return 'subBlog';
     if (id === 'supportPayBtn' || /\/support\//.test(href) || /支持与付款/.test(txt)) return 'support';
@@ -527,9 +530,10 @@ window.XLMedia = (function () {
     if (/\/products\.html/.test(href) || /产品/.test(txt)) return 'products';
     return 'other';
   }
-  // 规范顺序（左→右）：搜索 → 消息中心 → 订阅和博客 → 支持与付款 → 群组 → 产品 → 其它 → 登录/头像
+  // 规范顺序（左→右）：搜索 → 消息中心 → 兑换码 → 订阅和博客 → 支持与付款 → 群组 → 产品 → 其它 → 登录/头像
   // 2026-09-22 按 Jerry 要求移除 legacy「个人主页」(home) 槽位：顶栏从「搜索框」起头；个人主页入口已由 auth.js 改为最右头像，home.html 仅 301 跳板。群组入口保留。
-  var SEQ = ['search', 'notice', 'subBlog', 'support', 'groups', 'products', 'other', 'login'];
+  // 2026-09-26 按 Jerry 要求在「消息中心」与「订阅和博客」之间新增「兑换码」槽位（redeem/）。
+  var SEQ = ['search', 'notice', 'redeem', 'subBlog', 'support', 'groups', 'products', 'other', 'login'];
   function isBarEl(n) {
     if (n.nodeType !== 1) return false;
     var cls = n.className || '';

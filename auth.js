@@ -691,7 +691,7 @@
         onClick: function () { if (window.JW_LOGIN) window.JW_LOGIN(); }
       });
     });
-    window.__postHover = postHover; window.__prodHover = prodHover;
+    window.__prodHover = prodHover;
     window.__helpHover = helpHover; window.__loginHover = loginHover;
 
     // 避免头像的「悬浮预览」与原有「点击下拉菜单」互相冲突

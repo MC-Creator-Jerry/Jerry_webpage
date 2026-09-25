@@ -282,6 +282,12 @@
       </div>
     </section>
 
+    <section class="card" id="upgradeCard" hidden>
+      <h2 data-zh="升级状态" data-en="Upgrade status">升级状态</h2>
+      <div class="account-status" id="upgradeStatus">—</div>
+      <a class="seg" id="upgradeBtn" href="../support/" data-zh="去升级 / 续费" data-en="Upgrade / renew" hidden>去升级 / 续费</a>
+    </section>
+
     <section class="card" id="bindCard" hidden>
       <h2 data-zh="绑定邮箱 / GitHub" data-en="Link email / GitHub">绑定邮箱 / GitHub</h2>
       <p class="set-hint" data-zh="用同一邮箱登录 GitHub 与邮箱，即可合并为同一账户；绑定后两边数据互通。" data-en="Use the same email for GitHub and email login to merge into one account; linked data is shared.">用同一邮箱登录 GitHub 与邮箱，即可合并为同一账户；绑定后两边数据互通。</p>
@@ -399,7 +405,7 @@
       document.getElementById('optLang').addEventListener('click', function (e) {
         var b = e.target.closest('.seg'); if (!b) return;
         cur.lang = b.getAttribute('data-val');
-        set(K.lang, cur.lang); segActive('optLang', cur.lang); applyLang(); syncCloud();
+        set(K.lang, cur.lang); segActive('optLang', cur.lang); applyLang(); refreshUpgradeStatus(); syncCloud();
       });
       document.getElementById('optTheme').addEventListener('click', function (e) {
         var b = e.target.closest('.seg'); if (!b) return;
@@ -549,6 +555,46 @@
         });
       });
 
+      // 升级状态（茶馆·发布功能升级 + 小蓝页会员），数据来自 /api/me
+      var upgradeCard = document.getElementById('upgradeCard');
+      var upgradeStatus = document.getElementById('upgradeStatus');
+      var upgradeBtn = document.getElementById('upgradeBtn');
+      function fmtDate(ts) {
+        if (!ts) return '';
+        var d = new Date(ts);
+        var p = function (n) { return (n < 10 ? '0' : '') + n; };
+        return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+      }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function refreshUpgradeStatus() {
+        if (!upgradeCard) return;
+        fetch('/api/me', { credentials: 'same-origin' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (me) {
+            var en = document.documentElement.lang === 'en';
+            if (!me || me.error || !me.login) { upgradeCard.hidden = true; return; }
+            upgradeCard.hidden = false;
+            var tp = me.teahouse_plus;
+            var rows = [];
+            if (tp) {
+              var days = Math.max(0, Math.ceil((tp.exp - Date.now()) / 86400000));
+              rows.push((en ? 'Teahouse Post Boost: active · expires ' : '茶馆·发布功能升级：生效中 · 到期 ') + fmtDate(tp.exp) + (en ? ' (' + days + 'd left)' : '（剩 ' + days + ' 天）'));
+            } else {
+              rows.push(en ? 'Teahouse Post Boost: not activated' : '茶馆·发布功能升级：未开通');
+            }
+            if (me.sponsor) {
+              rows.push((en ? 'Xiaolan membership: ' : '小蓝页会员：') + esc(me.sponsor.label) + ' · ' + (en ? 'expires ' : '到期 ') + fmtDate(me.sponsor.exp));
+            }
+            upgradeStatus.innerHTML = rows.join('<br>');
+            if (upgradeBtn) upgradeBtn.hidden = !!tp;
+          })
+          .catch(function () { /* ignore */ });
+      }
+
       window.onAuthState = function (auth) {
         if (!settingsAuthBtn) return;
         var en = document.documentElement.lang === 'en';
@@ -556,10 +602,12 @@
           settingsAuthBtn.textContent = en ? 'Sign out' : '退出登录';
           settingsAuthBtn.onclick = function () { if (window.JW_LOGOUT) window.JW_LOGOUT(); };
           refreshAccountStatus();
+          refreshUpgradeStatus();
         } else {
           settingsAuthBtn.textContent = en ? 'Sign in' : '登录';
           settingsAuthBtn.onclick = function () { if (window.JW_LOGIN) window.JW_LOGIN(); };
           accountManage.hidden = true;
+          if (upgradeCard) upgradeCard.hidden = true;
         }
       };
       if (window.JW_AUTH) window.onAuthState(window.JW_AUTH);

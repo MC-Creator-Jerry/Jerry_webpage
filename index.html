@@ -285,6 +285,7 @@
   .prod-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 6px 18px rgba(20, 35, 59, 0.12); }
   .prod-icon { font-size: 1.8rem; margin-bottom: 8px; }
   .prod-icon-round { width: 40px; height: 40px; margin-bottom: 8px; border-radius: 50%; object-fit: contain; display: block; }
+  .prod-icon-sq { width: 40px; height: 40px; margin-bottom: 8px; border-radius: 9px; object-fit: contain; display: block; }
   .prod-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
   .prod-desc { font-size: 0.92rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
   .prod-soon { font-size: 0.8rem; color: var(--accent); margin-top: 8px; font-weight: 600; }
@@ -359,7 +360,7 @@
       <h2 data-zh="🚀 我的项目作品" data-en="🚀 My Projects">🚀 我的项目作品</h2>
       <div class="prod-grid">
         <a class="prod-card" href="products/cleanopt/">
-          <div class="prod-icon">🧹</div>
+          <img class="prod-icon-round" src="/icons/cleanopt.svg" alt="CleanOpt" loading="lazy">
           <div class="prod-name" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</div>
           <div class="prod-desc" data-zh="Windows 系统清理与内存优化小工具，后台静默运行。" data-en="Windows cleanup and memory optimizer that runs silently in the background.">Windows 系统清理与内存优化小工具，后台静默运行。</div>
           <div class="prod-soon" id="cleanoptVer" data-zh="v1.0.0 · 立即下载" data-en="v1.0.0 · Download now">v1.0.0 · 立即下载</div>
@@ -377,13 +378,13 @@
           <div class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</div>
         </a>
         <a class="prod-card" href="https://jerrybookstation.pages.dev/" target="_blank" rel="noopener">
-          <div class="prod-icon">📚</div>
+          <img class="prod-icon-sq" src="/icons/bookstation.svg" alt="书栈 BookStation" loading="lazy">
           <div class="prod-name" data-zh="书栈 BookStation" data-en="BookStation">书栈 BookStation</div>
           <div class="prod-desc" data-zh="独立小说站：书架浏览、内置阅读器、章节管理。纯文本渲染，安全零 XSS。" data-en="An independent novel site: bookshelf, built-in reader, chapter management. Plaintext rendering, XSS-safe.">独立小说站：书架浏览、内置阅读器、章节管理。纯文本渲染，安全零 XSS。</div>
           <div class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</div>
         </a>
         <a class="prod-card" href="https://jerrypianyu.pages.dev/" target="_blank" rel="noopener">
-          <div class="prod-icon">🏝️</div>
+          <img class="prod-icon-sq" src="/icons/pianyu.svg" alt="片屿 Pianyu" loading="lazy">
           <div class="prod-name" data-zh="片屿 Pianyu" data-en="Pianyu">片屿 Pianyu</div>
           <div class="prod-desc" data-zh="独立视频站：上新、看片、聊屿论。小蓝页单点登录。" data-en="An independent video site: upload, watch, and discuss. Single sign-on via 小蓝页.">独立视频站：上新、看片、聊屿论。小蓝页单点登录。</div>
           <div class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</div>

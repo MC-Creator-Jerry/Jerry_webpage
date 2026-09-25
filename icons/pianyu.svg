@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="片屿">
+  <defs>
+    <linearGradient id="gw" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff5a5f"/>
+      <stop offset="0.5" stop-color="#fb923c"/>
+      <stop offset="1" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2b9bf4"/>
+      <stop offset="1" stop-color="#21c08a"/>
+    </linearGradient>
+    <clipPath id="frame">
+      <rect x="3" y="3" width="58" height="58" rx="15"/>
+    </clipPath>
+    <style>
+      .bg { fill: #1a120e; }
+      @media (prefers-color-scheme: light) {
+        .bg { fill: #fff1e3; }
+      }
+    </style>
+  </defs>
+
+  <!-- 圆角底（暖色深浅主题） -->
+  <rect class="bg" x="3" y="3" width="58" height="58" rx="15"/>
+
+  <!-- 框内所有元素：裁剪到圆角框，避免顶出尖角 -->
+  <g clip-path="url(#frame)">
+    <!-- 海水（蓝 + 绿） -->
+    <path d="M3 44 q6 -4 12 0 t12 0 t12 0 t12 0 t12 0 L61 61 L3 61 Z" fill="url(#sea)" opacity="0.9"/>
+
+    <!-- 浪花 -->
+    <path d="M45 47 q3.5 -2.5 7 0 t7 0" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+    <path d="M45 53 q3.5 -2.5 7 0 t7 0" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.4"/>
+
+    <!-- 中间的岛 -->
+    <path d="M28 51 C31 40 41 40 44 51 Z" fill="url(#gw)"/>
+
+    <!-- 左下角的岸（更大） -->
+    <path d="M3 61 L3 44 C9 41 15 43 21 48 C24 51 25 55 26 61 Z" fill="url(#gw)"/>
+
+    <!-- 太阳（右上角） -->
+    <circle cx="47" cy="15" r="8" fill="url(#gw)"/>
+
+    <!-- 左上角圆角播放按钮 -->
+    <rect x="8" y="10" width="15" height="15" rx="5" fill="url(#gw)"/>
+    <path d="M13 12.5 L13 22.5 L21 17.5 Z" fill="#fffaf2"/>
+  </g>
+
+  <!-- 圆角描边框 -->
+  <rect x="3" y="3" width="58" height="58" rx="15" fill="none" stroke="url(#gw)" stroke-width="2.5"/>
+</svg>

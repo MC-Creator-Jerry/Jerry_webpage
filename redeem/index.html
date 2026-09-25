@@ -267,7 +267,7 @@
         status.className = 'status is-guest';
         status.innerHTML =
           '<div class="st-title">' + t('请先登录', 'Please sign in first') + '</div>' +
-          '<div class="st-meta">' + t('兑换码需要绑定到一个账号上，所以要先登录（用 GitHub 登录，只读取你的用户名和头像）。', 'Codes are bound to an account, so sign-in is required (GitHub sign-in; only your username and avatar are read).') + '</div>' +
+          '<div class="st-meta">' + t('兑换码需要绑定到一个账号上，所以要先登录/注册（支持 GitHub 或邮箱，只读取你的用户名和头像）。', 'Codes are bound to an account, so sign-in/register is required (GitHub or email; only your username and avatar are read).') + '</div>' +
           '<p style="margin-top:10px"><button class="btn-ghost" id="loginNow" type="button">' + t('登录', 'Sign in') + '</button></p>';
         var b = document.getElementById('loginNow');
         if (b) b.addEventListener('click', function () { if (window.JW_LOGIN) window.JW_LOGIN(); });

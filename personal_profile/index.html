@@ -17,7 +17,7 @@
 <title>个人资料 · Jerry's webpage</title>
 <meta name="description" content="个人资料：展示你的名字、简介、技能与链接。" />
 <meta name="author" content="Jerry" />
-<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg?v=20260926" />
 <!-- 首屏提速（B）：头像来自 GitHub（会重定向到 avatars.githubusercontent.com），提前建连省 DNS/TLS 往返 -->
 <link rel="preconnect" href="https://github.com" crossorigin />
 <link rel="preconnect" href="https://avatars.githubusercontent.com" crossorigin />
@@ -863,7 +863,8 @@
         renameEditor.hidden = true;
         renameBtn.hidden = !isOwn();
         // 设置背景按钮：仅本人可见
-        $('profileTools').hidden = !isOwn();        // 关注按钮：仅查看他人时可见
+        $('profileTools').hidden = !isOwn();
+        // 关注按钮：仅查看他人时可见
         updateFollowBtn();
         loadFollowState();
       }
@@ -1418,6 +1419,7 @@
     })();
   </script>
   <script src="../common.js?v=20260926a"></script>
+  <script src="../scroll-keys.js?v=20260926" defer></script>
 </body>
 </html>
 

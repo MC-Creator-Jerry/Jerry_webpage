@@ -38,6 +38,26 @@
   function inExcluded(el) { return !!(el.closest && el.closest(EXCLUDE)); }
   function genId() { return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
+  // 编辑器样式：xiaolan/teahouse 已内联在 common.css；bookstation/pianyu 由本脚本按需注入 /assets/editbar.css
+  function editbarCssReady() {
+    try {
+      var probe = document.createElement('div');
+      probe.className = 'xl-edit-banner';
+      probe.style.display = 'none';
+      document.body.appendChild(probe);
+      var pos = window.getComputedStyle(probe).position;
+      document.body.removeChild(probe);
+      return pos === 'fixed' || pos === 'absolute' || pos === 'sticky';
+    } catch (e) { return false; }
+  }
+  function ensureEditbarCss() {
+    if (editbarCssReady()) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/assets/editbar.css?v=20260926b';
+    document.head.appendChild(link);
+  }
+
   // 生成确定性 CSS 选择器（DOM 结构不变时稳定）
   function cssPath(el) {
     if (el.id) return '#' + (window.CSS && CSS.escape ? CSS.escape(el.id) : el.id);
@@ -223,6 +243,7 @@
     if (dirty) return;
     dirty = true;
     updateSaveBtn();
+    scheduleDraft();   // C: 有改动即安排空闲 20s 自动存草稿
   }
   function updateSaveBtn() {
     if (!saveBtn) return;
@@ -236,6 +257,76 @@
     saveBtn.textContent = '保存';
     saveBtn.classList.toggle('is-dirty', dirty);
     saveBtn.title = dirty ? '有未保存的修改（Ctrl/Cmd+S）' : '已保存（Ctrl/Cmd+S）';
+  }
+
+  // ---------- C: 防抖自动保存草稿（空闲 20s 写草稿键；刷新/崩溃不丢未保存改动） ----------
+  var draftTimer = null;
+  var DRAFT_MS = 20000;
+  // 收集当前编辑态的全部覆盖 + 块（与 saveEdits 同样的收集逻辑，抽出复用）
+  function collectPayload() {
+    var blocks = [];
+    var seen = {};
+    $all('#xl-edit-blocks .xl-block').forEach(function (wrap) {
+      var type = wrap.dataset.type;
+      var id = wrap.dataset.bid || genId();
+      if (seen[id]) return;
+      seen[id] = 1;
+      var w = parseInt(wrap.dataset.w || '0', 10) || 0;
+      var h = parseInt(wrap.dataset.h || '0', 10) || 0;
+      if (type === 'textbox') {
+        var inner = wrap.querySelector('.xl-block-inner');
+        blocks.push({ id: id, type: 'textbox', html: inner.innerHTML, style: inner.getAttribute('style') || '', w: w, h: h });
+      } else if (type === 'image') {
+        var img = wrap.querySelector('img');
+        blocks.push({ id: id, type: 'image', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '', w: w, h: h });
+      } else if (type === 'video') {
+        blocks.push({ id: id, type: 'video', url: wrap.dataset.url || '', w: w, h: h });
+      } else if (type === 'file') {
+        blocks.push({ id: id, type: 'file', url: wrap.dataset.url || '', name: wrap.dataset.name || '', w: w, h: h });
+      }
+    });
+    return { path: curPath(), edits: edits, blocks: blocks };
+  }
+  function scheduleDraft() {
+    if (draftTimer) clearTimeout(draftTimer);
+    draftTimer = setTimeout(saveDraft, DRAFT_MS);
+  }
+  function saveDraft() {
+    draftTimer = null;
+    if (!active || !dirty || saving) return;
+    var payload = collectPayload();
+    payload.draft = true;
+    fetch('/api/page-edit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (r.ok) toast('已自动保存草稿');
+    }).catch(function () {});
+  }
+  // 显式保存成功后清掉草稿键
+  function clearDraft() {
+    if (draftTimer) { clearTimeout(draftTimer); draftTimer = null; }
+    fetch('/api/page-edit?draft=1&path=' + encodeURIComponent(curPath()), { method: 'DELETE' })
+      .catch(function () {});
+  }
+  // 进入编辑态时恢复上次未保存的草稿
+  function loadDraft() {
+    fetch('/api/page-edit?draft=1&path=' + encodeURIComponent(curPath()))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        var dEdits = d.edits || {};
+        var dBlocks = Array.isArray(d.blocks) ? d.blocks : [];
+        if (!Object.keys(dEdits).length && !dBlocks.length) return;
+        Object.keys(dEdits).forEach(function (sel) { edits[sel] = dEdits[sel]; });
+        var c = blocksContainer();
+        $all('.xl-block', c).forEach(function (w) { w.remove(); });
+        dBlocks.forEach(function (b) { c.appendChild(buildBlockEl(b)); });
+        dirty = true; updateSaveBtn();
+        toast('已恢复未保存的草稿');
+      })
+      .catch(function () {});
   }
 
   function saveSel() {
@@ -1511,11 +1602,30 @@
     exitEdit(false);
   }
 
-  // 让出 banner 实际高度，防止固定 margin-top 遮挡内容
+  // 测量页面顶部「固定定位」的菜单栏/顶栏高度（仿 M365 顶栏会压在内容上导致顶部文字点不到）
+  function measureFixedTop() {
+    var total = 0;
+    try {
+      var els = document.querySelectorAll('header, .topbar, nav.topbar, .navbar, .app-bar, [data-fixed-top]');
+      Array.prototype.forEach.call(els, function (el) {
+        if (!el) return;
+        var cs = window.getComputedStyle(el);
+        if (cs.position === 'fixed' && el.getBoundingClientRect().top <= 4) {
+          total += (el.getBoundingClientRect().height || 0);
+        }
+      });
+    } catch (e) {}
+    return total;
+  }
+
+  // 让出 banner 实际高度 + 固定顶栏高度，防止固定栏遮挡内容（修「仿 M365 菜单栏遮挡顶部文字」）
   function syncBannerHeight() {
     if (!banner) return;
     var h = banner.getBoundingClientRect().height || banner.offsetHeight || 160;
+    var top = measureFixedTop();
     document.body.style.setProperty('--xl-banner-h', (h + 8) + 'px');
+    // 编辑态给 body 加的留白 = 编辑横幅 + 固定顶栏，确保页面最顶端文字不被任何固定栏压住
+    document.body.style.setProperty('--xl-edit-top', (h + top + 8) + 'px');
   }
 
   // ---------- 进入 / 保存 / 退出 ----------
@@ -1524,7 +1634,9 @@
     active = true;
     dirty = false;
     document.body.classList.add('xl-editmode');
+    ensureEditbarCss();
     showUI();
+    loadDraft();
     syncBannerHeight();
     if (!window.__xlBannerRO && 'ResizeObserver' in window) {
       window.__xlBannerRO = new ResizeObserver(function () { syncBannerHeight(); });
@@ -1610,7 +1722,8 @@
       dirty = false;
       updateSaveBtn();
       toast('已保存布局修改');
-      exitEdit(true);
+      // A: 保存成功后不强制退出编辑态，保留编辑界面方便连续修改（未保存指示已随 dirty=false 清除）
+      clearDraft();   // 显式保存成功后清掉自动保存的草稿键
     }).catch(function () {
       saving = false;
       updateSaveBtn();
@@ -1620,6 +1733,7 @@
 
   function exitEdit(keep) {
     active = false;
+    if (draftTimer) { clearTimeout(draftTimer); draftTimer = null; }
     activeWrap = null; activeInner = null; savedRange = null;
     dirty = false; saving = false;
     detachHandles();

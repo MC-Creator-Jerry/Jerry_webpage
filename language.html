@@ -130,8 +130,31 @@
       });
     })();
   </script>
-<script src="auth.js?v=20260925c"></script>
+  <script src="auth.js?v=20260925c"></script>
   <script src="common.js?v=20260926a"></script>
+  <script>
+    // O1 修复：language.html 此前缺失 i18n 引擎，顶栏 4 个 data-zh 按钮不随语言切换。
+    // 内联精简版 applyLang，仅替换首个文本节点以保留内部子元素（如 noticeBtn 的 badge）。
+    (function () {
+      function xlGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+      function xlApplyLang() {
+        var en = xlGet('xl_lang', 'zh') === 'en';
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          if (txt == null) continue;
+          var kids = n.childNodes, firstText = null;
+          for (var j = 0; j < kids.length; j++) { if (kids[j].nodeType === 3) { firstText = kids[j]; break; } }
+          if (firstText) firstText.nodeValue = txt;
+          else n.textContent = txt;
+        }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', xlApplyLang);
+      else xlApplyLang();
+    })();
+  </script>
+  <script src="scroll-keys.js?v=20260926" defer></script>
 </body>
 </html>
 

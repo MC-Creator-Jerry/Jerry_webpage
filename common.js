@@ -220,7 +220,7 @@ window.XLMedia = (function () {
       var t = f.type || '';
       if (/^image\//.test(t)) {
         return '<a class="att-tile att-img" href="' + u + '" target="_blank" rel="noopener">' +
-          '<img src="' + u + '" alt="' + esc(f.name) + '" loading="lazy"></a>';
+          '<img src="' + u + '" alt="' + esc(f.name) + '" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></a>';
       }
       if (/^video\//.test(t)) {
         return '<video class="att-tile att-video" src="' + u + '" controls playsinline preload="metadata"></video>';

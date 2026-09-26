@@ -1041,7 +1041,7 @@ window.XLMedia = (function () {
     // ⚠️ editbar.js 版本号必须与本文件（common.js?v=20260922a）同步 bump：
     //    改 editbar.js 后务必同时改这里，否则访客端仍加载旧版编辑栏。
     var s = document.createElement('script');
-    s.src = scriptPrefix() + 'editbar.js?v=20260921a';
+    s.src = scriptPrefix() + 'editbar.js?v=20260926b';
     s.async = true;
     document.head.appendChild(s);
   }
@@ -1129,9 +1129,19 @@ window.XLMedia = (function () {
 
 /* ============ 联系/建议表单（form.contact-form 或 #contactForm）：POST /api/contact ============ */
 /* 后端：存 KV + 给访客发自动回复 + 把建议转发到站长邮箱。任何含该表单的页面都会被自动接线。 */
+/* 扩展：分类选「Bug」时显示「是 Bug（提交并抽奖）/ 不是 Bug（仅留言）」分流，见下方 bug 分支。 */
 (function () {
   function lang() { try { return localStorage.getItem('xl_lang') === 'en' ? 'en' : 'zh'; } catch (e) { return 'zh'; } }
   function T(zh, en) { return lang() === 'en' ? en : zh; }
+  function hasLogin() { try { return /(?:^|;\s*)gh_user=/.test(document.cookie); } catch (e) { return false; } }
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    if (!el) { alert(msg); return; }
+    el.textContent = msg;
+    el.classList.add('xl-toast', 'show');
+    clearTimeout(window.__xlToastT);
+    window.__xlToastT = setTimeout(function () { el.classList.remove('show'); }, 2800);
+  }
   function wire(form) {
     if (!form || form.__xlWired) return;
     form.__xlWired = true;
@@ -1143,27 +1153,29 @@ window.XLMedia = (function () {
     if (!btn || !nameEl || !emailEl || !msgEl) return;
     btn.removeAttribute('onclick'); // 去掉占位 alert('功能开发中')
     form.addEventListener('submit', function (e) { e.preventDefault(); });
-    var busy = false;
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      if (busy) return;
+
+    function payload() {
       var name = (nameEl.value || '').trim();
       var email = (emailEl.value || '').trim();
       var msg = (msgEl.value || '').trim();
-      if (!name || !email || !msg) { alert(T('请填写姓名、邮箱和留言内容。', 'Please fill in name, email and message.')); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert(T('请填写正确的邮箱地址。', 'Please enter a valid email address.')); return; }
-      busy = true;
-      var old = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = T('发送中…', 'Sending…');
+      if (!name || !email || !msg) { alert(T('请填写姓名、邮箱和留言内容。', 'Please fill in name, email and message.')); return null; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert(T('请填写正确的邮箱地址。', 'Please enter a valid email address.')); return null; }
+      return { name: name, email: email, msg: msg, category: catEl ? (catEl.value || '') : '', page: location.pathname + location.search };
+    }
+
+    // 主发送按钮（非 Bug 分类使用）
+    var sending = false;
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (sending) return;
+      var p = payload();
+      if (!p) return;
+      sending = true;
+      var old = btn.textContent; btn.disabled = true; btn.textContent = T('发送中…', 'Sending…');
       fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name, email: email, msg: msg,
-          category: catEl ? (catEl.value || '') : '',
-          page: location.pathname + location.search
-        })
+        body: JSON.stringify(p)
       }).then(function (r) {
         return r.json().then(function (j) { return { status: r.status, j: j }; }, function () { return { status: r.status, j: {} }; });
       }).then(function (res) {
@@ -1178,9 +1190,75 @@ window.XLMedia = (function () {
       }).catch(function () {
         alert(T('网络错误，请稍后再试。', 'Network error, please try again later.'));
       }).then(function () {
-        busy = false; btn.disabled = false; btn.textContent = old;
+        sending = false; btn.disabled = false; btn.textContent = old;
       });
     });
+
+    // ---- Bug 分类：是 Bug / 不是 Bug 分流 + 抽奖 ----
+    var triage = document.getElementById('bugTriage');
+    var yesBtn = document.getElementById('bugYesBtn');
+    var noBtn = document.getElementById('bugNoBtn');
+    var loginHint = document.getElementById('bugTrialLogin');
+    function syncBugUI() {
+      if (!triage || !catEl) return;
+      var isBug = catEl.value === 'Bug';
+      if (isBug) {
+        if (btn) btn.hidden = true;
+        triage.hidden = false;
+        if (loginHint) loginHint.hidden = hasLogin();
+      } else {
+        if (btn) btn.hidden = false;
+        triage.hidden = true;
+      }
+    }
+    if (catEl) catEl.addEventListener('change', syncBugUI);
+    syncBugUI();
+
+    function postBug(isBug) {
+      var p = payload();
+      if (!p) return;
+      if (!hasLogin()) {
+        if (window.JW_LOGIN) window.JW_LOGIN();
+        else toast(T('请先登录后再举报 Bug。', 'Please log in first.'));
+        return;
+      }
+      var b = isBug ? yesBtn : noBtn;
+      var old = b ? b.textContent : '';
+      if (b) b.disabled = true;
+      fetch('/api/bug-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: p.name, email: p.email, msg: p.msg, page: p.page, isBug: isBug })
+      }).then(function (r) {
+        return r.json().then(function (j) { return { status: r.status, j: j }; }, function () { return { status: r.status, j: {} }; });
+      }).then(function (res) {
+        if (res.status === 401 || (res.j && res.j.error === 'login_required')) {
+          if (window.JW_LOGIN) window.JW_LOGIN();
+          else toast(T('请先登录后再举报 Bug。', 'Please log in first.'));
+          return;
+        }
+        if (res.status === 429) { toast(T('提交太频繁，请稍后再试。', 'Too many submissions, please try again later.')); return; }
+        if (!(res.status === 200 && res.j && res.j.ok)) { toast(T('发送失败，请稍后再试。', 'Failed to send, please try again later.')); return; }
+        var j = res.j;
+        if (isBug) {
+          if (j.already_today) {
+            toast(j.win ? T('🎉 你今天已抽中 1 小时小蓝页·1级成员！', '🎉 You already won 1-hour Level-1 Member today!') : T('你今天已抽过啦，明天再来~', 'You already drew today, come back tomorrow~'));
+          } else if (j.win) {
+            toast(j.alreadyMember ? T('🎉 你已抽中！会员时间 +12 小时', '🎉 You won! +12h membership') : T('🎉 抽中！已获得 1 小时小蓝页·1级成员', '🎉 You won! 1-hour Level-1 Member granted'));
+          } else {
+            toast(T('未抽中，明天再来~ 已记录你的 Bug 反馈', 'No luck this time, come back tomorrow~ Bug noted'));
+          }
+        } else {
+          toast(T('已收到，谢谢反馈 🙏', 'Received, thanks for the feedback 🙏'));
+        }
+        form.reset();
+        syncBugUI();
+      }).catch(function () {
+        toast(T('网络错误，请稍后再试。', 'Network error, please try again later.'));
+      }).then(function () { if (b) { b.disabled = false; b.textContent = old; } });
+    }
+    if (yesBtn) yesBtn.addEventListener('click', function (e) { e.preventDefault(); postBug(true); });
+    if (noBtn) noBtn.addEventListener('click', function (e) { e.preventDefault(); postBug(false); });
   }
   function init() {
     var forms = document.querySelectorAll('form.contact-form, #contactForm');

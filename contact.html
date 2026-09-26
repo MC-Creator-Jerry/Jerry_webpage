@@ -237,6 +237,20 @@
         <textarea class="c-input" name="msg" rows="4" data-ph-zh="想说的话…" data-ph-en="Your message…" placeholder="想说的话…"></textarea>
         <button type="button" id="contactSendBtn" class="btn" data-zh="发送留言 →" data-en="Send message →">发送留言 →</button>
       </form>
+      <div class="bug-triage" id="bugTriage" hidden>
+        <style>
+          .bug-triage { margin-top: 14px; padding: 14px 16px; border: 1px dashed color-mix(in srgb, var(--accent) 42%, var(--card-border)); border-radius: var(--radius, 14px); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+          .bug-trial-note { margin: 0 0 10px; font-size: .9rem; color: var(--muted, #8a8f98); line-height: 1.5; }
+          .bug-trial-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+          .bug-trial-login { margin: 10px 0 0; font-size: .85rem; color: var(--danger, #e5484d); }
+        </style>
+        <p class="bug-trial-note" data-zh="确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 🎁" data-en="Sure it's a bug? Click “Yes, it's a bug” to submit and enter the draw: 50% chance each day to win 1-hour Level-1 Member 🎁">确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 🎁</p>
+        <div class="bug-trial-btns">
+          <button type="button" id="bugYesBtn" class="btn" data-zh="🐞 是 Bug（提交并抽奖）" data-en="🐞 Yes, it's a bug (submit &amp; draw)">🐞 是 Bug（提交并抽奖）</button>
+          <button type="button" id="bugNoBtn" class="btn btn-ghost" data-zh="这不是 Bug（仅留言）" data-en="Not a bug (just a note)">这不是 Bug（仅留言）</button>
+        </div>
+        <p class="bug-trial-login" id="bugTrialLogin" hidden data-zh="🔒 需登录后才能抽奖，请先登录。" data-en="🔒 Log in first to join the draw.">🔒 需登录后才能抽奖，请先登录。</p>
+      </div>
     </section>
   </main>
 
@@ -294,8 +308,9 @@
     })();
   </script>
 <script src="auth.js?v=20260925c"></script>
-  <script src="common.js?v=20260926a"></script>
-  <script src="scroll-keys.js?v=20260926" defer></script>
+  <script src="common.js?v=20260926b"></script>
+  <div id="toast"></div>
+  <script src="scroll-keys.js?v=20260926c" defer></script>
 </body>
 </html>
 

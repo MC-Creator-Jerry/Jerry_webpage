@@ -1093,7 +1093,7 @@ html[data-theme="dark"] .fab img.ico { filter: brightness(0) invert(1); }
 .xl-edit-banner {
   position: fixed;
   top: 0; left: 0; right: 0;
-  z-index: 1200;
+  z-index: 2000;
   display: flex; flex-direction: column;
   background: #faf9f8;
   color: #242424;
@@ -1433,8 +1433,10 @@ html[data-theme="dark"] .xl-mini-toolbar .xl-mini-fg-bar { background: #f3f2f1; 
    —— 由 JS 在 body 上切换 .xl-rbn-collapsed 同步。
    高度不再写死：字体组因「清格式」等按钮实际超过 74px，固定 156px 会遮挡内容。
    用 ResizeObserver 把 banner 实时高度写进 --xl-banner-h，CSS 取这个变量 + 8px 缓冲。 */
-body.xl-editmode #xl-edit-blocks { margin-top: var(--xl-banner-h, 160px); }
-body.xl-editmode.xl-rbn-collapsed #xl-edit-blocks { margin-top: var(--xl-banner-h, 56px); }
+/* 进入编辑态给 body 留白 = 编辑横幅 + 固定顶栏，修「仿 M365 菜单栏遮挡顶部文字」 */
+body.xl-editmode { padding-top: var(--xl-edit-top, 168px); }
+body.xl-editmode #xl-edit-blocks { margin-top: 0; }
+body.xl-editmode.xl-rbn-collapsed { padding-top: var(--xl-edit-top, 168px); }
 
 /* 保存按钮：有未保存修改时右上角显示琥珀色圆点 */
 .xl-edit-save.is-dirty { position: relative; }

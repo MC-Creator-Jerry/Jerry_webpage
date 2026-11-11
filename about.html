@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="boot.js?v=20260921c"></script>
+  <script src="boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>关于 · Jerry's webpage</title>
 <meta name="description" content="关于 Jerry 与小蓝页：独立开发者 Jerry（MC-Creator-Jerry）是谁，这个站点在做什么，以及背后的产品理念。" />
 <meta name="author" content="Jerry" />
@@ -93,7 +93,16 @@
   }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="common.css?v=20260921a" />
+  <link rel="stylesheet" href="common.css?v=20261103a" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -106,11 +115,11 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -156,7 +165,7 @@
       <p data-zh="对一个工具或话题感兴趣？欢迎通过这些方式找到我：" data-en="Interested in a tool or topic? Reach me through any of these:">对一个工具或话题感兴趣？欢迎通过这些方式找到我：</p>
       <ul class="about-list">
         <li><a class="inline-link" href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a></li>
-        <li data-zh="📧 邮箱：jerryprdservice@163.com" data-en="📧 Email: jerryprdservice@163.com">📧 邮箱：jerryprdservice@163.com</li>
+        <li><i class="ic" data-ic="mail" aria-hidden="true"></i><span data-zh="邮箱：jerryprdservice@163.com" data-en="Email: jerryprdservice@163.com">邮箱：jerryprdservice@163.com</span></li>
         <li data-zh="不想用 GitHub？可以 <a class='inline-link' href='subscribe/'>邮箱订阅</a> 站点更新，或到 <a class='inline-link' href='guestbook/'>留言板</a> 给我留言。" data-en="Prefer not GitHub? <a class='inline-link' href='subscribe/'>Subscribe by email</a> for updates, or leave a note on the <a class='inline-link' href='guestbook/'>guestbook</a>.">不想用 GitHub？可以 <a class="inline-link" href="subscribe/">邮箱订阅</a> 站点更新，或到 <a class="inline-link" href="guestbook/">留言板</a> 给我留言。</li>
       </ul>
     </section>
@@ -164,7 +173,8 @@
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="index.html" data-zh="返回主页" data-en="Back to home">返回主页</a> · <a href="blog/" data-zh="博客" data-en="Blog">博客</a> · <a href="guestbook/" data-zh="留言板" data-en="Guestbook">留言板</a> · <a href="contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <div class="float-actions">
     <a class="fab" href="language.html"  aria-label="语言" title="语言">
@@ -175,9 +185,12 @@
     </a>
   </div>
 
-  <script src="prefs.js?v=20260909a"></script>
-  <script src="auth.js?v=20260925c"></script>
-  <script src="common.js?v=20260926a"></script>
-  <script src="scroll-keys.js?v=20260926c" defer></script>
+  <script src="prefs.js?v=20261027a"></script>
+  <script src="auth.js?v=20261103a"></script>
+  <script src="common.js?v=20261111a"></script>
+  <script src="scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+

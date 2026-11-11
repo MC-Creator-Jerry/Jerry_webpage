@@ -1,14 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
 </script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>订阅 · Jerry's webpage</title>
 <meta name="description" content="邮件订阅。" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=20260926" />
@@ -44,7 +44,16 @@
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .content { padding: 28px 16px 90px; } .sub-form { flex-direction: column; } }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -75,7 +84,7 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="../auth.js?v=20260925c"></script>
+  <script src="../auth.js?v=20261103a"></script>
   <script>
     (function () {
       var toastEl = document.getElementById('toast');
@@ -92,16 +101,16 @@
         var email = emailEl.value.trim();
         if (!email) { toast('请输入邮箱', true); return; }
         subBtn.disabled = true;
-        fetch('/api/subscribe', {
+        fetch('/api/mail-broadcast', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email })
+          body: JSON.stringify({ action: 'subscribe', email: email })
         }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
             subBtn.disabled = false;
             if (res.ok) {
               emailEl.value = '';
-              toast(res.body && res.body.already ? '你已在订阅名单中 ✓' : '订阅成功 ✓');
+              toast(res.body && res.body.already ? '你已在订阅名单中 ' : '订阅成功 ');
               subHint.textContent = '已加入订阅名单（共 ' + (res.body && res.body.count || 1) + ' 位订阅者）。可随时取消订阅。';
             } else if (res.body && res.body.error === 'bad_email') { toast('邮箱格式有误', true); }
             else if (res.body && res.body.error === 'rate_limited') { toast('操作过于频繁，请稍后再试', true); }
@@ -116,8 +125,11 @@
       }).catch(function () {});
     })();
   </script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

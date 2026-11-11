@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="boot.js?v=20260921c"></script>
+  <script src="boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>产品 · Jerry's webpage</title>
 <meta name="description" content="Jerry's webpage 提供的产品与入口汇总：全球新闻等。" />
 <meta name="author" content="Jerry" />
@@ -93,6 +93,8 @@
 
   /* ---- 内容区 ---- */
   .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  /* 2026-10-29：拓宽内容区，消除宽屏下的大片侧边空白（覆盖 common.css 的 1180 !important） */
+  main.content { max-width: min(1400px, calc(100% - 48px)) !important; padding-left: 24px; padding-right: 24px; }
   .hero { margin-bottom: 36px; }
   .hero h1 {
     font-size: 1.9rem;
@@ -164,6 +166,10 @@
   .prod-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
   .prod-desc { font-size: 0.92rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
   .prod-soon { font-size: 0.8rem; color: var(--accent); margin-top: 8px; font-weight: 600; }
+  .prod-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; color: #fff; background: var(--muted); border-radius: 999px; padding: 2px 8px; margin-top: 8px; }
+  .prod-tag.t-dev { background: var(--accent); }
+  .prod-tag.t-live { background: #2e9e5b; }
+  .prod-tag[hidden] { display: none; }                           /* 自动判定徽章默认隐藏，JS 判定后显示 */
 
   /* 固定按钮 + 已固定 / 推荐区 */
   .prod-pin {
@@ -221,7 +227,8 @@
   }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="common.css?v=20260921a" />
+  <link rel="stylesheet" href="common.css?v=20261103a" />
+  <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
   <header class="topbar">
@@ -234,11 +241,11 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -254,166 +261,132 @@
 
     <section class="card">
       <h2 data-zh="全部产品" data-en="All Products">全部产品</h2>
-      <div class="prod-grid">
-        <a class="prod-card" href="products/cleanopt/" data-pin-icon="🧹" data-pin-name="CleanOpt" data-pin-en="CleanOpt" data-pin-url="products/cleanopt/" data-pin-desc="Windows 系统清理与内存优化小工具。" data-pin-desc-en="Windows cleanup &amp; memory optimizer.">
-          <img class="prod-icon-round" src="/icons/cleanopt.svg" alt="CleanOpt" loading="lazy">
-          <div class="prod-name" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</div>
-          <div class="prod-desc" data-zh="Windows 系统清理与内存优化小工具。" data-en="Windows system cleanup and memory optimization tool.">Windows 系统清理与内存优化小工具。</div>
-          <div class="prod-soon" id="cleanoptVer" data-zh="2026.0831.1813 · 立即下载" data-en="2026.0831.1813 · Download now">2026.0831.1813 · 立即下载</div>
-          <span class="prod-tag t-live" data-zh="✅ 持续维护中" data-en="✅ Maintained">✅ 持续维护中</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
-        </a>
-        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener" data-pin-icon="📰" data-pin-name="全球新闻" data-pin-en="Global News" data-pin-url="https://mc-creator-jerry.github.io/daily-news/" data-pin-desc="每日双语全球要闻，10 大领域实时更新。" data-pin-desc-en="Daily bilingual world news across 10 fields.">
-          <img class="prod-icon-round" src="/icons/news.svg" alt="全球新闻" loading="lazy">
-          <div class="prod-name" data-zh="全球新闻" data-en="Global News">全球新闻</div>
-          <div class="prod-desc" data-zh="每日双语全球要闻，10 大领域实时更新。" data-en="Daily bilingual world news across 10 fields, updated every day.">每日双语全球要闻，10 大领域实时更新。</div>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
-        </a>
-        <a class="prod-card" href="https://jerryteahouse.pages.dev/" target="_blank" rel="noopener" data-pin-icon="🍵" data-pin-name="茶馆 JerryTeahouse" data-pin-en="JerryTeahouse" data-pin-url="https://jerryteahouse.pages.dev/" data-pin-desc="独立小茶室：慢慢泡茶、慢慢写字。小蓝页单点登录。" data-pin-desc-en="An independent tea room for slow writing. Single sign-on via 小蓝页.">
-          <img class="prod-icon-round" src="/icons/teahouse.svg" alt="茶馆" loading="lazy">
-          <div class="prod-name" data-zh="茶馆 JerryTeahouse" data-en="JerryTeahouse">茶馆 JerryTeahouse</div>
-          <div class="prod-desc" data-zh="独立小茶室：慢慢泡茶、慢慢写字。小蓝页单点登录。" data-en="An independent tea room for slow writing. Single sign-on via 小蓝页.">独立小茶室：慢慢泡茶、慢慢写字。小蓝页单点登录。</div>
-          <span class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
-        </a>
-        <a class="prod-card" href="https://jerrybookstation.pages.dev/" target="_blank" rel="noopener" data-pin-icon="📚" data-pin-name="书栈 BookStation" data-pin-en="BookStation" data-pin-url="https://jerrybookstation.pages.dev/" data-pin-desc="独立小说站：书架浏览、内置阅读器、章节管理。" data-pin-desc-en="An independent novel site: bookshelf, reader, and chapter management.">
-          <img class="prod-icon-sq" src="/icons/bookstation.svg" alt="书栈 BookStation" loading="lazy">
-          <div class="prod-name" data-zh="书栈 BookStation" data-en="BookStation">书栈 BookStation</div>
-          <div class="prod-desc" data-zh="独立小说站：书架浏览、内置阅读器、章节管理。纯文本渲染，安全零 XSS。" data-en="An independent novel site: bookshelf, built-in reader, chapter management. Plaintext rendering, XSS-safe.">独立小说站：书架浏览、内置阅读器、章节管理。纯文本渲染，安全零 XSS。</div>
-          <span class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
-        </a>
-        <a class="prod-card" href="https://jerrypianyu.pages.dev/" target="_blank" rel="noopener" data-pin-icon="🏝️" data-pin-name="片屿 Pianyu" data-pin-en="Pianyu" data-pin-url="https://jerrypianyu.pages.dev/" data-pin-desc="独立视频站：上新、看片、聊屿论。小蓝页单点登录。" data-pin-desc-en="An independent video site: upload, watch, and discuss. Single sign-on via 小蓝页.">
-          <img class="prod-icon-sq" src="/icons/pianyu.svg" alt="片屿 Pianyu" loading="lazy">
-          <div class="prod-name" data-zh="片屿 Pianyu" data-en="Pianyu">片屿 Pianyu</div>
-          <div class="prod-desc" data-zh="独立视频站：上新、看片、聊屿论。小蓝页单点登录。" data-en="An independent video site: upload, watch, and discuss. Single sign-on via 小蓝页.">独立视频站：上新、看片、聊屿论。小蓝页单点登录。</div>
-          <span class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
-        </a>
-      </div>
+      <h3 class="prod-sub-h" data-zh="软件" data-en="Software">软件</h3>
+      <div class="prod-grid" data-prod-list="software" data-prod-style="card"></div>
+      <h3 class="prod-sub-h" data-zh="网站" data-en="Websites">网站</h3>
+      <div class="prod-grid" data-prod-list="site" data-prod-style="card"></div>
     </section>
 
     <section class="card" id="pinnedSection">
       <h2 data-zh="我的已固定" data-en="My Pinned">我的已固定</h2>
       <div class="prod-grid" id="pinnedGrid" hidden></div>
-      <p class="pin-empty" id="pinnedEmpty" data-zh="你还没有固定任何产品。在任意产品卡片上点击右上角的 ☆ 即可固定到这里。"
-         data-en="You haven't pinned anything yet. Tap the ☆ in the top-right of any product card to pin it here.">你还没有固定任何产品。在任意产品卡片上点击右上角的 ☆ 即可固定到这里。</p>
+      <p class="pin-empty" id="pinnedEmpty"><i class="ic" data-ic="star" aria-hidden="true"></i><span data-zh="你还没有固定任何产品。在任意产品卡片上点击右上角的  即可固定到这里。" data-en="You haven't pinned anything yet. Tap the  in the top-right of any product card to pin it here.">你还没有固定任何产品。在任意产品卡片上点击右上角的  即可固定到这里。</span></p>
     </section>
 
     <section class="card">
-      <h2 data-zh="站长推荐网络产品" data-en="Webmaster's Picks">站长推荐网络产品</h2>
+      <h2 data-zh="外部好站推荐" data-en="Webmaster's Picks">外部好站推荐</h2>
       <div class="prod-grid">
         <a class="prod-card" href="https://wordly.org" target="_blank" rel="noopener" data-pin-icon="https://wordly.org/favicon.ico" data-pin-name="Wordle" data-pin-en="Wordle" data-pin-url="https://wordly.org" data-pin-desc="每日猜词小游戏。" data-pin-desc-en="Daily word guessing game.">
           <img class="prod-icon-img" src="https://wordly.org/favicon.ico" alt="Wordle" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">Wordle</div>
           <div class="prod-desc">每日猜词小游戏。</div>
           <span class="ext-badge">wordly.org ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://www.bilibili.com" target="_blank" rel="noopener" data-pin-icon="https://www.bilibili.com/favicon.ico" data-pin-name="哔哩哔哩" data-pin-en="Bilibili" data-pin-url="https://www.bilibili.com" data-pin-desc="中文视频与社区平台。" data-pin-desc-en="Chinese video &amp; community platform.">
           <img class="prod-icon-img" src="https://www.bilibili.com/favicon.ico" alt="哔哩哔哩" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">哔哩哔哩</div>
           <div class="prod-desc">中文视频与社区平台。</div>
           <span class="ext-badge">bilibili.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://www.deepseek.com" target="_blank" rel="noopener" data-pin-icon="https://www.deepseek.com/favicon.ico" data-pin-name="DeepSeek" data-pin-en="DeepSeek" data-pin-url="https://www.deepseek.com" data-pin-desc="智能对话与推理模型。" data-pin-desc-en="AI chat &amp; reasoning models.">
           <img class="prod-icon-img" src="https://www.deepseek.com/favicon.ico" alt="DeepSeek" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">DeepSeek</div>
           <div class="prod-desc">智能对话与推理模型。</div>
           <span class="ext-badge">deepseek.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://www.duolingo.com" target="_blank" rel="noopener" data-pin-icon="https://d35aaqx5ub95lt.cloudfront.net/favicon.ico" data-pin-name="Duolingo" data-pin-en="Duolingo" data-pin-url="https://www.duolingo.com" data-pin-desc="游戏化语言学习。" data-pin-desc-en="Gamified language learning.">
           <img class="prod-icon-img" src="https://d35aaqx5ub95lt.cloudfront.net/favicon.ico" alt="Duolingo" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">Duolingo</div>
           <div class="prod-desc">游戏化语言学习。</div>
           <span class="ext-badge">duolingo.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://github.com" target="_blank" rel="noopener" data-pin-icon="https://github.com/favicon.ico" data-pin-name="GitHub" data-pin-en="GitHub" data-pin-url="https://github.com" data-pin-desc="全球代码托管与协作。" data-pin-desc-en="Global code hosting &amp; collaboration.">
           <img class="prod-icon-img" src="https://github.com/favicon.ico" alt="GitHub" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">GitHub</div>
           <div class="prod-desc">全球代码托管与协作。</div>
           <span class="ext-badge">github.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://www.cloudflare.com" target="_blank" rel="noopener" data-pin-icon="https://www.cloudflare.com/favicon.ico" data-pin-name="Cloudflare" data-pin-en="Cloudflare" data-pin-url="https://www.cloudflare.com" data-pin-desc="网络性能与安全平台。" data-pin-desc-en="Web performance &amp; security platform.">
           <img class="prod-icon-img" src="https://www.cloudflare.com/favicon.ico" alt="Cloudflare" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">Cloudflare</div>
           <div class="prod-desc">网络性能与安全平台。</div>
           <span class="ext-badge">cloudflare.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://wheelofnames.com" target="_blank" rel="noopener" data-pin-icon="https://wheelofnames.com/favicon.ico" data-pin-name="Wheel of Names" data-pin-en="Wheel of Names" data-pin-url="https://wheelofnames.com" data-pin-desc="随机抽签与转盘工具。" data-pin-desc-en="Random picker &amp; name wheel.">
           <img class="prod-icon-img" src="https://wheelofnames.com/favicon.ico" alt="Wheel of Names" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">Wheel of Names</div>
           <div class="prod-desc">随机抽签与转盘工具。</div>
           <span class="ext-badge">wheelofnames.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://endfield.hypergryph.com" target="_blank" rel="noopener" data-pin-icon="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/cb/f4/3c/cbf43c8d-a911-f698-e68b-3f8c26719f02/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg" data-pin-name="终末地" data-pin-en="Endfield" data-pin-url="https://endfield.hypergryph.com" data-pin-desc="鹰角网络终端工业题材新作。" data-pin-desc-en="Hypergryph's terminal-industrial themed game.">
           <img class="prod-icon-img" src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/cb/f4/3c/cbf43c8d-a911-f698-e68b-3f8c26719f02/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg" alt="终末地" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">终末地</div>
           <div class="prod-desc">鹰角网络终端工业题材新作。</div>
           <span class="ext-badge">endfield.hypergryph.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://www.minecraft.net" target="_blank" rel="noopener" data-pin-icon="https://www.minecraft.net/favicon.ico" data-pin-name="Minecraft" data-pin-en="Minecraft" data-pin-url="https://www.minecraft.net" data-pin-desc="方块沙盒建造与冒险游戏。" data-pin-desc-en="Block-based sandbox building &amp; adventure game.">
           <img class="prod-icon-img" src="https://www.minecraft.net/favicon.ico" alt="Minecraft" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">Minecraft</div>
           <div class="prod-desc">方块沙盒建造与冒险游戏。</div>
           <span class="ext-badge">minecraft.net ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://imgupscaler.ai" target="_blank" rel="noopener" data-pin-icon="https://imgupscaler.ai/favicon.ico" data-pin-name="ImgUpscaler" data-pin-en="ImgUpscaler" data-pin-url="https://imgupscaler.ai" data-pin-desc="AI 图片放大与画质增强。" data-pin-desc-en="AI image upscaling &amp; enhancement.">
           <img class="prod-icon-img" src="https://imgupscaler.ai/favicon.ico" alt="ImgUpscaler" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">ImgUpscaler</div>
           <div class="prod-desc">AI 图片放大与画质增强。</div>
           <span class="ext-badge">imgupscaler.ai ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://magiceraser.org/zh/remove-watermark-from-image" target="_blank" rel="noopener" data-pin-icon="https://magiceraser.org/favicon.ico" data-pin-name="Magic Eraser" data-pin-en="Magic Eraser" data-pin-url="https://magiceraser.org/zh/remove-watermark-from-image" data-pin-desc="在线抠图与去除图片水印。" data-pin-desc-en="Online object &amp; watermark removal.">
           <img class="prod-icon-img" src="https://magiceraser.org/favicon.ico" alt="Magic Eraser" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">Magic Eraser</div>
           <div class="prod-desc">在线抠图与去除图片水印。</div>
           <span class="ext-badge">magiceraser.org ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://account.microsoft.com" target="_blank" rel="noopener" data-pin-icon="https://account.microsoft.com/favicon.ico" data-pin-name="Microsoft 账户" data-pin-en="Microsoft account" data-pin-url="https://account.microsoft.com" data-pin-desc="微软账号登录与管理中心。" data-pin-desc-en="Microsoft sign-in &amp; account hub.">
           <img class="prod-icon-img" src="https://account.microsoft.com/favicon.ico" alt="Microsoft 账户" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">Microsoft 账户</div>
           <div class="prod-desc">微软账号登录与管理中心。</div>
           <span class="ext-badge">account.microsoft.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
-        <a class="prod-card" href="https://xiaoce.fun/daily" target="_blank" rel="noopener" data-pin-icon="🧂" data-pin-name="猜盐" data-pin-en="Caiyan" data-pin-url="https://xiaoce.fun/daily" data-pin-desc="趣味在线猜谜平台：猜城、猜词、猜病、地理、文字与娱乐多类型挑战。" data-pin-desc-en="Fun online guessing platform: cities, words, geography, culture & more.">
-          <div class="prod-icon">🧂</div>
+        <a class="prod-card" href="https://xiaoce.fun/daily" target="_blank" rel="noopener" data-pin-icon="" data-pin-name="猜盐" data-pin-en="Caiyan" data-pin-url="https://xiaoce.fun/daily" data-pin-desc="趣味在线猜谜平台：猜城、猜词、猜病、地理、文字与娱乐多类型挑战。" data-pin-desc-en="Fun online guessing platform: cities, words, geography, culture & more.">
+          <div class="prod-icon"><i class="ic" data-ic="dot" aria-hidden="true"></i></div>
           <div class="prod-name">猜盐</div>
           <div class="prod-desc">趣味在线猜谜平台：猜城、猜词、猜病、地理、文字与娱乐多类型挑战。</div>
           <span class="ext-badge">xiaoce.fun ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
-        <a class="prod-card" href="https://tuxun.fun/" target="_blank" rel="noopener" data-pin-icon="🗺" data-pin-name="图寻" data-pin-en="Tuxun" data-pin-url="https://tuxun.fun/" data-pin-desc="基于实景卫星图像的地理探索竞技：看图找地点，全球对战。" data-pin-desc-en="Geo-guessing battle game powered by satellite imagery. Play worldwide.">
-          <div class="prod-icon">🗺</div>
+        <a class="prod-card" href="https://tuxun.fun/" target="_blank" rel="noopener" data-pin-icon="" data-pin-name="图寻" data-pin-en="Tuxun" data-pin-url="https://tuxun.fun/" data-pin-desc="基于实景卫星图像的地理探索竞技：看图找地点，全球对战。" data-pin-desc-en="Geo-guessing battle game powered by satellite imagery. Play worldwide.">
+          <div class="prod-icon"><i class="ic" data-ic="map" aria-hidden="true"></i></div>
           <div class="prod-name">图寻</div>
           <div class="prod-desc">基于实景卫星图像的地理探索竞技：看图找地点，全球对战。</div>
           <span class="ext-badge">tuxun.fun ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://www.nationalgeographic.com" target="_blank" rel="noopener" data-pin-icon="https://www.nationalgeographic.com/favicon.ico" data-pin-name="National Geographic" data-pin-en="National Geographic" data-pin-url="https://www.nationalgeographic.com" data-pin-desc="国家地理：探索、科学、摄影与故事。" data-pin-desc-en="National Geographic: exploration, science, photography & stories.">
           <img class="prod-icon-img" src="https://www.nationalgeographic.com/favicon.ico" alt="National Geographic" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">National Geographic</div>
           <div class="prod-desc">国家地理：探索、科学、摄影与故事。</div>
           <span class="ext-badge">nationalgeographic.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
         <a class="prod-card" href="https://www.chess.com" target="_blank" rel="noopener" data-pin-icon="https://www.chess.com/favicon.ico" data-pin-name="chess.com" data-pin-en="chess.com" data-pin-url="https://www.chess.com" data-pin-desc="在线国际象棋对弈、学习与赛事平台。" data-pin-desc-en="Play, learn & compete in chess online.">
           <img class="prod-icon-img" src="https://www.chess.com/favicon.ico" alt="chess.com" loading="lazy" onerror="this.style.display='none'">
           <div class="prod-name">chess.com</div>
           <div class="prod-desc">在线国际象棋对弈、学习与赛事平台。</div>
           <span class="ext-badge">chess.com ↗</span>
-          <span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>
+          <span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>
         </a>
       </div>
     </section>
@@ -464,7 +437,8 @@
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="index.html">返回主页</a> · <a href="contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   
   <div class="float-actions">
@@ -499,12 +473,13 @@
         document.documentElement.style.setProperty('--radius', cur.radius + 'px');
       }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
         renderPins();
@@ -536,7 +511,7 @@
         var html = iconHTML(p.icon) +
           '<div class="prod-name">' + esc((en && p.en) ? p.en : p.name) + '</div>';
         if (p.desc) html += '<div class="prod-desc">' + esc((en && p.descEn) ? p.descEn : p.desc) + '</div>';
-        html += '<span class="prod-pin' + (pinned ? ' pinned' : '') + '" role="button" tabindex="0" aria-label="取消固定">★</span>';
+        html += '<span class="prod-pin' + (pinned ? ' pinned' : '') + '" role="button" tabindex="0" aria-label="取消固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>';
         a.innerHTML = html;
         a.querySelector('.prod-pin').addEventListener('click', function (e) {
           e.preventDefault(); e.stopPropagation(); unpin(p.url);
@@ -553,6 +528,8 @@
         if (!pins.length) { empty.hidden = false; grid.hidden = true; return; }
         empty.hidden = true; grid.hidden = false;
         pins.forEach(function (p) { grid.appendChild(cardFromPin(p, true)); });
+        // 修复（2026-10-29）：动态插入的 .prod-card 需补 .in，否则停在 opacity:0 不可见
+        grid.querySelectorAll('.prod-card').forEach(function (c) { c.classList.add('in'); });
       }
 
       function unpin(url) {
@@ -566,14 +543,14 @@
           var card = b.closest('.prod-card');
           var on = urls.indexOf(card.getAttribute('data-pin-url')) >= 0;
           b.classList.toggle('pinned', on);
-          b.textContent = on ? '★' : '☆';
+          b.textContent = on ? '' : '';
           b.setAttribute('aria-label', on ? '取消固定' : '固定');
         });
       }
 
       function onPinClick(e) {
         e.preventDefault(); e.stopPropagation();
-        var card = e.currentTarget.closest('.prod-card');
+        var card = e.target.closest('.prod-card');
         var p = {
           icon: card.getAttribute('data-pin-icon'),
           name: card.getAttribute('data-pin-name'),
@@ -589,11 +566,19 @@
       }
 
       function bindPins() {
-        document.querySelectorAll('.prod-card[data-pin-url] .prod-pin').forEach(function (b) {
-          b.addEventListener('click', onPinClick);
-          b.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPinClick(e); }
-          });
+        // 事件委托：产品卡由 products.js 异步渲染，绑在载入时刻会漏掉新卡
+        if (bindPins._done) return;
+        bindPins._done = true;
+        document.addEventListener('click', function (e) {
+          var b = e.target.closest && e.target.closest('.prod-card[data-pin-url] .prod-pin');
+          if (!b) return;
+          onPinClick(e);
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          var b = e.target.closest && e.target.closest('.prod-card[data-pin-url] .prod-pin');
+          if (!b) return;
+          e.preventDefault(); onPinClick(e);
         });
       }
 
@@ -658,20 +643,20 @@
         var icon = p.icon || '';
         var iconHtml;
         if (!icon) {
-          iconHtml = '<div class="prod-icon">🌐</div>';
+          iconHtml = '<div class="prod-icon"><i class="ic" data-ic="globe" aria-hidden="true"></i></div>';
         } else if (isIconUrl(icon)) {
           iconHtml = '<img class="prod-icon-img" src="' + escHtml(icon) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
         } else if (isIconLikeEmoji(icon)) {
           iconHtml = '<div class="prod-icon">' + escHtml(icon) + '</div>';
         } else {
-          iconHtml = '<div class="prod-icon">🌐</div>';
+          iconHtml = '<div class="prod-icon"><i class="ic" data-ic="globe" aria-hidden="true"></i></div>';
         }
-        return '<a class="prod-card has-custom-del" href="' + escHtml(p.url) + '" target="_blank" rel="noopener" data-pin-icon="' + escHtml(p.icon || '🌐') + '" data-pin-name="' + escHtml(p.name) + '" data-pin-url="' + escHtml(p.url) + '" data-pin-desc="' + escHtml(p.desc || '') + '" data-pin-id="' + escHtml(p.id) + '">' +
+        return '<a class="prod-card has-custom-del" href="' + escHtml(p.url) + '" target="_blank" rel="noopener" data-pin-icon="' + escHtml(p.icon || '<i class="ic" data-ic="globe"></i>') + '" data-pin-name="' + escHtml(p.name) + '" data-pin-url="' + escHtml(p.url) + '" data-pin-desc="' + escHtml(p.desc || '') + '" data-pin-id="' + escHtml(p.id) + '">' +
           '<button class="custom-del" type="button" aria-label="删除" title="删除" data-id="' + escHtml(p.id) + '">×</button>' +
           iconHtml +
           '<div class="prod-name">' + escHtml(p.name) + '</div>' +
           (p.desc ? '<div class="prod-desc">' + escHtml(p.desc) + '</div>' : '') +
-          '<span class="prod-pin" role="button" tabindex="0" aria-label="固定">☆</span>' +
+          '<span class="prod-pin" role="button" tabindex="0" aria-label="固定"><i class="ic" data-ic="star" aria-hidden="true"></i></span>' +
         '</a>';
       }
 
@@ -681,6 +666,8 @@
         if (!grid) return;
         var list = getCustom();
         grid.innerHTML = list.map(customCardHtml).join('');
+        // 修复（2026-10-29）：动态插入的 .prod-card 需补 .in，否则停在 opacity:0 不可见
+        grid.querySelectorAll('.prod-card').forEach(function (c) { c.classList.add('in'); });
         grid.hidden = list.length === 0;
         empty.hidden = list.length > 0;
         // 重新绑定新加卡片的固定按钮 + 删除按钮
@@ -799,11 +786,22 @@
       syncPinButtons();
       bindCustomUI();
       renderCustom();
+      // 产品卡异步渲染完成后：补同步固定状态 + 重判「新上线」徽章
+      window.__xlAfterProductsRender = function () {
+        syncPinButtons();
+        if (typeof window.__xlRefreshNewBadge === 'function') {
+          try { window.__xlRefreshNewBadge(); } catch (e) {}
+        }
+      };
     })();
   </script>
-<script src="auth.js?v=20260925c"></script>
-  <script src="common.js?v=20260926a"></script>
-  <script src="scroll-keys.js?v=20260926c" defer></script>
+<script src="auth.js?v=20261103a"></script>
+  <script src="assets/products.js?v=20261029c"></script>
+<script src="common.js?v=20261111a"></script>
+  <script src="scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

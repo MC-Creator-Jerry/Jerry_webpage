@@ -286,6 +286,54 @@ window.XLMedia = (function () {
   else setTimeout(send, 0);
 })();
 
+/* ============ 访客态导航门控：未登录仅显示 搜索/产品/订阅和博客/登录 ============ */
+/* 登录后才出现的按钮槽位：notice(消息中心) / redeem(兑换码) / support(支持与付款)。
+   登录态以 cookie gh_user= 或 window.JW_AUTH 判定；SSO 登录会重载页面，重载后自然显示。
+   门控函数给这些按钮打 .xl-login-only，并给 <html> 加 .xl-guest（CSS 隐藏）。 */
+(function () {
+  function xlHasLogin() {
+    try {
+      if (/(?:^|;\s*)gh_user=/.test(document.cookie)) return true;
+      if (window.JW_AUTH && window.JW_AUTH.user) return true;
+      return false;
+    } catch (e) { return false; }
+  }
+  var LOGIN_ONLY = { notice: 1, redeem: 1, support: 1 };
+  function slotOf(b) {
+    var tag = b.tagName ? b.tagName.toLowerCase() : '';
+    var cls = b.className || '';
+    var id = b.id || '';
+    var href = (b.getAttribute && b.getAttribute('href')) || b.href || '';
+    var txt = ((b.getAttribute && b.getAttribute('data-zh')) || b.textContent || '').trim();
+    if (/(^|\s)bar-avatar(\s|$)/.test(cls)) return 'login';
+    if (id === 'loginBtn' || id === 'logoutBtn') return 'login';
+    if (id === 'noticeBtn' || id === 'noticeBadge' || /\/notice\//.test(href) || /消息中心|通知中心|通知/.test(txt)) return 'notice';
+    if (id === 'redeemBtn' || /\/redeem\//.test(href) || /兑换码|兑换/.test(txt)) return 'redeem';
+    if (/\/groups\//.test(href) || /群组/.test(txt)) return 'groups';
+    if (id === 'subBlogBtn' || /\/sub-blog\//.test(href) || /订阅和博客/.test(txt)) return 'subBlog';
+    if (id === 'supportPayBtn' || /\/support\//.test(href) || /支持与付款/.test(txt)) return 'support';
+    if (/\/products\.html/.test(href) || /产品/.test(txt)) return 'products';
+    return 'other';
+  }
+  window.__xlHasLogin = xlHasLogin;
+  window.__xlApplyNavGate = function () {
+    try {
+      var guest = !xlHasLogin();
+      document.documentElement.classList.toggle('xl-guest', guest);
+      var bars = document.querySelectorAll('.bar-right');
+      bars.forEach(function (bar) {
+        bar.querySelectorAll('.bar-btn, .xl-search').forEach(function (b) {
+          if (LOGIN_ONLY[slotOf(b)]) b.classList.add('xl-login-only');
+        });
+      });
+    } catch (e) {}
+  };
+  // 兜底：DOM 就绪与资源加载完各再跑一次，覆盖动态注入的 bar
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', window.__xlApplyNavGate);
+  else window.__xlApplyNavGate();
+  window.addEventListener('load', window.__xlApplyNavGate);
+})();
+
 /* ============ 顶栏搜索框 + 群组入口（注入到每个页面的 .bar-right；私信入口已并入通知中心） ============ */
 (function () {
   function isSearchPage() { return /\/search\//.test(location.pathname); }
@@ -336,7 +384,19 @@ window.XLMedia = (function () {
       var inp = document.createElement('input');
       inp.type = 'search'; inp.name = 'q'; inp.className = 'xl-search-input';
       inp.placeholder = '搜索'; inp.setAttribute('aria-label', '搜索'); inp.maxLength = 80;
+      // 放大镜按钮始终存在：仅图标模式下由 CSS 显示并收起输入框，其余模式隐藏（display:none）
+      var toggle = document.createElement('button');
+      toggle.type = 'button'; toggle.className = 'xl-search-toggle';
+      toggle.setAttribute('aria-label', '搜索');
+      toggle.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
+      form.appendChild(toggle);
       form.appendChild(inp);
+      toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        var open = inp.classList.toggle('open');
+        if (open) { try { inp.focus(); } catch (err) {} }
+        else { inp.value = ''; if (window.__xlCloseSearch) window.__xlCloseSearch(form); }
+      });
 
       var notice = bar.querySelector('#noticeBtn');
       var login = bar.querySelector('#loginBtn') || bar.querySelector('#logoutBtn');
@@ -346,7 +406,9 @@ window.XLMedia = (function () {
       else { bar.appendChild(form); }
       // 注：群组入口不再全局注入；已在「通知中心」(notice/index.html) 顶栏显式放置
       injectBarExtras(bar);
+      if (window.__xlApplyNavGate) window.__xlApplyNavGate();
     });
+    if (window.__xlApplySearchBox) window.__xlApplySearchBox();
     // 实时刷新：后台轮询通知徽标（免 VAPID，纯前端轮询）
     // 优化：未登录访客无需刷新徽标；页面隐藏时暂停轮询；间隔拉长到 90s，省 Functions 费用与访客带宽
     if (!window.__xlRealtimeStarted) {
@@ -372,6 +434,206 @@ window.XLMedia = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
   else inject();
+})();
+
+/* ============ 顶栏 / 主页「实时下拉快搜」（B 档：用户 + 产品；分组、高亮、键盘选择） ============ */
+(function () {
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function hl(text, q) {
+    text = String(text == null ? '' : text);
+    q = (q || '').trim();
+    if (!q) return esc(text);
+    try {
+      var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+      return esc(text).replace(re, '<span class="xsp-hl">$1</span>');
+    } catch (e) { return esc(text); }
+  }
+  function initialAvatar(login) {
+    var ch = (login || '?').charAt(0).toUpperCase();
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28599c"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs><rect width="64" height="64" rx="32" fill="url(#g)"/><text x="32" y="42" font-size="30" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">' + ch + '</text></svg>';
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
+  window.xlInitialAvatar = initialAvatar; // 供行内 onerror 使用
+  // 依据当前页引用 common.js 的相对前缀，构造跨深度的站内相对链接
+  function sitePrefix() {
+    var sc = document.querySelector('script[src*="common.js"]');
+    var m = sc ? (sc.getAttribute('src') || '').match(/^((?:\.\.\/)*)/) : null;
+    return m ? m[1] : '';
+  }
+
+  var _timers = new WeakMap();
+  // 同时只允许一个搜索浮层展开：顶栏搜索与首页 hero 搜索互斥，
+  // 否则两个面板会叠在一起，看起来像"多出一堆无关结果"。
+  var _openPanel = null;
+  function wireQuickSearch(form, input) {
+    if (!form || !input || form.__qsWired) return;
+    form.__qsWired = true;
+    var pre = sitePrefix();
+    var panel = document.createElement('div');
+    panel.className = 'xl-search-panel';
+    panel.hidden = true;
+    panel.setAttribute('role', 'listbox');
+    form.appendChild(panel);
+    var active = -1;
+    var items = [];
+    var seq = 0;        // 请求序号：丢弃过期响应，避免旧查询结果覆盖新查询
+    var lastQ = '';     // 当前面板内容对应的查询词
+
+    function clearActive() {
+      var els = panel.querySelectorAll('.xsp-row');
+      for (var i = 0; i < els.length; i++) els[i].classList.remove('xsp-active');
+    }
+    function setActive(i) {
+      var els = panel.querySelectorAll('.xsp-row');
+      if (!els.length) return;
+      if (i < 0) i = els.length - 1;
+      if (i >= els.length) i = 0;
+      clearActive();
+      els[i].classList.add('xsp-active');
+      active = i;
+    }
+    function close() {
+      panel.hidden = true; active = -1; clearActive();
+      if (_openPanel === panel) _openPanel = null;
+    }
+    function openPanel() {
+      if (_openPanel && _openPanel !== panel) { _openPanel.hidden = true; }
+      _openPanel = panel;
+      panel.hidden = false;
+    }
+
+    function render(d, q) {
+      items = [];
+      panel.innerHTML = '';
+      lastQ = q;
+      var users = d.users || [];
+      var products = d.products || [];
+      if (!users.length && !products.length) {
+        panel.innerHTML = '<div class="xsp-empty">没有找到与「' + esc(q) + '」相关的结果。</div>';
+        active = -1; return;
+      }
+      function row(href, inner) {
+        var a = document.createElement('a');
+        a.className = 'xsp-row'; a.href = href; a.setAttribute('role', 'option');
+        a.innerHTML = inner;
+        a.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        items.push({ href: href });
+        return a;
+      }
+      if (users.length) {
+        var sh = document.createElement('div'); sh.className = 'xsp-sec'; sh.textContent = '用户'; panel.appendChild(sh);
+        users.forEach(function (u) {
+          panel.appendChild(row(pre + 'personal_profile/?user=' + encodeURIComponent(u.login),
+            '<img src="https://mc-creator-jerry-webpage.pages.dev/api/avatar?login=' + encodeURIComponent(u.login) + '" alt="" loading="lazy" onerror="this.onerror=null;this.src=window.xlInitialAvatar(\'' + u.login + '\')">' +
+            '<div class="xsp-main"><div class="xsp-t">@' + hl(u.login, q) + '</div>' +
+            '<div class="xsp-sub">' + hl((u.name !== u.login ? u.name : '') + (u.bio ? ' · ' + u.bio : ''), q) + '</div></div>'));
+        });
+      }
+      if (products.length) {
+        var ph = document.createElement('div'); ph.className = 'xsp-sec'; ph.textContent = '产品'; panel.appendChild(ph);
+        products.forEach(function (p) {
+          var raw = p.url || ('/products/' + p.id + '/');
+          var abs = /^https?:\/\//i.test(raw); // 外链产品（如各分站）直接用绝对地址，站内产品走相对前缀
+          // 图标：优先用与首页卡片同一套的 SVG（p.img，站内相对路径需补前缀），无图时回落 emoji
+          var ico;
+          if (p.img) {
+            var isrc = /^https?:\/\//i.test(p.img) ? p.img : pre + p.img.replace(/^\//, '');
+            var shapeCls = (p.shape === 'round') ? ' xsp-prod-ico-round' : ((p.shape === 'sq') ? ' xsp-prod-ico-sq' : '');
+            ico = '<div class="xsp-prod-ico xsp-prod-ico-img' + shapeCls + '"><img src="' + esc(isrc) + '" alt="" loading="lazy"></div>';
+          } else {
+            ico = '<div class="xsp-prod-ico">' + esc(p.icon || '') + '</div>';
+          }
+          var el = row(abs ? raw : pre + raw.replace(/^\//, ''),
+            ico +
+            '<div class="xsp-main"><div class="xsp-t">' + hl(p.name, q) + '</div>' +
+            '<div class="xsp-sub">' + hl(p.desc, q) + '</div></div>');
+          if (abs) { el.target = '_blank'; el.rel = 'noopener'; }
+          panel.appendChild(el);
+        });
+      }
+      var foot = document.createElement('a');
+      foot.className = 'xsp-foot'; foot.href = pre + 'search/?q=' + encodeURIComponent(q);
+      foot.textContent = '查看全部结果 →';
+      panel.appendChild(foot);
+    }
+
+    function search(q) {
+      q = (q || '').trim();
+      if (!q) { close(); return; }
+      openPanel();
+      panel.innerHTML = '<div class="xsp-loading">搜索中……</div>';
+      active = -1;
+      var my = ++seq;
+      fetch('/api/search?q=' + encodeURIComponent(q))
+        .then(function (r) { return r.ok ? r.json() : { users: [], products: [] }; })
+        .then(function (d) { if (!panel.hidden && my === seq) render(d, q); })
+        .catch(function () { if (!panel.hidden && my === seq) panel.innerHTML = '<div class="xsp-empty">搜索失败，请重试。</div>'; });
+    }
+
+    input.addEventListener('input', function () {
+      var q = input.value;
+      var t = _timers.get(input); if (t) clearTimeout(t);
+      _timers.set(input, setTimeout(function () { search(q); }, 250));
+    });
+    input.addEventListener('focus', function () {
+      // 打开本面板（同时收起另一个搜索框的面板）；若输入值已变化则重新搜索
+      if (input.value.trim()) { openPanel(); if (input.value.trim() !== lastQ) search(input.value); }
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (panel.hidden) search(input.value); else setActive(active + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === 'Escape') { if (!panel.hidden) close(); input.blur(); }
+      else if (e.key === 'Enter') {
+        // 一律进入搜索专用详情页（不论是否用方向键选中了某条结果）
+        e.preventDefault();
+        var qv = input.value.trim();
+        location.href = (pre || '') + 'search/' + (qv ? ('?q=' + encodeURIComponent(qv)) : '');
+      }
+    });
+    document.addEventListener('click', function (e) {
+      if (!panel.hidden && !form.contains(e.target)) close();
+    });
+  }
+
+  window.__xlFocusSearch = function () {
+    var inp = document.querySelector('.xl-search-input') || document.querySelector('.home-search-input');
+    if (!inp) return;
+    // 仅图标模式下若输入框收起，先展开再聚焦
+    if (inp.classList.contains('xl-search-input') && document.body.classList.contains('xl-sb-icon') && !inp.classList.contains('open')) {
+      inp.classList.add('open');
+    }
+    inp.focus();
+    try { inp.scrollIntoView({ block: 'center' }); } catch (e) {}
+  };
+
+  // 搜索框位置 / 仅图标模式：根据 xl_searchbox 给 <body> 加 xl-sb-* class（CSS 控制布局）
+  function applySearchBoxMode() {
+    var m = 'right';
+    try { m = localStorage.getItem('xl_searchbox') || 'right'; } catch (e) {}
+    if (m !== 'icon' && m !== 'left' && m !== 'center' && m !== 'right') m = 'right';
+    document.body.classList.remove('xl-sb-icon', 'xl-sb-left', 'xl-sb-center', 'xl-sb-right');
+    document.body.classList.add('xl-sb-' + m);
+  }
+  window.__xlApplySearchBox = applySearchBoxMode;
+
+  function init() {
+    applySearchBoxMode();
+    document.querySelectorAll('.xl-search').forEach(function (f) {
+      var inp = f.querySelector('input');
+      if (inp) wireQuickSearch(f, inp);
+    });
+    var homeForm = document.querySelector('form.home-search');
+    if (homeForm) {
+      var hInp = homeForm.querySelector('.home-search-input');
+      if (hInp) wireQuickSearch(homeForm, hInp);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 
 /* ============ 小蓝条显示模式：注入图标到顶栏按钮（.bar-icon + .bar-text），并按 xl_barmode 应用 body 类 ============ */
@@ -501,6 +763,7 @@ window.XLMedia = (function () {
     });
     // 补完图标，与既有注入逻辑一致（已注图标者会被守卫跳过）
     if (window.__xlInjectBarIcons) window.__xlInjectBarIcons();
+    if (window.__xlApplyNavGate) window.__xlApplyNavGate();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
@@ -559,6 +822,7 @@ window.XLMedia = (function () {
         if (arr) for (var a = 0; a < arr.length; a++) bar.appendChild(arr[a]);
       }
     }
+    if (window.__xlApplyNavGate) window.__xlApplyNavGate();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
@@ -602,7 +866,8 @@ window.XLMedia = (function () {
 (function () {
   var XL_KEYS = [
     { key: 'n', nav: '/notice/',          re: /\/notice\//,            login: false },
-    { key: 's', nav: '/search/',          re: /\/search\//,            login: false },
+    { key: 's', focusSearch: true },
+    { key: '/', focusSearch: true },
     { key: 'u', nav: '/personal_profile/', login: true },
     { key: 'h', nav: '/helpcenter/',      re: /\/helpcenter\//,         login: false },
     { key: 'p', nav: '/products.html',    re: /\/products\.html/,       login: false },
@@ -666,6 +931,7 @@ window.XLMedia = (function () {
         else if (XL_KEYS[i].theme) { if (window.__xlToggleTheme) window.__xlToggleTheme(); }
         else if (XL_KEYS[i].bg) { if (window.__xlOpenBg) window.__xlOpenBg(); }
         else if (XL_KEYS[i].edit) { if (isOwner()) editCurrentPage(); }
+        else if (XL_KEYS[i].focusSearch) { if (window.__xlFocusSearch) window.__xlFocusSearch(); }
         else go(XL_KEYS[i].nav);
         return;
       }
@@ -1022,9 +1288,34 @@ window.XLMedia = (function () {
     // 3) 站主：在主题按钮左侧插入「更改当前页面布局」
     maybeInjectLayoutBtn();
 
+    // 3.5) 全站统一浮动按钮顺序（编辑→背景→主题→语言→设置→帮助→回到顶部）
+    normalizeFloatOrder();
+
     // 4) 强制钉在 body 并兜底固定位置，防止横屏下随滚动消失
     pinFloat();
     pinBarRight();
+  }
+
+  // 浮动按钮统一先后顺序（所有页面一致，视觉从左到右）：
+  //   编辑(管理员/黑) → 自定义背景 → 深浅色 → 语言 → 设置 → 帮助(?) → 回到顶部(↑)
+  // 各页静态 HTML 与动态注入的相对位置可能略有差异，这里在注入后强制重排一次；
+  // 依序 appendChild 把匹配节点移到末尾，最终整体顺序即 = 数组顺序。
+  function normalizeFloatOrder() {
+    var fa = document.querySelector('.float-actions');
+    if (!fa) return;
+    var SEL = [
+      '#editLayoutBtn, .xl-edit-fab',   // 更改页面布局（仅站主可见，黑色）
+      '#bgToggle, .xl-bg',              // 自定义背景
+      '#themeToggle, .xl-theme',        // 深浅色
+      '#langBtn, a[href$="language.html"]', // 语言
+      '#settingsBtn, a[href*="homepage.html"]', // 设置
+      '#helpBtn, .xl-help-fab',         // 帮助中心（绝对定位在簇上方）
+      '#toTopBtn, .xl-toplink'          // 回到顶部（绝对定位在最上）
+    ];
+    for (var i = 0; i < SEL.length; i++) {
+      var el = fa.querySelector(SEL[i]);
+      if (el) fa.appendChild(el);
+    }
   }
 
   // 依据当前页引用 common.js 的相对前缀（如 "../../"）推断站内相对路径前缀
@@ -1038,10 +1329,10 @@ window.XLMedia = (function () {
   function loadEditbar() {
     if (window.XLEdit) return;
     // 注意：脚本引用带 ?v= 版本号，src 不再以 "common.js" 结尾，必须用 *=
-    // ⚠️ editbar.js 版本号必须与本文件（common.js?v=20260922a）同步 bump：
+    //  editbar.js 版本号必须与本文件（common.js?v=20260922a）同步 bump：
     //    改 editbar.js 后务必同时改这里，否则访客端仍加载旧版编辑栏。
     var s = document.createElement('script');
-    s.src = scriptPrefix() + 'editbar.js?v=20260926b';
+    s.src = scriptPrefix() + 'editbar.js?v=20261027a';
     s.async = true;
     document.head.appendChild(s);
   }
@@ -1059,6 +1350,7 @@ window.XLMedia = (function () {
     var ref = fa.querySelector('#bgToggle') || fa.querySelector('#themeToggle') || fa.querySelector('#langBtn');
     if (ref) fa.insertBefore(btn, ref);
     else fa.appendChild(btn);
+    normalizeFloatOrder(); // 登录后补插的编辑按钮也要归位到最左
     pinFloat();
   }
 
@@ -1242,14 +1534,14 @@ window.XLMedia = (function () {
         var j = res.j;
         if (isBug) {
           if (j.already_today) {
-            toast(j.win ? T('🎉 你今天已抽中 1 小时小蓝页·1级成员！', '🎉 You already won 1-hour Level-1 Member today!') : T('你今天已抽过啦，明天再来~', 'You already drew today, come back tomorrow~'));
+            toast(j.win ? T(' 你今天已抽中 1 小时小蓝页·1级成员！', ' You already won 1-hour Level-1 Member today!') : T('你今天已抽过啦，明天再来~', 'You already drew today, come back tomorrow~'));
           } else if (j.win) {
-            toast(j.alreadyMember ? T('🎉 你已抽中！会员时间 +12 小时', '🎉 You won! +12h membership') : T('🎉 抽中！已获得 1 小时小蓝页·1级成员', '🎉 You won! 1-hour Level-1 Member granted'));
+            toast(j.alreadyMember ? T(' 你已抽中！会员时间 +12 小时', ' You won! +12h membership') : T(' 抽中！已获得 1 小时小蓝页·1级成员', ' You won! 1-hour Level-1 Member granted'));
           } else {
             toast(T('未抽中，明天再来~ 已记录你的 Bug 反馈', 'No luck this time, come back tomorrow~ Bug noted'));
           }
         } else {
-          toast(T('已收到，谢谢反馈 🙏', 'Received, thanks for the feedback 🙏'));
+          toast(T('已收到，谢谢反馈 ', 'Received, thanks for the feedback '));
         }
         form.reset();
         syncBugUI();
@@ -1264,6 +1556,60 @@ window.XLMedia = (function () {
     var forms = document.querySelectorAll('form.contact-form, #contactForm');
     for (var i = 0; i < forms.length; i++) wire(forms[i]);
   }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
+/* ===== 项目卡片「新上线」自动判定 =====
+ * 规则：后端 /api/project-first 自动记录每个项目第一次出现的时间（系统视角的首次上传时间）；
+ *       距今年限 <= 30 天的卡片显示「 新上线」徽章（.prod-tag[data-auto-new]），超过则移除徽章。
+ *       HTML 可用 data-proj-since="YYYY-MM-DD" 指定已知的真实首次上传时间（优先于系统记录）。
+ * 无需手动调用，DOM 就绪后自动初始化。
+ */
+(function () {
+  'use strict';
+  var WINDOW_MS = 30 * 24 * 3600 * 1000;
+
+  function applyJudgement(cards, firstMap) {
+    var now = Date.now();
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      var tag = c.querySelector('.prod-tag[data-auto-new]');
+      if (!tag) continue;
+      var key = c.getAttribute('data-proj');
+      var since = c.getAttribute('data-proj-since');
+      var ts = since ? Date.parse(since + 'T00:00:00')
+                     : (key && typeof firstMap[key] === 'number' ? firstMap[key] : null);
+      if (ts && (now - ts) <= WINDOW_MS) {
+        tag.hidden = false;                                  // 新上线：显示徽章
+      } else if (tag.parentNode) {
+        tag.parentNode.removeChild(tag);                     // 超过 30 天：摘掉徽章
+      }
+    }
+  }
+
+  function init() {
+    refresh();
+  }
+
+  // 可被外部重复调用（产品卡由 products.js 异步渲染后，需要再判定一次徽章）
+  function refresh() {
+    var cards = document.querySelectorAll('.prod-card[data-proj]');
+    if (!cards.length) return;
+    var keys = [];
+    for (var i = 0; i < cards.length; i++) {
+      var k = cards[i].getAttribute('data-proj');
+      if (k && keys.indexOf(k) < 0) keys.push(k);
+    }
+    // 接口失败/无 KV：只按 data-proj-since 判定，拿不到时间的一律不显示徽章（宁缺毋滥）
+    fetch('/api/project-first?keys=' + encodeURIComponent(keys.join(',')))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        applyJudgement(cards, (d && d.ok && d.first) || {});
+      })
+      .catch(function () { applyJudgement(cards, {}); });
+  }
+  window.__xlRefreshNewBadge = refresh;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

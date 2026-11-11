@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <script>
   // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
   if (location.hostname.indexOf('github.io') !== -1) {
@@ -13,18 +13,23 @@
   window.__xlHoldReveal = true;
 </script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>个人资料 · Jerry's webpage</title>
 <meta name="description" content="个人资料：展示你的名字、简介、技能与链接。" />
 <meta name="author" content="Jerry" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=20260926" />
-<!-- 首屏提速（B）：头像来自 GitHub（会重定向到 avatars.githubusercontent.com），提前建连省 DNS/TLS 往返 -->
-<link rel="preconnect" href="https://github.com" crossorigin />
-<link rel="preconnect" href="https://avatars.githubusercontent.com" crossorigin />
-<link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
-<style>  
+<!-- 首屏提速（B）：头像统一走自己的 Cloudflare 端点，提前建连省 DNS/TLS 往返（不再依赖 GitHub） -->
+<link rel="preconnect" href="https://mc-creator-jerry-webpage.pages.dev" crossorigin />
+<link rel="dns-prefetch" href="https://mc-creator-jerry-webpage.pages.dev" />
+<link rel="stylesheet" href="../common.css?v=20261103a" />
+<style>
+  /* ===========================================================
+     小蓝页 · 个人主页 视觉系统（2026-10-28 重做）
+     设计基线：沿用站点既有 UI 语言 —— 小蓝条、--accent、14px 圆角、轻阴影
+     结构：头图（头像 / 背景·主题 / 关注·私聊）→ 桌面双栏内容
+     =========================================================== */
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: calc(16px * var(--font-scale)); }
   html, body {
     min-height: 100%;
@@ -33,9 +38,26 @@
     color: var(--text);
     background: var(--bg);
     transition: background 0.25s, color 0.25s;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* ---- 上方蓝条 ---- */
+  :root {
+    /* 2026-10-29：整体放宽（原 1100px 两侧留白过多）；--pp-pad 让头图与双栏共用同一套边距 */
+    --pp-pad: 24px;
+    --pp-max: min(1400px, calc(100% - 2 * var(--pp-pad)));
+    --pp-r: var(--radius, 14px);
+    --pp-r-sm: 10px;
+    --pp-line: var(--card-border, #e3e8ef);
+    --pp-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+    --pp-soft-2: color-mix(in srgb, var(--accent) 17%, transparent);
+    --pp-line-accent: color-mix(in srgb, var(--accent) 42%, var(--card-border, #e3e8ef));
+    --pp-shadow: var(--card-shadow, 0 1px 6px rgba(0, 0, 0, .08));
+    --pp-shadow-hi: 0 10px 28px rgba(16, 24, 40, .12);
+  }
+
+  [hidden] { display: none !important; }
+
+  /* ---------------- 顶部小蓝条（与小蓝页其它页面一致） ---------------- */
   .topbar {
     position: sticky; top: 0; z-index: 100;
     min-height: 64px; display: flex; align-items: center; justify-content: space-between;
@@ -44,7 +66,6 @@
     background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
     color: var(--bar-fg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-    border-radius: 0;
   }
   .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
   .site-name { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.3px; color: var(--bar-fg); white-space: nowrap; text-decoration: none; cursor: pointer; }
@@ -58,218 +79,437 @@
   .bar-btn { border: none; background: rgba(255, 255, 255, 0.08); color: var(--bar-fg); border-radius: 0; padding: 6px 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer; line-height: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
   .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
 
-  
-  
-  
-  
+  /* 主题色条（小蓝条下方 6px） */
+  .profile-theme-strip { width: 100%; height: 6px; background: var(--accent); }
 
-  /* ---- 内容区 ---- */
-  .content { max-width: 920px; margin: 0 auto; padding: 40px 24px 64px; }
-  .card { margin-top: 26px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 24px; box-shadow: var(--card-shadow); }
-  .card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 12px; }
-  .card p { font-size: 1rem; line-height: 1.75; color: var(--muted); margin-bottom: 12px; }
-  .card p:last-child { margin-bottom: 0; }
-  .card a.inline-link { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
-  .card a.inline-link:hover { border-bottom-color: var(--accent); }
+  /* ===========================================================
+     按钮系统：.pp-btn 基类 + 变体（默认实心 / ghost / soft / danger）
+     =========================================================== */
+  .pp-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    font: inherit; font-weight: 700; font-size: 0.9rem; line-height: 1;
+    cursor: pointer; white-space: nowrap; text-decoration: none;
+    border: 1px solid transparent; border-radius: 999px; padding: 9px 16px;
+    background: var(--accent); color: #fff;
+    transition: filter .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .pp-btn:hover { filter: brightness(1.06); }
+  .pp-btn:active { transform: translateY(1px); }
+  .pp-btn--ghost { background: transparent; color: var(--accent); border-color: var(--pp-line-accent); }
+  .pp-btn--ghost:hover { background: var(--pp-soft); filter: none; }
+  .pp-btn--soft { background: var(--pp-soft); color: var(--accent); border-color: transparent; }
+  .pp-btn--soft:hover { background: var(--pp-soft-2); filter: none; }
+  .pp-btn--danger { background: transparent; color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--pp-line)); }
+  .pp-btn--danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); filter: none; }
+  .pp-btn--sm { padding: 7px 13px; font-size: 0.84rem; }
+  .pp-btn--block { width: 100%; }
+  .pp-btn[disabled] { opacity: .6; cursor: default; filter: none !important; }
 
-  /* 资料专属 */
-  .profile-head { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; position: relative; }
-  .avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom)); color: #fff; font-size: 2.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid var(--card-bg); box-shadow: 0 3px 12px rgba(0, 0, 0, .18); position: relative; overflow: hidden; }
-  .avatar > img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
-  .avatar > .avatar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
-  /* 头像下一行：更改头像（文字头像 / 不使用头像） */
-  .avatar-stack { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .avatar-opts { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .avatar-opts-label { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
-  .avatar-opt { padding: 5px 14px; font-size: 0.82rem; border-radius: 999px; border: 1px solid var(--card-border); background: var(--panel-bg); color: var(--text); cursor: pointer; transition: background .15s ease, border-color .15s ease, color .15s ease; font-weight: 600; }
-  .avatar-opt:hover { border-color: var(--accent); color: var(--accent); }
-  .avatar-opt.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .profile-name { font-size: 1.9rem; font-weight: 700; color: var(--text); line-height: 1.2; }
-  .profile-meta { font-size: 0.9rem; color: var(--muted); margin-top: 4px; }
-  .profile-tagline { font-size: 1.05rem; color: var(--muted); margin-top: 6px; max-width: 560px; display: inline; }
-  .owner-badge { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom)); vertical-align: middle; letter-spacing: 0.5px; }
+  /* 方形/圆形图标按钮 */
+  .pp-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--pp-line); background: var(--card-bg);
+    color: var(--muted); cursor: pointer; flex: none;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+  }
+  .pp-icon-btn:hover { color: var(--accent); border-color: var(--pp-line-accent); background: var(--pp-soft); }
 
-  /* 名字 + 改名按钮 同一行 */
-  .profile-name-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .rename-editor { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-  .rename-editor .edit-input { width: auto; min-width: 240px; margin-top: 0; font-size: 1.05rem; padding: 8px 12px; }
-  .rename-editor .save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 8px 18px; font-weight: 700; cursor: pointer; }
-  .rename-editor .save:hover { filter: brightness(1.08); }
-  .rename-editor .cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); border: none; border-radius: 10px; padding: 8px 18px; cursor: pointer; }
+  /* 卡片标题上的「更改」按钮 */
+  .change-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid transparent; background: var(--pp-soft); color: var(--accent);
+    border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.8rem; font-weight: 700;
+    line-height: 1; cursor: pointer; white-space: nowrap;
+    transition: background-color .15s ease;
+  }
+  .change-btn:hover { background: var(--pp-soft-2); }
+  .change-btn.inline { margin-left: 2px; }
 
-  .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-  .tag { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--card-border)); border-radius: 999px; padding: 6px 14px; font-size: 0.92rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-  .tag-x { cursor: pointer; font-weight: 700; opacity: 0.7; }
-  .tag-x:hover { opacity: 1; color: var(--danger); }
-  .link-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-  .link-row a { color: var(--accent); text-decoration: none; font-weight: 600; word-break: break-all; }
-  .link-row a:hover { text-decoration: underline; }
-
-  .hint-empty { color: var(--muted); opacity: 0.7; font-style: italic; font-size: 0.95rem; }
-
-  /* 卡片头部（标题 + 更改） */
-  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-  .card-head h2 { margin-bottom: 0; }
-  .change-btn { border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--card-border)); background: transparent; color: var(--accent); border-radius: 999px; padding: 3px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; line-height: 1.5; }
-  .change-btn:hover { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); }
-  .change-btn.inline { margin-left: 8px; vertical-align: middle; }
-  .follow-btn { margin-left: 8px; border: none; background: var(--accent); color: #fff; border-radius: 999px; padding: 4px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; line-height: 1.5; }
-  .follow-btn:hover { filter: brightness(1.08); }
-  .follow-btn.on { background: transparent; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--card-border)); }
-
-  /* 编辑态 */
-  .edit-input, .edit-textarea { width: 100%; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; font-size: 1rem; font-family: inherit; color: var(--text); background: var(--panel-bg); margin-top: 6px; }
-  .edit-input:focus, .edit-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
-  .edit-textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
-  .edit-label { display: block; font-size: 0.82rem; color: var(--muted); margin-top: 14px; font-weight: 600; }
-  .skills-add { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
-  .skills-add .edit-input { margin-top: 0; }
-  .add-btn { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 10px 16px; font-size: 0.92rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-  .add-btn:hover { filter: brightness(1.08); }
-  .link-edit { border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; margin-bottom: 12px; background: color-mix(in srgb, var(--card-bg) 100%, transparent); }
-  .link-edit .row-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-  .link-del { border: none; background: transparent; color: var(--danger); font-size: 0.9rem; cursor: pointer; font-weight: 700; }
-
-  .sec-actions { display: flex; gap: 10px; margin-top: 14px; }
-  .sec-actions .save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 8px 18px; font-weight: 700; cursor: pointer; }
-  .sec-actions .save:hover { filter: brightness(1.08); }
-  .sec-actions .cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); border: none; border-radius: 10px; padding: 8px 18px; cursor: pointer; }
-
-  .avatar-preview { width: 72px; height: 72px; margin-top: 12px; }
-  .file-note { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
-
-  .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
-  .toast.err { background: var(--danger); }
-
-  .site-footer { border-top: 1px solid var(--card-border); margin-top: 48px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
-  .site-footer a { color: var(--accent); text-decoration: none; }
-  .site-footer a:hover { text-decoration: underline; }
-
-  /* ---- 个人主页背景 ---- */
-  /* 头图显示时：内容区上移，让头像压在头图下缘。
-     借鉴的是"大图头图 + 头像 + 信息栏"这一信息层级，配色与尺寸均为本站原创。 */
-  .content.has-banner { margin-top: -52px; padding-top: 8px; }
-
-  .profile-banner {
+  /* ===========================================================
+     头图：横跨内容区，头像压在下缘，右侧放关注 / 私聊
+     =========================================================== */
+  .pp-banner {
     position: relative;
-    width: 100%;
-    height: 22vh;
-    min-height: 140px;
-    max-height: 240px;
+    max-width: var(--pp-max);
+    margin: 14px auto 0;
+    height: clamp(160px, 23vh, 250px);
+    border-radius: var(--pp-r);
+    background-color: #4a90d9;
+    background-image:
+      radial-gradient(120% 92% at 12% 118%, rgba(20, 60, 100, .55) 0%, transparent 62%),
+      radial-gradient(90% 72% at 78% 112%, rgba(30, 86, 140, .45) 0%, transparent 66%),
+      radial-gradient(58% 48% at 85% 12%, rgba(255, 255, 255, .5), transparent 68%),
+      linear-gradient(180deg, #f2f8fd 0%, #cfe3f5 28%, #8fbce4 62%, #4a90d9 100%);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-color: color-mix(in srgb, var(--accent) 12%, var(--card-bg));
-    border-radius: 0 0 var(--radius) var(--radius);
-    margin-bottom: 22px;
+    box-shadow: var(--pp-shadow);
   }
-  /* 头图来源切换（仅站长本人可见，悬浮在头图右上角） */
-  .banner-mode { position: absolute; top: 10px; right: 12px; display: flex; gap: 6px; z-index: 3; }
-  .banner-mode button {
-    font-size: 0.8rem; line-height: 1; padding: 6px 13px; cursor: pointer;
-    color: #fff; background: rgba(8, 14, 24, 0.42); border: 1px solid rgba(255, 255, 255, 0.55);
-    border-radius: 999px; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+
+  /* 头图右上角：背景 / 主题（玻璃质感） */
+  .pp-banner-tools {
+    position: absolute; top: 12px; right: 14px; z-index: 6;
+    display: flex; align-items: center; gap: 8px;
   }
-  .banner-mode button:hover { background: rgba(8, 14, 24, 0.6); }
-  .banner-mode button.active { background: #fff; color: #16202c; border-color: #fff; font-weight: 700; }
-  .banner-mode-hint { position: absolute; left: 12px; bottom: 10px; z-index: 3; color: #fff; font-size: 0.78rem; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
-  .profile-tools { display: flex; justify-content: flex-end; margin-bottom: 14px; }
-  .bg-btn {
+  .glass-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--card-border));
-    background: var(--card-bg); color: var(--accent);
-    border-radius: 999px; padding: 7px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer;
-    box-shadow: var(--card-shadow);
+    padding: 7px 14px; font: inherit; font-size: 0.84rem; font-weight: 700; line-height: 1;
+    color: #fff; cursor: pointer;
+    background: rgba(10, 20, 34, .38);
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 999px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transition: background-color .15s ease, border-color .15s ease;
   }
-  .bg-btn:hover { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); }
+  .glass-btn:hover { background: rgba(10, 20, 34, .55); border-color: rgba(255, 255, 255, .8); }
+
+  /* 头图来源提示（选了图片模式但还没传图） */
+  .banner-mode-hint {
+    position: absolute; top: 14px; left: 16px; z-index: 5;
+    max-width: 60%;
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 0.76rem; color: #fff;
+    background: rgba(10, 20, 34, .34);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* 头像：压在头图下缘 */
+  .avatar-wrap {
+    position: absolute; left: 26px; bottom: -44px; z-index: 7;
+    width: 96px; height: 96px;
+  }
+  .avatar {
+    width: 96px; height: 96px; border-radius: 50%; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+    object-fit: cover;
+    color: #fff; font-size: 2.3rem; font-weight: 800; letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom));
+    border: 4px solid var(--card-bg);
+    box-shadow: 0 4px 16px rgba(16, 24, 40, .22);
+  }
+  .avatar > img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+  .avatar > .avatar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.3rem; font-weight: 800; }
+  .avatar-edit {
+    position: absolute; right: -6px; bottom: -6px; z-index: 2;
+    width: 32px; height: 32px; border-radius: 50%; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--card-bg); color: var(--accent);
+    border: 1px solid var(--pp-line);
+    box-shadow: 0 2px 8px rgba(16, 24, 40, .18);
+    cursor: pointer;
+  }
+  .avatar-edit:hover { background: var(--pp-soft); border-color: var(--pp-line-accent); }
+
+  /* 头图右下角：关注 + 私聊 */
+  .banner-actions {
+    position: absolute; right: 20px; bottom: 16px; z-index: 6;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  /* 自己视角：禁用态「关注」按钮（不能自己关注自己），样式对齐白底药丸 */
+  #followSlot .pp-follow-self {
+    padding: 8px 15px; border-radius: 999px; border: 1px solid rgba(255,255,255,.9);
+    background: rgba(255,255,255,.55); color: rgba(255,255,255,.95);
+    font-size: .86rem; font-weight: 600; cursor: not-allowed;
+    box-shadow: 0 2px 10px rgba(10,20,34,.12);
+  }
+  /* 关注按钮（FollowUI 注入）：在蓝底头图上改成白底 / 玻璃底 */
+  #followSlot .fui-wrap { font-size: .86rem; }
+  #followSlot .fui-main, #followSlot .fui-caret {
+    background: #fff; color: var(--accent);
+    border-color: rgba(255, 255, 255, .9);
+    box-shadow: 0 2px 10px rgba(10, 20, 34, .18);
+  }
+  #followSlot .fui-main { padding: 8px 15px; }
+  #followSlot .fui-caret { padding: 8px 9px; }
+  #followSlot .fui-wrap.on .fui-main, #followSlot .fui-wrap.on .fui-caret {
+    background: rgba(10, 20, 34, .42); color: #fff;
+    border-color: rgba(255, 255, 255, .62);
+    box-shadow: none;
+  }
+  #followSlot .fui-wrap.star .fui-main, #followSlot .fui-wrap.star .fui-caret {
+    background: rgba(255, 255, 255, .92); color: #b57c00; border-color: #fff;
+  }
+  .banner-actions .pp-btn {
+    background: #fff; color: var(--accent);
+    box-shadow: 0 2px 10px rgba(10, 20, 34, .18);
+  }
+  .banner-actions .pp-btn:hover { background: #f4f8fd; filter: none; }
+
+  /* ===========================================================
+     头图下方：个人空间页签
+     参考视频站个人空间的「彩色矢量图标 + 文字」页签层级，配色/间距/交互按本站重做，
+     图标全部复用站点自绘 mask 图标（i.ic），不引外部图标库。
+     =========================================================== */
+  .pp-tabs {
+    position: relative;
+    z-index: 5;
+    box-sizing: border-box;
+    max-width: var(--pp-max);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 10px 0 132px; /* 左侧给压下来的头像让位 */
+  }
+  .pp-tabs-in {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .pp-tabs-in::-webkit-scrollbar { display: none; }
+
+  .pp-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    font: inherit;
+    font-size: 0.93rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .16s ease, color .16s ease;
+  }
+  .pp-tab:hover { background: var(--pp-soft); }
+  .pp-tab.is-active { color: var(--accent); background: var(--pp-soft); }
+  .pp-tab-ic { width: 21px; height: 21px; vertical-align: 0; }
+
+  .pp-tabs-more { position: relative; flex: 0 0 auto; margin-left: 4px; }
+  .pp-tabs-more-btn { color: var(--muted); padding: 9px 10px; }
+  .pp-tabs-more-btn[aria-expanded="true"] { background: var(--pp-soft); color: var(--accent); }
+  .pp-tabs-more-btn svg { display: block; }
+  .pp-tabs-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 12;
+    min-width: 178px;
+    padding: 6px;
+    background: var(--card-bg);
+    border: 1px solid var(--pp-line);
+    border-radius: 12px;
+    box-shadow: var(--pp-shadow-hi);
+  }
+  .pp-tabs-menu a {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 11px;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text);
+    text-decoration: none;
+    transition: background-color .14s ease, color .14s ease;
+  }
+  .pp-tabs-menu a:hover { background: var(--pp-soft); color: var(--accent); }
+  .pp-tabs-menu a .ic { width: 17px; height: 17px; vertical-align: 0; color: var(--muted); }
+  .pp-tabs-menu a:hover .ic { color: var(--accent); }
+
+  /* ===========================================================
+     内容区：桌面双栏
+     =========================================================== */
+  .content {
+    position: relative;
+    /* 覆盖 common.css 里的 .content{max-width:1180px!important}：
+       +2*pad 抵消左右 padding，让双栏卡片外边缘与头图左右对齐 */
+    max-width: calc(var(--pp-max) + 2 * var(--pp-pad)) !important;
+    margin: 0 auto;
+    padding: 0 var(--pp-pad) 56px;
+    display: grid;
+    grid-template-columns: 380px minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+  /* 头图 + 页签存在时：头像已压在页签行里，正文只需一点余量 */
+  .content.has-banner { padding-top: 12px; }
+
   .content.has-bigbg {
     background-image: var(--bigbg);
     background-size: cover;
     background-position: center top;
     background-attachment: fixed;
   }
-  /* 背景编辑弹窗 */
-  .bg-modal { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; background: rgba(10, 18, 30, 0.5); padding: 20px; }
-  .bg-sheet { width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
-  .bg-sheet h3 { font-size: 1.02rem; color: var(--accent); margin: 16px 0 6px; }
-  .bg-sheet h3:first-child { margin-top: 0; }
-  .bg-preview { width: 100%; height: 110px; border-radius: 10px; background-size: cover; background-position: center; background-color: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); border: 1px dashed var(--card-border); margin-top: 8px; }
-  .bg-preview.empty { opacity: 0.45; }
-  .bg-sec-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-  .bg-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
-  .bg-save:hover { filter: brightness(1.08); }
-  .bg-cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); border: none; border-radius: 10px; padding: 9px 18px; cursor: pointer; }
-  .bg-clear { background: transparent; color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--card-border)); border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 700; }
-  .bg-clear:hover { background: color-mix(in srgb, var(--danger) 10%, var(--card-bg)); }
 
-  @media (max-width: 560px) {
-    .topbar { padding: 0 14px; min-height: 56px; }
-    .site-name { font-size: 1.05rem; }
-    .content { padding: 28px 16px 48px; }
-    .profile-name { font-size: 1.6rem; }
-  }
-  /* ---- 个人主页主题色条（小蓝条下方 6px） ---- */
-  .profile-theme-strip { width: 100%; height: 6px; background: var(--accent); }
-
-  /* 主题色弹窗（复用背景弹窗风格） */
-  .theme-modal { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; background: rgba(10, 18, 30, 0.5); padding: 20px; }
-  .theme-sheet { width: 100%; max-width: 460px; max-height: 86vh; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
-  .theme-sheet h3 { font-size: 1.05rem; color: var(--accent); margin-bottom: 12px; }
-  .theme-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-  .theme-row input[type="color"] { width: 52px; height: 38px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--card-bg); cursor: pointer; padding: 2px; flex: 0 0 auto; }
-  .theme-row .edit-input { flex: 1; margin-top: 0; text-transform: uppercase; }
-  .theme-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-  .theme-swatch { width: 34px; height: 34px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
-  .theme-swatch.active { border-color: #1c2733; }
-
-  /* 预设主题画廊：每张卡直接用该主题自己的头图渐变作预览 */
-  .theme-sub { font-size: 0.92rem; color: var(--text); margin: 20px 0 6px; }
-  .theme-presets {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
-    gap: 10px;
-    margin-top: 14px;
-  }
-  .theme-preset {
-    border: 2px solid transparent;
+  /* ---------------- 左栏：资料卡 ---------------- */
+  .pcard {
+    position: sticky; top: 84px;
     background: var(--card-bg);
-    border-radius: 10px;
-    padding: 6px;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
-    transition: border-color .15s, transform .12s, box-shadow .15s;
+    border: 1px solid var(--pp-line);
+    border-radius: var(--pp-r);
+    box-shadow: var(--pp-shadow);
+    padding: 16px 20px 20px;
+    min-width: 0;
   }
-  .theme-preset:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, .12); }
-  .theme-preset.active { border-color: var(--accent); }
-  .theme-preset-art {
-    display: block;
-    height: 54px;
-    border-radius: 7px;
-    background-size: cover;
-    background-position: center;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06);
+  .pp-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pp-name {
+    display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    font-size: 1.5rem; font-weight: 800; line-height: 1.25; color: var(--text);
+    letter-spacing: .2px;
   }
-  .theme-preset-name {
-    display: block;
-    margin-top: 7px;
-    font-size: 0.84rem;
-    font-weight: 700;
-    color: var(--text);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  .owner-badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 10px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 800; letter-spacing: .5px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--bar-top), var(--bar-bottom));
   }
-  .theme-preset.active .theme-preset-name { color: var(--accent); }
-  .theme-sec-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; justify-content: flex-end; }
-  .theme-save { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
-  .theme-save:hover { filter: brightness(1.08); }
-  .theme-cancel { background: rgba(128, 128, 128, 0.18); color: var(--text); border: none; border-radius: 10px; padding: 9px 18px; cursor: pointer; }
-  .theme-clear { background: transparent; color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--card-border)); border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 700; }
-  .theme-clear:hover { background: color-mix(in srgb, var(--danger) 10%, var(--card-bg)); }
+  .pp-login { margin-top: 4px; font-size: 0.9rem; color: var(--muted); letter-spacing: .2px; }
+  .pp-uid {
+    margin-top: 3px; font-size: 0.78rem; color: var(--muted);
+    font-family: ui-monospace, Consolas, 'Courier New', monospace;
+    letter-spacing: 1.2px; user-select: all; cursor: pointer;
+  }
+  .pp-uid b { color: var(--accent); font-weight: 700; margin-right: 6px; letter-spacing: .5px; }
+  .pp-chip {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
+    padding: 6px 13px; border-radius: 999px;
+    background: var(--pp-soft); color: var(--accent);
+    font-size: 0.85rem; font-weight: 700;
+  }
+  .pp-chip .pv-val { font-size: .95rem; font-weight: 800; }
+  .pp-chip .pv-unit { opacity: .7; font-weight: 600; }
 
-  /* iOS 风格开关（设置页同款，本页复用） */
-  .set-row-switch { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
-  .set-row-switch .set-label { margin-bottom: 0; }
+  .rename-editor { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .rename-editor .edit-input { width: auto; min-width: 190px; margin-top: 0; }
+
+  /* 头像模式（文字 / 不使用） */
+
+  /* 资料卡内的分区（简介等） */
+  .pcard-sep { height: 1px; background: var(--pp-line); margin: 18px 0 16px; }
+  .pcard-block + .pcard-block { margin-top: 18px; }
+  .pcard-block-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .pcard-h {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 0.98rem; font-weight: 800; color: var(--text); line-height: 1.3;
+  }
+  .h-ic {
+    width: 28px; height: 28px; border-radius: 9px; flex: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--pp-soft); color: var(--accent);
+  }
+  .pp-bio { font-size: 0.95rem; line-height: 1.75; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+
+  /* ---------------- 右栏 ---------------- */
+  .cmain { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+  .pp-card {
+    background: var(--card-bg);
+    border: 1px solid var(--pp-line);
+    border-radius: var(--pp-r);
+    box-shadow: var(--pp-shadow);
+    padding: 20px 22px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pp-card { transition: box-shadow .2s ease, border-color .2s ease; }
+    .pp-card:hover { box-shadow: var(--pp-shadow-hi); }
+    html[data-theme="dark"] .pp-card:hover { box-shadow: 0 10px 28px rgba(0, 0, 0, .55); }
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .card-head h2 { display: flex; align-items: center; gap: 10px; font-size: 1.04rem; font-weight: 800; color: var(--text); line-height: 1.3; }
+
+  /* 标签 */
+  .tags { display: flex; flex-wrap: wrap; gap: 9px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 13px; border-radius: 999px;
+    font-size: 0.89rem; font-weight: 700;
+    color: var(--accent);
+    background: var(--pp-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--pp-line));
+    transition: transform .14s ease, box-shadow .14s ease;
+  }
+  @media (hover: hover) {
+    .tag:hover { transform: translateY(-1px); box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 20%, transparent); }
+  }
+  .tag-x { cursor: pointer; font-weight: 800; opacity: .55; line-height: 1; }
+  .tag-x:hover { opacity: 1; color: var(--danger); }
+
+  /* 链接行 */
+  .link-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed color-mix(in srgb, var(--pp-line) 88%, transparent); }
+  .link-row:first-child { padding-top: 2px; }
+  .link-row:last-child { border-bottom: none; padding-bottom: 2px; }
+  .link-row a { color: var(--accent); font-weight: 600; text-decoration: none; word-break: break-all; }
+  .link-row a:hover { text-decoration: underline; }
+
+  /* 空状态 */
+  .hint-empty {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .93rem; color: var(--muted);
+    background: var(--pp-soft);
+    border: 1px dashed var(--pp-line-accent);
+    border-radius: 12px; padding: 12px 15px; margin-top: 2px;
+  }
+  .hint-empty::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .5; flex: none; }
+
+  /* 消息入口 */
+  .my-msg-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .my-msg-actions .pp-btn { flex: 1 1 150px; }
+
+  /* ---------------- 表单控件 ---------------- */
+  .edit-input, .edit-textarea {
+    width: 100%; font: inherit; font-size: .95rem;
+    color: var(--text); background: var(--card-bg);
+    border: 1px solid var(--pp-line); border-radius: var(--pp-r-sm);
+    padding: 9px 12px; margin-top: 6px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .edit-input:focus, .edit-textarea:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--pp-soft);
+  }
+  .edit-textarea { min-height: 96px; resize: vertical; line-height: 1.65; }
+  .edit-label { display: block; margin: 12px 0 4px; font-size: .8rem; font-weight: 700; color: var(--muted); }
+  .file-note { font-size: .82rem; line-height: 1.65; color: var(--muted); }
+  .char-count { display: block; margin-top: 6px; text-align: right; font-size: .78rem; color: var(--muted); }
+
+  .sec-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .sec-actions .save, .sec-actions .cancel {
+    font: inherit; font-size: .86rem; font-weight: 700; line-height: 1;
+    border-radius: 999px; padding: 9px 18px; cursor: pointer; border: 1px solid transparent;
+  }
+  .sec-actions .save { background: var(--accent); color: #fff; }
+  .sec-actions .save:hover { filter: brightness(1.06); }
+  .sec-actions .cancel { background: transparent; color: var(--muted); border-color: var(--pp-line); }
+  .sec-actions .cancel:hover { color: var(--text); background: color-mix(in srgb, var(--muted) 10%, transparent); }
+
+  .skills-add { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .skills-add .edit-input { margin-top: 0; }
+  .add-btn {
+    font: inherit; font-size: .88rem; font-weight: 700; line-height: 1;
+    border: none; border-radius: 999px; padding: 10px 16px;
+    background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; flex: none;
+  }
+  .add-btn:hover { filter: brightness(1.06); }
+
+  .link-edit {
+    border: 1px solid var(--pp-line); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 10px;
+    background: color-mix(in srgb, var(--accent) 4%, var(--card-bg));
+  }
+  .link-edit .row-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .link-edit .row-head b { font-size: .84rem; color: var(--muted); font-weight: 700; }
+  .link-del { font: inherit; font-size: .82rem; font-weight: 700; border: none; background: transparent; color: var(--danger); cursor: pointer; }
+
+  /* 开关 */
+  .set-row-switch { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .set-row-switch .set-label { font-weight: 600; font-size: .93rem; }
+  .set-hint { font-size: .8rem; color: var(--muted); }
   .xl-switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: 0 0 auto; cursor: pointer; }
   .xl-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
   .xl-switch-track { position: absolute; inset: 0; background: #cdd5df; border-radius: 999px; transition: background .2s ease; }
@@ -277,123 +517,230 @@
   .xl-switch input:checked + .xl-switch-track { background: var(--accent); }
   .xl-switch input:checked + .xl-switch-track .xl-switch-thumb { transform: translateX(20px); }
   html[data-theme="dark"] .xl-switch-track { background: #3a4760; }
+  .avatar-preview { width: 72px; height: 72px; margin-top: 12px; }
 
-  [hidden] { display: none !important; }
-
-  /* 我的：消息与私信入口 */
-  .my-msg-card .my-msg-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-  .my-msg-card .msg-entry-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--accent); border-radius: 999px; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; text-decoration: none; }
-  .my-msg-card .msg-entry-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); }
-
-  /* ============================================================
-     2026-09-21 体验优化：整体视觉（E）+ 移动端排版（C）+ 无障碍
-     仅动本页样式，不改任何数据与接口。
-     ============================================================ */
-  html { scroll-behavior: smooth; }
-
-  /* 强调色 / 主题切换更顺滑（预设主题、自定义主题色） */
-  .topbar, .tag, .card, .change-btn, .bg-btn, .follow-btn,
-  .profile-theme-strip, .msg-entry-btn { transition: color .25s ease, background-color .25s ease, border-color .25s ease; }
-
-  /* 卡片标题前加一条小色条：层级更清楚，一眼看出分节 */
-  .card h2 { position: relative; padding-left: 13px; }
-  .card h2::before {
-    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-    width: 4px; height: 1.05em; border-radius: 3px; background: var(--accent); opacity: .92;
+  /* ===========================================================
+     弹窗（背景 / 主题）—— 统一 sheet
+     =========================================================== */
+  .pp-modal {
+    position: fixed; inset: 0; z-index: 400;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background: rgba(10, 18, 30, .5);
+    backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
   }
-  .card-head h2 { padding-left: 13px; }
-
-  /* 卡片悬浮反馈（仅指针设备；触屏不触发，避免"粘住"） */
-  @media (hover: hover) and (pointer: fine) {
-    .card { transition: box-shadow .2s ease, border-color .25s ease; }
-    .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .10); }
-    html[data-theme="dark"] .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .5); }
+  .pp-sheet {
+    width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--pp-line);
+    border-radius: var(--pp-r);
+    padding: 22px 22px 20px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .32);
   }
-
-  /* 空状态：从"一句灰斜体"改成一块轻量提示区，更易读也不刺眼 */
-  .hint-empty {
-    display: flex; align-items: center; gap: 8px; font-style: normal;
-    font-size: .95rem; color: var(--muted); opacity: .9;
-    background: color-mix(in srgb, var(--accent) 6%, transparent);
-    border: 1px dashed color-mix(in srgb, var(--accent) 26%, var(--card-border));
-    border-radius: 12px; padding: 13px 16px; margin-top: 4px;
+  .pp-sheet--wide { max-width: 620px; }
+  .pp-sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .pp-sheet-head h3 { display: flex; align-items: center; gap: 9px; font-size: 1.06rem; font-weight: 800; color: var(--text); }
+  .pp-sheet-sub { margin-top: 6px; font-size: .84rem; line-height: 1.65; color: var(--muted); }
+  .pp-x {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--pp-line); background: transparent; color: var(--muted); cursor: pointer;
   }
-  .hint-empty::before { content: '∅'; opacity: .55; font-size: 1.05em; line-height: 1; }
+  .pp-x:hover { color: var(--text); background: color-mix(in srgb, var(--muted) 10%, transparent); }
+  .pp-h4 { margin-top: 22px; font-size: .95rem; font-weight: 800; color: var(--text); }
+  .pp-divider { height: 1px; background: var(--pp-line); margin: 22px 0 0; }
 
-  /* 标签微交互 */
-  .tag { transition: transform .14s ease, box-shadow .14s ease; }
-  @media (hover: hover) {
-    .tag:hover { transform: translateY(-1px); box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 22%, transparent); }
+  /* 背景：两张卡（头图 / 大背景） */
+  .pp-bg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+  .pp-bg-item {
+    border: 1px solid var(--pp-line); border-radius: 12px;
+    padding: 12px; background: color-mix(in srgb, var(--accent) 4%, var(--card-bg));
+    min-width: 0;
   }
+  .pp-bg-item-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .pp-bg-item-head b { font-size: .9rem; font-weight: 800; color: var(--text); }
+  .pp-bg-ratio { font-size: .72rem; font-weight: 700; color: var(--muted); letter-spacing: .5px; }
+  .pp-preview {
+    width: 100%; margin-top: 9px;
+    border-radius: 9px;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+    background-color: var(--pp-soft);
+    border: 1px dashed var(--pp-line);
+  }
+  .pp-preview--banner { aspect-ratio: 16 / 6; }
+  .pp-preview--bg { aspect-ratio: 16 / 9; }
+  .pp-preview.empty { opacity: .5; }
+  .pp-bg-ctl { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .pp-file {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border-radius: 999px; cursor: pointer;
+    font-size: .82rem; font-weight: 700; color: var(--accent);
+    background: var(--pp-soft); border: 1px solid transparent;
+  }
+  .pp-file:hover { background: var(--pp-soft-2); }
+  .pp-bg-item .edit-input { font-size: .85rem; padding: 8px 10px; }
 
-  /* 头像加一圈主题色高光，视觉焦点更明确 */
-  .avatar { box-shadow: 0 3px 12px rgba(0, 0, 0, .18), 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent); }
+  /* 分段控件（头图来源） */
+  .pp-seg-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .pp-seg-row .pp-h4 { margin-top: 0; }
+  .pp-seg {
+    display: inline-flex; padding: 3px; gap: 2px;
+    background: color-mix(in srgb, var(--muted) 12%, transparent);
+    border-radius: 999px;
+  }
+  .pp-seg button {
+    font: inherit; font-size: .8rem; font-weight: 700; line-height: 1;
+    border: none; background: transparent; color: var(--muted);
+    padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    transition: background-color .15s, color .15s;
+  }
+  .pp-seg button:hover { color: var(--text); }
+  .pp-seg button.active { background: var(--card-bg); color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
 
-  /* 姓名 / 账号：字距微调，读起来更稳 */
-  .profile-name, .profile-meta { letter-spacing: .2px; }
+  .pp-sheet-actions { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; flex-wrap: wrap; }
+  .pp-sheet-actions .pp-btn--danger { margin-right: auto; }
 
-  /* 链接行：分隔更清晰，长链接不挤成一坨 */
-  .link-row { padding: 7px 0; border-bottom: 1px dashed color-mix(in srgb, var(--card-border) 85%, transparent); }
-  .link-row:last-child { border-bottom: none; }
+  /* 主题：预设画廊 */
+  .theme-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; margin-top: 16px; }
+  .theme-preset {
+    border: 2px solid transparent; background: var(--card-bg);
+    border-radius: 12px; padding: 6px; cursor: pointer; text-align: left; font: inherit;
+    transition: border-color .15s, transform .12s, box-shadow .15s;
+  }
+  .theme-preset:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
+  .theme-preset.active { border-color: var(--accent); }
+  .theme-preset-art {
+    display: block; height: 54px; border-radius: 8px;
+    background-size: cover; background-position: center;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+  }
+  .theme-preset-name { display: block; margin-top: 7px; font-size: .82rem; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .theme-preset.active .theme-preset-name { color: var(--accent); }
 
-  /* 键盘可见焦点（无障碍） */
+  .theme-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .theme-row input[type="color"] {
+    width: 48px; height: 38px; flex: 0 0 auto; cursor: pointer; padding: 2px;
+    border: 1px solid var(--pp-line); border-radius: var(--pp-r-sm); background: var(--card-bg);
+  }
+  .theme-row .edit-input { flex: 1; margin-top: 0; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+  .theme-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .theme-swatch {
+    width: 34px; height: 34px; border-radius: 9px; cursor: pointer;
+    border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    transition: transform .12s ease;
+  }
+  .theme-swatch:hover { transform: scale(1.06); }
+  .theme-swatch.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--card-bg) inset; }
+
+  /* ---------------- Toast ---------------- */
+  .toast {
+    position: fixed; left: 50%; top: 22px; transform: translateX(-50%);
+    z-index: 500;
+    padding: 10px 18px; border-radius: 12px;
+    background: #1c2733; color: #fff;
+    font-size: .9rem; font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+    opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
+  .toast.err { background: var(--danger); }
+  html[data-theme="dark"] .toast { background: #2a3344; }
+
+  /* ---------------- 浮动按钮 ---------------- */
+  .float-actions { position: fixed; right: 20px; bottom: 20px; z-index: 300; display: flex; flex-direction: column; gap: 10px; }
+  .float-actions .fab {
+    width: 46px; height: 46px; border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--accent, #0078d4); color: #fff;
+    border: 1px solid transparent;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, .18);
+    cursor: pointer; text-decoration: none;
+    transition: background-color .15s, color .15s, border-color .15s;
+  }
+  .float-actions .fab:hover { background: color-mix(in srgb, var(--accent, #0078d4) 86%, #000); border-color: transparent; }
+  /* 管理员专用按钮：黑色（common.css 已有，此处随内联覆盖同步兜底） */
+  .float-actions .fab.xl-edit-fab { background: #1f1f1f; border-color: rgba(255, 255, 255, .12); }
+  .float-actions .fab.xl-edit-fab:hover { background: #000; }
+
+  /* ---------------- 页脚 ---------------- */
+  .site-footer {
+    max-width: var(--pp-max); margin: 8px auto 0; padding: 22px 24px 40px;
+    border-top: 1px solid var(--pp-line);
+    text-align: center; color: var(--muted); font-size: .88rem; line-height: 1.9;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  /* ---------------- 焦点可见（无障碍） ---------------- */
   a:focus-visible, button:focus-visible, input:focus-visible,
-  textarea:focus-visible, .theme-swatch:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px;
+  textarea:focus-visible, .theme-swatch:focus-visible, .pp-file:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
   }
 
-  /* 保存按钮的"保存中…"禁用态 */
-  button[disabled] { opacity: .6; cursor: default; filter: none !important; }
-
-  /* 简介字数：贴着文本框右下 */
-  #aboutEditor .char-count { display: block; margin-top: 6px; text-align: right; }
-
-  /* 头像预览：未设置时用主题色底，避免一片空白 */
-  .avatar-preview { background: color-mix(in srgb, var(--accent) 10%, var(--card-bg)); }
-
-  /* ---- 移动端排版（C） ---- */
-  @media (max-width: 640px) {
-    .content { padding: 22px 14px 40px; }
-    .card { padding: 18px 16px; margin-top: 18px; }
-    .card h2 { font-size: 1.08rem; }
-    /* 头像与资料纵向居中排布，比左右挤更耐看 */
-    .profile-head { gap: 14px; justify-content: center; text-align: center; }
-    .profile-head > div { width: 100%; min-width: 0; }
-    .profile-head > .avatar-stack { width: auto; }
-    .profile-name-row { justify-content: center; }
-    .profile-tagline { max-width: 100%; }
-    .avatar { width: 80px; height: 80px; }
-    .avatar > .avatar-text { font-size: 1.95rem; }
-    .avatar-opts { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-    .profile-tools { flex-wrap: wrap; justify-content: center; gap: 8px; }
-    .bg-btn { font-size: .84rem; padding: 7px 12px; }
-    .rename-editor { justify-content: center; }
-    .rename-editor .edit-input { min-width: 0; flex: 1 1 100%; }
-    .sec-actions { flex-wrap: wrap; }
-    .sec-actions .save, .sec-actions .cancel { flex: 1 1 auto; }
-    .skills-add { flex-wrap: wrap; }
-    .skills-add .edit-input { flex: 1 1 100%; }
-    .skills-add .add-btn { width: 100%; }
-    .theme-row { flex-wrap: wrap; }
-    .theme-row .edit-input { flex: 1 1 100%; }
-    .banner-mode { top: 8px; right: 8px; }
-    .banner-mode button { font-size: .74rem; padding: 5px 10px; }
-    .bg-sheet, .theme-sheet { padding: 18px 16px; }
-    .theme-swatch { width: 30px; height: 30px; }
-    .msg-entry-btn { width: 100%; justify-content: center; }
+  /* ===========================================================
+     响应式
+     =========================================================== */
+  @media (max-width: 900px) {
+    :root { --pp-pad: 12px; }
+    .content { grid-template-columns: minmax(0, 1fr); padding: 0 var(--pp-pad) 44px; gap: 16px; }
+    .pcard { position: static; }
+    .pp-banner { margin: 12px auto 0; height: clamp(150px, 26vh, 200px); border-radius: var(--pp-r); }
+    .pp-bg-grid { grid-template-columns: minmax(0, 1fr); }
+    /* 页签：单行横向滚动，不再让位大块留白 */
+    .pp-tabs { padding: 0 12px 0 132px; min-height: 52px; }
+    .pp-tabs::after {
+      content: '';
+      position: absolute; top: 0; bottom: 0; right: 46px; width: 24px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, var(--bg));
+    }
+    .pp-tab { font-size: .88rem; padding: 8px 11px; }
+    .pp-tab-ic { width: 19px; height: 19px; }
+    .content.has-banner { padding-top: 8px; }
   }
-  /* 超窄屏：顶栏按钮别太挤 */
+  @media (max-width: 560px) {
+    :root { --pp-pad: 10px; }
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .pp-banner { margin: 10px auto 0; border-radius: 12px; }
+    .avatar-wrap { width: 84px; height: 84px; left: 16px; bottom: -38px; }
+    .avatar, .avatar > .avatar-text { width: 84px; height: 84px; font-size: 2rem; }
+    .content.has-banner { padding-top: 6px; }
+    .pp-tabs { padding: 0 8px 0 112px; min-height: 50px; gap: 0; }
+    .pp-tab { font-size: .84rem; padding: 8px 9px; gap: 5px; }
+    .pp-tab-ic { width: 18px; height: 18px; }
+    .pp-tabs-menu { min-width: 164px; }
+    .pp-banner-tools { top: 10px; right: 10px; gap: 6px; }
+    .glass-btn { padding: 6px 11px; font-size: .78rem; }
+    .banner-mode-hint { top: 10px; left: 12px; font-size: .72rem; max-width: 52%; }
+    .banner-actions { right: 12px; bottom: 12px; gap: 8px; }
+    .banner-actions .pp-btn { padding: 8px 13px; font-size: .84rem; }
+    .pp-name { font-size: 1.32rem; }
+    .pp-card { padding: 17px 16px; }
+    .pp-sheet { padding: 18px 16px 16px; }
+    .my-msg-actions .pp-btn { flex: 1 1 100%; }
+    .float-actions { right: 12px; bottom: 12px; }
+    .float-actions .fab { width: 42px; height: 42px; border-radius: 12px; }
+    .site-footer { padding: 18px 16px 34px; }
+  }
   @media (max-width: 380px) {
     .bar-btn { padding: 6px 8px; font-size: .82rem; }
     .site-name { font-size: .98rem; }
   }
-  /* 尊重"减少动态效果"偏好 */
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .card, .tag, .bg-btn { transition: none !important; }
+    .pp-card, .tag, .pp-btn, .float-actions .fab { transition: none !important; }
   }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -406,227 +753,309 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
-      
-      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
   <div class="profile-theme-strip" id="profileThemeStrip" hidden></div>
 
-  <div class="profile-banner" id="profileBanner" hidden>
-    <div class="banner-mode" id="bannerMode" hidden>
-      <button type="button" id="bmTheme" data-mode="theme" data-zh="主题色" data-en="Theme">主题色</button>
-      <button type="button" id="bmImage" data-mode="image" data-zh="图片" data-en="Image">图片</button>
+  <!-- ============ 头图：头像压在下缘；右上角＝背景/主题；右下角＝关注/私聊 ============ -->
+  <div class="pp-banner" id="profileBanner">
+    <div class="pp-banner-tools" id="profileTools" hidden>
+      <button class="glass-btn" id="openBgBtn" type="button"><i class="ic" data-ic="image"></i><span data-zh="背景" data-en="Background">背景</span></button>
+      <button class="glass-btn" id="openThemeBtn" type="button"><i class="ic" data-ic="palette"></i><span data-zh="主题" data-en="Theme">主题</span></button>
     </div>
     <div class="banner-mode-hint" id="bannerModeHint" hidden></div>
+
+    <div class="avatar-wrap">
+      <div class="avatar" id="avatar">
+        <img id="avatarImg" alt="" decoding="async" />
+        <span id="avatarText" class="avatar-text" hidden></span>
+      </div>
+      <button class="change-btn avatar-edit" data-sec="avatar" type="button" hidden aria-label="更改头像" title="更改头像"><i class="ic" data-ic="edit"></i></button>
+    </div>
+
+    <div class="banner-actions">
+      <span id="followSlot"></span>
+      <a class="pp-btn" id="dmBtn" href="../messages/" hidden><i class="ic" data-ic="chat"></i><span data-zh="私聊" data-en="Message">私聊</span></a>
+    </div>
   </div>
 
-  <main class="content">
-    <div class="profile-tools" id="profileTools" hidden>
-      <button class="bg-btn" id="openBgBtn" type="button"><span aria-hidden="true">🖼️</span> <span data-zh="设置背景" data-en="Set background">设置背景</span></button>
-      <button class="bg-btn" id="openThemeBtn" type="button"><span aria-hidden="true">🎨</span> <span data-zh="设置主题色" data-en="Set theme color">设置主题色</span></button>
+  <!-- ============ 头图下方：个人空间页签（彩色矢量图标 + 文字，右侧「更多」折叠菜单） ============ -->
+  <nav class="pp-tabs" id="ppTabs" aria-label="个人空间">
+    <div class="pp-tabs-in">
+      <a class="pp-tab is-active" href="./" aria-current="page">
+        <i class="ic pp-tab-ic" data-ic="home" style="color:#00aeec"></i>
+        <span data-zh="主页" data-en="Home" data-zh-TW="主頁" data-ja="ホーム" data-ko="홈" data-de="Start" data-fr="Accueil">主页</span>
+      </a>
+      <a class="pp-tab" href="../products.html">
+        <i class="ic pp-tab-ic" data-ic="grid" style="color:#ff8f1f"></i>
+        <span data-zh="作品" data-en="Works" data-zh-TW="作品" data-ja="作品" data-ko="작품" data-de="Projekte" data-fr="Projets">作品</span>
+      </a>
+      <a class="pp-tab" href="../blog/">
+        <i class="ic pp-tab-ic" data-ic="file-text" style="color:#00c2a8"></i>
+        <span data-zh="博客" data-en="Blog" data-zh-TW="部落格" data-ja="ブログ" data-ko="블로그" data-de="Blog" data-fr="Blog">博客</span>
+      </a>
+      <a class="pp-tab" href="../guestbook/">
+        <i class="ic pp-tab-ic" data-ic="chat" style="color:#ff6699"></i>
+        <span data-zh="留言" data-en="Guestbook" data-zh-TW="留言板" data-ja="ゲストブック" data-ko="방명록" data-de="Gästebuch" data-fr="Livre d'or">留言</span>
+      </a>
+      <a class="pp-tab" href="../groups/">
+        <i class="ic pp-tab-ic" data-ic="users" style="color:#7c5cff"></i>
+        <span data-zh="群组" data-en="Groups" data-zh-TW="群組" data-ja="グループ" data-ko="그룹" data-de="Gruppen" data-fr="Groupes">群组</span>
+      </a>
+      <a class="pp-tab" href="../settings/homepage.html">
+        <i class="ic pp-tab-ic" data-ic="settings" style="color:#7f8c9b"></i>
+        <span data-zh="设置" data-en="Settings" data-zh-TW="設定" data-ja="設定" data-ko="설정" data-de="Einstellungen" data-fr="Réglages">设置</span>
+      </a>
     </div>
-    <section class="hero">
-      <div class="profile-head">
-        <div class="avatar-stack">
-          <div class="avatar" id="avatar">
-            <img id="avatarImg" alt="" decoding="async" />
-            <span id="avatarText" class="avatar-text" hidden></span>
-          </div>
-          <div class="avatar-opts" id="avatarOpts" hidden>
-            <div class="avatar-opts-label" data-zh="更改头像" data-en="Change Avatar">更改头像</div>
-            <button type="button" class="avatar-opt" data-mode="text" data-zh="使用文字头像" data-en="Use Text Avatar">使用文字头像</button>
-            <button type="button" class="avatar-opt" data-mode="none" data-zh="不使用头像" data-en="No Avatar">不使用头像</button>
+    <div class="pp-tabs-more">
+      <button class="pp-tab pp-tabs-more-btn" id="ppTabsMore" type="button" aria-haspopup="true" aria-expanded="false" title="更多" aria-label="更多">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>
+      </button>
+      <div class="pp-tabs-menu" id="ppTabsMenu" hidden>
+        <a href="../notice/"><i class="ic" data-ic="bell"></i><span data-zh="消息中心" data-en="Message Center" data-zh-TW="訊息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心</span></a>
+        <a href="../messages/"><i class="ic" data-ic="chat"></i><span data-zh="私信" data-en="Direct Messages" data-zh-TW="私訊" data-ja="ダイレクトメッセージ" data-ko="쪽지" data-de="Direktnachrichten" data-fr="Messages privés">私信</span></a>
+        <a href="../search_user/"><i class="ic" data-ic="search"></i><span data-zh="用户搜索" data-en="User Search" data-zh-TW="使用者搜尋" data-ja="ユーザー検索" data-ko="사용자 검색" data-de="Nutzersuche" data-fr="Recherche d'utilisateurs">用户搜索</span></a>
+        <a href="../points/"><i class="ic" data-ic="trophy"></i><span data-zh="积分榜" data-en="Leaderboard" data-zh-TW="積分榜" data-ja="ランキング" data-ko="포인트 순위" data-de="Punkteliste" data-fr="Classement">积分榜</span></a>
+        <a href="../language.html"><i class="ic" data-ic="globe"></i><span data-zh="语言" data-en="Language" data-zh-TW="語言" data-ja="言語" data-ko="언어" data-de="Sprache" data-fr="Langue">语言</span></a>
+        <a href="../helpcenter/"><i class="ic" data-ic="clipboard"></i><span data-zh="帮助中心" data-en="Help Center" data-zh-TW="幫助中心" data-ja="ヘルプセンター" data-ko="고객센터" data-de="Hilfezentrum" data-fr="Centre d'aide">帮助中心</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="content has-banner">
+    <!-- ============ 左栏：资料卡 ============ -->
+    <aside class="pcard">
+      <div class="pp-name-row" id="nameRow">
+        <h1 class="pp-name" id="nameDisplay"></h1>
+        <button class="pp-icon-btn" id="renameBtn" type="button" hidden aria-label="改名" title="改名"><i class="ic" data-ic="edit"></i></button>
+      </div>
+      <div class="rename-editor" id="renameEditor" hidden>
+        <input class="edit-input" id="renameInput" maxlength="40" />
+        <button class="pp-btn pp-btn--sm" id="renameSave" type="button"><span data-zh="保存" data-en="Save">保存</span></button>
+        <button class="pp-btn pp-btn--ghost pp-btn--sm" id="renameCancel" type="button"><span data-zh="取消" data-en="Cancel">取消</span></button>
+      </div>
+      <div class="pp-login" id="loginDisplay"></div>
+      <div class="pp-uid" id="uidDisplay" hidden title="点击复制 ID"><b>ID</b><span id="uidValue"></span></div>
+
+      <div class="pp-chip" id="voucherChip" hidden>
+        <i class="ic" data-ic="ticket"></i>
+        <span class="pv-label" data-zh="调度券" data-en="Vouchers">调度券</span>
+        <b class="pv-val" id="voucherChipVal">…</b>
+        <span class="pv-unit" data-zh="张" data-en="张">张</span>
+      </div>
+
+      <div class="pcard-sep"></div>
+
+      <section class="pcard-block" id="aboutCard">
+        <div class="pcard-block-head">
+          <h2 class="pcard-h"><span class="h-ic"><i class="ic" data-ic="note"></i></span><span data-zh="简介" data-en="Bio">简介</span></h2>
+          <button class="change-btn" data-sec="about" hidden><i class="ic" data-ic="edit"></i><span data-zh="更改" data-en="Edit">更改</span></button>
+        </div>
+        <div id="aboutView">
+          <p class="pp-bio" id="aboutDisplay"></p>
+          <p class="hint-empty" id="aboutEmpty" hidden data-zh="还没有简介" data-en="No bio yet" data-zh-TW="還沒有簡介" data-ja="自己紹介はまだありません" data-ko="아직 소개가 없습니다" data-de="Noch keine Beschreibung" data-fr="Pas encore de bio">还没有简介</p>
+        </div>
+        <div id="aboutEditor" hidden>
+          <textarea class="edit-textarea auto-grow" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……（Ctrl/⌘ + Enter 保存，Esc 取消）"></textarea>
+          <span class="char-count" data-for="aboutInput"></span>
+          <div class="sec-actions">
+            <button class="save" data-save="about"><span data-zh="保存" data-en="Save">保存</span></button>
+            <button class="cancel" data-cancel="about"><span data-zh="取消" data-en="Cancel">取消</span></button>
           </div>
         </div>
-        <div>
-          <div class="profile-name-row" id="nameRow">
-            <h1 class="profile-name" id="nameDisplay"></h1>
-            <button class="change-btn inline" id="renameBtn" type="button" hidden data-zh="改名" data-en="Rename">改名</button>
+      </section>
+    </aside>
+
+    <!-- ============ 右栏：内容 ============ -->
+    <div class="cmain">
+      <section class="pp-card" id="myMessagesCard">
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="inbox"></i></span><span data-zh="消息与私信" data-en="Messages & Chat">消息与私信</span></h2>
+        </div>
+        <div class="my-msg-actions">
+          <a class="pp-btn pp-btn--soft" href="../notice/"><i class="ic" data-ic="bell"></i><span data-zh="消息中心" data-en="Message Center">消息中心</span></a>
+          <a class="pp-btn pp-btn--soft" href="../messages/"><i class="ic" data-ic="chat"></i><span data-zh="私信" data-en="Direct Messages">私信</span></a>
+        </div>
+      </section>
+
+      <section class="pp-card" id="skillsCard">
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="tag"></i></span><span data-zh="技能 / 专长" data-en="Skills">技能 / 专长</span></h2>
+          <button class="change-btn" data-sec="skills" hidden><i class="ic" data-ic="edit"></i><span data-zh="更改" data-en="Edit">更改</span></button>
+        </div>
+        <div id="skillsView">
+          <div class="tags" id="skillsDisplay"></div>
+          <p class="hint-empty" id="skillsEmpty" hidden data-zh="暂无技能标签" data-en="No skills yet">暂无技能标签</p>
+        </div>
+        <div id="skillsEditor" hidden>
+          <div class="tags" id="skillsEditList"></div>
+          <div class="skills-add">
+            <input class="edit-input" id="skillInput" placeholder="添加技能，回车或点「添加」（可用逗号一次加多个）" maxlength="160" />
+            <button class="add-btn" id="skillAdd" type="button"><span data-zh="添加" data-en="Add">添加</span></button>
           </div>
-          <div class="rename-editor" id="renameEditor" hidden>
-            <input class="edit-input" id="renameInput" maxlength="40" />
-            <button class="save" id="renameSave" type="button" data-zh="保存" data-en="Save">保存</button>
-            <button class="cancel" id="renameCancel" type="button" data-zh="取消" data-en="Cancel">取消</button>
-          </div>
-          <div class="profile-meta" id="loginDisplay"></div>
-          <div style="margin-top:10px">
-            <button class="change-btn" data-sec="avatar" hidden>更改头像</button>
-            <button class="follow-btn" id="followBtn" type="button" hidden></button>
+          <div class="sec-actions">
+            <button class="save" data-save="skills"><span data-zh="保存" data-en="Save">保存</span></button>
+            <button class="cancel" data-cancel="skills"><span data-zh="取消" data-en="Cancel">取消</span></button>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="card my-msg-card" id="myMessagesCard">
-      <div class="card-head">
-        <h2 data-zh="消息与私信" data-en="Messages & Chat">消息与私信</h2>
-      </div>
-      <div class="my-msg-actions">
-        <a class="msg-entry-btn" href="../notice/" data-zh="消息中心" data-en="Message Center">消息中心</a>
-        <a class="msg-entry-btn" href="../messages/" data-zh="私信" data-en="Direct Messages">私信</a>
-      </div>
-    </section>
+      <section class="pp-card" id="linksCard">
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="link"></i></span><span data-zh="链接" data-en="Links">链接</span></h2>
+          <button class="change-btn" data-sec="links" hidden><i class="ic" data-ic="edit"></i><span data-zh="更改" data-en="Edit">更改</span></button>
+        </div>
+        <div id="linksView">
+          <div id="linksDisplay"></div>
+          <p class="hint-empty" id="linksEmpty" hidden data-zh="暂无链接" data-en="No links yet">暂无链接</p>
+        </div>
+        <div id="linksEditor" hidden>
+          <div id="linksEditList"></div>
+          <button class="add-btn" id="linkAdd" type="button"><i class="ic" data-ic="plus"></i> <span data-zh="添加链接" data-en="Add link">添加链接</span></button>
+          <div class="sec-actions">
+            <button class="save" data-save="links"><span data-zh="保存" data-en="Save">保存</span></button>
+            <button class="cancel" data-cancel="links"><span data-zh="取消" data-en="Cancel">取消</span></button>
+          </div>
+        </div>
+      </section>
 
-    <section class="card" id="aboutCard">
-      <div class="card-head">
-        <h2 data-zh="简介" data-en="Bio">简介</h2>
-        <button class="change-btn" data-sec="about" hidden>更改</button>
-      </div>
-      <div id="aboutView">
-        <p id="aboutDisplay"></p>
-        <p class="hint-empty" id="aboutEmpty" hidden>（还没有简介）</p>
-      </div>
-      <div id="aboutEditor" hidden>
-        <textarea class="edit-textarea auto-grow" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……（Ctrl/⌘ + Enter 保存，Esc 取消）"></textarea>
-        <span class="char-count" data-for="aboutInput"></span>
+      <section class="pp-card" id="avatarEditor" hidden>
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="user"></i></span><span data-zh="自定义头像" data-en="Custom Avatar">自定义头像</span></h2>
+          <button class="change-btn" data-sec="avatar-close"><span data-zh="收起" data-en="Close">收起</span></button>
+        </div>
+        <div class="set-row-switch">
+          <span class="set-label" data-zh="头像由 GitHub 同步" data-en="Sync avatar from GitHub">头像由 GitHub 同步</span>
+          <label class="xl-switch">
+            <input type="checkbox" id="ghAvatarSync" />
+            <span class="xl-switch-track"><span class="xl-switch-thumb"></span></span>
+          </label>
+          <span class="set-hint" id="ghSyncHint" data-zh="开启后始终使用 GitHub 头像，自定义头像不显示" data-en="On: always use the GitHub avatar; your custom avatar is hidden">开启后始终使用 GitHub 头像，自定义头像不显示</span>
+        </div>
+        <div id="avatarCustomWrap">
+          <p class="file-note" data-zh="支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。" data-en="Upload an image or paste an image URL. Uploaded images are stored as data (keep under 1.5MB). Leave empty to restore the default GitHub avatar.">支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。</p>
+          <div class="pp-bg-ctl">
+            <label class="pp-file"><i class="ic" data-ic="camera"></i><span data-zh="上传图片" data-en="Upload">上传图片</span><input type="file" id="avatarFile" accept="image/*" hidden /></label>
+            <img id="avatarPreview" class="avatar avatar-preview" alt="" onerror="this.onerror=null;this.src=window.initialAvatarSvg?window.initialAvatarSvg(''):''" />
+          </div>
+          <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
+          <input class="edit-input" id="avatarUrl" placeholder="https://..." />
+        </div>
         <div class="sec-actions">
-          <button class="save" data-save="about">保存</button>
-          <button class="cancel" data-cancel="about">取消</button>
+          <button class="save" data-save="avatar"><span data-zh="保存" data-en="Save">保存</span></button>
+          <button class="cancel" data-cancel="avatar"><span data-zh="取消" data-en="Cancel">取消</span></button>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="card" id="skillsCard">
-      <div class="card-head">
-        <h2 data-zh="技能 / 专长" data-en="Skills">技能 / 专长</h2>
-        <button class="change-btn" data-sec="skills" hidden>更改</button>
-      </div>
-      <div id="skillsView">
-        <div class="tags" id="skillsDisplay"></div>
-        <p class="hint-empty" id="skillsEmpty" hidden>（暂无技能标签）</p>
-      </div>
-      <div id="skillsEditor" hidden>
-        <div class="tags" id="skillsEditList"></div>
-        <div class="skills-add">
-          <input class="edit-input" id="skillInput" placeholder="添加技能，回车或点「添加」（可用逗号一次加多个）" maxlength="160" />
-          <button class="add-btn" id="skillAdd">添加</button>
+      <div id="loginPrompt" class="pp-card" hidden>
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="lock"></i></span><span data-zh="请先登录" data-en="Please sign in">请先登录</span></h2>
         </div>
-        <div class="sec-actions">
-          <button class="save" data-save="skills">保存</button>
-          <button class="cancel" data-cancel="skills">取消</button>
-        </div>
+        <p class="file-note" data-zh="登录后即可查看并编辑你的个人资料。" data-en="Sign in to view and edit your profile.">登录后即可查看并编辑你的个人资料。</p>
       </div>
-    </section>
-
-    <section class="card" id="linksCard">
-      <div class="card-head">
-        <h2 data-zh="链接" data-en="Links">链接</h2>
-        <button class="change-btn" data-sec="links" hidden>更改</button>
-      </div>
-      <div id="linksView">
-        <div id="linksDisplay"></div>
-        <p class="hint-empty" id="linksEmpty" hidden>（暂无链接）</p>
-      </div>
-      <div id="linksEditor" hidden>
-        <div id="linksEditList"></div>
-        <button class="add-btn" id="linkAdd">+ 添加链接</button>
-        <div class="sec-actions">
-          <button class="save" data-save="links">保存</button>
-          <button class="cancel" data-cancel="links">取消</button>
-        </div>
-      </div>
-    </section>
-    <section class="card" id="avatarEditor" hidden>
-      <div class="card-head">
-        <h2 data-zh="自定义头像" data-en="Custom Avatar">自定义头像</h2>
-        <button class="change-btn" data-sec="avatar-close">收起</button>
-      </div>
-      <div class="set-row-switch">
-        <span class="set-label" data-zh="头像由 GitHub 同步" data-en="Sync avatar from GitHub">头像由 GitHub 同步</span>
-        <label class="xl-switch">
-          <input type="checkbox" id="ghAvatarSync" />
-          <span class="xl-switch-track"><span class="xl-switch-thumb"></span></span>
-        </label>
-        <span class="set-hint" id="ghSyncHint" data-zh="开启后始终使用 GitHub 头像，自定义头像不显示" data-en="On: always use the GitHub avatar; your custom avatar is hidden">开启后始终使用 GitHub 头像，自定义头像不显示</span>
-      </div>
-      <div id="avatarCustomWrap">
-        <p class="file-note" data-zh="支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。" data-en="Upload an image or paste an image URL. Uploaded images are stored as data (keep under 1.5MB). Leave empty to restore the default GitHub avatar.">支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。</p>
-        <input type="file" id="avatarFile" accept="image/*" />
-        <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
-        <input class="edit-input" id="avatarUrl" placeholder="https://..." />
-        <img id="avatarPreview" class="avatar avatar-preview" alt="" onerror="this.onerror=null;this.src=window.initialAvatarSvg?window.initialAvatarSvg(''):''" />
-      </div>
-      <div class="sec-actions">
-        <button class="save" data-save="avatar">保存</button>
-        <button class="cancel" data-cancel="avatar">取消</button>
-      </div>
-    </section>
-
-    <div id="loginPrompt" class="card" hidden>
-      <h2 data-zh="请先登录" data-en="Please sign in">请先登录</h2>
-      <p data-zh="登录后即可查看并编辑你的个人资料。" data-en="Sign in to view and edit your profile.">登录后即可查看并编辑你的个人资料。</p>
     </div>
   </main>
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <div class="toast" id="toast"></div>
 
-  <div class="bg-modal" id="bgModal" hidden>
-    <div class="bg-sheet">
-      <h3 data-zh="超长背景（主页顶部长条）" data-en="Banner (top strip)">超长背景（主页顶部长条）</h3>
-      <input type="file" id="bannerFile" accept="image/*" />
-      <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
-      <input class="edit-input" id="bannerUrl" placeholder="https://..." />
-      <div class="bg-preview empty" id="bannerPreview"></div>
-      <div class="bg-sec-actions">
-        <button class="bg-clear" id="bannerClear" type="button" data-zh="清除超长背景" data-en="Clear banner">清除超长背景</button>
+  <!-- ============ 背景弹窗（重做） ============ -->
+  <div class="pp-modal" id="bgModal" hidden>
+    <div class="pp-sheet pp-sheet--wide">
+      <div class="pp-sheet-head">
+        <div>
+          <h3><span class="h-ic"><i class="ic" data-ic="image"></i></span><span data-zh="设置背景" data-en="Background">设置背景</span></h3>
+          <p class="pp-sheet-sub" data-zh="头图是主页顶部那条横幅，大背景铺在正文后面。上传的图片会存到云端，换设备也在。" data-en="The banner is the strip on top; the big background sits behind the content. Uploads are stored in the cloud.">头图是主页顶部那条横幅，大背景铺在正文后面。上传的图片会存到云端，换设备也在。</p>
+        </div>
+        <button class="pp-x" type="button" onclick="document.getElementById('bgModal').hidden=true" aria-label="关闭"><i class="ic" data-ic="x"></i></button>
       </div>
 
-      <h3 data-zh="大背景（正文下方）" data-en="Big background (behind content)">大背景（正文下方）</h3>
-      <input type="file" id="bgFile" accept="image/*" />
-      <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
-      <input class="edit-input" id="bgUrl" placeholder="https://..." />
-      <div class="bg-preview empty" id="bgPreview"></div>
-      <div class="bg-sec-actions">
-        <button class="bg-clear" id="bgClear" type="button" data-zh="清除大背景" data-en="Clear background">清除大背景</button>
+      <div class="pp-bg-grid">
+        <div class="pp-bg-item">
+          <div class="pp-bg-item-head"><b data-zh="头图" data-en="Banner">头图</b><span class="pp-bg-ratio">16 : 6</span></div>
+          <div class="pp-preview pp-preview--banner empty" id="bannerPreview"></div>
+          <div class="pp-bg-ctl">
+            <label class="pp-file"><i class="ic" data-ic="camera"></i><span data-zh="上传" data-en="Upload">上传</span><input type="file" id="bannerFile" accept="image/*" hidden /></label>
+            <button class="pp-btn pp-btn--danger pp-btn--sm" id="bannerClear" type="button"><span data-zh="清除" data-en="Clear">清除</span></button>
+          </div>
+          <input class="edit-input" id="bannerUrl" placeholder="https://..." />
+        </div>
+
+        <div class="pp-bg-item">
+          <div class="pp-bg-item-head"><b data-zh="大背景" data-en="Big background">大背景</b><span class="pp-bg-ratio">16 : 9</span></div>
+          <div class="pp-preview pp-preview--bg empty" id="bgPreview"></div>
+          <div class="pp-bg-ctl">
+            <label class="pp-file"><i class="ic" data-ic="camera"></i><span data-zh="上传" data-en="Upload">上传</span><input type="file" id="bgFile" accept="image/*" hidden /></label>
+            <button class="pp-btn pp-btn--danger pp-btn--sm" id="bgClear" type="button"><span data-zh="清除" data-en="Clear">清除</span></button>
+          </div>
+          <input class="edit-input" id="bgUrl" placeholder="https://..." />
+        </div>
       </div>
 
-      <div class="bg-sec-actions" style="margin-top:18px; justify-content:flex-end;">
-        <button class="bg-cancel" id="bgCancel" type="button" data-zh="取消" data-en="Cancel">取消</button>
-        <button class="bg-save" id="bgSave" type="button" data-zh="保存" data-en="Save">保存</button>
+      <div class="pp-seg-row">
+        <h4 class="pp-h4" data-zh="头图来源" data-en="Banner source">头图来源</h4>
+        <div class="banner-mode pp-seg" id="bannerMode" hidden>
+          <button type="button" id="bmTheme" data-mode="theme" data-zh="主题色" data-en="Theme">主题色</button>
+          <button type="button" id="bmImage" data-mode="image" data-zh="图片" data-en="Image">图片</button>
+        </div>
+      </div>
+
+      <div class="pp-sheet-actions">
+        <button class="pp-btn pp-btn--ghost" id="bgCancel" type="button"><span data-zh="取消" data-en="Cancel">取消</span></button>
+        <button class="pp-btn" id="bgSave" type="button"><span data-zh="保存" data-en="Save">保存</span></button>
       </div>
     </div>
   </div>
 
-  <div class="theme-modal" id="themeModal" hidden>
-    <div class="theme-sheet">
-      <h3 data-zh="个人主页主题" data-en="Personal homepage theme">个人主页主题</h3>
-      <p class="file-note" data-zh="选一个预设主题：会同时套用配色、主页头图与页面底色。若你上传过自定义头图，头图优先显示。" data-en="Pick a preset theme: it applies the colors, a homepage banner and a page tint. Your own uploaded banner takes priority.">选一个预设主题：会同时套用配色、主页头图与页面底色。若你上传过自定义头图，头图优先显示。</p>
+  <!-- ============ 主题弹窗（重做） ============ -->
+  <div class="pp-modal" id="themeModal" hidden>
+    <div class="pp-sheet">
+      <div class="pp-sheet-head">
+        <div>
+          <h3><span class="h-ic"><i class="ic" data-ic="palette"></i></span><span data-zh="个人主页主题" data-en="Homepage theme">个人主页主题</span></h3>
+          <p class="pp-sheet-sub" data-zh="选一套预设：同时套用主色与头图；也可只改主色。你上传过自定义头图时，头图优先显示。" data-en="Pick a preset to apply colors and banner, or just change the accent. A custom banner you uploaded takes priority.">选一套预设：同时套用主色与头图；也可只改主色。你上传过自定义头图时，头图优先显示。</p>
+        </div>
+        <button class="pp-x" type="button" onclick="document.getElementById('themeModal').hidden=true" aria-label="关闭"><i class="ic" data-ic="x"></i></button>
+      </div>
 
       <div class="theme-presets" id="themePresets"></div>
 
-      <h4 class="theme-sub" data-zh="自定义主题色" data-en="Custom accent">自定义主题色</h4>
-      <p class="file-note" data-zh="也可只调小蓝条下方的 6px 色条颜色。" data-en="Or just customize the 6px strip below the blue bar.">也可只调小蓝条下方的 6px 色条颜色。</p>
+      <div class="pp-divider"></div>
+      <h4 class="pp-h4" data-zh="自定义主色" data-en="Custom accent">自定义主色</h4>
+      <p class="pp-sheet-sub" data-zh="主色决定按钮、标签与小蓝条下方 6px 色条的颜色。" data-en="The accent drives buttons, tags, and the 6px strip under the bar.">主色决定按钮、标签与小蓝条下方 6px 色条的颜色。</p>
       <div class="theme-row">
         <input type="color" id="themeColorInput" value="#0078d4" />
         <input class="edit-input" id="themeHexInput" placeholder="#0078d4" maxlength="7" />
       </div>
       <div class="theme-swatches" id="themeSwatches"></div>
-      <div class="theme-sec-actions">
-        <button class="theme-clear" id="themeClear" type="button" data-zh="清除" data-en="Clear">清除</button>
-        <button class="theme-cancel" id="themeCancel" type="button" data-zh="取消" data-en="Cancel">取消</button>
-        <button class="theme-save" id="themeSave" type="button" data-zh="保存" data-en="Save">保存</button>
+
+      <div class="pp-sheet-actions">
+        <button class="pp-btn pp-btn--danger" id="themeClear" type="button"><span data-zh="恢复默认" data-en="Reset">恢复默认</span></button>
+        <button class="pp-btn pp-btn--ghost" id="themeCancel" type="button"><span data-zh="取消" data-en="Cancel">取消</span></button>
+        <button class="pp-btn" id="themeSave" type="button"><span data-zh="保存" data-en="Save">保存</span></button>
       </div>
     </div>
   </div>
 
   <div class="float-actions">
-    <a class="fab" id="langBtn" href="../language.html"  aria-label="语言" title="语言">
+    <a class="fab" id="langBtn" href="../language.html" aria-label="语言" title="语言">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
     </a>
-    <a class="fab" id="settingsBtn" href="../settings/homepage.html"  aria-label="设置" title="设置">
+    <a class="fab" id="settingsBtn" href="../settings/homepage.html" aria-label="设置" title="设置">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </a>
   </div>
 
-  <script src="../auth.js?v=20260925c"></script>
+  <script src="../auth.js?v=20261103a"></script>
   <script>
     (function () {
       var OWNER = 'MC-Creator-Jerry';
@@ -634,7 +1063,7 @@
       function findForbidden(text){ if(!text) return null; var low=String(text).toLowerCase(); for(var i=0;i<FORBIDDEN.length;i++){ if(low.indexOf(FORBIDDEN[i].toLowerCase())!==-1) return FORBIDDEN[i]; } return null; }
 
       var $ = function (id) { return document.getElementById(id); };
-      var avatar = $('avatarImg'), avatarWrap = $('avatar'), avatarText = $('avatarText'), avatarOpts = $('avatarOpts'), nameDisplay = $('nameDisplay'), loginDisplay = $('loginDisplay');
+      var avatar = $('avatarImg'), avatarWrap = $('avatar'), avatarText = $('avatarText'), nameDisplay = $('nameDisplay'), loginDisplay = $('loginDisplay'), uidDisplay = $('uidDisplay'), uidValue = $('uidValue');
       var nameRow = $('nameRow'), renameBtn = $('renameBtn'), renameEditor = $('renameEditor'), renameInput = $('renameInput');
 
       /* ---------- 头像显示模式（image / text / none）---------- */
@@ -677,29 +1106,6 @@
             avatar.src = d.ghAvatar ? gh(login) : (d.avatar || gh(login));
           }
         }
-        if (avatarOpts) {
-          var btns = avatarOpts.querySelectorAll('.avatar-opt');
-          for (var i = 0; i < btns.length; i++) {
-            var m = btns[i].getAttribute('data-mode');
-            btns[i].classList.toggle('active', m === mode);
-          }
-        }
-      }
-      // 头像模式按钮：点击切换；再次点击当前激活的则回到图片
-      var avatarOptBtns = document.querySelectorAll('.avatar-opt');
-      for (var ai = 0; ai < avatarOptBtns.length; ai++) {
-        avatarOptBtns[ai].addEventListener('click', function () {
-          if (!isOwn() || !state.data) return;
-          var login = state.data.login;
-          var cur = getAvatarMode(login);
-          var mode = this.getAttribute('data-mode');
-          var next = (cur === mode) ? 'image' : mode;
-          setAvatarMode(login, next);
-          renderAvatar();
-          if (next === 'image') toast('已恢复图片头像 ✓');
-          else if (next === 'text') toast('已切换到文字头像 ✓');
-          else toast('已隐藏头像 ✓');
-        });
       }
       var aboutDisplay = $('aboutDisplay'), aboutEmpty = $('aboutEmpty'), aboutInput = $('aboutInput');
       var aboutView = $('aboutView'), aboutEditor = $('aboutEditor');
@@ -723,7 +1129,8 @@
         setTimeout(function () { toastEl.className = 'toast' + (isErr ? ' err' : ''); }, 2600);
       }
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
-      function gh(login){ return 'https://github.com/' + encodeURIComponent(login || '') + '.png'; }
+      // 头像统一走自己的 Cloudflare 端点（不再直连 github.com）
+      function gh(login){ return 'https://mc-creator-jerry-webpage.pages.dev/api/avatar?login=' + encodeURIComponent(login || ''); }
 
       /* ---------- 个人主页背景（banner 超长背景 + bg 大背景） ---------- */
       var bgModal = $('bgModal'), openBgBtn = $('openBgBtn');
@@ -784,7 +1191,7 @@
         fetch('/api/bg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
-            if (res.ok) { state.bg = { banner: res.body.banner || null, bg: res.body.bg || null }; applyBg(); bgModal.hidden = true; toast('背景已保存 ✓'); }
+            if (res.ok) { state.bg = { banner: res.body.banner || null, bg: res.body.bg || null }; applyBg(); bgModal.hidden = true; toast('背景已保存 '); }
             else if (res.body && res.body.error === 'invalid_banner') toast('超长背景链接无效（需图片URL或上传图片）', true);
             else if (res.body && res.body.error === 'invalid_bg') toast('大背景链接无效（需图片URL或上传图片）', true);
             else if (res.body && res.body.error === 'forbidden') toast('无权限', true);
@@ -793,35 +1200,38 @@
           .catch(function () { toast('保存失败（网络错误）', true); });
       };
 
-      /* ---------- 用户关注（关注 / 好友） ---------- */
-      var followState = false;
-      function updateFollowBtn() {
-        if (!followBtn) return;
-        if (!MY_LOGIN || isOwn()) { followBtn.hidden = true; return; }
-        followBtn.hidden = false;
-        followBtn.textContent = followState ? '已关注' : '关注';
-        followBtn.classList.toggle('on', followState);
-      }
-      function loadFollowState() {
-        if (!MY_LOGIN || !state.data || isOwn()) return;
-        fetch('/api/ufollow?target=' + encodeURIComponent(state.data.login))
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { if (d) { followState = !!d.following; updateFollowBtn(); } })
-          .catch(function () {});
-      }
-      if (followBtn) {
-        followBtn.addEventListener('click', function () {
-          if (!MY_LOGIN || isOwn()) return;
-          fetch('/api/ufollow', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: followState ? 'unfollow' : 'follow', target: state.data.login })
-          })
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (d) { if (d && d.ok) { followState = d.following; updateFollowBtn(); toast(followState ? '已关注 ✓' : '已取消关注'); } else { toast('操作失败', true); } })
-            .catch(function () { toast('操作失败', true); });
+      /* ---------- 用户关注（关注 / 特别关注） ---------- */
+      var followSlot = $('followSlot');
+      var followRetries = 0;
+      function renderFollow() {
+        if (!followSlot) return;
+        followSlot.innerHTML = '';
+        // 匿名访客也显示关注按钮，点击时由 FollowUI 走 requireLogin 引导登录
+        if (!state.data) return;
+        // 自己的主页：关注按钮换成禁用态（不能自己关注自己）
+        if (isOwn()) {
+          var self = document.createElement('button');
+          self.type = 'button';
+          self.className = 'pp-follow-self';
+          self.disabled = true;
+          self.textContent = '关注';
+          self.title = '不能自己关注自己';
+          followSlot.appendChild(self);
+          return;
+        }
+        if (!window.FollowUI) {
+          // follow.js 是本页靠后的外链脚本，加载链跑得比它快时还没就绪；稍后补挂
+          if (followRetries++ < 25) setTimeout(renderFollow, 200);
+          return;
+        }
+        window.FollowUI.attach(followSlot, state.data.login, {
+          endpoint: '/api/ufollow',
+          me: MY_LOGIN || null,
+          requireLogin: function () { if (window.JW_LOGIN) window.JW_LOGIN(); }
         });
       }
+      function updateFollowBtn() { renderFollow(); }
+      function loadFollowState() { /* 关系状态由 FollowUI 自行拉取 */ }
 
       function renderDisplay() {
         var d = state.data || {};
@@ -836,6 +1246,20 @@
           nameDisplay.appendChild(ob);
         }
         loginDisplay.textContent = d.login ? '@' + d.login : '';
+        // 用户 ID（A/C/U + 10 位数字）：@ 的下一行；点击复制
+        if (uidDisplay && uidValue) {
+          uidDisplay.onclick = function () {
+            var t = uidValue.textContent;
+            if (!t) return;
+            var done = function () { toast('ID 已复制 '); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () {});
+            else { try { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } catch (e) {} }
+          };
+          if (d.uid) {
+            uidValue.textContent = d.uid;
+            uidDisplay.hidden = false;
+          } else uidDisplay.hidden = true;
+        }
         // 简介（about）
         if (d.about) { aboutDisplay.textContent = d.about; aboutDisplay.hidden = false; aboutEmpty.hidden = true; }
         else { aboutDisplay.hidden = true; aboutEmpty.hidden = false; }
@@ -857,13 +1281,15 @@
         }
         // 编辑按钮可见性
         document.querySelectorAll('.change-btn[data-sec]').forEach(function (b) { b.hidden = !isOwn(); });
-        if (avatarOpts) avatarOpts.hidden = !isOwn();
         // 改名按钮 + 内联编辑器：仅本人可见，默认关闭编辑态
         nameRow.hidden = false;
         renameEditor.hidden = true;
         renameBtn.hidden = !isOwn();
         // 设置背景按钮：仅本人可见
         $('profileTools').hidden = !isOwn();
+        // 私聊按钮（头图右下角）：登录后可见；看自己的主页时指向私信页
+        var dmBtn = $('dmBtn');
+        if (dmBtn) dmBtn.hidden = !MY_LOGIN;
         // 关注按钮：仅查看他人时可见
         updateFollowBtn();
         loadFollowState();
@@ -928,7 +1354,7 @@
           state.draft.skills.push(v); added++;
         }
         skillInput.value = ''; renderSkillsEdit();
-        if (added > 1) toast('已添加 ' + added + ' 个技能 ✓');
+        if (added > 1) toast('已添加 ' + added + ' 个技能 ');
         else if (!added && dup) toast('该技能已在列表中');
       }
       skillAdd.onclick = addSkill;
@@ -1023,7 +1449,7 @@
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
             busy(false);
-            if (res.ok) { state.data = d; toast('已保存到云端 ✓'); if (done) done(); }
+            if (res.ok) { state.data = d; toast('已保存到云端 '); if (done) done(); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else { toast('保存失败，请重试', true); }
           })
@@ -1218,10 +1644,11 @@
           el.style.backgroundImage = '';
           el.style.backgroundColor = '';
         }
-        // 站长本人：只要已设置来源（bannerMode）或本身有内容，就显示头图面板，便于就地切换
-        var visible = showImage || showTheme || (isOwn() && !!mode);
-        el.hidden = !visible;
-        if (contentEl) contentEl.classList.toggle('has-banner', visible);
+        // 头图恒显示：没有自定义图片 / 主题时由 CSS 提供默认蓝渐变。
+        // 这样右上角「背景 / 主题」、压在头图下缘的头像都有稳定落点，不再出现"没设背景就整块消失"。
+        var visible = true;
+        el.hidden = false;
+        if (contentEl) contentEl.classList.add('has-banner');
         // 来源切换控件：仅站长可见，且只在面板显示时出现
         var bm = $('bannerMode');
         if (bm) bm.hidden = !(isOwn() && visible);
@@ -1253,7 +1680,7 @@
         saveProfile({ bannerMode: mode }, function () {
           state.data.bannerMode = mode;
           renderBanner();
-          toast((mode === 'theme' ? '头图将显示主题色' : '头图将显示自定义图片') + ' ✓');
+          toast((mode === 'theme' ? '头图将显示主题色' : '头图将显示自定义图片') + ' ');
         });
       }
 
@@ -1359,8 +1786,29 @@
         doReveal();
       }
 
-      /* ---------- 加载（B：并行请求，省掉串行往返） ---------- */
-      // 原实现串行三次往返：/api/me → /api/profile → /api/bg。
+      /* ---------- 调度券 chip（五站统一账本） ---------- */
+      // 本人主页：/api/voucher 本人视角（无限账号显示 ∞）
+      // 他人主页：/api/voucher?user=<login> 掩码视角（无限账号对外固定 325，不带标记）
+      function loadVoucherChip() {
+        var chip = document.getElementById('voucherChip');
+        var val = document.getElementById('voucherChipVal');
+        if (!chip || !val) return;
+        var selfView = !VIEW_USER || (MY_LOGIN && VIEW_USER.toLowerCase() === MY_LOGIN.toLowerCase());
+        var login = VIEW_USER || MY_LOGIN;
+        if (!login) return;
+        fetch(selfView ? '/api/voucher' : '/api/voucher?user=' + encodeURIComponent(login), { credentials: 'include' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!chip.isConnected || !d || !d.ok) return; // 失败保持隐藏，不占位
+            if (d.infinite === true) { val.textContent = '∞'; }
+            else if (typeof d.balance === 'number') { val.textContent = String(d.balance); }
+            else return;
+            chip.hidden = false;
+          })
+          .catch(function () { /* 网络异常：静默隐藏 */ });
+      }
+
+      /* ---------- 加载（B：并行请求，省掉串行往返） ---------- */      // 原实现串行三次往返：/api/me → /api/profile → /api/bg。
       // 现在 /api/me 与资料请求同时发出；看他人主页时背景也一并并行（login 已知，无需等资料）。
       var ME_P = fetch('/api/me')
         .then(function (r) { return r.ok ? r.json() : null; })
@@ -1384,6 +1832,7 @@
         }
         state.data = d;
         renderDisplay(); // 此时 MY_LOGIN 已就绪，编辑按钮/关注按钮的可见性一次算对
+        loadVoucherChip(); // 调度券 chip：本人=本人视角（可能 ∞），他人=掩码视角
         var bgs;
         if (VIEW_USER) bgs = BG_P || Promise.resolve();
         else { bgs = loadBg(d.login); }
@@ -1393,14 +1842,15 @@
 
       /* ---------- 中英切换（i18n 引擎，修复遗留 P1） ---------- */
       function applyLang() {
-        var en = curLang() === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = curLang(); var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
           var zh = n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
           var enTxt = n.getAttribute('data-en') || zh;
-          var txt = en ? enTxt : zh;
+          var txt = spec != null ? spec : enTxt;
           if (txt == null) continue;
           if (n.children.length === 0) {
             n.textContent = txt;
@@ -1418,8 +1868,32 @@
       window.addEventListener('pageshow', function (e) { if (e.persisted) applyLang(); });
     })();
   </script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+  <!-- ============ 头图下方页签：右侧「更多」折叠菜单 ============ -->
+  <script>
+    (function () {
+      var btn = document.getElementById('ppTabsMore');
+      var menu = document.getElementById('ppTabsMenu');
+      if (!btn || !menu) return;
+      function close() { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = menu.hidden;
+        menu.hidden = !open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', function (e) {
+        if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) close();
+      });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+      window.addEventListener('blur', close);
+    })();
+  </script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../assets/follow.js?v=20261014b"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

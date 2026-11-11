@@ -8,19 +8,19 @@
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
   </script>
-  <script src="../../boot.js?v=20260921c"></script>
+  <script src="../../boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>CleanOpt · 文档</title>
-<meta name="description" content="CleanOpt 产品文档。" />
+<meta name="description" content="CleanOpt 产品文档：磁盘垃圾清理、内存优化、系统工具面板、后台静默运行与定时任务。" />
 <meta name="author" content="Jerry" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="CleanOpt · 文档" />
-<meta property="og:description" content="CleanOpt 产品文档。" />
+<meta property="og:description" content="CleanOpt 产品文档：磁盘垃圾清理、内存优化、系统工具面板、后台静默运行与定时任务。" />
 <meta property="og:site_name" content="Jerry's webpage" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="CleanOpt · 文档" />
-<meta name="twitter:description" content="CleanOpt 产品文档。" />
+<meta name="twitter:description" content="CleanOpt 产品文档：磁盘垃圾清理、内存优化、系统工具面板、后台静默运行与定时任务。" />
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=20260926" />
 <style>  
 
@@ -132,6 +132,21 @@
     line-height: 1.7;
   }
 
+  /* ---- 文档正文 ---- */
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 0 0 10px; }
+  .card ul { list-style: disc; margin: 6px 0 0; padding-left: 22px; }
+  .card ul li { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 7px 0; }
+  .card ul li b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .card .hint { color: var(--muted); margin-top: 12px; }
+  .card .doc-link a { color: var(--accent); }
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+
   /* ---- 页脚 ---- */
   .site-footer {
     border-top: 1px solid var(--card-border);
@@ -155,7 +170,8 @@
     .hero h1 { font-size: 1.6rem; }
   }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
 </head>
 <body>
   <header class="topbar">
@@ -170,29 +186,84 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
   <main class="content">
     <section class="hero">
       <h1 data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</h1>
-      <p data-zh="这是 CleanOpt 的产品文档。" data-en="This is the product documentation for CleanOpt.">这是 CleanOpt 的产品文档。</p>
+      <p data-zh="Windows 系统清理与内存优化小工具，PowerShell WinForms 界面，免安装、可静默后台运行。" data-en="A Windows cleanup and memory-optimisation tool with a PowerShell WinForms interface — portable, and happy to run quietly in the background.">Windows 系统清理与内存优化小工具，PowerShell WinForms 界面，免安装、可静默后台运行。</p>
     </section>
 
     <section class="card">
-      <h2 data-zh="文档内容" data-en="Documentation">文档内容</h2>
-      <p class="empty-tip" data-zh="（内容待补充）" data-en="(Content to be added)">（内容待补充）</p>
+      <h2 data-zh="能做什么" data-en="What It Can Do">能做什么</h2>
+      <ul>
+        <li><b data-zh="磁盘垃圾清理" data-en="Disk junk cleanup">磁盘垃圾清理</b><span data-zh="清掉临时文件、系统缓存和回收站冗余，安全释放磁盘空间。" data-en="Sweep away temp files, system caches and recycle-bin leftovers to reclaim disk space safely.">清掉临时文件、系统缓存和回收站冗余，安全释放磁盘空间。</span></li>
+        <li><b data-zh="内存优化" data-en="Memory optimisation">内存优化</b><span data-zh="释放被占用的内存，提升系统响应速度，减少卡顿。" data-en="Release occupied memory to make the system more responsive and less stuttery.">释放被占用的内存，提升系统响应速度，减少卡顿。</span></li>
+        <li><b data-zh="系统工具面板" data-en="System tools panel">系统工具面板</b><span data-zh="把常用的系统维护入口收在同一处。" data-en="Keep the everyday system-maintenance shortcuts in one place.">把常用的系统维护入口收在同一处。</span></li>
+        <li><b data-zh="后台静默运行" data-en="Quiet background operation">后台静默运行</b><span data-zh="常驻后台、不弹窗不打扰，按需自动维护系统。" data-en="Stays resident in the background without popups, maintaining the system when needed.">常驻后台、不弹窗不打扰，按需自动维护系统。</span></li>
+        <li><b data-zh="定时任务" data-en="Scheduled runs">定时任务</b><span data-zh="随附 daily_run.ps1，可交给 Windows 任务计划程序每天执行。" data-en="Ships with daily_run.ps1, which you can hand to Windows Task Scheduler to run every day.">随附 daily_run.ps1，可交给 Windows 任务计划程序每天执行。</span></li>
+        <li><b data-zh="三段式版本号" data-en="Three-part version number">三段式版本号</b><span data-zh="版本号形如 [年.月日.时分]，例如 2026.0831.1813，一眼看清是哪个构建。" data-en="Versions read as [year.monthday.time], e.g. 2026.0831.1813, so you always know which build you have.">版本号形如 [年.月日.时分]，例如 2026.0831.1813，一眼看清是哪个构建。</span></li>
+      </ul>
     </section>
-  </main>
+
+    <section class="card">
+      <h2 data-zh="怎么登录" data-en="How to Sign In">怎么登录</h2>
+      <p data-zh="CleanOpt 是本地工具，不联网、不需要登录；安装包与更新日志发布在小蓝页的 /products/cleanopt/ 。" data-en="CleanOpt is a local tool: no network, no sign-in. The installer and release notes are published on Xiaolan at /products/cleanopt/ .">CleanOpt 是本地工具，不联网、不需要登录；安装包与更新日志发布在小蓝页的 /products/cleanopt/ 。</p>
+      <ul>
+        <li><b data-zh="不需要登录" data-en="No sign-in required">不需要登录</b><span data-zh="下载解压后直接运行，所有清理动作都在你本机完成。" data-en="Download, unzip and run — every cleanup action happens on your own machine.">下载解压后直接运行，所有清理动作都在你本机完成。</span></li>
+        <li><b data-zh="到小蓝页取安装包" data-en="Get the build from Xiaolan">到小蓝页取安装包</b><span data-zh="安装包与历史版本都在 /products/cleanopt/ 。" data-en="The installer and version history live at /products/cleanopt/ .">安装包与历史版本都在 /products/cleanopt/ 。</span></li>
+        <li><b data-zh="需要跨站身份时再登录小蓝页" data-en="Sign in to Xiaolan only when you need a shared identity">需要跨站身份时再登录小蓝页</b><span data-zh="用邮箱验证码或 GitHub 登录，身份在各站之间互通。" data-en="Use an email code or GitHub; your identity carries across all sites.">用邮箱验证码或 GitHub 登录，身份在各站之间互通。</span></li>
+      </ul>
+      <p class="hint" data-zh="提示：CleanOpt 不写注册表、不建服务、不做静默提权，清理前会先列出将要处理的条目。" data-en="Tip: CleanOpt writes no registry keys, installs no service and never elevates silently — it lists what it will touch before acting.">提示：CleanOpt 不写注册表、不建服务、不做静默提权，清理前会先列出将要处理的条目。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="主要功能速查" data-en="Feature Quick Reference">主要功能速查</h2>
+      <ul>
+        <li><b data-zh="清理" data-en="Clean">清理</b><span data-zh="先列出项目，确认后才执行。" data-en="It lists the items first and only runs after you confirm.">先列出项目，确认后才执行。</span></li>
+        <li><b data-zh="内存" data-en="Memory">内存</b><span data-zh="手动释放被占用的内存。" data-en="Free occupied memory on demand.">手动释放被占用的内存。</span></li>
+        <li><b data-zh="工具" data-en="Tools">工具</b><span data-zh="常用系统维护入口集中一处。" data-en="Everyday maintenance shortcuts in one panel.">常用系统维护入口集中一处。</span></li>
+        <li><b data-zh="设置" data-en="Settings">设置</b><span data-zh="开关自动维护、后台静默与开机自启。" data-en="Toggle auto-maintain, quiet background mode and autostart.">开关自动维护、后台静默与开机自启。</span></li>
+        <li><b data-zh="daily_run.ps1" data-en="daily_run.ps1">daily_run.ps1</b><span data-zh="给任务计划程序做每日定时调用。" data-en="Called daily by Task Scheduler.">给任务计划程序做每日定时调用。</span></li>
+        <li><b data-zh="/products/cleanopt/" data-en="Download page">/products/cleanopt/</b><span data-zh="安装包与版本记录。" data-en="Installer and version history.">安装包与版本记录。</span></li>
+      </ul>
+      <p class="hint doc-link"><span data-zh="安装包：" data-en="Installer: ">安装包：</span><a href="../../products/cleanopt/" data-zh="CleanOpt 产品页" data-en="the CleanOpt product page">CleanOpt 产品页</a></p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+        <details class="faq">
+          <summary data-zh="会误删我的文件吗？" data-en="Will it delete my files by mistake?">会误删我的文件吗？</summary>
+          <div class="faq-body" data-zh="不会。它只清理明确安全的系统冗余——临时文件、系统与浏览器缓存、回收站残留、无效缩略图；执行前会先列出清单供你确认，文档、图片、下载和桌面都不动。" data-en="No. It only clears clearly-safe leftovers — temp files, system and browser caches, recycle-bin residue, stale thumbnails — and lists them for confirmation before acting. Documents, photos, downloads and the desktop are never touched.">不会。它只清理明确安全的系统冗余——临时文件、系统与浏览器缓存、回收站残留、无效缩略图；执行前会先列出清单供你确认，文档、图片、下载和桌面都不动。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="需要管理员权限吗？" data-en="Does it need administrator rights?">需要管理员权限吗？</summary>
+          <div class="faq-body" data-zh="日常使用普通用户即可；清理系统级目录时部分条目会提示你以管理员身份再运行一次，它不会偷偷提权。" data-en="A normal account is enough day to day; when a system path needs it, that entry asks you to re-run as administrator — it never elevates behind your back.">日常使用普通用户即可；清理系统级目录时部分条目会提示你以管理员身份再运行一次，它不会偷偷提权。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="怎么设置每天自动清理？" data-en="How do I run it every day automatically?">怎么设置每天自动清理？</summary>
+          <div class="faq-body" data-zh="用随包的 daily_run.ps1，在 Windows 任务计划程序里新建一个每日任务指向它即可。" data-en="Point a new daily task in Windows Task Scheduler at the bundled daily_run.ps1.">用随包的 daily_run.ps1，在 Windows 任务计划程序里新建一个每日任务指向它即可。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="版本号怎么读？" data-en="How do I read the version number?">版本号怎么读？</summary>
+          <div class="faq-body" data-zh="三段制 [年.月日.时分]，例如 2026.0831.1813；安装包下载页会标出当前版本。" data-en="It has three parts, [year.monthday.time], e.g. 2026.0831.1813; the download page always shows the current build.">三段制 [年.月日.时分]，例如 2026.0831.1813；安装包下载页会标出当前版本。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="会不会留一堆残留？" data-en="Does it leave leftovers behind?">会不会留一堆残留？</summary>
+          <div class="faq-body" data-zh="不会。免安装便携版，解压即用，不写注册表、不建服务，删掉文件夹就等于卸载干净。" data-en="No. The portable build needs no install: unzip and run, no registry writes, no service — delete the folder and it is gone.">不会。免安装便携版，解压即用，不写注册表、不建服务，删掉文件夹就等于卸载干净。</div>
+        </details>
+    </section>  </main>
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <div class="float-actions">
     <a class="fab" id="langBtn" href="../../language.html"  aria-label="语言" title="语言">
@@ -219,12 +290,13 @@
       function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
       function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
@@ -232,9 +304,12 @@
       applyAll();
     })();
   </script>
-  <script src="../../auth.js?v=20260925c"></script>
-  <script src="../../common.js?v=20260926a"></script>
-  <script src="../../scroll-keys.js?v=20260926c" defer></script>
+  <script src="../../auth.js?v=20261103a"></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

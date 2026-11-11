@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script>
+  // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
+  // pages.dev 域名下不触发，避免循环。
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+  </script>
+  <script src="../../boot.js?v=20261014b"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>噪音警报器 Noise Alarm · 文档</title>
+<meta name="description" content="噪音警报器产品文档：麦克风实时测噪、分贝阈值设定、超阈值三态机与四种报警方式。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="噪音警报器 Noise Alarm · 文档" />
+<meta property="og:description" content="噪音警报器产品文档：麦克风实时测噪、分贝阈值设定、超阈值三态机与四种报警方式。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="噪音警报器 Noise Alarm · 文档" />
+<meta name="twitter:description" content="噪音警报器产品文档：麦克风实时测噪、分贝阈值设定、超阈值三态机与四种报警方式。" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=20260926" />
+<style>  
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a {
+    color: var(--bar-fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 0;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
+
+  /* ---- 内容区（目前留空，只保留 UI） ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 36px; }
+  .hero h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+  }
+  .card {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .empty-tip {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ---- 文档正文 ---- */
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 0 0 10px; }
+  .card ul { list-style: disc; margin: 6px 0 0; padding-left: 22px; }
+  .card ul li { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 7px 0; }
+  .card ul li b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .card .hint { color: var(--muted); margin-top: 12px; }
+  .card .doc-link a { color: var(--accent); }
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+
+  /* ---- 页脚 ---- */
+  .site-footer {
+    border-top: 1px solid var(--card-border);
+    margin-top: 48px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
+        <a id="bcMain" href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep" id="bcSep">›</span>
+        <a href="../" data-zh="帮助中心" data-en="Help Center">帮助中心</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" id="bcSub" data-zh="噪音警报器 Noise Alarm" data-en="Noise Alarm">噪音警报器 Noise Alarm</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="噪音警报器 Noise Alarm" data-en="Noise Alarm">噪音警报器 Noise Alarm</h1>
+      <p data-zh="一个纯静态的浏览器工具：用麦克风实时测噪音，超过你设定的分贝阈值就报警。" data-en="A purely static browser tool: it measures your microphone in real time and raises the alarm once the level passes your threshold.">一个纯静态的浏览器工具：用麦克风实时测噪音，超过你设定的分贝阈值就报警。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="能做什么" data-en="What It Can Do">能做什么</h2>
+      <ul>
+        <li><b data-zh="麦克风实时测噪" data-en="Live microphone metering">麦克风实时测噪</b><span data-zh="用 getUserMedia 取音频流，算 RMS 转成 dBFS 实时显示。" data-en="It takes the audio stream via getUserMedia, computes the RMS and shows it live in dBFS.">用 getUserMedia 取音频流，算 RMS 转成 dBFS 实时显示。</span></li>
+        <li><b data-zh="分贝阈值设定" data-en="Set your threshold">分贝阈值设定</b><span data-zh="自己定一条线，超过才算超标。" data-en="Pick the line yourself — anything above it counts as too loud.">自己定一条线，超过才算超标。</span></li>
+        <li><b data-zh="超阈值三态机" data-en="Three-state machine">超阈值三态机</b><span data-zh="ARMED 待命、ALARMING 报警中、MUTED 静默，状态一目了然。" data-en="ARMED, ALARMING and MUTED keep the current state obvious at a glance.">ARMED 待命、ALARMING 报警中、MUTED 静默，状态一目了然。</span></li>
+        <li><b data-zh="迟滞与持续判定" data-en="Hysteresis and dwell time">迟滞与持续判定</b><span data-zh="5dB 迟滞加持续 800ms 判定，避免声音忽高忽低时反复误报。" data-en="A 5 dB hysteresis plus an 800 ms dwell keeps a wavering sound from triggering over and over.">5dB 迟滞加持续 800ms 判定，避免声音忽高忽低时反复误报。</span></li>
+        <li><b data-zh="四种报警方式" data-en="Four ways to alert you">四种报警方式</b><span data-zh="红闪、蜂鸣、振动、桌面通知同时可用，眼睛耳朵都不耽误。" data-en="Red flash, beep, vibration and desktop notification — you will not miss it with your eyes or your ears.">红闪、蜂鸣、振动、桌面通知同时可用，眼睛耳朵都不耽误。</span></li>
+        <li><b data-zh="纯静态页面" data-en="Purely static">纯静态页面</b><span data-zh="打开网页就能用，不需要安装任何东西。" data-en="Open the page and go — nothing to install.">打开网页就能用，不需要安装任何东西。</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="怎么登录" data-en="How to Sign In">怎么登录</h2>
+      <p data-zh="噪音警报器是纯静态工具，不收集数据、不需要登录，麦克风信号只在本机处理。" data-en="Noise Alarm is a purely static tool: it collects no data and needs no sign-in — microphone signals are processed on your machine only.">噪音警报器是纯静态工具，不收集数据、不需要登录，麦克风信号只在本机处理。</p>
+      <ul>
+        <li><b data-zh="无需登录" data-en="No sign-in">无需登录</b><span data-zh="打开页面、授权麦克风即可开始测噪。" data-en="Open the page, allow the microphone, and metering starts.">打开页面、授权麦克风即可开始测噪。</span></li>
+        <li><b data-zh="全部在本机处理" data-en="Everything stays local">全部在本机处理</b><span data-zh="音频流不出浏览器，不上传、不留存。" data-en="The audio stream never leaves the browser — nothing is uploaded or stored.">音频流不出浏览器，不上传、不留存。</span></li>
+        <li><b data-zh="需要跨站身份时再登录小蓝页" data-en="Sign in to Xiaolan only when you want a shared identity">需要跨站身份时再登录小蓝页</b><span data-zh="用邮箱验证码或 GitHub 登录，身份在各站之间互通。" data-en="Use an email code or GitHub; your identity carries across all sites.">用邮箱验证码或 GitHub 登录，身份在各站之间互通。</span></li>
+      </ul>
+      <p class="hint" data-zh="提示：浏览器会先弹出麦克风授权请求，被拒绝后请在地址栏的权限图标里重新允许。" data-en="Tip: the browser asks for microphone access first — if you decline it, re-allow it from the permissions icon in the address bar.">提示：浏览器会先弹出麦克风授权请求，被拒绝后请在地址栏的权限图标里重新允许。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="主要功能速查" data-en="Feature Quick Reference">主要功能速查</h2>
+      <ul>
+        <li><b data-zh="实时读数" data-en="Live readout">实时读数</b><span data-zh="RMS → dBFS 实时显示。" data-en="RMS → dBFS, shown live.">RMS → dBFS 实时显示。</span></li>
+        <li><b data-zh="阈值设定" data-en="Threshold">阈值设定</b><span data-zh="自己定报警线。" data-en="Set the alarm line yourself.">自己定报警线。</span></li>
+        <li><b data-zh="ARMED" data-en="ARMED">ARMED</b><span data-zh="待命，随时监听。" data-en="Standing by.">待命，随时监听。</span></li>
+        <li><b data-zh="ALARMING / MUTED" data-en="ALARMING and MUTED">ALARMING / MUTED</b><span data-zh="报警中与静默两种状态。" data-en="The alarming and silenced states.">报警中与静默两种状态。</span></li>
+        <li><b data-zh="5dB + 800ms" data-en="5 dB and 800 ms">5dB + 800ms</b><span data-zh="迟滞与持续判定，抑制误报。" data-en="Hysteresis and dwell time to suppress false alarms.">迟滞与持续判定，抑制误报。</span></li>
+        <li><b data-zh="红闪 / 蜂鸣 / 振动 / 通知" data-en="Flash, beep, vibrate, notify">红闪 / 蜂鸣 / 振动 / 通知</b><span data-zh="四种报警方式。" data-en="Four alert channels.">四种报警方式。</span></li>
+      </ul>
+      <p class="hint doc-link"><span data-zh="站点地址：" data-en="Site: ">站点地址：</span><a href="https://jerrydbalarm.pages.dev/" target="_blank" rel="noopener" data-zh="打开噪音警报器" data-en="open Noise Alarm">打开噪音警报器</a></p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+        <details class="faq">
+          <summary data-zh="需要安装插件吗？" data-en="Do I need to install anything?">需要安装插件吗？</summary>
+          <div class="faq-body" data-zh="不需要，纯静态页面，浏览器打开即用；只有麦克风授权这一步需要你点一下同意。" data-en="No — it is a static page that runs in any browser; the only thing you must click is the microphone permission prompt.">不需要，纯静态页面，浏览器打开即用；只有麦克风授权这一步需要你点一下同意。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="麦克风会被上传吗？" data-en="Is my microphone uploaded anywhere?">麦克风会被上传吗？</summary>
+          <div class="faq-body" data-zh="不会。音频流通过 getUserMedia 取得后只在浏览器里计算 RMS，数据不出本机。" data-en="No. The stream from getUserMedia is only used to compute the RMS inside the browser; nothing leaves your machine.">不会。音频流通过 getUserMedia 取得后只在浏览器里计算 RMS，数据不出本机。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="为什么报警不立刻触发？" data-en="Why does the alarm not fire instantly?">为什么报警不立刻触发？</summary>
+          <div class="faq-body" data-zh="超阈值要持续 800ms 才判定为超标，这是为了过滤瞬时的碰撞声、关门声之类的短促噪音。" data-en="The level has to stay over the threshold for 800 ms, which filters out short bursts like a door slam.">超阈值要持续 800ms 才判定为超标，这是为了过滤瞬时的碰撞声、关门声之类的短促噪音。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="报警线附近反复闪怎么办？" data-en="What if it keeps flickering near my threshold?">报警线附近反复闪怎么办？</summary>
+          <div class="faq-body" data-zh="5dB 迟滞已经能避免大部分抖动；仍嫌频繁可以把阈值调高一些，或让环境安静一点。" data-en="The 5 dB hysteresis already removes most of the jitter; if it still bothers you, raise the threshold or quieten the room.">5dB 迟滞已经能避免大部分抖动；仍嫌频繁可以把阈值调高一些，或让环境安静一点。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="报警时会怎么通知我？" data-en="How am I notified when it trips?">报警时会怎么通知我？</summary>
+          <div class="faq-body" data-zh="四种方式同时生效：页面红闪、蜂鸣声、机身振动，以及一条桌面通知。" data-en="All four fire together: the page flashes red, a beep sounds, the device vibrates, and a desktop notification appears.">四种方式同时生效：页面红闪、蜂鸣声、机身振动，以及一条桌面通知。</div>
+        </details>
+    </section>  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  <span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../../language.html"  aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../../settings/homepage.html"  aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      applyAll();
+    })();
+  </script>
+  <script src="../../auth.js?v=20261103a"></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
+</body>
+</html>
+
+

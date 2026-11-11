@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>隐私政策 · Jerry's webpage</title>
 <meta name="description" content="小蓝页隐私政策：收集哪些数据、为什么收集、存在哪里、你的权利。" />
 <meta name="author" content="Jerry" />
@@ -80,7 +80,10 @@
     th, td { padding: 8px 8px; }
   }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -93,10 +96,10 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -199,14 +202,15 @@
     <p data-zh="任何隐私相关的疑问或请求，都可以通过留言页或邮箱 jerryprdservice@163.com 联系我。" data-en="For any privacy question or request, reach me via the contact page or jerryprdservice@163.com.">任何隐私相关的疑问或请求，都可以通过留言页或邮箱 jerryprdservice@163.com 联系我。</p>
 
     <div class="draft">
-      <strong data-zh="⚠️ 这份政策是按站点当前的真实实现写的草稿。" data-en="⚠️ This policy is a draft written from the site's current implementation.">⚠️ 这份政策是按站点当前的真实实现写的草稿。</strong>
+      <strong><i class="ic" data-ic="alert" aria-hidden="true"></i><span data-zh="这份政策是按站点当前的真实实现写的草稿。" data-en="This policy is a draft written from the site's current implementation.">这份政策是按站点当前的真实实现写的草稿。</span></strong>
       <div data-zh="建议你发布前自己过一遍，重点核对：① 数据保留期限是否符合你的打算；② 如果将来接广告或引入新的第三方（分析、支付、CDN），需要补进第五节；③ 涉及正式商业运营时，请咨询专业人士。" data-en="Please review it before publishing. Check: (1) whether the retention periods match your intent; (2) if you later add ads or new third parties (analytics, payments, CDN), add them to section 5; (3) consult a professional for formal commercial operation.">建议你发布前自己过一遍，重点核对：① 数据保留期限是否符合你的打算；② 如果将来接广告或引入新的第三方（分析、支付、CDN），需要补进第五节；③ 涉及正式商业运营时，请咨询专业人士。</div>
     </div>
   </main>
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../support/" data-zh="支持与付款" data-en="Support & Payment">支持与付款</a> · <a href="../contact.html" data-zh="留言 / 建议" data-en="Contact">留言 / 建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <script>
     (function () {
@@ -217,20 +221,24 @@
       function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
       function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
       applyTheme(); applyFont(); applyRadius(); applyLang();
     })();
   </script>
-<script src="../auth.js?v=20260925c"></script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+<script src="../auth.js?v=20261103a"></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+

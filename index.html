@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="boot.js?v=20260921c"></script>
+  <script src="boot.js?v=20261014b"></script>
 <script>
   // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
   // pages.dev 域名下不触发，避免循环。
@@ -10,7 +10,7 @@
   }
 </script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Jerry's Webpage • 小蓝页</title>
 <meta name="description" content="Jerry，独立开发者。CleanOpt 内存优化工具作者，专注 Windows 系统清理与性能优化；这里收录我的项目、想法与实用小工具。" />
 <meta name="author" content="Jerry" />
@@ -21,9 +21,12 @@
 <meta property="og:title" content="Jerry's Webpage • 小蓝页" />
 <meta property="og:description" content="Jerry，独立开发者。CleanOpt 内存优化工具作者，专注 Windows 系统清理与性能优化。" />
 <meta property="og:site_name" content="Jerry's webpage" />
-<meta name="twitter:card" content="summary" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Jerry's Webpage • 小蓝页" />
 <meta name="twitter:description" content="Jerry，独立开发者。CleanOpt 内存优化工具作者，专注 Windows 系统清理与性能优化。" />
+<meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg?v=20260926" />
+<meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+<meta name="twitter:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg?v=20260926" />
 <!-- Font Awesome CDN removed: was only used for the footer GitHub icon; now an inline SVG (see footer). ~70KB saved. -->
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260926" />
 <style>
@@ -292,6 +295,7 @@
   .prod-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; color: #fff; background: var(--muted); border-radius: 999px; padding: 2px 8px; margin-top: 8px; }
   .prod-tag.t-dev { background: var(--accent); }                 /* 开发中 = 蓝色 */
   .prod-tag.t-live { background: #2e9e5b; }                      /* 持续维护中 = 绿色 */
+  .prod-tag[hidden] { display: none; }                           /* 自动判定徽章默认隐藏，JS 判定后显示 */
   .prod-more { text-align: right; margin-top: 16px; }
 
   /* ---- 关于 / 联系 ---- */
@@ -314,6 +318,23 @@
   .foot-links .gh-ico { width: 16px; height: 16px; vertical-align: -3px; margin-right: 5px; color: var(--accent); transition: color 0.15s; }
   .foot-links a:hover .gh-ico { color: #005a9e; }
 
+  /* ---- 分享弹窗 ---- */
+  .share-url-row { display: flex; gap: 8px; margin-top: 12px; }
+  .share-url-row .edit-input { flex: 1; min-width: 0; font-size: 0.92rem; }
+  .share-url-row .primary { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 0 18px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
+  .share-url-row .primary:hover { background: #005a9e; }
+  .share-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .share-btn {
+    flex: 1; min-width: 130px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text);
+    border-radius: 10px; padding: 11px 12px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .share-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .share-qr-wrap { text-align: center; margin-top: 18px; }
+  #shareQr { width: 200px; height: 200px; border-radius: 12px; background: #fff; padding: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+  .share-qr-tip { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+  .share-qr-fallback { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+
   /* ---- 轻提示 toast ---- */
   #toast {
     position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
@@ -323,8 +344,28 @@
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   [hidden] { display: none !important; }
+
+  /* ---- 分享按钮：独立固定在左下角（2026-11-10）----
+     不放在右下角 .float-actions 浮动簇里；用 ID 选择器保证优先于
+     common.js 运行时注入的 .fab{position:relative} 与 .float-actions 规则。 */
+  #shareFab {
+    position: fixed;
+    left: max(16px, env(safe-area-inset-left, 0px));
+    right: auto;
+    top: auto;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 151;
+  }
+  @media (max-width: 560px) {
+    #shareFab {
+      left: max(12px, env(safe-area-inset-left, 0px));
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  @media print { #shareFab { display: none !important; } }
 </style>
-  <link rel="stylesheet" href="common.css?v=20260921a" />
+  <link rel="stylesheet" href="common.css?v=20261103a" />
+  <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
   <header class="topbar">
@@ -337,11 +378,11 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -351,49 +392,62 @@
       <p data-zh="本网站的作者是 Jerry（MC-Creator-Jerry）。" data-en="The author of this site is Jerry (MC-Creator-Jerry).">本网站的作者是 Jerry（MC-Creator-Jerry）。</p>
       <p class="hero-sub" data-zh="一个热爱创造与工具效率的独立开发者。这个网站是我存放项目、想法和实用工具的数字花园。" data-en="An independent developer who loves building and tooling efficiency. This site is my digital garden for projects, ideas and handy tools.">一个热爱创造与工具效率的独立开发者。这个网站是我存放项目、想法和实用工具的数字花园。</p>
       <form class="home-search" action="search/" method="get" role="search">
-        <input type="search" name="q" class="home-search-input" data-ph-zh="搜索帖子、用户或话题…" data-ph-en="Search posts, users or topics…" placeholder="搜索帖子、用户或话题…" maxlength="80" aria-label="搜索" />
+        <input type="search" name="q" class="home-search-input" data-ph-zh="搜索用户或产品…" data-ph-en="Search users or products…" placeholder="搜索用户或产品…" maxlength="80" aria-label="搜索" />
         <button type="submit" class="home-search-btn" data-zh="搜索" data-en="Search">搜索</button>
       </form>
     </section>
 
     <section class="card" id="products">
-      <h2 data-zh="🚀 我的项目作品" data-en="🚀 My Projects">🚀 我的项目作品</h2>
+      <h2><i class="ic" data-ic="rocket" aria-hidden="true"></i><span data-zh="我的项目作品" data-en="My Projects">我的项目作品</span></h2>
       <div class="prod-grid">
-        <a class="prod-card" href="products/cleanopt/">
+        <a class="prod-card" href="products/cleanopt/" data-proj="cleanopt" data-proj-since="2026-08-31">
           <img class="prod-icon-round" src="/icons/cleanopt.svg" alt="CleanOpt" loading="lazy">
           <div class="prod-name" data-zh="CleanOpt" data-en="CleanOpt">CleanOpt</div>
           <div class="prod-desc" data-zh="Windows 系统清理与内存优化小工具，后台静默运行。" data-en="Windows cleanup and memory optimizer that runs silently in the background.">Windows 系统清理与内存优化小工具，后台静默运行。</div>
-          <div class="prod-soon" id="cleanoptVer" data-zh="v1.0.0 · 立即下载" data-en="v1.0.0 · Download now">v1.0.0 · 立即下载</div>
-          <div class="prod-tag t-live" data-zh="✅ 持续维护中" data-en="✅ Maintained">✅ 持续维护中</div>
+          <div class="prod-soon" id="cleanoptVer" data-zh="2026.1111.1045 · 立即下载" data-en="2026.1111.1045 · Download now">2026.1111.1045 · 立即下载</div>
+          <div class="prod-tag t-live"><i class="ic" data-ic="check-circle" aria-hidden="true"></i><span data-zh="持续维护中" data-en="Maintained">持续维护中</span></div>
         </a>
-        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener">
+        <a class="prod-card" href="https://mc-creator-jerry.github.io/daily-news/" target="_blank" rel="noopener" data-proj="news" data-proj-since="2026-08-22">
           <img class="prod-icon-round" src="/icons/news.svg" alt="全球新闻" loading="lazy">
           <div class="prod-name" data-zh="全球新闻" data-en="Global News">全球新闻</div>
           <div class="prod-desc" data-zh="每日双语全球要闻，10 大领域实时更新。" data-en="Daily bilingual world news across 10 fields, updated every day.">每日双语全球要闻，10 大领域实时更新。</div>
         </a>
-        <a class="prod-card" href="https://jerryteahouse.pages.dev/" target="_blank" rel="noopener">
+        <a class="prod-card" href="https://jerryteahouse.pages.dev/" target="_blank" rel="noopener" data-proj="teahouse">
           <img class="prod-icon-round" src="/icons/teahouse.svg" alt="茶馆" loading="lazy">
           <div class="prod-name" data-zh="茶馆 JerryTeahouse" data-en="JerryTeahouse">茶馆 JerryTeahouse</div>
           <div class="prod-desc" data-zh="独立小茶室：慢慢泡茶、慢慢写字。小蓝页单点登录。" data-en="An independent tea room for slow writing. Single sign-on via 小蓝页.">独立小茶室：慢慢泡茶、慢慢写字。小蓝页单点登录。</div>
-          <div class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</div>
         </a>
-        <a class="prod-card" href="https://jerrybookstation.pages.dev/" target="_blank" rel="noopener">
+        <a class="prod-card" href="https://jerrybookstation.pages.dev/" target="_blank" rel="noopener" data-proj="bookstation">
           <img class="prod-icon-sq" src="/icons/bookstation.svg" alt="书栈 BookStation" loading="lazy">
           <div class="prod-name" data-zh="书栈 BookStation" data-en="BookStation">书栈 BookStation</div>
           <div class="prod-desc" data-zh="独立小说站：书架浏览、内置阅读器、章节管理。纯文本渲染，安全零 XSS。" data-en="An independent novel site: bookshelf, built-in reader, chapter management. Plaintext rendering, XSS-safe.">独立小说站：书架浏览、内置阅读器、章节管理。纯文本渲染，安全零 XSS。</div>
-          <div class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</div>
         </a>
-        <a class="prod-card" href="https://jerrypianyu.pages.dev/" target="_blank" rel="noopener">
+        <a class="prod-card" href="https://jerrypianyu.pages.dev/" target="_blank" rel="noopener" data-proj="pianyu">
           <img class="prod-icon-sq" src="/icons/pianyu.svg" alt="片屿 Pianyu" loading="lazy">
           <div class="prod-name" data-zh="片屿 Pianyu" data-en="Pianyu">片屿 Pianyu</div>
           <div class="prod-desc" data-zh="独立视频站：上新、看片、聊屿论。小蓝页单点登录。" data-en="An independent video site: upload, watch, and discuss. Single sign-on via 小蓝页.">独立视频站：上新、看片、聊屿论。小蓝页单点登录。</div>
-          <div class="prod-tag t-live" data-zh="✅ 新上线" data-en="✅ New">✅ 新上线</div>
         </a>
-        <a class="prod-card" href="#" onclick="alert('页面建设中');return false">
-          <div class="prod-icon">📦</div>
+        <a class="prod-card" href="https://jerrymusic.pages.dev/" target="_blank" rel="noopener" data-proj="music">
+          <img class="prod-icon-round" src="/icons/music.svg" alt="音乐电台 RADIO" loading="lazy">
+          <div class="prod-name" data-zh="音乐电台 RADIO" data-en="Music Radio">音乐电台 RADIO</div>
+          <div class="prod-desc" data-zh="独立音乐电台：收藏播放、社区作品、创作者中心。小蓝页单点登录。" data-en="An independent music radio: playlists, community tracks, creator center. Single sign-on via 小蓝页.">独立音乐电台：收藏播放、社区作品、创作者中心。小蓝页单点登录。</div>
+        </a>
+        <a class="prod-card" href="https://jerrydbalarm.pages.dev/" target="_blank" rel="noopener" data-proj="dbalarm">
+          <img class="prod-icon-round" src="/icons/bell.svg" alt="噪音警报器 Noise Alarm" loading="lazy">
+          <div class="prod-name" data-zh="噪音警报器 Noise Alarm" data-en="Noise Alarm">噪音警报器 Noise Alarm</div>
+          <div class="prod-desc" data-zh="浏览器麦克风实时测噪，超过设定分贝阈值即报警（红闪+蜂鸣+振动+桌面通知）。" data-en="Real-time mic noise monitor: alarms (flash+beep+vibrate+notify) when over your dB threshold.">浏览器麦克风实时测噪，超过设定分贝阈值即报警（红闪+蜂鸣+振动+桌面通知）。</div>
+        </a>
+        <a class="prod-card" href="https://jerrycalendar.pages.dev/" target="_blank" rel="noopener" data-proj="calendar">
+          <img class="prod-icon-sq" src="/icons/calendar.svg" alt="Jerry 日历" loading="lazy">
+          <div class="prod-name" data-zh="Jerry 日历" data-en="Jerry Calendar">Jerry 日历</div>
+          <div class="prod-desc" data-zh="在线日历：月视图、日程管理、节假日标记，数据存本地。" data-en="Online calendar: month view, event management, holiday marks, local storage.">在线日历：月视图、日程管理、节假日标记，数据存本地。</div>
+          <div class="prod-tag t-live"><i class="ic" data-ic="check-circle" aria-hidden="true"></i><span data-zh="新上线" data-en="New">新上线</span></div>
+        </a>
+        <a class="prod-card" href="products.html">
+          <div class="prod-icon"><i class="ic" data-ic="package" aria-hidden="true"></i></div>
           <div class="prod-name" data-zh="实验项目（筹备中）" data-en="Experimental (in progress)">实验项目（筹备中）</div>
           <div class="prod-desc" data-zh="想法验证阶段，暂不公开。" data-en="In the idea-validation stage, not public yet.">想法验证阶段，暂不公开。</div>
-          <div class="prod-tag" data-zh="🚧 开发中" data-en="🚧 In progress">🚧 开发中</div>
+          <div class="prod-tag"><i class="ic" data-ic="wrench" aria-hidden="true"></i><span data-zh="开发中" data-en="In progress">开发中</span></div>
         </a>
       </div>
       <div class="prod-more">
@@ -401,14 +455,14 @@
       </div>
     </section>
 
-    <p class="hero-focus" data-zh="📌 最新开发：CleanOpt —— Windows 内存优化小工具" data-en="📌 Latest dev: CleanOpt — a Windows memory optimization tool">📌 最新开发：CleanOpt —— Windows 内存优化小工具</p>
+    <p class="hero-focus"><i class="ic" data-ic="pin" aria-hidden="true"></i><span data-zh="最新开发：CleanOpt —— Windows 内存优化小工具" data-en="Latest dev: CleanOpt — a Windows memory optimization tool">最新开发：CleanOpt —— Windows 内存优化小工具</span></p>
 
     <section class="card feature-card" id="featureCard" hidden>
       <span class="feature-tag" data-zh="精选" data-en="Featured">精选</span>
       <h2 id="featureTitle">新发布：CleanOpt</h2>
       <p id="featureDesc">Windows 清理与内存优化小工具，后台静默监控，游戏免打扰。</p>
       <div class="feature-actions">
-        <a class="product-go" id="featureLink" href="#" onclick="alert('页面建设中');return false;">查看详情 →</a>
+        <a class="product-go" id="featureLink" href="/products/cleanopt/">查看详情 →</a>
         <button class="edit-feature-btn admin-only" id="editFeatureBtn" data-zh="编辑入口" data-en="Edit feature">编辑入口</button>
       </div>
     </section>
@@ -435,21 +489,46 @@
       </div>
     </div>
 
+  <div class="modal-mask" id="shareMask">
+    <div class="modal" style="max-width: 420px;">
+      <h3 data-zh="分享这个页面" data-en="Share this page">分享这个页面</h3>
+      <div class="share-url-row">
+        <input class="edit-input" id="shareUrl" readonly aria-label="页面链接" />
+        <button class="primary" id="copyUrlBtn" data-zh="复制" data-en="Copy">复制</button>
+      </div>
+      <div class="share-actions">
+        <button class="share-btn" id="nativeShareBtn"><i class="ic" data-ic="share" aria-hidden="true"></i><span data-zh="系统分享" data-en="System share">系统分享</span></button>
+        <a class="share-btn" id="mailShareBtn" href="#"><i class="ic" data-ic="mail" aria-hidden="true"></i><span data-zh="邮件分享" data-en="Email">邮件分享</span></a>
+      </div>
+      <div class="share-qr-wrap">
+        <img id="shareQr" alt="QR" />
+        <div class="share-qr-fallback" id="qrFallback" hidden data-zh="二维码生成失败，请复制上方链接" data-en="QR failed, copy the link above">二维码生成失败，请复制上方链接</div>
+        <div class="share-qr-tip" data-zh="扫码在手机上打开" data-en="Scan to open on phone">扫码在手机上打开</div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="closeShare" data-zh="关闭" data-en="Close">关闭</button>
+      </div>
+    </div>
+  </div>
+
     <section class="card" id="about">
-      <h2 data-zh="📖 关于这个站点" data-en="📖 About this site">📖 关于这个站点</h2>
+      <h2><i class="ic" data-ic="book-open" aria-hidden="true"></i><span data-zh="关于这个站点" data-en="About this site">关于这个站点</span></h2>
       <p data-zh="这个网站既是我的项目聚合地，也是我的写作与实验空间。"
          data-en="This site is both my project hub and my writing &amp; experimentation space.">这个网站既是我的项目聚合地，也是我的写作与实验空间。</p>
       <ul class="about-list">
-        <li data-zh="🛠️ 正在做：持续开发 CleanOpt，以及一些提升数字生活效率的小工具" data-en="🛠️ Building: continuously developing CleanOpt and small tools that improve digital-life efficiency">🛠️ 正在做：持续开发 CleanOpt，以及一些提升数字生活效率的小工具</li>
-        <li data-zh="✍️ 计划写：Windows 优化技巧、独立开发经验、工具测评" data-en="✍️ Planning to write: Windows optimization tips, indie-dev experience, tool reviews">✍️ 计划写：Windows 优化技巧、独立开发经验、工具测评</li>
-        <li data-zh="🌱 长期目标：让这个网站成为一个实用、开放且持续生长的资源站" data-en="🌱 Long-term goal: make this site a practical, open and continuously growing resource hub">🌱 长期目标：让这个网站成为一个实用、开放且持续生长的资源站</li>
+        <li><i class="ic" data-ic="wrench" aria-hidden="true"></i><span data-zh="正在做：持续开发 CleanOpt，以及一些提升数字生活效率的小工具" data-en="Building: continuously developing CleanOpt and small tools that improve digital-life efficiency">正在做：持续开发 CleanOpt，以及一些提升数字生活效率的小工具</span></li>
+        <li><i class="ic" data-ic="edit" aria-hidden="true"></i><span data-zh="计划写：Windows 优化技巧、独立开发经验、工具测评" data-en="Planning to write: Windows optimization tips, indie-dev experience, tool reviews">计划写：Windows 优化技巧、独立开发经验、工具测评</span></li>
+        <li><i class="ic" data-ic="sprout" aria-hidden="true"></i><span data-zh="长期目标：让这个网站成为一个实用、开放且持续生长的资源站" data-en="Long-term goal: make this site a practical, open and continuously growing resource hub">长期目标：让这个网站成为一个实用、开放且持续生长的资源站</span></li>
       </ul>
       <p data-zh="如果你对某个工具或话题感兴趣，欢迎通过 GitHub 与我交流。"
          data-en="If you're interested in any tool or topic, feel free to reach me on GitHub.">如果你对某个工具或话题感兴趣，欢迎通过 GitHub 与我交流。</p>
+      <div class="prod-more">
+        <a class="btn" href="/activity/" data-zh="查看全站动态 →" data-en="View site activity →">查看全站动态 →</a>
+      </div>
     </section>
 
     <section class="card" id="blog">
-      <h2 data-zh="📝 博客与写作" data-en="📝 Blog &amp; Writing">📝 博客与写作</h2>
+      <h2><i class="ic" data-ic="edit" aria-hidden="true"></i><span data-zh="博客与写作" data-en="Blog &amp; Writing">博客与写作</span></h2>
       <p data-zh="我在这里记录开发笔记、工具测评与独立开发经验。目前已经发布了 CleanOpt 首个版本的发布说明，以及一个 Windows 内存优化系列的大纲预告。"
          data-en="Dev notes, tool reviews and indie-dev experience live here. The CleanOpt v2026.0831 release notes are up, plus an outline preview of a Windows memory-optimization series.">我在这里记录开发笔记、工具测评与独立开发经验。目前已经发布了 CleanOpt 首个版本的发布说明，以及一个 Windows 内存优化系列的大纲预告。</p>
       <div class="prod-more">
@@ -458,20 +537,21 @@
     </section>
 
     <section class="card" id="contact">
-      <h2 data-zh="📬 保持联系" data-en="📬 Keep in touch">📬 保持联系</h2>
+      <h2><i class="ic" data-ic="mailbox" aria-hidden="true"></i><span data-zh="保持联系" data-en="Keep in touch">保持联系</span></h2>
       <p data-zh="欢迎通过以下方式与我交流：" data-en="Feel free to reach me through any of these:">欢迎通过以下方式与我交流：</p>
       <ul class="contact-list">
         <li><a class="inline-link" href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener" data-zh="GitHub @MC-Creator-Jerry" data-en="GitHub @MC-Creator-Jerry">GitHub @MC-Creator-Jerry</a></li>
-        <li data-zh="📧 邮箱：jerryprdservice@163.com" data-en="📧 Email: jerryprdservice@163.com">📧 邮箱：jerryprdservice@163.com</li>
+        <li><i class="ic" data-ic="mail" aria-hidden="true"></i><span data-zh="邮箱：jerryprdservice@163.com" data-en="Email: jerryprdservice@163.com">邮箱：jerryprdservice@163.com</span></li>
       </ul>
+      <p><a class="btn" href="#" id="vcardBtn" data-zh="保存名片（.vcf）" data-en="Save contact card (.vcf)">保存名片（.vcf）</a></p>
       <p data-zh="不想用 GitHub？也可以邮箱订阅站点更新，无需登录：" data-en="Prefer not to use GitHub? Subscribe to updates by email — no login needed:">不想用 GitHub？也可以邮箱订阅站点更新，无需登录：<a class="inline-link" href="subscribe/" data-zh="邮箱订阅 →" data-en="Email subscribe →">邮箱订阅 →</a></p>
       <h3 class="contact-sub" data-zh="也可以直接给我留言" data-en="Or leave me a message">也可以直接给我留言</h3>
       <form id="contactForm" class="contact-form" novalidate onsubmit="return false;">
         <select class="c-input" name="category" aria-label="分类">
-          <option value="建议" data-zh="💡 建议 / 意见" data-en="💡 Suggestion">💡 建议 / 意见</option>
-          <option value="Bug" data-zh="🐞 Bug 反馈" data-en="🐞 Bug report">🐞 Bug 反馈</option>
-          <option value="功能" data-zh="🧩 功能需求" data-en="🧩 Feature request">🧩 功能需求</option>
-          <option value="其他" data-zh="💬 其他" data-en="💬 Other">💬 其他</option>
+          <option value="建议" data-zh="建议 / 意见" data-en="Suggestion"> 建议 / 意见</option>
+          <option value="Bug" data-zh="Bug 反馈" data-en="Bug report"> Bug 反馈</option>
+          <option value="功能" data-zh="功能需求" data-en="Feature request"> 功能需求</option>
+          <option value="其他" data-zh="其他" data-en="Other"> 其他</option>
         </select>
         <input class="c-input" type="text" name="name" data-ph-zh="姓名" data-ph-en="Name" placeholder="姓名" />
         <input class="c-input" type="email" name="email" data-ph-zh="邮箱" data-ph-en="Email" placeholder="邮箱" />
@@ -485,12 +565,12 @@
           .bug-trial-btns { display: flex; gap: 10px; flex-wrap: wrap; }
           .bug-trial-login { margin: 10px 0 0; font-size: .85rem; color: var(--danger, #e5484d); }
         </style>
-        <p class="bug-trial-note" data-zh="确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 🎁" data-en="Sure it's a bug? Click “Yes, it's a bug” to submit and enter the draw: 50% chance each day to win 1-hour Level-1 Member 🎁">确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 🎁</p>
+        <p class="bug-trial-note"><i class="ic" data-ic="gift" aria-hidden="true"></i><span data-zh="确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 " data-en="Sure it's a bug? Click “Yes, it's a bug” to submit and enter the draw: 50% chance each day to win 1-hour Level-1 Member ">确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 </span></p>
         <div class="bug-trial-btns">
-          <button type="button" id="bugYesBtn" class="btn" data-zh="🐞 是 Bug（提交并抽奖）" data-en="🐞 Yes, it's a bug (submit &amp; draw)">🐞 是 Bug（提交并抽奖）</button>
+          <button type="button" id="bugYesBtn" class="btn"><i class="ic" data-ic="bug" aria-hidden="true"></i><span data-zh="是 Bug（提交并抽奖）" data-en="Yes, it's a bug (submit &amp; draw)">是 Bug（提交并抽奖）</span></button>
           <button type="button" id="bugNoBtn" class="btn btn-ghost" data-zh="这不是 Bug（仅留言）" data-en="Not a bug (just a note)">这不是 Bug（仅留言）</button>
         </div>
-        <p class="bug-trial-login" id="bugTrialLogin" hidden data-zh="🔒 需登录后才能抽奖，请先登录。" data-en="🔒 Log in first to join the draw.">🔒 需登录后才能抽奖，请先登录。</p>
+        <p class="bug-trial-login" id="bugTrialLogin" hidden><i class="ic" data-ic="lock" aria-hidden="true"></i><span data-zh="需登录后才能抽奖，请先登录。" data-en="Log in first to join the draw.">需登录后才能抽奖，请先登录。</span></p>
       </div>
     </section>
   </main>
@@ -499,13 +579,16 @@
     <div>© 2026 Jerry's webpage · 小蓝页</div>
     <div class="foot-links">
       <a href="https://github.com/MC-Creator-Jerry" target="_blank" rel="noopener"><svg class="gh-icon" viewBox="0 0 496 512" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.2 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.3.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.3zm32.5 35.7c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 1.6 1.6-1 1.6-3.6 0-5.9-1.4-2.3-4-3.3-5.6-1.6z"/></svg> GitHub</a>
-      <a href="products.html" data-zh="产品" data-en="Products">产品</a>
+      <a href="products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
       <a href="blog/" data-zh="博客" data-en="Blog">博客</a>
       <a href="about.html" data-zh="关于" data-en="About">关于</a>
       <a href="guestbook/" data-zh="留言板" data-en="Guestbook">留言板</a>
+      <a href="globalsearch/">全站搜索</a>
+      <a href="achievements/">我的勋章</a>
       <a href="contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a>
     </div>
-  </footer>
+  <span class="uikit-foot"><a href="sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
   <div id="toast"></div>
 
   
@@ -513,10 +596,15 @@
     <a class="fab" id="langBtn" href="language.html"  aria-label="语言" title="语言">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
     </a>
-    <a class="fab" id="settingsBtn" href="settings/homepage.html"  aria-label="设置" title="设置">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </a>
+      <a class="fab" id="settingsBtn" href="settings/homepage.html"  aria-label="设置" title="设置">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
   </div>
+
+  <!-- 分享按钮独立于右下角浮动簇，固定显示在左下角 -->
+  <a class="fab" id="shareFab" href="#" aria-label="分享" title="分享">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.4 10.7l7.2-4.1M8.4 13.3l7.2 4.1"/></svg>
+  </a>
 
   <script>
     (function () {
@@ -541,18 +629,19 @@
         document.documentElement.style.setProperty('--radius', cur.radius + 'px');
       }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
         var phs = document.querySelectorAll('[data-ph-zh]');
         for (var j = 0; j < phs.length; j++) {
           var p = phs[j];
-          var ph = en ? (p.getAttribute('data-ph-en') || '') : p.getAttribute('data-ph-zh');
+          var ph = (L !== 'zh' && L !== 'zh-TW') ? (p.getAttribute('data-ph-en') || '') : p.getAttribute('data-ph-zh');
           if (ph != null) p.placeholder = ph;
         }
       }
@@ -572,9 +661,15 @@
         document.getElementById('featureTitle').textContent = f.title || '';
         document.getElementById('featureDesc').textContent = f.desc || '';
         var link = document.getElementById('featureLink');
-        link.href = '#';
+        var url = String(f.link || '').trim();
+        // 只放行 https 外链与站内路径，避免管理员误填 javascript: 等协议
+        var safe = /^https:\/\//i.test(url) || /^\/(?!\/)/.test(url) || /^[\w.-]+\/[\w./-]*$/.test(url);
+        if (safe) {
+          link.style.display = ''; link.href = url; link.onclick = null;
+        } else {
+          link.style.display = 'none'; link.removeAttribute('href'); link.onclick = null;
+        }
         link.textContent = (f.label || '查看详情') + ' →';
-        link.onclick = function () { alert('页面建设中'); return false; };
       }
       function loadFeature() {
         fetch('/api/home-feature')
@@ -639,7 +734,7 @@
         clearTimeout(window.__toastT);
         window.__toastT = setTimeout(function () { toast.classList.remove('show'); }, 2600);
       }
-      // 留言功能开发中：发送按钮仅弹出提示，不提交
+      // 联系表单由 common.js 自动接线，POST /api/contact（含 Bug 分流抽奖），此处无需额外逻辑。
 
       // 联网拉取 CleanOpt 版本，避免主页产品卡与详情页 / 接口漂移（GitHub 静态镜像无 API 时回退到硬编码文本）
       (function syncCleanoptVer() {
@@ -661,12 +756,81 @@
         } catch (e) {}
       })();
 
+      // ---- 分享本页（复制链接 / 系统分享 / 邮件 / 二维码） ----
+      var shareMask = document.getElementById('shareMask');
+      var shareUrlEl = document.getElementById('shareUrl');
+      var shareQr = document.getElementById('shareQr');
+      var qrFallback = document.getElementById('qrFallback');
+      var mailShareBtn = document.getElementById('mailShareBtn');
+      function openShare() {
+        var url = location.href;
+        shareUrlEl.value = url;
+        var enc = encodeURIComponent(url);
+        shareQr.onerror = null;
+        try {
+          var qr = qrcode(0, 'M');
+          qr.addData(url);
+          qr.make();
+          shareQr.src = qr.createDataURL(6, 4);
+          shareQr.hidden = false; qrFallback.hidden = true;
+        } catch (e) {
+          shareQr.hidden = true; qrFallback.hidden = false;
+        }
+        mailShareBtn.href = 'mailto:?subject=' + encodeURIComponent(document.title) +
+          '&body=' + encodeURIComponent('推荐给你：' + document.title + '\n' + url);
+        shareMask.classList.add('show');
+      }
+      document.getElementById('shareFab').addEventListener('click', function (e) { e.preventDefault(); openShare(); });
+      document.getElementById('closeShare').addEventListener('click', function () { shareMask.classList.remove('show'); });
+      shareMask.addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
+      document.getElementById('copyUrlBtn').addEventListener('click', function () {
+        var t = shareUrlEl.value;
+        function done() { showToast(cur.lang === 'en' ? 'Link copied' : '链接已复制'); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(t).then(done).catch(function () { shareUrlEl.select(); document.execCommand('copy'); done(); });
+        } else { shareUrlEl.select(); document.execCommand('copy'); done(); }
+      });
+      document.getElementById('nativeShareBtn').addEventListener('click', function () {
+        var url = location.href;
+        if (navigator.share) { navigator.share({ title: document.title, url: url }).catch(function () {}); }
+        else { showToast(cur.lang === 'en' ? 'System share not supported, copy the link' : '当前浏览器不支持系统分享，请复制链接'); }
+      });
+
+      /* vCard 名片下载（纯前端生成，数据不上传） */
+      var vcardBtn = document.getElementById('vcardBtn');
+      if (vcardBtn) vcardBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var lines = [
+          'BEGIN:VCARD', 'VERSION:3.0',
+          'N:Jerry;;;;',
+          'FN:MC-Creator-Jerry',
+          'NICKNAME:Jerry',
+          'EMAIL;TYPE=INTERNET,WORK:jerryprdservice@163.com',
+          'URL:https://mc-creator-jerry-webpage.pages.dev/',
+          'URL:https://github.com/MC-Creator-Jerry',
+          'NOTE:小蓝页 · 个人主页与站点工具集合',
+          'END:VCARD'
+        ];
+        var blob = new Blob([lines.join('\r\n') + '\r\n'], { type: 'text/vcard;charset=utf-8' });
+        var u = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = u;
+        a.download = 'MC-Creator-Jerry.vcf';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(u); }, 2000);
+        showToast(cur.lang === 'en' ? 'Contact card downloaded' : '名片已下载');
+      });
+
       applyAll();
     })();
   </script>
-<script src="auth.js?v=20260925c"></script>
-  <script src="common.js?v=20260926b"></script>
-  <script src="scroll-keys.js?v=20260926c" defer></script>
+<script src="auth.js?v=20261103a"></script>
+  <script src="common.js?v=20261111a"></script>
+  <script src="scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+<script src="assets/qrcode.js?v=20261108"></script>
+  <script src="assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

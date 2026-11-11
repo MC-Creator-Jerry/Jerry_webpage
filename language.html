@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="zh" data-theme="light" data-page-node-id="HxAhxJvaqdBOZ7w8SehFvy">
 <head data-page-node-id="AdiAXWyPEcO7ybwKoAH1Ak">
-  <script src="boot.js?v=20260921c"></script>
+  <script src="boot.js?v=20261014b"></script>
   <meta charset="utf-8" data-page-node-id="JGlQ41oJ2I6AWbjKAJfotJ" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="fU7JdXFollPapAXup0sJiK" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" data-page-node-id="fU7JdXFollPapAXup0sJiK" />
   <title>语言 / Language</title>
   <meta name="description" content="选择小蓝页的显示语言：中文或 English。" data-page-node-id="SDUZLDzHukMKJCvJeBjs69" />
   <style>
@@ -70,7 +70,16 @@
 
     @media (max-width: 520px) { .lang-grid { grid-template-columns: 1fr; } }
   </style>
-  <link rel="stylesheet" href="common.css?v=20260921a" data-page-node-id="eFcEzGvl3ZtRBqGF0THKIa" />
+  <link rel="stylesheet" href="common.css?v=20261103a" data-page-node-id="eFcEzGvl3ZtRBqGF0THKIa" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body data-page-node-id="qlGLyYgwVBAUoVNBiKO0ot">
   <header class="topbar" data-page-node-id="ro2cxRAMh1wYIF4I9pDR3H">
@@ -79,26 +88,51 @@
       <nav class="breadcrumb" data-page-node-id="Tt0IXgFSnDrTX76ZQioEeI"><a href="index.html" data-page-node-id="yi76JSd6CQ6yHJzWg06bYT">主页</a> › 语言</nav>
     </div>
     <div class="bar-right" data-page-node-id="mpNlXwKtGNH5OzqPeR0NjG">
-      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages" data-page-node-id="zlsHH8a8kGLMVaLTnBPkx4">消息中心<span class="badge" id="noticeBadge" hidden data-page-node-id="KGbWCVS6pB37wvk7GNCDnv"></span></a>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages" data-page-node-id="zlsHH8a8kGLMVaLTnBPkx4" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden data-page-node-id="KGbWCVS6pB37wvk7GNCDnv"></span></a>
       
-      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products" data-page-node-id="uQgZlXo54xhM3bE10cBzJ1">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-page-node-id="fWEteacq81gulx5r48GD7A">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-page-node-id="Azs6mMs2BA7e9HAb0DjzXD">退出</a>
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products" data-page-node-id="uQgZlXo54xhM3bE10cBzJ1" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-page-node-id="fWEteacq81gulx5r48GD7A" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-page-node-id="Azs6mMs2BA7e9HAb0DjzXD" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
   <main class="wrap" data-page-node-id="C95LIAIAQy91PI0WkZBB2U">
-    <h1 data-page-node-id="pUfYVWlwAZZ2sz5I87eZCW">选择语言</h1>
-    <p class="sub" data-page-node-id="IWKFVk9WjGNmUFEniqKhJA">Select your language</p>
+    <h1 data-page-node-id="pUfYVWlwAZZ2sz5I87eZCW" data-zh="选择语言" data-en="Select language" data-zh-TW="選擇語言" data-ja="言語を選択" data-ko="언어 선택" data-de="Sprache wählen" data-fr="Choisir la langue">选择语言</h1>
+    <p class="sub" data-page-node-id="IWKFVk9WjGNmUFEniqKhJA" data-zh="选择界面显示语言" data-en="Select your display language" data-zh-TW="選擇介面顯示語言" data-ja="表示言語を選択" data-ko="표시 언어 선택" data-de="Wähle deine Anzeigesprache" data-fr="Choisis ta langue d'affichage">Select your language</p>
     <div class="lang-grid" data-page-node-id="AwPuiXCLQ825NGThGBnz7p">
       <div class="lang-card" data-lang="zh" data-page-node-id="KypHOznLi5pHXFIEFA1P1n">
-        <span class="flag" data-page-node-id="MmA16PwrlO6wrxMEicCt8X">🇨🇳</span>
+        <span class="flag" data-page-node-id="MmA16PwrlO6wrxMEicCt8X"><i class="ic" data-ic="globe" aria-hidden="true"></i></span>
         <span data-page-node-id="ifTdxtQV3GKlIaVQDuvuNa">中文</span>
         <span class="en" data-page-node-id="o0XXIXDDTZAeecVhXf1w7p">Chinese</span>
       </div>
       <div class="lang-card" data-lang="en" data-page-node-id="wT0Ln8cCuGwlK6cJB0fI2A">
-        <span class="flag" data-page-node-id="uHU2a8kC6Ip5VXsGJNX2kB">🌐</span>
+        <span class="flag" data-page-node-id="uHU2a8kC6Ip5VXsGJNX2kB"><i class="ic" data-ic="globe" aria-hidden="true"></i></span>
         <span data-page-node-id="ix0DNse5fC7TNOCeOV9xOD">English</span>
         <span class="en" data-page-node-id="Cuvs6eCwBJw4Ai8eLyteVS">English</span>
+      </div>
+      <div class="lang-card" data-lang="zh-TW">
+        <span class="flag"><i class="ic" data-ic="globe" aria-hidden="true"></i></span>
+        <span>繁體中文</span>
+        <span class="en">Traditional Chinese</span>
+      </div>
+      <div class="lang-card" data-lang="ja">
+        <span class="flag"><i class="ic" data-ic="globe" aria-hidden="true"></i></span>
+        <span>日本語</span>
+        <span class="en">Japanese</span>
+      </div>
+      <div class="lang-card" data-lang="ko">
+        <span class="flag"><i class="ic" data-ic="globe" aria-hidden="true"></i></span>
+        <span>한국어</span>
+        <span class="en">Korean</span>
+      </div>
+      <div class="lang-card" data-lang="de">
+        <span class="flag"><i class="ic" data-ic="globe" aria-hidden="true"></i></span>
+        <span>Deutsch</span>
+        <span class="en">German</span>
+      </div>
+      <div class="lang-card" data-lang="fr">
+        <span class="flag"><i class="ic" data-ic="globe" aria-hidden="true"></i></span>
+        <span>Français</span>
+        <span class="en">French</span>
       </div>
     </div>
   </main>
@@ -123,6 +157,8 @@
         c.addEventListener('click', function () {
           var lang = c.getAttribute('data-lang');
           try { localStorage.setItem('xl_lang', lang); } catch (e) {}
+          // 同步云端偏好（登录态）：保证多端一致，也避免云端旧值在别的页面把本地选择压回
+          try { if (window.saveUserPrefs) window.saveUserPrefs({ lang: lang }); } catch (e) {}
           // 同源跳转携带站内跳转标记，避免首页误判为全新加载而重播开场动画
           try { sessionStorage.setItem('__xl_intra', '1'); sessionStorage.setItem('xl_nav_loader', '1'); } catch (e) {}
           window.location.href = 'index.html';
@@ -130,19 +166,21 @@
       });
     })();
   </script>
-  <script src="auth.js?v=20260925c"></script>
-  <script src="common.js?v=20260926a"></script>
+  <script src="auth.js?v=20261103a"></script>
+  <script src="common.js?v=20261111a"></script>
   <script>
     // O1 修复：language.html 此前缺失 i18n 引擎，顶栏 4 个 data-zh 按钮不随语言切换。
     // 内联精简版 applyLang，仅替换首个文本节点以保留内部子元素（如 noticeBtn 的 badge）。
     (function () {
       function xlGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
       function xlApplyLang() {
-        var en = xlGet('xl_lang', 'zh') === 'en';
+        var xlL = xlGet('xl_lang', 'zh');
+        var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt == null) continue;
           var kids = n.childNodes, firstText = null;
           for (var j = 0; j < kids.length; j++) { if (kids[j].nodeType === 3) { firstText = kids[j]; break; } }
@@ -154,7 +192,10 @@
       else xlApplyLang();
     })();
   </script>
-  <script src="scroll-keys.js?v=20260926c" defer></script>
+  <script src="scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

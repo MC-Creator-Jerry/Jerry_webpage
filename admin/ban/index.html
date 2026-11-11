@@ -1,14 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../../boot.js?v=20260921c"></script>
+  <script src="../../boot.js?v=20261014b"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
 </script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>小黑屋 · Jerry's webpage</title>
 <meta name="description" content="违规用户封禁管理（仅管理员）。" />
 <meta name="author" content="Jerry" />
@@ -67,7 +67,16 @@
   [hidden]{display:none!important;}
   @media (max-width:560px){ .topbar{padding:0 14px;min-height:56px;} .site-name{font-size:1.05rem;} .content{padding:28px 16px 80px;} .ban-field input, .ban-field select{min-width:120px;} }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -76,11 +85,11 @@
       <nav class="breadcrumb"><a href="../../index.html">主页</a><span class="bc-sep">›</span><span class="bc-sub">小黑屋</span></nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -130,11 +139,12 @@
     </div>
   </main>
 
-  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../admin/reports/">举报后台</a></div></footer>
+  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../admin/reports/">举报后台</a></div><span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
   <div class="toast" id="toast"></div>
 
-  <script src="../../prefs.js?v=20260909a"></script>
-  <script src="../../auth.js?v=20260925c"></script>
+  <script src="../../prefs.js?v=20261027a"></script>
+  <script src="../../auth.js?v=20261103a"></script>
   <script>
     (function () {
       // ===== 安全前置：非管理员（含未登录）直接跳走，不渲染后台界面 =====
@@ -236,7 +246,7 @@
       function act(action, target){
         fetch('/api/ban', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ login:target, action:action }) })
           .then(function(r){ return r.ok? r.json() : {error:'fail'}; })
-          .then(function(d){ if (d.ok){ toast('已更新 ✓'); load(); } else { toast('操作失败', true); } })
+          .then(function(d){ if (d.ok){ toast('已更新 '); load(); } else { toast('操作失败', true); } })
           .catch(function(){ toast('操作失败（网络错误）', true); });
       }
 
@@ -248,7 +258,7 @@
         fetch('/api/ban', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ login:login, action:'ban', durationMs:dur, reason:reason }) })
           .then(function(r){ return r.ok? r.json() : r.json().then(function(e){return e;}); })
           .then(function(d){
-            if (d.ok){ toast('已封禁 @'+login+' ✓'); document.getElementById('banLogin').value=''; document.getElementById('banReason').value=''; load(); }
+            if (d.ok){ toast('已封禁 @'+login+' '); document.getElementById('banLogin').value=''; document.getElementById('banReason').value=''; load(); }
             else if (d.error === 'cannot_ban_owner'){ toast('不能封禁站主', true); }
             else { toast('操作失败：' + (d.error||'未知'), true); }
           })
@@ -261,7 +271,10 @@
       }
     })();
   </script>
-  <script src="../../common.js?v=20260926a"></script>
-  <script src="../../scroll-keys.js?v=20260926c" defer></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+

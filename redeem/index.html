@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>兑换赞助码 · Jerry's webpage</title>
 <meta name="description" content="在爱发电赞助后，把收到的一次性兑换码填进来，即可绑定你的小蓝页账号并解锁赞助者权益。" />
 <meta name="author" content="Jerry" />
@@ -120,7 +120,10 @@
     #submitBtn { flex: 1 1 100%; }
   }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -133,16 +136,16 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
   <main class="content">
     <section class="hero">
-      <h1 data-zh="🎟️ 兑换赞助码" data-en="🎟️ Redeem your code">🎟️ 兑换赞助码</h1>
+      <h1><i class="ic" data-ic="ticket" aria-hidden="true"></i><span data-zh="兑换赞助码" data-en="Redeem your code">兑换赞助码</span></h1>
       <p data-zh="在爱发电赞助后，你会收到一条一次性兑换码。把它填进下面的框里，你的赞助者权益就会绑定到当前登录的小蓝页账号上。"
          data-en="After sponsoring on Afdian you receive a one-off redeem code. Paste it below and your supporter benefits get bound to the account you are signed in with.">在爱发电赞助后，你会收到一条一次性兑换码。把它填进下面的框里，你的赞助者权益就会绑定到当前登录的小蓝页账号上。</p>
     </section>
@@ -214,12 +217,13 @@
       function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
       function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
@@ -325,9 +329,9 @@
           .then(function (res) {
             var d = res.d || {};
             if (d.ok) {
-              var phrase = d.reason === 'extended' ? t('续期成功，有效期已顺延 31 天 🎉', 'Renewed — extended by another 31 days 🎉')
+              var phrase = d.reason === 'extended' ? t('续期成功，有效期已顺延 31 天', 'Renewed — extended by another 31 days')
                 : d.reason === 'already' ? t('这条码你之前已经兑换过了，有效期保持不变。', 'You already redeemed this code; expiry unchanged.')
-                : t('兑换成功，赞助者权益已生效 🎉', 'Redeemed successfully — your benefits are now active 🎉');
+                : t('兑换成功，赞助者权益已生效', 'Redeemed successfully — your benefits are now active');
               setMsg(phrase, 'ok');
               input.value = '';
               if (d.sponsor) renderSponsor(d.sponsor); else refresh();
@@ -355,8 +359,11 @@
       refresh();
     })();
   </script>
-<script src="../auth.js?v=20260925c"></script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+<script src="../auth.js?v=20261103a"></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+

@@ -8,7 +8,23 @@
 (function () {
   var loginBtn = document.getElementById('loginBtn');
   var logoutBtn = document.getElementById('logoutBtn');
-  window.JW_AUTH = { user: null, isAdmin: false };
+  window.JW_AUTH = { user: null, isAdmin: false, isReviewer: false, role: '' };
+
+  // 权限分级辅助：permLevel() 返回数字等级（0 普通 / 1 审核 / 2 管理员）；
+  // canUse('admin'|'review'|'all') 判断当前登录态是否满足按钮所需权限。
+  function xlPermLevel() {
+    var a = window.JW_AUTH;
+    if (a && a.isAdmin) return 2;
+    if (a && a.isReviewer) return 1;
+    return 0;
+  }
+  window.XL = window.XL || {};
+  window.XL.permLevel = xlPermLevel;
+  window.XL.canUse = function (perm) {
+    if (perm === 'admin') return xlPermLevel() >= 2;
+    if (perm === 'review') return xlPermLevel() >= 1;
+    return true; // 'all' / 未指定
+  };
 
   // —— 登录态客户端缓存：避免每次切页都打 /api/me（省函数调用、更快）——
   var ME_KEY = '__xl_me', ME_TTL = 120000, ME_PROMISE = null;
@@ -109,6 +125,14 @@
       '.bar-avatar{border:none;background:rgba(255,255,255,.12);width:36px;height:36px;border-radius:50%;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(255,255,255,.7);flex:0 0 auto}',
       '.bar-avatar:hover{background:rgba(255,255,255,.22)}',
       '.bar-avatar img{width:100%;height:100%;object-fit:cover;display:block}',
+      /* 头像显示模式：名字槽 + 两种胶囊形态（xl-av-na=名字+头像 · xl-av-an=头像+名字） */
+      '.bar-avatar .ba-name{display:none;color:#fff;font-size:.84rem;font-weight:700;line-height:1;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.bar-avatar.xl-av-na,.bar-avatar.xl-av-an{width:auto;height:36px;border-radius:999px;gap:7px}',
+      '.bar-avatar.xl-av-na img,.bar-avatar.xl-av-an img{width:28px;height:28px;border-radius:50%;flex:0 0 auto}',
+      '.bar-avatar.xl-av-na .ba-name,.bar-avatar.xl-av-an .ba-name{display:block}',
+      '.bar-avatar.xl-av-na .ba-name{order:-1}',
+      '.bar-avatar.xl-av-na{padding:0 5px 0 12px}',
+      '.bar-avatar.xl-av-an{padding:0 12px 0 5px}',
       '.user-popup{position:absolute;top:calc(100% + 8px);right:0;min-width:184px;background:#fff;color:#1c2733;border:1px solid #e3e8ef;border-radius:12px;box-shadow:0 10px 30px rgba(20,35,59,.18);padding:6px;z-index:200}',
       '.user-popup .up-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;color:#1c2733;text-decoration:none;font-size:.95rem;font-weight:600}',
       '.user-popup .up-item:hover{background:#f1f5fa}',
@@ -117,12 +141,12 @@
       /* ===== 悬浮预览卡（B 站风格） ===== */
       '.xl-hovercard{position:fixed;z-index:300;min-width:220px;max-width:360px;background:#fff;color:#1c2733;border:1px solid #e3e8ef;border-radius:14px;box-shadow:0 14px 38px rgba(20,35,59,.24);padding:14px;opacity:0;transform:translateY(-6px) scale(.98);transition:opacity .18s ease,transform .18s ease;pointer-events:none;visibility:hidden}',
       '.xl-hovercard.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;visibility:visible}',
-      '.xl-hovercard.avatar-card{max-width:240px}',
+      '.xl-hovercard.avatar-card{width:min(500px,calc(100vw - 24px));max-width:none}',
       '.xl-hovercard .hc-avatar{width:64px;height:64px;border-radius:50%;overflow:hidden;margin:0 auto 8px;background:#eef2f7}',
       '.xl-hovercard .hc-avatar img{width:100%;height:100%;object-fit:cover;display:block}',
       '.xl-hovercard .hc-name{text-align:center;font-size:1.02rem;font-weight:700}',
       '.xl-hovercard .hc-login{text-align:center;font-size:.8rem;color:#6b7785;margin-top:2px}',
-      '.xl-hovercard .hc-actions{display:flex;gap:8px;margin-top:12px}',
+      '.xl-hovercard .hc-actions{display:flex;gap:10px;margin-top:12px}',
       '.xl-hovercard .hc-btn{flex:1;text-align:center;padding:8px 10px;border-radius:9px;background:#0078d4;color:#fff;text-decoration:none;font-size:.9rem;font-weight:600}',
       '.xl-hovercard .hc-btn.ghost{background:#eef2f7;color:#1c2733}',
       '.xl-hovercard .hc-btn:hover{filter:brightness(1.06)}',
@@ -156,6 +180,71 @@
       '.hc-lv-hint-row .hc-lv-hint{margin-top:0}',
       '.hc-lv-more{font-size:.72rem;color:#0078d4;text-decoration:none;font-weight:600;white-space:nowrap}',
       '.hc-lv-more:hover{text-decoration:underline}',
+      /* ===== 宽版账户卡（双栏）：左=头像/昵称/按钮/菜单，右=等级卡+调度券卡 ===== */
+      '.xl-hovercard.avatar-card .hc-top{display:flex;gap:14px;align-items:flex-start}',
+      '.xl-hovercard.avatar-card .hc-top-left{flex:1;min-width:0}',
+      '.xl-hovercard.avatar-card .hc-top-right{flex:0 0 200px;min-width:0;display:flex;flex-direction:column;gap:8px}',
+      '.xl-hovercard.avatar-card .hc-idrow{display:flex;gap:12px;align-items:center}',
+      '.xl-hovercard.avatar-card .hc-avatar{margin:0;flex:0 0 auto}',
+      '.xl-hovercard.avatar-card .hc-name{text-align:left}',
+      '.xl-hovercard.avatar-card .hc-login{text-align:left}',
+      '.xl-hovercard.avatar-card .hc-level{margin:0}',
+      /* 调度券显示卡（用户拥有数量）：两行结构，加载/完成两态宽度恒定，不会把右侧栏撑宽 */
+      '.hc-voucher{padding:10px 14px;background:#f5f8fb;border:1px solid #e7edf3;border-radius:10px;min-width:0;box-sizing:border-box}',
+      '.hc-v-row{display:flex;align-items:center;gap:8px;min-width:0}',
+      '.hc-v-ico{display:inline-flex;flex:0 0 auto;align-items:center}',
+      '.hc-v-ico img{height:15px;width:auto;display:block}',
+      '.hc-v-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}',
+      '.hc-v-name{font-size:.82rem;color:#5b6776;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.hc-v-meta{display:flex;align-items:center;gap:6px;min-width:0}',
+      '.hc-v-val{font-size:.92rem;font-weight:800;color:#0078d4;white-space:nowrap;flex:0 0 auto}',
+      '.hc-v-done{font-size:.7rem;color:#8a94a3;white-space:nowrap;flex:0 0 auto}',
+      '.hc-toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:99999;background:#1c2733;color:#fff;padding:9px 16px;border-radius:10px;font-size:.86rem;box-shadow:0 6px 20px rgba(0,0,0,.3);opacity:0;transition:opacity .25s;pointer-events:none}',
+      '.hc-toast.show{opacity:1}',
+      '.hc-cal{margin-top:0;display:block;min-width:0}',
+      '.hc-cal-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;min-width:0;transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .4s ease}',
+      '.hc-cal-strip.hc-out{transform:translateX(-55%);opacity:0}',
+      '.hc-cal-strip.hc-in{transform:translateX(55%);opacity:0}',
+      '.hc-cal-cell{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:3px 0;border-radius:7px}',
+      '.hc-cal-num{font-size:.78rem;font-weight:800;line-height:1.15;color:#3d4753}',
+      '.hc-cal-lunar{font-size:.55rem;color:#8a94a3;line-height:1.1}',
+      '.hc-cal-fest{font-size:.5rem;color:#d99a1f;line-height:1.1;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}',
+      /* 今日：整格铺蓝色圆角方块（方块在文字底下），数字/农历文字反白 */
+      '.hc-cal-cell.is-today{background:#29a9e0}',
+      '.hc-cal-cell.is-today .hc-cal-num{color:#fff}',
+      '.hc-cal-cell.is-today .hc-cal-lunar{color:rgba(255,255,255,.92)}',
+      '.hc-cal-cell.is-today .hc-cal-fest{color:#fff}',
+      /* 旧的小圆点不再使用 */
+      '.hc-cal-dot{display:none}',
+      '.hc-cal-strip.hc-in .is-today{animation:hcCalPop .5s .18s both}',
+      '@keyframes hcCalPop{0%{transform:scale(0)}70%{transform:scale(1.3)}100%{transform:scale(1)}}',
+      '@media (prefers-reduced-motion:reduce){.hc-cal-strip{transition:none!important}.hc-cal-strip.hc-in .is-today .hc-cal-dot{animation:none!important}}',
+      /* 个人主页壁纸：头像卡左上（头像+昵称行）铺用户自己的主页背景，白纱保证文字可读 */
+      '.hc-idrow.hc-wp{position:relative;border-radius:12px;padding:9px;background-size:cover;background-position:center;background-repeat:no-repeat}',
+      '.hc-idrow.hc-wp::after{content:"";position:absolute;inset:0;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.93));pointer-events:none}',
+      '.hc-idrow.hc-wp>*{position:relative;z-index:1}',
+      /* 每日登录动画（等级卡上方）：默认已登录；悬浮头像时播放，看完显示 √已登录 */
+      '.hc-login-state{margin:0 0 8px;min-height:32px;box-sizing:border-box;display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:10px;background:#f0f9f1;border:1px solid #d8efd9;font-size:.8rem;font-weight:600;color:#1d7a33}',
+      '.hc-login-state.hls-loading{background:#f5f8fb;border-color:#e7edf3;color:#5b6776}',
+      '.hls-dot{width:8px;height:8px;border-radius:50%;background:#0078d4;flex:0 0 auto;animation:hls-pulse 1s ease-in-out infinite}',
+      '@keyframes hls-pulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}',
+      '.hls-check{width:15px;height:15px;flex:0 0 auto}',
+      '.hls-check circle{stroke-dasharray:36;stroke-dashoffset:36;animation:hls-draw .5s ease forwards}',
+      '.hls-check path{stroke-dasharray:20;stroke-dashoffset:20;animation:hls-draw .35s ease .4s forwards}',
+      '@keyframes hls-draw{to{stroke-dashoffset:0}}',
+      '.hls-pop{animation:hls-pop .45s cubic-bezier(.2,1.4,.4,1)}',
+      '@keyframes hls-pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}',
+      '@media (prefers-reduced-motion: reduce){.hls-dot{animation:none}.hls-check circle,.hls-check path{stroke-dashoffset:0;animation:none}.hls-pop{animation:none}}',
+      /* 等级卡未加载完：显示「加载中」占位，不隐藏 */
+      '.hc-level.hc-level-loading{display:flex;align-items:center;justify-content:center;min-height:58px;color:#8a94a0;font-size:.82rem;font-weight:600}',
+      /* 菜单网格：订阅更新通栏，其余两列；管理员专属区三列 */
+      '.hc-menu{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}',
+      '.hc-menu .hc-btn-sub{flex:none;width:100%;font-size:.78rem;padding:8px 10px;display:flex;align-items:center;justify-content:flex-start;gap:6px;min-width:0}',
+      '.hc-menu .hc-btn-sub span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.hc-menu .hc-btn-sub svg{width:14px;height:14px;flex:0 0 auto}',
+      '.hc-menu .span2{grid-column:1 / -1}',
+      '.hc-menu.hc-admin{grid-template-columns:1fr 1fr 1fr}',
+      '@media (max-width:560px){.xl-hovercard.avatar-card .hc-top{flex-direction:column;gap:10px}.xl-hovercard.avatar-card .hc-top-right{flex:1 1 auto;width:100%}.hc-menu.hc-admin{grid-template-columns:1fr 1fr}}',
       '.user-popup .up-divider{height:1px;background:#e3e8ef;margin:6px 4px}',
       '.user-popup .up-item.admin-only[hidden]{display:none!important}',
       '@media (prefers-reduced-motion: reduce){.xl-hovercard{transition:none}}'
@@ -186,6 +275,17 @@
   var fbIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z'/></svg>";
   var ticketIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2.5 2.5 0 0 0 0-6z'/><path d='M13 5v14'/></svg>";
 
+  // 全局轻提示（头像卡内签到等操作用；样式随卡片 CSS 一起注入）
+  function hcToast(msg) {
+    var el = document.createElement('div');
+    el.className = 'hc-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(function () { el.classList.add('show'); });
+    setTimeout(function () { el.classList.remove('show'); setTimeout(function () { el.remove(); }, 300); }, 1800);
+  }
+  var subIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='5' width='20' height='14' rx='2'/><path d='m2 7 10 7 10-7'/></svg>";
+
   // 蓝条「通知」红点：拉取未读总数（系统+消息+评论）并刷新
   var NOTIF_KEY = '__xl_notif', NOTIF_TTL = 30000;
   function applyBadge(d) {
@@ -214,21 +314,38 @@
   // ← 填入 GitHub OAuth App 的 Client ID；为空则视为未配置（按钮隐藏）
   var CLIENT_ID = 'Ov23ctu9zRxIQ0o0uxiJ';
 
-  var KEYS = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave', barmode: 'xl_barmode' };
+  var KEYS = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave', barmode: 'xl_barmode', avatarmode: 'xl_avatarmode', searchbox: 'xl_searchbox' };
   function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
   function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
   function applyUserPrefs(p) {
     if (!p) return;
-    if (p.lang) set(KEYS.lang, p.lang);
+    // 语言本地优先：云端值只在本地从未设置时做初始值。
+    // 根因（2026-09-28）：language.html 切语言只写本地，云端残留旧值会登录后每页
+    // 把用户选择压回去 —— 「主页英文、点进产品页变中文」就是它。
+    if (p.lang && get(KEYS.lang, null) == null) set(KEYS.lang, p.lang);
     if (p.theme) set(KEYS.theme, p.theme);
     if (p.font != null) set(KEYS.font, String(p.font));
     if (p.radius != null) set(KEYS.radius, String(p.radius));
     if (p.autosave) set(KEYS.autosave, p.autosave);
     if (p.barmode) set(KEYS.barmode, p.barmode);
+    if (p.avatarmode) {
+      set(KEYS.avatarmode, p.avatarmode);
+      // 云端头像模式也要即时生效（名字/头像顺序变化）
+      if (typeof window.__xlApplyAvatarMode === 'function') window.__xlApplyAvatarMode();
+    }
+    if (p.barmode) set(KEYS.barmode, p.barmode);
+    if (p.searchbox) set(KEYS.searchbox, p.searchbox);
+    // 个人主页头像显示（per-login，随自动保存从云端同步回来）
+    if (p.profileAvatar) {
+      var _lg = (window.JW_AUTH && window.JW_AUTH.user && window.JW_AUTH.user.login);
+      if (_lg) set('xl_avatar_mode:' + _lg, p.profileAvatar);
+    }
     if (typeof window.applyAll === 'function') window.applyAll();
     // 云端小蓝条模式也要即时生效（图标注入由 common.js 完成，这里只补 body 类）
     if (typeof window.__xlApplyBarMode === 'function') window.__xlApplyBarMode();
+    // 搜索框位置 / 仅图标模式：登录后从云端恢复布局（common.js 注入后才会存在）
+    if (typeof window.__xlApplySearchBox === 'function') window.__xlApplySearchBox();
     // 确保顶栏图标始终注入（任何 applyAll 路径后都补一次，杜绝按钮变空白）
     if (typeof window.__xlInjectBarIcons === 'function') window.__xlInjectBarIcons();
   }
@@ -249,25 +366,26 @@
     var img = document.getElementById('userAvatarImg');
     if (!img) return;
     var login = user && user.login;
-    var src = (user && user.cloud_avatar_url) || (user && user.avatar_url) || (user && user.id ? 'https://avatars.githubusercontent.com/u/' + user.id + '?v=4' : '');
-    if (!src && login) src = 'https://github.com/' + login + '.png';
+    // 头像统一走「自己的 Cloudflare 域名」端点：浏览器不再直连 GitHub 头像服务器，
+    // 与网站本体同源可达性一致（网络差时也能出图）。
+    var AVATAR_API = 'https://mc-creator-jerry-webpage.pages.dev/api/avatar?login=';
+    var src = (user && user.cloud_avatar_url) || (user && user.avatar_url) ||
+      (login ? AVATAR_API + encodeURIComponent(login) : '');
     img.onerror = function () { this.onerror = null; this.src = login ? initialAvatarSvg(login) : DEFAULT_AVATAR; };
     img.src = src || DEFAULT_AVATAR;
   }
-  function setLoginItem(show) {
-    var li = document.getElementById('upLogin');
-    if (li) li.hidden = !show;
-  }
-
   function setLoggedIn(user) {
     window.JW_AUTH.user = user;
     window.JW_AUTH.isAdmin = !!(user && user.isAdmin);
+    window.JW_AUTH.isReviewer = !!(user && user.isReviewer);
+    window.JW_AUTH.role = (user && user.role) || '';
     updateAuthCookies(user);
     if (loginBtn) loginBtn.style.display = 'none';
     var avatarBtn = document.getElementById('userAvatarBtn');
     if (avatarBtn) avatarBtn.style.display = '';
     setAvatar(user);
-    setLoginItem(false);
+    // 登录后刷新头像按钮的名字槽（display_name / login）
+    if (typeof window.__xlApplyAvatarMode === 'function') window.__xlApplyAvatarMode();
     fetch('/api/usersettings')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { if (d && d.prefs) applyUserPrefs(d.prefs); })
@@ -282,11 +400,13 @@
   function setLoggedOut() {
     window.JW_AUTH.user = null;
     window.JW_AUTH.isAdmin = false;
+    window.JW_AUTH.isReviewer = false;
+    window.JW_AUTH.role = '';
     if (loginBtn) loginBtn.style.display = '';
     var avatarBtn = document.getElementById('userAvatarBtn');
     if (avatarBtn) avatarBtn.style.display = 'none';
     setAvatar(DEFAULT_AVATAR);
-    setLoginItem(true);
+    if (typeof window.__xlApplyAvatarMode === 'function') window.__xlApplyAvatarMode();
     updateNoticeBadge();
     updateHeroTitle(null);
     if (typeof window.onAuthState === 'function') window.onAuthState(window.JW_AUTH);
@@ -438,63 +558,50 @@
   }
   window.xlToast = xlToast;
 
-  // 注入头像按钮 + 下拉菜单（蓝条最右侧）
+  // 注入头像按钮（蓝条最右侧）。点击与悬浮统一展开同一张完整账户卡（见下方 hoverPreview.buildAvatar）
   (function buildAvatarMenu() {
     var right = document.querySelector('.bar-right');
     if (!right) return;
-    var personIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='12' cy='7' r='4'/></svg>";
-    var gearIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'/></svg>";
-    var ghIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='currentColor'><path d='M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.6 18 4.9 18 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z'/></svg>";
-    var subIco = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='5' width='20' height='14' rx='2'/><path d='m2 7 10 7 10-7'/></svg>";
 
     var btn = document.createElement('button');
     btn.className = 'bar-avatar';
     btn.id = 'userAvatarBtn';
     btn.setAttribute('aria-label', '账户');
     btn.style.display = 'none'; // 默认隐藏，仅登录后显示（避免未登录时同时出现头像与登录按钮）
-    btn.innerHTML = '<img id="userAvatarImg" src="' + DEFAULT_AVATAR + '" alt="">';
-
-    var pop = document.createElement('div');
-    pop.className = 'user-popup';
-    pop.id = 'userPopup';
-    pop.hidden = true;
-    pop.innerHTML =
-      '<div class="hc-level" id="upLevel" hidden></div>' +
-      '<a class="up-item" id="upProfile" href="' + BASE + 'personal_profile/">' +
-        '<span class="up-ico">' + personIco + '</span><span data-zh="个人主页" data-en="Profile">个人主页</span></a>' +
-      '<a class="up-item" id="upSettings" href="' + BASE + 'settings/homepage.html">' +
-        '<span class="up-ico">' + gearIco + '</span><span data-zh="设置" data-en="Settings">设置</span></a>' +
-      '<a class="up-item" id="upLogin" href="#" hidden>' +
-        '<span class="up-ico">' + ghIco + '</span><span data-zh="登录" data-en="Sign in">登录</span></a>' +
-      '<div class="up-divider"></div>' +
-      '<a class="up-item" id="upSubscribe" href="' + BASE + 'subscribe/">' +
-        '<span class="up-ico">' + subIco + '</span><span data-zh="订阅" data-en="Subscribe">订阅</span></a>';
-
+    // 名字槽：默认不显示，由 xl_avatarmode（仅头像 / 名字+头像 / 头像+名字）控制
+    btn.innerHTML = '<img id="userAvatarImg" src="' + DEFAULT_AVATAR + '" alt=""><span class="ba-name" id="userAvatarName"></span>';
     right.appendChild(btn);
-    right.appendChild(pop);
 
+    // 头像显示模式：读取 xl_avatarmode 并应用到蓝条头像按钮
+    // avatar=仅头像（默认）· name-avatar=名字在左头像在右 · avatar-name=头像在左名字在右
+    function applyAvatarMode() {
+      var b = document.getElementById('userAvatarBtn');
+      if (!b) return;
+      var m = 'avatar';
+      try { m = localStorage.getItem('xl_avatarmode') || 'avatar'; } catch (e) {}
+      if (m !== 'avatar' && m !== 'name-avatar' && m !== 'avatar-name') m = 'avatar';
+      b.classList.remove('xl-av-na', 'xl-av-an');
+      if (m === 'name-avatar') b.classList.add('xl-av-na');
+      else if (m === 'avatar-name') b.classList.add('xl-av-an');
+      var nameEl = document.getElementById('userAvatarName');
+      var u = window.JW_AUTH && window.JW_AUTH.user;
+      if (nameEl) nameEl.textContent = (u && (u.display_name || u.login)) || '';
+    }
+    window.__xlApplyAvatarMode = applyAvatarMode;
+    applyAvatarMode();
+
+    // 点击 = 展开同一张悬浮卡并「钉住」（鼠标移开也不收），再点一次头像收起
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      pop.hidden = !pop.hidden;
-      if (!pop.hidden) {
-        var uu = window.JW_AUTH.user;
-        if (uu && uu.login) {
-          loadLevel(uu.login, function (lv) {
-            var box = document.getElementById('upLevel');
-            if (!box) return;
-            if (lv) { box.hidden = false; box.innerHTML = renderLevelBlock(lv); }
-          });
-        }
-      }
+      var h = window.__avatarHover;
+      if (!h) return;
+      if (h.isPinned()) { h.hide(true); h.unpin(); }
+      else h.showNow();
     });
-    document.addEventListener('click', function (e) {
-      if (!pop.hidden && e.target !== btn && !pop.contains(e.target)) pop.hidden = true;
-    });
-    var loginItem = document.getElementById('upLogin');
-    if (loginItem) loginItem.addEventListener('click', function (e) {
-      e.preventDefault();
-      pop.hidden = true;
-      openEmailModal();
+    // 点页面空白处收起（卡片自身 click 已 stopPropagation，不会误伤）
+    document.addEventListener('click', function () {
+      var h = window.__avatarHover;
+      if (h && h.isPinned()) { h.hide(true); h.unpin(); }
     });
 
     // 让下拉项跟随当前语言
@@ -524,7 +631,7 @@
       var card = document.createElement('div');
       card.className = 'xl-hovercard' + (extraClass ? ' ' + extraClass : '');
       document.body.appendChild(card);
-      var showT, hideT;
+      var showT, hideT, pinned = false;
       function place() {
         var r = trigger.getBoundingClientRect();
         var w = card.offsetWidth || 240;
@@ -544,59 +651,201 @@
         card.style.top = top + 'px';
         card.style.left = left + 'px';
       }
+      function reveal() {
+        builder(card);
+        place();
+        card.classList.add('show');
+      }
       function show() {
         clearTimeout(hideT);
-        showT = setTimeout(function () {
-          builder(card);
-          place();
-          card.classList.add('show');
-        }, 200);
+        showT = setTimeout(reveal, 200);
       }
-      function hide() {
+      // 点击打开：立即显示并钉住（pinned 期间 mouseleave 不收起）
+      function showNow() {
         clearTimeout(showT);
+        clearTimeout(hideT);
+        pinned = true;
+        reveal();
+      }
+      function hide(force) {
+        clearTimeout(showT);
+        // 注意：mouseleave 等监听器会把事件对象传进来（永远 truthy），
+        // 必须严格比对 === true，否则钉住状态会被鼠标移开误杀。
+        if (pinned && force !== true) return;
         hideT = setTimeout(function () { card.classList.remove('show'); }, 160);
       }
+      function unpin() { pinned = false; }
+      function isPinned() { return pinned; }
       trigger.addEventListener('mouseenter', show);
       trigger.addEventListener('mouseleave', hide);
       card.addEventListener('mouseenter', function () { clearTimeout(hideT); });
       card.addEventListener('mouseleave', hide);
       card.addEventListener('click', function (e) { e.stopPropagation(); });
-      return { card: card, show: show, hide: hide };
+      return { card: card, show: show, hide: hide, showNow: showNow, unpin: unpin, isPinned: isPinned };
+    }
+
+    /* 个人主页壁纸：/api/bg 取用户自己的背景（banner 超长背景优先，大背景兜底），铺到头像+昵称行 */
+    var __bgCache = {};
+    function paintWallpaper(row, url) {
+      if (!url) return;
+      row.classList.add('hc-wp');
+      row.style.backgroundImage = 'url("' + String(url).replace(/"/g, '%22') + '")';
+    }
+    function applyProfileWallpaper(card, login) {
+      if (!login) return;
+      var row = card.querySelector('.hc-idrow');
+      if (!row) return;
+      var c = __bgCache[login];
+      if (c && Date.now() - c.ts < 60000) { paintWallpaper(row, c.url); return; }
+      fetch('/api/bg?user=' + encodeURIComponent(login))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          var url = (d && (d.banner || d.bg)) || null;
+          __bgCache[login] = { url: url, ts: Date.now() };
+          if (card.contains(row)) paintWallpaper(row, url);
+        })
+        .catch(function () {});
+    }
+    /* 每日登录动画：默认已登录；今天还没看过动画才播放，看完落定「√ 已登录」并按日记录 */
+    function loginStateHtml() {
+      return '<svg class="hls-check hls-pop" viewBox="0 0 24 24" fill="none" stroke="url(#xl-perm-grad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M8 12.4l2.6 2.6L16.2 9.4"/></svg><span>' + t('已登录', 'Signed in') + '</span>';
+    }
+    function playDailyLogin(card) {
+      var box = card.querySelector('#hcLoginState');
+      if (!box) return;
+      var d = new Date();
+      var key = 'xl_login_anim:' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      var seen = false;
+      try { seen = localStorage.getItem(key) === '1'; } catch (e) {}
+      if (seen) {
+        box.classList.remove('hls-loading');
+        box.innerHTML = loginStateHtml();
+        return;
+      }
+      box.classList.add('hls-loading');
+      box.innerHTML = '<span class="hls-dot"></span><span>' + t('登录中…', 'Signing in…') + '</span>';
+      setTimeout(function () {
+        if (!box.isConnected) return;
+        box.classList.remove('hls-loading');
+        box.innerHTML = loginStateHtml();
+        try { localStorage.setItem(key, '1'); } catch (e) {}
+      }, 1000);
     }
 
     function buildAvatar(card) {
       var u = window.JW_AUTH.user;
       if (u && u.login) {
-        var av = u.cloud_avatar_url || u.avatar_url || (u.id ? 'https://avatars.githubusercontent.com/u/' + u.id + '?v=4' : ('https://github.com/' + u.login + '.png'));
+        // 注入一次 SVG 渐变定义，供头像卡内联 SVG 图标使用（与 i.ic 渐变一致）
+        if (!document.getElementById('xl-ico-grad-defs')) {
+          var gsvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          gsvg.setAttribute('id', 'xl-ico-grad-defs');
+          gsvg.setAttribute('width', '0');
+          gsvg.setAttribute('height', '0');
+          gsvg.setAttribute('style', 'position:absolute');
+          gsvg.innerHTML = "<defs><linearGradient id='xl-perm-grad' x1='0' y1='0' x2='1' y2='1'><stop offset='0'/><stop offset='1'/></linearGradient></defs>";
+          (document.body || document.documentElement).appendChild(gsvg);
+        }
+        var av = u.cloud_avatar_url || u.avatar_url ||
+          (u.login ? 'https://mc-creator-jerry-webpage.pages.dev/api/avatar?login=' + encodeURIComponent(u.login) : '') ||
+          DEFAULT_AVATAR;
         card.innerHTML =
-          '<div class="hc-avatar"><img id="hcAvatarImg" src="' + av + '" alt=""></div>' +
-          '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +
-          '<div class="hc-login">@' + esc(u.login) + (u.isAdmin ? ' · ' + t('管理员', 'Admin') : '') +
-            (u.sponsor ? '<span class="hc-sp">' + esc(u.sponsor.label || t('赞助者', 'Supporter')) + '</span>' : '') + '</div>' +
-          '<div class="hc-level" id="hcLevel" hidden></div>' +
-          '<div class="hc-actions">' +
-            '<a class="hc-btn" href="' + BASE + 'personal_profile/">' + t('个人主页', 'Profile') + '</a>' +
-            '<a class="hc-btn ghost" href="' + BASE + 'settings/homepage.html">' + t('设置', 'Settings') + '</a>' +
+          '<div class="hc-top">' +
+            '<div class="hc-top-left">' +
+              '<div class="hc-idrow">' +
+                '<div class="hc-avatar"><img id="hcAvatarImg" src="' + av + '" alt=""></div>' +
+                '<div class="hc-idtext">' +
+                  '<div class="hc-name">' + esc(u.display_name || u.login) + '</div>' +
+                  '<div class="hc-login">@' + esc(u.login) + (u.isAdmin ? ' · ' + t('管理员', 'Admin') : '') +
+                    (u.sponsor ? '<span class="hc-sp">' + esc(u.sponsor.label || t('赞助者', 'Supporter')) + '</span>' : '') + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="hc-actions">' +
+                '<a class="hc-btn" href="' + BASE + 'personal_profile/">' + t('个人主页', 'Profile') + '</a>' +
+                '<a class="hc-btn ghost" href="' + BASE + 'settings/homepage.html">' + t('设置', 'Settings') + '</a>' +
+              '</div>' +
+              '<div class="hc-menu">' +
+                '<a class="hc-btn ghost hc-btn-sub span2" href="' + BASE + 'subscribe/">' + subIco + '<span>' + t('订阅更新', 'Subscribe') + '</span></a>' +
+                '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'helpcenter/">' + helpIco + '<span>' + t('帮助中心', 'Help Center') + '</span></a>' +
+                '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'redeem/">' + ticketIco + '<span>' + t('兑换赞助码', 'Redeem code') + '</span></a>' +
+                (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub xl-perm-admin" href="' + BASE + 'admin/feedback/">' + fbIco + '<span>' + t('建议管理', 'Feedback') + '</span></a>' : '') +
+                (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub xl-perm-admin" href="' + BASE + 'admin/sponsors/">' + ticketIco + '<span>' + t('赞助管理', 'Sponsors') + '</span></a>' : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="hc-top-right">' +
+              '<div class="hc-login-state hls-loading" id="hcLoginState">' + t('登录中…', 'Signing in…') + '</div>' +
+              '<div class="hc-level hc-level-loading" id="hcLevel">' + t('加载中…', 'Loading…') + '</div>' +
+              '<div class="hc-voucher" id="hcVoucher">' +
+                '<div class="hc-v-row">' +
+                  '<span class="hc-v-ico"><img src="' + BASE + 'assets/voucher.svg?v=2" alt="" width="38" height="15"></span>' +
+                  '<span class="hc-v-main">' +
+                    '<span class="hc-v-name">' + t('小蓝页调度券', 'Vouchers') + '</span>' +
+                    '<span class="hc-v-meta">' +
+                      '<span class="hc-v-val" id="hcVoucherVal">' + t('加载中…', 'Loading…') + '</span>' +
+                      '<span class="hc-v-done" id="hcVoucherDone" hidden>' + t('已签到', 'Checked in') + '</span>' +
+                    '</span>' +
+                  '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="hc-cal" id="hcCal" aria-label="' + t('七日日历', '7-day calendar') + '"></div>' +
+            '</div>' +
           '</div>' +
-          '<div class="hc-actions hc-actions-sub">' +
-            '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'subscribe/">' + t('订阅更新', 'Subscribe') + '</a>' +
-          '</div>' +
-          '<div class="hc-actions hc-actions-extras">' +
-            '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'helpcenter/">' + helpIco + '<span>' + t('帮助中心', 'Help Center') + '</span></a>' +
-            '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'redeem/">' + ticketIco + '<span>' + t('兑换赞助码', 'Redeem code') + '</span></a>' +
-            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/feedback/">' + fbIco + '<span>' + t('建议管理', 'Feedback') + '</span></a>' : '') +
-            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/sponsors/">' + ticketIco + '<span>' + t('赞助管理', 'Sponsors') + '</span></a>' : '') +
-            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/reports/">' + flagIco + '<span>' + t('举报后台', 'Reports') + '</span></a>' : '') +
-            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'admin/ban/">' + banIco + '<span>' + t('小黑屋', 'Ban List') + '</span></a>' : '') +
-            (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub" href="' + BASE + 'stats/">' + trafficIco + '<span>' + t('流量', 'Traffic') + '</span></a>' : '') +
-          '</div>';
+          ((u.isReviewer || u.isAdmin) ?
+            '<div class="hc-menu hc-admin">' +
+              '<a class="hc-btn ghost hc-btn-sub xl-perm-review" href="' + BASE + 'admin/reports/">' + flagIco + '<span>' + t('举报后台', 'Reports') + '</span></a>' +
+              '<a class="hc-btn ghost hc-btn-sub xl-perm-review" href="' + BASE + 'admin/ban/">' + banIco + '<span>' + t('小黑屋', 'Ban List') + '</span></a>' +
+              (u.isAdmin ? '<a class="hc-btn ghost hc-btn-sub xl-perm-admin" href="' + BASE + 'stats/">' + trafficIco + '<span>' + t('流量', 'Traffic') + '</span></a>' : '') +
+            '</div>' : '');
         var himg = card.querySelector('#hcAvatarImg');
         if (himg) himg.onerror = function () { this.onerror = null; this.src = initialAvatarSvg(u.login); };
+        // 个人主页壁纸 + 每日登录动画（等级上方）
+        applyProfileWallpaper(card, u.login);
+        playDailyLogin(card);
         loadLevel(u.login, function (lv) {
           var box = card.querySelector('#hcLevel');
           if (!box || !box.isConnected) return;
-          if (lv) { box.hidden = false; box.innerHTML = renderLevelBlock(lv, { points: true }); }
+          if (lv) { box.classList.remove('hc-level-loading'); box.innerHTML = renderLevelBlock(lv, { points: true }); }
+          else box.textContent = '—'; // 加载失败也保留占位盒，只换文案（不隐藏）
         });
+        // 调度券数量（每日登录自动 +1，无需手动签到；数据来自五站统一账本 /api/voucher）
+        var vVal = card.querySelector('#hcVoucherVal');
+        var vDone = card.querySelector('#hcVoucherDone');
+        if (vVal) {
+          function vSetBalance(n) { vVal.textContent = n + (curLang() === 'en' ? '' : ' 张'); }
+          fetch('/api/voucher', { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+              if (!card.contains(vVal)) return; // 卡已重建或已关闭
+              // 无限账号（站长本人）：显示 ∞，无需签到
+              if (d && d.ok && d.infinite === true) {
+                vVal.textContent = '∞ ' + (curLang() === 'en' ? '' : '张');
+                if (vDone) vDone.hidden = false;
+                return;
+              }
+              if (d && d.ok && typeof d.balance === 'number') {
+                vSetBalance(d.balance);
+                if (d.signinClaimed && vDone) vDone.hidden = false; // 今日已自动签到
+                if (d.justClaimed > 0) {
+                  hcToast(t('今日登录奖励，调度券 +' + d.justClaimed, 'Daily login bonus +' + d.justClaimed));
+                }
+              } else {
+                vVal.textContent = '—'; // 账本不可用（未登录/后端异常）
+              }
+            })
+            .catch(function () {
+              if (card.contains(vVal)) vVal.textContent = '—';
+            });
+        }
+        // 七日日历条（前3天 + 今天 + 后3天，农历 + 节日标注）
+        var calBox = card.querySelector('#hcCal');
+        if (calBox) {
+          if (window.XL_CALENDAR) { window.XL_CALENDAR.render(calBox); }
+          else {
+            var calScript = document.createElement('script');
+            calScript.src = BASE + 'assets/xl-calendar.js';
+            calScript.onload = function () { if (window.XL_CALENDAR) window.XL_CALENDAR.render(calBox); };
+            document.head.appendChild(calScript);
+          }
+        }
       } else {
         card.innerHTML =
           '<div class="hc-avatar"><img src="' + DEFAULT_AVATAR + '" alt=""></div>' +
@@ -691,15 +940,70 @@
         onClick: function () { if (window.JW_LOGIN) window.JW_LOGIN(); }
       });
     });
+    /* ===== 蓝条其余按钮统一补悬浮预览 =====
+       auth.js 先于 common.js 执行，而顶栏按钮（消息中心/兑换码/订阅和博客/支持与付款/群组等）
+       由 common.js 在 DOMContentLoaded 兜底注入——此前只有静态 HTML 里已有的按钮绑定了预览，
+       导致「不是所有按钮都会显示预览界面」。这里在 DCL + 两轮延时兜底扫描，给所有未绑定的
+       蓝条按钮补预览卡（消息中心按钮补通知富卡片，其余补信息卡）。 */
+    (function wireBarPreviews() {
+      var FLAG = 'data-xl-hv';
+      function mark(el) { if (el && el.setAttribute) el.setAttribute(FLAG, '1'); }
+      function bound(el) { return !!(el && el.getAttribute && el.getAttribute(FLAG) === '1'); }
+      function barText(n) { return ((n.getAttribute && n.getAttribute('data-zh')) || n.textContent || '').trim(); }
+      function barHref(n) { return (n.getAttribute && n.getAttribute('href')) || ''; }
+      function run() {
+        var bar = document.querySelector('.bar-right');
+        if (!bar) return;
+        var nodes = bar.querySelectorAll('.bar-btn, .xl-search, #loginBtn, #logoutBtn');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          if (bound(n)) continue;
+          var href = barHref(n), txt = barText(n);
+          var isForm = n.tagName === 'FORM' || /(^|\s)xl-search(\s|$)/.test(n.className || '');
+          if (isForm) {
+            mark(n);
+            makeHover(n, function (c) {
+              buildInfo(c, {
+                title: t('快搜', 'Quick Search'),
+                desc: t('输入关键词，实时匹配站内用户与产品。', 'Type to search users and products instantly.'),
+                href: '#',
+                btnText: t('去搜索 ›', 'Search ›'),
+                onClick: function () { var inp = document.querySelector('.xl-search-input'); if (inp) inp.focus(); }
+              });
+            });
+            continue;
+          }
+          if (/\/notice\//.test(href) || /消息中心|通知中心|通知/.test(txt)) { mark(n); makeHover(n, buildNotice, 'notice-card'); continue; }
+          var d = null;
+          if (/\/redeem\//.test(href) || /兑换/.test(txt)) d = { title: t('兑换码', 'Redeem'), desc: t('输入赞助码，兑换会员权益与定制内容。', 'Enter a sponsor code to redeem benefits.') };
+          else if (/\/sub-blog\//.test(href) || /订阅和博客/.test(txt)) d = { title: t('订阅和博客', 'Subscribe & Blog'), desc: t('订阅更新动态，浏览站内博客文章。', 'Subscribe to updates and read blog posts.') };
+          else if (/\/support\//.test(href) || /支持与付款/.test(txt)) d = { title: t('支持与付款', 'Support & Payment'), desc: t('赞助方式、付款说明与常见问题。', 'Sponsorship, payment info and FAQ.') };
+          else if (/\/groups\//.test(href) || /群组/.test(txt)) d = { title: t('群组', 'Groups'), desc: t('加入兴趣群组，与大家讨论。', 'Join interest groups and chat.') };
+          else if (/\/products\.html/.test(href) || txt === '产品') d = { title: t('产品', 'Products'), desc: t('浏览我发布的工具与软件。', 'Browse the tools and software I published.') };
+          else if (/\/helpcenter\//.test(href) || /帮助中心/.test(txt)) d = { title: t('帮助中心', 'Help Center'), desc: t('常见问题与使用指南。', 'FAQ and usage guides.') };
+          if (!d) continue;
+          mark(n);
+          (function (btn, info) {
+            makeHover(btn, function (c) {
+              buildInfo(c, { title: info.title, desc: info.desc, btnText: t('前往 ›', 'Open ›'), href: btn.href || '#' });
+            });
+          })(n, d);
+        }
+      }
+      // 已绑定专属预览的触发器打标，防止本扫描重复绑定
+      mark(document.getElementById('userAvatarBtn'));
+      mark(document.getElementById('noticeBtn'));
+      mark(document.getElementById('loginBtn'));
+      var prod0 = document.querySelector('.bar-right a[href*="products.html"]'); if (prod0) mark(prod0);
+      var help0 = document.querySelector('.bar-right a[href*="helpcenter/"]'); if (help0) mark(help0);
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+      else run();
+      setTimeout(run, 300);  // common.js 的注入在 DCL 执行，晚于本脚本的 DCL 监听，兜底第一轮
+      setTimeout(run, 1200); // 再兜底一轮（深页 / 慢注入）
+    })();
+
     window.__prodHover = prodHover;
     window.__helpHover = helpHover; window.__loginHover = loginHover;
-
-    // 避免头像的「悬浮预览」与原有「点击下拉菜单」互相冲突
-    var ab = document.getElementById('userAvatarBtn');
-    if (ab) {
-      ab.addEventListener('mouseenter', function () { var p = document.getElementById('userPopup'); if (p) p.hidden = true; });
-      ab.addEventListener('click', function () { if (avatarHover) avatarHover.hide(); });
-    }
   })();
 
   // 暴露给设置页：把当前设置保存到云端（用户身份由后端 cookie 识别）

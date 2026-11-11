@@ -1,0 +1,291 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script>
+  // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
+  // pages.dev 域名下不触发，避免循环。
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+  </script>
+  <script src="../../boot.js?v=20261014b"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Jerry 日历 · 文档</title>
+<meta name="description" content="Jerry 日历产品文档：月视图、日程管理、节假日标记、深浅主题，数据保存在本地浏览器。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Jerry 日历 · 文档" />
+<meta property="og:description" content="Jerry 日历产品文档：月视图、日程管理、节假日标记、深浅主题，数据保存在本地浏览器。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Jerry 日历 · 文档" />
+<meta name="twitter:description" content="Jerry 日历产品文档：月视图、日程管理、节假日标记、深浅主题，数据保存在本地浏览器。" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=20260926" />
+<style>  
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a {
+    color: var(--bar-fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 0;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
+
+  /* ---- 内容区 ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 36px; }
+  .hero h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+  }
+  .card {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  /* ---- 文档正文 ---- */
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 0 0 10px; }
+  .card ul { list-style: disc; margin: 6px 0 0; padding-left: 22px; }
+  .card ul li { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 7px 0; }
+  .card ul li b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .card .hint { color: var(--muted); margin-top: 12px; }
+  .card .doc-link a { color: var(--accent); }
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+
+  /* ---- 页脚 ---- */
+  .site-footer {
+    border-top: 1px solid var(--card-border);
+    margin-top: 48px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
+        <a id="bcMain" href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep" id="bcSep">›</span>
+        <a href="../" data-zh="帮助中心" data-en="Help Center">帮助中心</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" id="bcSub" data-zh="Jerry 日历" data-en="Jerry Calendar">Jerry 日历</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="ログアウト" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="Jerry 日历" data-en="Jerry Calendar">Jerry 日历</h1>
+      <p data-zh="简洁的在线日历：月视图一目了然，点日期记日程，节假日自动标记，红色主题醒目。" data-en="A clean online calendar: month view at a glance, tap a date to add events, automatic holiday marks, with an eye-catching red theme.">简洁的在线日历：月视图一目了然，点日期记日程，节假日自动标记，红色主题醒目。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="能做什么" data-en="What It Can Do">能做什么</h2>
+      <ul>
+        <li><b data-zh="月视图" data-en="Month view">月视图</b><span data-zh="整月日期一屏看完，今天用红圈高亮，周末标红。" data-en="See a whole month at once — today gets a red ring and weekends are tinted red.">整月日期一屏看完，今天用红圈高亮，周末标红。</span></li>
+        <li><b data-zh="日程管理" data-en="Event management">日程管理</b><span data-zh="点任意日期添加日程：标题、时间、六色标签，随时删除。" data-en="Tap any date to add events with a title, time and a six-color label; delete anytime.">点任意日期添加日程：标题、时间、六色标签，随时删除。</span></li>
+        <li><b data-zh="节假日标记" data-en="Holiday marks">节假日标记</b><span data-zh="元旦、劳动节、国庆等公历节日自动标注在日期上。" data-en="Gregorian holidays like New Year, Labour Day and National Day are marked automatically.">元旦、劳动节、国庆等公历节日自动标注在日期上。</span></li>
+        <li><b data-zh="数据存本地" data-en="Local storage">数据存本地</b><span data-zh="日程保存在你的浏览器里，刷新不丢，无需注册。" data-en="Events are saved in your browser — they survive refreshes, no sign-up needed.">日程保存在你的浏览器里，刷新不丢，无需注册。</span></li>
+        <li><b data-zh="深浅主题" data-en="Light and dark themes">深浅主题</b><span data-zh="右上角一键切换浅色与深色，也可以跟随系统。" data-en="Flip between light and dark at the top right, or follow your system.">右上角一键切换浅色与深色，也可以跟随系统。</span></li>
+        <li><b data-zh="全设备适配" data-en="Works on every device">全设备适配</b><span data-zh="手机上日程面板自动变成底部抽屉，窄屏也不挤。" data-en="On phones the event panel becomes a bottom drawer — no crowding on narrow screens.">手机上日程面板自动变成底部抽屉，窄屏也不挤。</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="主要功能速查" data-en="Feature Quick Reference">主要功能速查</h2>
+      <ul>
+        <li><b data-zh="切月" data-en="Change month">切月</b><span data-zh="点标题两侧箭头，或用键盘 ← / →；按 T 回到今天。" data-en="Use the arrows by the title or the ← / → keys; press T to jump back to today.">点标题两侧箭头，或用键盘 ← / →；按 T 回到今天。</span></li>
+        <li><b data-zh="记日程" data-en="Add an event">记日程</b><span data-zh="点日期 → 填标题和时间 → 选颜色 → 添加。" data-en="Tap a date → fill in the title and time → pick a color → add.">点日期 → 填标题和时间 → 选颜色 → 添加。</span></li>
+        <li><b data-zh="删日程" data-en="Delete an event">删日程</b><span data-zh="日程条目右侧的删除按钮一键移除。" data-en="Use the delete button on the right of any event.">日程条目右侧的删除按钮一键移除。</span></li>
+        <li><b data-zh="主题切换" data-en="Theme switch">主题切换</b><span data-zh="右上角月亮按钮，浅色 / 深色自由切换。" data-en="The moon button at the top right toggles light or dark.">右上角月亮按钮，浅色 / 深色自由切换。</span></li>
+      </ul>
+      <p class="hint doc-link"><span data-zh="站点地址：" data-en="Site: ">站点地址：</span><a href="https://jerrycalendar.pages.dev/" target="_blank" rel="noopener" data-zh="打开 Jerry 日历" data-en="open Jerry Calendar">打开 Jerry 日历</a></p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+        <details class="faq">
+          <summary data-zh="日程会同步到其他设备吗？" data-en="Do events sync across devices?">日程会同步到其他设备吗？</summary>
+          <div class="faq-body" data-zh="目前日程保存在本机浏览器（localStorage），换设备或清浏览器数据后不会跟随。跨设备同步在规划中，后续会接入小蓝页账户。" data-en="Events are currently stored in your browser (localStorage) and don't follow you across devices. Cross-device sync is planned via the Xiaolan account.">目前日程保存在本机浏览器（localStorage），换设备或清浏览器数据后不会跟随。跨设备同步在规划中，后续会接入小蓝页账户。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="要注册账号吗？" data-en="Do I need an account?">要注册账号吗？</summary>
+          <div class="faq-body" data-zh="不用。打开就能用，记的日程存在你自己的浏览器里。" data-en="No. Just open it and use it — your events stay in your own browser.">不用。打开就能用，记的日程存在你自己的浏览器里。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="日历是红色主题？" data-en="Why is the theme red?">日历是红色主题？</summary>
+          <div class="faq-body" data-zh="对，Jerry 日历以红色为主题色：今天的高亮、按钮和图标都是红色系，日期上的彩色小方块是日程标签的示例色。" data-en="Yes — Jerry Calendar uses red as its theme color: today's highlight, buttons and the icon are all red-toned. The little colored squares on dates are sample event-label colors.">对，Jerry 日历以红色为主题色：今天的高亮、按钮和图标都是红色系，日期上的彩色小方块是日程标签的示例色。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="有农历和节气吗？" data-en="Does it show lunar dates?">有农历和节气吗？</summary>
+          <div class="faq-body" data-zh="目前标注公历节日；农历与节气标注在规划中。" data-en="Gregorian holidays are marked for now; lunar dates and solar terms are planned.">目前标注公历节日；农历与节气标注在规划中。</div>
+        </details>
+    </section>  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  <span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../../language.html"  aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../../settings/homepage.html"  aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0 .33 1.82 1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      applyAll();
+    })();
+  </script>
+  <script src="../../auth.js?v=20261103a"></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
+</body>
+</html>

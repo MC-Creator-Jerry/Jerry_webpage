@@ -1,14 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
 </script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>消息中心 · Jerry's webpage</title>
 <meta name="description" content="站内消息中心：站长消息、系统消息、评论通知与私信。" />
 <meta name="author" content="Jerry" />
@@ -118,7 +118,16 @@
   .attach-img { max-width: 100%; max-height: 320px; border-radius: 10px; display: block; }
   .attach-video { width: 100%; max-width: 480px; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; display: block; }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -131,12 +140,12 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
       <a class="bar-btn" href="../groups/" data-zh="群组" data-en="Groups">群组</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -172,8 +181,8 @@
         <span class="edit-label" data-zh="图片 / 视频附件" data-en="Image / Video Attachments">图片 / 视频附件</span>
         <div class="attach-list" id="nAttachList"></div>
         <div class="attach-actions">
-          <button type="button" class="attach-btn" id="nAddImg">🖼 添加图片</button>
-          <button type="button" class="attach-btn" id="nAddVid">🎬 添加视频</button>
+          <button type="button" class="attach-btn" id="nAddImg"><i class="ic" data-ic="image" aria-hidden="true"></i> 添加图片</button>
+          <button type="button" class="attach-btn" id="nAddVid"><i class="ic" data-ic="film" aria-hidden="true"></i> 添加视频</button>
         </div>
         <button class="post-btn" id="postBtn" data-zh="发布" data-en="Publish">发布</button>
       </section>
@@ -207,8 +216,8 @@
         <span class="edit-label" data-zh="图片 / 视频附件" data-en="Image / Video Attachments">图片 / 视频附件</span>
         <div class="attach-list" id="mAttachList"></div>
         <div class="attach-actions">
-          <button type="button" class="attach-btn" id="mAddImg">🖼 添加图片</button>
-          <button type="button" class="attach-btn" id="mAddVid">🎬 添加视频</button>
+          <button type="button" class="attach-btn" id="mAddImg"><i class="ic" data-ic="image" aria-hidden="true"></i> 添加图片</button>
+          <button type="button" class="attach-btn" id="mAddVid"><i class="ic" data-ic="film" aria-hidden="true"></i> 添加视频</button>
         </div>
         <button class="post-btn" id="msgSendBtn" data-zh="发送" data-en="Send">发送</button>
       </section>
@@ -247,7 +256,8 @@
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <div class="toast" id="toast"></div>
 
@@ -260,8 +270,8 @@
     </a>
   </div>
 
-  <script src="../prefs.js?v=20260909a"></script>
-  <script src="../auth.js?v=20260925c"></script>
+  <script src="../prefs.js?v=20261027a"></script>
+  <script src="../auth.js?v=20261103a"></script>
   <script>
     (function () {
       var FORBIDDEN = ['fuck','shit','bitch','asshole','bastard','dick','cunt','whore','slut','nigger','faggot','retard','tranny','nazi','kill yourself','kys','傻逼','sb','草泥马','操你','日你','妈的','贱人','婊子','杂种','滚蛋','废青','支那','洋奴','汉奸','狗杂种','加微信','扫码领','免费送','刷单','博彩','赌博','色情','裸聊','办证','代开发票','点击领取','一元购','日赚','月入过万','私聊客服'];
@@ -334,6 +344,15 @@
           card.querySelector('h3').textContent = m.title || '（无标题）';
           if (m.permanent === false) { var t2 = document.createElement('span'); t2.className = 'temp-tag'; t2.textContent = '暂时'; card.querySelector('h3').appendChild(t2); }
           card.querySelector('p').textContent = m.body || '';
+          if (m.url && /^https?:\/\//.test(m.url)) {
+            var lk = document.createElement('a');
+            lk.href = m.url;
+            lk.target = '_blank';
+            lk.rel = 'noopener noreferrer';
+            lk.textContent = '查看内容 →';
+            lk.style.cssText = 'display:inline-block;margin-top:8px;font-size:.9rem;color:var(--accent,#3b6cff);text-decoration:none;';
+            card.appendChild(lk);
+          }
           renderAttachments(card, m.attachments);
           card.querySelector('.time').textContent = fmtTime(m.ts);
           el.appendChild(card);
@@ -351,7 +370,7 @@
         empty.hidden = true;
         data.comments.forEach(function (c) {
           var card = document.createElement('div'); card.className = 'cmt-notif';
-          var ico = c.type === 'mention' ? '📣' : (c.type === 'reply' ? '↩️' : '💬');
+          var ico = c.type === 'mention' ? '<i class="ic" data-ic="megaphone"></i>' : (c.type === 'reply' ? '<i class="ic" data-ic="corner-up-left"></i>' : '<i class="ic" data-ic="chat"></i>');
           var txt;
           var who = '@' + esc(c.fromLogin);
           if (c.type === 'mention') txt = who + ' 在评论中 @ 了你';
@@ -406,7 +425,7 @@
         if (!window.JW_AUTH || !window.JW_AUTH.user) { toast('请先登录', true); return; }
         if (!confirm('确定清除该分类下的所有通知？')) return;
         fetch('/api/notif/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: type, action: 'clear' }) })
-          .then(function (r) { if (r.ok) { load(); toast('已清除 ✓'); } else { throw new Error('fail'); } })
+          .then(function (r) { if (r.ok) { load(); toast('已清除 '); } else { throw new Error('fail'); } })
           .catch(function () { toast('清除失败', true); });
       }
       document.querySelectorAll('[data-read]').forEach(function (b) {
@@ -447,7 +466,7 @@
           if (!atts.length) { var e = document.createElement('span'); e.className = 'attach-empty'; e.textContent = '（暂无附件）'; listEl.appendChild(e); return; }
           atts.forEach(function (a, i) {
             var it = document.createElement('div'); it.className = 'attach-item';
-            var t = document.createElement('span'); t.className = 'attach-thumb'; t.textContent = a.type === 'image' ? '🖼' : '🎬';
+            var t = document.createElement('span'); t.className = 'attach-thumb'; t.textContent = a.type === 'image' ? '' : '';
             var n = document.createElement('span'); n.className = 'attach-name'; n.textContent = a.type === 'image' ? '图片' : '视频';
             var x = document.createElement('button'); x.type = 'button'; x.className = 'attach-rm'; x.textContent = '×';
             x.addEventListener('click', function () { atts.splice(i, 1); render(); });
@@ -500,7 +519,7 @@
         fetch('/api/notice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, body: body, permanent: permanent, attachments: nAtts }) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
-            if (res.ok) { nAtts.length = 0; if (renderNAttach) renderNAttach(); document.getElementById('nTitle').value = ''; document.getElementById('nBody').value = ''; toast('已发布 ✓'); load(); }
+            if (res.ok) { nAtts.length = 0; if (renderNAttach) renderNAttach(); document.getElementById('nTitle').value = ''; document.getElementById('nBody').value = ''; toast('已发布 '); load(); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else { toast('发布失败', true); }
           })
@@ -528,7 +547,7 @@
         fetch('/api/notif/message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: to, title: title, body: body, permanent: permanent, attachments: mAtts }) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
-            if (res.ok) { mAtts.length = 0; if (renderMAttach) renderMAttach(); document.getElementById('mTo').value=''; document.getElementById('mTitle').value=''; document.getElementById('mBody').value=''; toast('已发送给 @' + to + ' ✓'); load(); }
+            if (res.ok) { mAtts.length = 0; if (renderMAttach) renderMAttach(); document.getElementById('mTo').value=''; document.getElementById('mTitle').value=''; document.getElementById('mBody').value=''; toast('已发送给 @' + to + ' '); load(); }
             else if (res.body && res.body.error === 'forbidden') { toast('服务器拦截：含违禁词「' + (res.body.word || '') + '」', true); }
             else if (res.body && res.body.error === 'missing_to') { toast('请填写接收者', true); }
             else { toast('发送失败', true); }
@@ -552,8 +571,11 @@
       }).catch(load);
     })();
   </script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

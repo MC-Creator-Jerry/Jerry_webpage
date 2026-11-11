@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#5b6b7b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.1-1.6-5.6-4.5-6.3V4c0-.8-.7-1.5-1.5-1.5S10.5 3.2 10.5 4v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="噪音警报器">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <g fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 16 c-6.6 0 -12 5.4 -12 12 v6.5 L16.5 40 h31 L44 34.5 V28 c0 -6.6 -5.4 -12 -12 -12 z"/>
+    <path d="M27.5 44 a4.5 4.5 0 0 0 9 0"/>
+    <path d="M48.5 25.5 a9 9 0 0 1 0 12"/>
+    <path d="M51.5 22 a10.5 10.5 0 0 1 0 21"/>
+  </g>
+  <circle cx="45" cy="16.5" r="3.6" fill="#ff5a5a"/>
+</svg>

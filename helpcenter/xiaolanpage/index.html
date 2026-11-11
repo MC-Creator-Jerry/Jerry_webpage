@@ -8,19 +8,19 @@
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
   </script>
-  <script src="../../boot.js?v=20260921c"></script>
+  <script src="../../boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>小蓝页 · 文档</title>
-<meta name="description" content="小蓝页产品文档。" />
+<meta name="description" content="小蓝页产品文档：顶栏产品快搜、个人资料、博客留言板、群组私信、通知积分与布局编辑。" />
 <meta name="author" content="Jerry" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="小蓝页 · 文档" />
-<meta property="og:description" content="小蓝页产品文档。" />
+<meta property="og:description" content="小蓝页产品文档：顶栏产品快搜、个人资料、博客留言板、群组私信、通知积分与布局编辑。" />
 <meta property="og:site_name" content="Jerry's webpage" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="小蓝页 · 文档" />
-<meta name="twitter:description" content="小蓝页产品文档。" />
+<meta name="twitter:description" content="小蓝页产品文档：顶栏产品快搜、个人资料、博客留言板、群组私信、通知积分与布局编辑。" />
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=20260926" />
 <style>  
 
@@ -132,6 +132,21 @@
     line-height: 1.7;
   }
 
+  /* ---- 文档正文 ---- */
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 0 0 10px; }
+  .card ul { list-style: disc; margin: 6px 0 0; padding-left: 22px; }
+  .card ul li { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 7px 0; }
+  .card ul li b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .card .hint { color: var(--muted); margin-top: 12px; }
+  .card .doc-link a { color: var(--accent); }
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+
   /* ---- 页脚 ---- */
   .site-footer {
     border-top: 1px solid var(--card-border);
@@ -155,7 +170,8 @@
     .hero h1 { font-size: 1.6rem; }
   }
 </style>
-  <link rel="stylesheet" href="../../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
 </head>
 <body>
   <header class="topbar">
@@ -170,29 +186,85 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
   <main class="content">
     <section class="hero">
       <h1 data-zh="小蓝页" data-en="Xiaolan Page">小蓝页</h1>
-      <p data-zh="这是小蓝页的产品文档。" data-en="This is the product documentation for Xiaolan Page.">这是小蓝页的产品文档。</p>
+      <p data-zh="Jerry 的数字花园主站，也是所有产品的统一入口和账号中心。" data-en="Jerry's digital garden: the main site, the hub for every product, and the shared account center.">Jerry 的数字花园主站，也是所有产品的统一入口和账号中心。</p>
     </section>
 
     <section class="card">
-      <h2 data-zh="文档内容" data-en="Documentation">文档内容</h2>
-      <p class="empty-tip" data-zh="（内容待补充）" data-en="(Content to be added)">（内容待补充）</p>
+      <h2 data-zh="能做什么" data-en="What It Can Do">能做什么</h2>
+      <ul>
+        <li><b data-zh="顶栏产品快搜" data-en="Product quick search">顶栏产品快搜</b><span data-zh="在顶栏输入关键词即可直达任意产品，搜索会匹配名称、快捷键和简介三个字段。" data-en="Type in the top bar to reach any product. Search matches the name, the shortcut keys and the summary.">在顶栏输入关键词即可直达任意产品，搜索会匹配名称、快捷键和简介三个字段。</span></li>
+        <li><b data-zh="个人资料页" data-en="Personal profile">个人资料页</b><span data-zh="在 /personal_profile/ 维护名字、简介、技能和常用链接。" data-en="Keep your name, bio, skills and favourite links in /personal_profile/.">在 /personal_profile/ 维护名字、简介、技能和常用链接。</span></li>
+        <li><b data-zh="博客与留言板" data-en="Blog and guestbook">博客与留言板</b><span data-zh="/blog/ 写文章，/guestbook/ 给站点留言。" data-en="Post articles in /blog/ and leave a note on the guestbook at /guestbook/.">/blog/ 写文章，/guestbook/ 给站点留言。</span></li>
+        <li><b data-zh="群组、私信与通知" data-en="Groups, messages and notices">群组、私信与通知</b><span data-zh="/groups/ 讨论、/messages/ 一对一聊天、/notice/ 收站内通知与评论提醒。" data-en="Discuss in /groups/, chat one-to-one in /messages/, and read site notices in /notice/.">/groups/ 讨论、/messages/ 一对一聊天、/notice/ 收站内通知与评论提醒。</span></li>
+        <li><b data-zh="积分榜、订阅与兑换" data-en="Points, subscription and redemption">积分榜、订阅与兑换</b><span data-zh="/points/ 看积分榜、/subscribe/ 订阅邮件更新、/redeem/ 兑换权益。" data-en="See the leaderboard in /points/, subscribe to updates in /subscribe/, redeem codes in /redeem/.">/points/ 看积分榜、/subscribe/ 订阅邮件更新、/redeem/ 兑换权益。</span></li>
+        <li><b data-zh="布局编辑" data-en="Layout editing">布局编辑</b><span data-zh="点文字直接改、点图片换图，改完保存即对所有访客生效。" data-en="Click any text to rewrite it, click any image to swap it; once saved the change is live for every visitor.">点文字直接改、点图片换图，改完保存即对所有访客生效。</span></li>
+      </ul>
     </section>
-  </main>
+
+    <section class="card">
+      <h2 data-zh="怎么登录" data-en="How to Sign In">怎么登录</h2>
+      <p data-zh="所有站点统一走小蓝页单点登录（SSO）：用小蓝页账户登录，身份在各站之间互通。" data-en="Every site uses Xiaolan's single sign-on: sign in with your Xiaolan account and your identity carries across all of them.">所有站点统一走小蓝页单点登录（SSO）：用小蓝页账户登录，身份在各站之间互通。</p>
+      <ul>
+        <li><b data-zh="邮箱验证码登录或注册" data-en="Sign in or register with an email code">邮箱验证码登录或注册</b><span data-zh="输入邮箱 → 收验证码 → 设密码，一次搞定。" data-en="Enter your email, receive the code, set a password — that's it.">输入邮箱 → 收验证码 → 设密码，一次搞定。</span></li>
+        <li><b data-zh="GitHub 登录" data-en="Sign in with GitHub">GitHub 登录</b><span data-zh="点 GitHub 图标授权即完成登录，拿到的是同一个站点身份。" data-en="Click the GitHub icon and authorise; you land on the same site identity.">点 GitHub 图标授权即完成登录，拿到的是同一个站点身份。</span></li>
+        <li><b data-zh="身份互通" data-en="One identity everywhere">身份互通</b><span data-zh="在任意站点登录，其余站点自动识别，无需重复注册。" data-en="Sign in anywhere and the other sites recognise you — no repeat registration.">在任意站点登录，其余站点自动识别，无需重复注册。</span></li>
+        <li><b data-zh="创作者功能自动开放" data-en="Creator roles come with the sign-in">创作者功能自动开放</b><span data-zh="书栈、茶馆等站点的创作者功能，登录后自动获得相应角色。" data-en="On BookStation, JerryTeahouse and friends, signing in automatically grants you the right creator role.">书栈、茶馆等站点的创作者功能，登录后自动获得相应角色。</span></li>
+      </ul>
+      <p class="hint" data-zh="提示：每日签到可得调度券 +1，可用于打赏支持站内的创作者。" data-en="Tip: check in daily to earn one scheduling voucher, which you can use to tip creators.">提示：每日签到可得调度券 +1，可用于打赏支持站内的创作者。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="主要功能速查" data-en="Feature Quick Reference">主要功能速查</h2>
+      <ul>
+        <li><b data-zh="/personal_profile/" data-en="Personal profile">/personal_profile/</b><span data-zh="名字、简介、技能与链接。" data-en="Name, bio, skills and links.">名字、简介、技能与链接。</span></li>
+        <li><b data-zh="/blog/" data-en="Blog">/blog/</b><span data-zh="发布与阅读文章。" data-en="Publish and read articles.">发布与阅读文章。</span></li>
+        <li><b data-zh="/guestbook/" data-en="Guestbook">/guestbook/</b><span data-zh="给站点留言。" data-en="Leave a message for the site.">给站点留言。</span></li>
+        <li><b data-zh="/groups/ · /messages/" data-en="Groups and messages">/groups/ · /messages/</b><span data-zh="群组讨论与一对一私信。" data-en="Group threads and private chats.">群组讨论与一对一私信。</span></li>
+        <li><b data-zh="/notice/ · /points/" data-en="Notices and points">/notice/ · /points/</b><span data-zh="站内通知与积分榜。" data-en="Site notices and the points leaderboard.">站内通知与积分榜。</span></li>
+        <li><b data-zh="/subscribe/ · /redeem/" data-en="Subscribe and redeem">/subscribe/ · /redeem/</b><span data-zh="邮件订阅与兑换码。" data-en="Email subscription and redemption codes.">邮件订阅与兑换码。</span></li>
+      </ul>
+      <p class="hint doc-link"><span data-zh="站点地址：" data-en="Site: ">站点地址：</span><a href="../../index.html" data-zh="小蓝页首页" data-en="the Xiaolan home page">小蓝页首页</a></p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+        <details class="faq">
+          <summary data-zh="顶栏的搜索是怎么工作的？" data-en="How does the top-bar search work?">顶栏的搜索是怎么工作的？</summary>
+          <div class="faq-body" data-zh="搜索走 functions/api/search.js，只匹配产品的 name、keys 和 desc 三个字段，命中即给出直达链接。" data-en="Search runs through functions/api/search.js and only looks at each product's name, keys and desc; a hit links straight to the product.">搜索走 functions/api/search.js，只匹配产品的 name、keys 和 desc 三个字段，命中即给出直达链接。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="忘记密码怎么办？" data-en="What if I forget my password?">忘记密码怎么办？</summary>
+          <div class="faq-body" data-zh="走邮箱验证码登录或注册入口重新设置即可，不需要旧密码。" data-en="Use the email-code sign-in or registration entry to set a new one — the old password is not needed.">走邮箱验证码登录或注册入口重新设置即可，不需要旧密码。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="GitHub 登录和邮箱登录哪个好？" data-en="Which sign-in should I use, GitHub or email?">GitHub 登录和邮箱登录哪个好？</summary>
+          <div class="faq-body" data-zh="两者等价，登录后拿到的是同一个站点身份；GitHub 少填一次邮箱，邮箱方式则完全独立于第三方平台。" data-en="They are equivalent and share the same site identity. GitHub saves typing an email; the email route stays independent of third parties.">两者等价，登录后拿到的是同一个站点身份；GitHub 少填一次邮箱，邮箱方式则完全独立于第三方平台。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="我改了首页布局，别人也会看到吗？" data-en="If I edit the home layout, will others see it?">我改了首页布局，别人也会看到吗？</summary>
+          <div class="faq-body" data-zh="会。布局编辑保存后即对所有访客生效，属于站点级的公开改动。" data-en="Yes. A saved layout edit goes live for every visitor — it is a site-wide public change.">会。布局编辑保存后即对所有访客生效，属于站点级的公开改动。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="积分和调度券有什么区别？" data-en="What is the difference between points and scheduling vouchers?">积分和调度券有什么区别？</summary>
+          <div class="faq-body" data-zh="积分来自每日签到，可在 /points/ 的积分榜看到；调度券用于给站内的作品打赏。" data-en="Points come from the daily check-in and show up on the /points/ leaderboard; scheduling vouchers are used to tip works on the site.">积分来自每日签到，可在 /points/ 的积分榜看到；调度券用于给站内的作品打赏。</div>
+        </details>
+    </section>  </main>
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <div class="float-actions">
     <a class="fab" id="langBtn" href="../../language.html"  aria-label="语言" title="语言">
@@ -219,12 +291,13 @@
       function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
       function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
@@ -232,9 +305,12 @@
       applyAll();
     })();
   </script>
-  <script src="../../auth.js?v=20260925c"></script>
-  <script src="../../common.js?v=20260926a"></script>
-  <script src="../../scroll-keys.js?v=20260926c" defer></script>
+  <script src="../../auth.js?v=20261103a"></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

@@ -1,0 +1,314 @@
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" data-zh="个人资料" data-en="Profile">个人资料</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
+    </div>
+  </header>
+
+  <div class="profile-theme-strip" id="profileThemeStrip" hidden></div>
+
+  <!-- ============ 头图：头像压在下缘；右上角＝背景/主题；右下角＝关注/私聊 ============ -->
+  <div class="pp-banner" id="profileBanner">
+    <div class="pp-banner-tools" id="profileTools" hidden>
+      <button class="glass-btn" id="openBgBtn" type="button"><i class="ic" data-ic="image"></i><span data-zh="背景" data-en="Background">背景</span></button>
+      <button class="glass-btn" id="openThemeBtn" type="button"><i class="ic" data-ic="palette"></i><span data-zh="主题" data-en="Theme">主题</span></button>
+    </div>
+    <div class="banner-mode-hint" id="bannerModeHint" hidden></div>
+
+    <div class="avatar-wrap">
+      <div class="avatar" id="avatar">
+        <img id="avatarImg" alt="" decoding="async" />
+        <span id="avatarText" class="avatar-text" hidden></span>
+      </div>
+      <button class="change-btn avatar-edit" data-sec="avatar" type="button" hidden aria-label="更改头像" title="更改头像"><i class="ic" data-ic="edit"></i></button>
+    </div>
+
+    <div class="banner-actions">
+      <span id="followSlot"></span>
+      <a class="pp-btn" id="dmBtn" href="../messages/" hidden><i class="ic" data-ic="chat"></i><span data-zh="私聊" data-en="Message">私聊</span></a>
+    </div>
+  </div>
+
+  <!-- ============ 头图下方：个人空间页签（彩色矢量图标 + 文字，右侧「更多」折叠菜单） ============ -->
+  <nav class="pp-tabs" id="ppTabs" aria-label="个人空间">
+    <div class="pp-tabs-in">
+      <a class="pp-tab is-active" href="./" aria-current="page">
+        <i class="ic pp-tab-ic" data-ic="home" style="color:#00aeec"></i>
+        <span data-zh="主页" data-en="Home" data-zh-TW="主頁" data-ja="ホーム" data-ko="홈" data-de="Start" data-fr="Accueil">主页</span>
+      </a>
+      <a class="pp-tab" href="../products.html">
+        <i class="ic pp-tab-ic" data-ic="grid" style="color:#ff8f1f"></i>
+        <span data-zh="作品" data-en="Works" data-zh-TW="作品" data-ja="作品" data-ko="작품" data-de="Projekte" data-fr="Projets">作品</span>
+      </a>
+      <a class="pp-tab" href="../blog/">
+        <i class="ic pp-tab-ic" data-ic="file-text" style="color:#00c2a8"></i>
+        <span data-zh="博客" data-en="Blog" data-zh-TW="部落格" data-ja="ブログ" data-ko="블로그" data-de="Blog" data-fr="Blog">博客</span>
+      </a>
+      <a class="pp-tab" href="../guestbook/">
+        <i class="ic pp-tab-ic" data-ic="chat" style="color:#ff6699"></i>
+        <span data-zh="留言" data-en="Guestbook" data-zh-TW="留言板" data-ja="ゲストブック" data-ko="방명록" data-de="Gästebuch" data-fr="Livre d'or">留言</span>
+      </a>
+      <a class="pp-tab" href="../groups/">
+        <i class="ic pp-tab-ic" data-ic="users" style="color:#7c5cff"></i>
+        <span data-zh="群组" data-en="Groups" data-zh-TW="群組" data-ja="グループ" data-ko="그룹" data-de="Gruppen" data-fr="Groupes">群组</span>
+      </a>
+      <a class="pp-tab" href="../settings/homepage.html">
+        <i class="ic pp-tab-ic" data-ic="settings" style="color:#7f8c9b"></i>
+        <span data-zh="设置" data-en="Settings" data-zh-TW="設定" data-ja="設定" data-ko="설정" data-de="Einstellungen" data-fr="Réglages">设置</span>
+      </a>
+    </div>
+    <div class="pp-tabs-more">
+      <button class="pp-tab pp-tabs-more-btn" id="ppTabsMore" type="button" aria-haspopup="true" aria-expanded="false" title="更多" aria-label="更多">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>
+      </button>
+      <div class="pp-tabs-menu" id="ppTabsMenu" hidden>
+        <a href="../notice/"><i class="ic" data-ic="bell"></i><span data-zh="消息中心" data-en="Message Center" data-zh-TW="訊息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心</span></a>
+        <a href="../messages/"><i class="ic" data-ic="chat"></i><span data-zh="私信" data-en="Direct Messages" data-zh-TW="私訊" data-ja="ダイレクトメッセージ" data-ko="쪽지" data-de="Direktnachrichten" data-fr="Messages privés">私信</span></a>
+        <a href="../search_user/"><i class="ic" data-ic="search"></i><span data-zh="用户搜索" data-en="User Search" data-zh-TW="使用者搜尋" data-ja="ユーザー検索" data-ko="사용자 검색" data-de="Nutzersuche" data-fr="Recherche d'utilisateurs">用户搜索</span></a>
+        <a href="../points/"><i class="ic" data-ic="trophy"></i><span data-zh="积分榜" data-en="Leaderboard" data-zh-TW="積分榜" data-ja="ランキング" data-ko="포인트 순위" data-de="Punkteliste" data-fr="Classement">积分榜</span></a>
+        <a href="../language.html"><i class="ic" data-ic="globe"></i><span data-zh="语言" data-en="Language" data-zh-TW="語言" data-ja="言語" data-ko="언어" data-de="Sprache" data-fr="Langue">语言</span></a>
+        <a href="../helpcenter/"><i class="ic" data-ic="clipboard"></i><span data-zh="帮助中心" data-en="Help Center" data-zh-TW="幫助中心" data-ja="ヘルプセンター" data-ko="고객센터" data-de="Hilfezentrum" data-fr="Centre d'aide">帮助中心</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="content has-banner">
+    <!-- ============ 左栏：资料卡 ============ -->
+    <aside class="pcard">
+      <div class="pp-name-row" id="nameRow">
+        <h1 class="pp-name" id="nameDisplay"></h1>
+        <button class="pp-icon-btn" id="renameBtn" type="button" hidden aria-label="改名" title="改名"><i class="ic" data-ic="edit"></i></button>
+      </div>
+      <div class="rename-editor" id="renameEditor" hidden>
+        <input class="edit-input" id="renameInput" maxlength="40" />
+        <button class="pp-btn pp-btn--sm" id="renameSave" type="button"><span data-zh="保存" data-en="Save">保存</span></button>
+        <button class="pp-btn pp-btn--ghost pp-btn--sm" id="renameCancel" type="button"><span data-zh="取消" data-en="Cancel">取消</span></button>
+      </div>
+      <div class="pp-login" id="loginDisplay"></div>
+      <div class="pp-uid" id="uidDisplay" hidden title="点击复制 ID"><b>ID</b><span id="uidValue"></span></div>
+
+      <div class="pp-chip" id="voucherChip" hidden>
+        <i class="ic" data-ic="ticket"></i>
+        <span class="pv-label" data-zh="调度券" data-en="Vouchers">调度券</span>
+        <b class="pv-val" id="voucherChipVal">…</b>
+        <span class="pv-unit" data-zh="张" data-en="张">张</span>
+      </div>
+
+      <div class="pcard-sep"></div>
+
+      <section class="pcard-block" id="aboutCard">
+        <div class="pcard-block-head">
+          <h2 class="pcard-h"><span class="h-ic"><i class="ic" data-ic="note"></i></span><span data-zh="简介" data-en="Bio">简介</span></h2>
+          <button class="change-btn" data-sec="about" hidden><i class="ic" data-ic="edit"></i><span data-zh="更改" data-en="Edit">更改</span></button>
+        </div>
+        <div id="aboutView">
+          <p class="pp-bio" id="aboutDisplay"></p>
+          <p class="hint-empty" id="aboutEmpty" hidden data-zh="还没有简介" data-en="No bio yet" data-zh-TW="還沒有簡介" data-ja="自己紹介はまだありません" data-ko="아직 소개가 없습니다" data-de="Noch keine Beschreibung" data-fr="Pas encore de bio">还没有简介</p>
+        </div>
+        <div id="aboutEditor" hidden>
+          <textarea class="edit-textarea auto-grow" id="aboutInput" maxlength="2000" placeholder="写一段自我介绍……（Ctrl/⌘ + Enter 保存，Esc 取消）"></textarea>
+          <span class="char-count" data-for="aboutInput"></span>
+          <div class="sec-actions">
+            <button class="save" data-save="about"><span data-zh="保存" data-en="Save">保存</span></button>
+            <button class="cancel" data-cancel="about"><span data-zh="取消" data-en="Cancel">取消</span></button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ============ 右栏：内容 ============ -->
+    <div class="cmain">
+      <section class="pp-card" id="myMessagesCard">
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="inbox"></i></span><span data-zh="消息与私信" data-en="Messages & Chat">消息与私信</span></h2>
+        </div>
+        <div class="my-msg-actions">
+          <a class="pp-btn pp-btn--soft" href="../notice/"><i class="ic" data-ic="bell"></i><span data-zh="消息中心" data-en="Message Center">消息中心</span></a>
+          <a class="pp-btn pp-btn--soft" href="../messages/"><i class="ic" data-ic="chat"></i><span data-zh="私信" data-en="Direct Messages">私信</span></a>
+        </div>
+      </section>
+
+      <section class="pp-card" id="skillsCard">
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="tag"></i></span><span data-zh="技能 / 专长" data-en="Skills">技能 / 专长</span></h2>
+          <button class="change-btn" data-sec="skills" hidden><i class="ic" data-ic="edit"></i><span data-zh="更改" data-en="Edit">更改</span></button>
+        </div>
+        <div id="skillsView">
+          <div class="tags" id="skillsDisplay"></div>
+          <p class="hint-empty" id="skillsEmpty" hidden data-zh="暂无技能标签" data-en="No skills yet">暂无技能标签</p>
+        </div>
+        <div id="skillsEditor" hidden>
+          <div class="tags" id="skillsEditList"></div>
+          <div class="skills-add">
+            <input class="edit-input" id="skillInput" placeholder="添加技能，回车或点「添加」（可用逗号一次加多个）" maxlength="160" />
+            <button class="add-btn" id="skillAdd" type="button"><span data-zh="添加" data-en="Add">添加</span></button>
+          </div>
+          <div class="sec-actions">
+            <button class="save" data-save="skills"><span data-zh="保存" data-en="Save">保存</span></button>
+            <button class="cancel" data-cancel="skills"><span data-zh="取消" data-en="Cancel">取消</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="pp-card" id="linksCard">
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="link"></i></span><span data-zh="链接" data-en="Links">链接</span></h2>
+          <button class="change-btn" data-sec="links" hidden><i class="ic" data-ic="edit"></i><span data-zh="更改" data-en="Edit">更改</span></button>
+        </div>
+        <div id="linksView">
+          <div id="linksDisplay"></div>
+          <p class="hint-empty" id="linksEmpty" hidden data-zh="暂无链接" data-en="No links yet">暂无链接</p>
+        </div>
+        <div id="linksEditor" hidden>
+          <div id="linksEditList"></div>
+          <button class="add-btn" id="linkAdd" type="button"><i class="ic" data-ic="plus"></i> <span data-zh="添加链接" data-en="Add link">添加链接</span></button>
+          <div class="sec-actions">
+            <button class="save" data-save="links"><span data-zh="保存" data-en="Save">保存</span></button>
+            <button class="cancel" data-cancel="links"><span data-zh="取消" data-en="Cancel">取消</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="pp-card" id="avatarEditor" hidden>
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="user"></i></span><span data-zh="自定义头像" data-en="Custom Avatar">自定义头像</span></h2>
+          <button class="change-btn" data-sec="avatar-close"><span data-zh="收起" data-en="Close">收起</span></button>
+        </div>
+        <div class="set-row-switch">
+          <span class="set-label" data-zh="头像由 GitHub 同步" data-en="Sync avatar from GitHub">头像由 GitHub 同步</span>
+          <label class="xl-switch">
+            <input type="checkbox" id="ghAvatarSync" />
+            <span class="xl-switch-track"><span class="xl-switch-thumb"></span></span>
+          </label>
+          <span class="set-hint" id="ghSyncHint" data-zh="开启后始终使用 GitHub 头像，自定义头像不显示" data-en="On: always use the GitHub avatar; your custom avatar is hidden">开启后始终使用 GitHub 头像，自定义头像不显示</span>
+        </div>
+        <div id="avatarCustomWrap">
+          <p class="file-note" data-zh="支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。" data-en="Upload an image or paste an image URL. Uploaded images are stored as data (keep under 1.5MB). Leave empty to restore the default GitHub avatar.">支持上传图片或粘贴图片链接。上传图片将转为数据存入云端（建议小于 1.5MB）。留空并保存即恢复默认 GitHub 头像。</p>
+          <div class="pp-bg-ctl">
+            <label class="pp-file"><i class="ic" data-ic="camera"></i><span data-zh="上传图片" data-en="Upload">上传图片</span><input type="file" id="avatarFile" accept="image/*" hidden /></label>
+            <img id="avatarPreview" class="avatar avatar-preview" alt="" onerror="this.onerror=null;this.src=window.initialAvatarSvg?window.initialAvatarSvg(''):''" />
+          </div>
+          <div class="edit-label" data-zh="或粘贴图片链接（URL）" data-en="Or paste an image URL">或粘贴图片链接（URL）</div>
+          <input class="edit-input" id="avatarUrl" placeholder="https://..." />
+        </div>
+        <div class="sec-actions">
+          <button class="save" data-save="avatar"><span data-zh="保存" data-en="Save">保存</span></button>
+          <button class="cancel" data-cancel="avatar"><span data-zh="取消" data-en="Cancel">取消</span></button>
+        </div>
+      </section>
+
+      <div id="loginPrompt" class="pp-card" hidden>
+        <div class="card-head">
+          <h2><span class="h-ic"><i class="ic" data-ic="lock"></i></span><span data-zh="请先登录" data-en="Please sign in">请先登录</span></h2>
+        </div>
+        <p class="file-note" data-zh="登录后即可查看并编辑你的个人资料。" data-en="Sign in to view and edit your profile.">登录后即可查看并编辑你的个人资料。</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ============ 背景弹窗（重做） ============ -->
+  <div class="pp-modal" id="bgModal" hidden>
+    <div class="pp-sheet pp-sheet--wide">
+      <div class="pp-sheet-head">
+        <div>
+          <h3><span class="h-ic"><i class="ic" data-ic="image"></i></span><span data-zh="设置背景" data-en="Background">设置背景</span></h3>
+          <p class="pp-sheet-sub" data-zh="头图是主页顶部那条横幅，大背景铺在正文后面。上传的图片会存到云端，换设备也在。" data-en="The banner is the strip on top; the big background sits behind the content. Uploads are stored in the cloud.">头图是主页顶部那条横幅，大背景铺在正文后面。上传的图片会存到云端，换设备也在。</p>
+        </div>
+        <button class="pp-x" type="button" onclick="document.getElementById('bgModal').hidden=true" aria-label="关闭"><i class="ic" data-ic="x"></i></button>
+      </div>
+
+      <div class="pp-bg-grid">
+        <div class="pp-bg-item">
+          <div class="pp-bg-item-head"><b data-zh="头图" data-en="Banner">头图</b><span class="pp-bg-ratio">16 : 6</span></div>
+          <div class="pp-preview pp-preview--banner empty" id="bannerPreview"></div>
+          <div class="pp-bg-ctl">
+            <label class="pp-file"><i class="ic" data-ic="camera"></i><span data-zh="上传" data-en="Upload">上传</span><input type="file" id="bannerFile" accept="image/*" hidden /></label>
+            <button class="pp-btn pp-btn--danger pp-btn--sm" id="bannerClear" type="button"><span data-zh="清除" data-en="Clear">清除</span></button>
+          </div>
+          <input class="edit-input" id="bannerUrl" placeholder="https://..." />
+        </div>
+
+        <div class="pp-bg-item">
+          <div class="pp-bg-item-head"><b data-zh="大背景" data-en="Big background">大背景</b><span class="pp-bg-ratio">16 : 9</span></div>
+          <div class="pp-preview pp-preview--bg empty" id="bgPreview"></div>
+          <div class="pp-bg-ctl">
+            <label class="pp-file"><i class="ic" data-ic="camera"></i><span data-zh="上传" data-en="Upload">上传</span><input type="file" id="bgFile" accept="image/*" hidden /></label>
+            <button class="pp-btn pp-btn--danger pp-btn--sm" id="bgClear" type="button"><span data-zh="清除" data-en="Clear">清除</span></button>
+          </div>
+          <input class="edit-input" id="bgUrl" placeholder="https://..." />
+        </div>
+      </div>
+
+      <div class="pp-seg-row">
+        <h4 class="pp-h4" data-zh="头图来源" data-en="Banner source">头图来源</h4>
+        <div class="banner-mode pp-seg" id="bannerMode" hidden>
+          <button type="button" id="bmTheme" data-mode="theme" data-zh="主题色" data-en="Theme">主题色</button>
+          <button type="button" id="bmImage" data-mode="image" data-zh="图片" data-en="Image">图片</button>
+        </div>
+      </div>
+
+      <div class="pp-sheet-actions">
+        <button class="pp-btn pp-btn--ghost" id="bgCancel" type="button"><span data-zh="取消" data-en="Cancel">取消</span></button>
+        <button class="pp-btn" id="bgSave" type="button"><span data-zh="保存" data-en="Save">保存</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 主题弹窗（重做） ============ -->
+  <div class="pp-modal" id="themeModal" hidden>
+    <div class="pp-sheet">
+      <div class="pp-sheet-head">
+        <div>
+          <h3><span class="h-ic"><i class="ic" data-ic="palette"></i></span><span data-zh="个人主页主题" data-en="Homepage theme">个人主页主题</span></h3>
+          <p class="pp-sheet-sub" data-zh="选一套预设：同时套用主色与头图；也可只改主色。你上传过自定义头图时，头图优先显示。" data-en="Pick a preset to apply colors and banner, or just change the accent. A custom banner you uploaded takes priority.">选一套预设：同时套用主色与头图；也可只改主色。你上传过自定义头图时，头图优先显示。</p>
+        </div>
+        <button class="pp-x" type="button" onclick="document.getElementById('themeModal').hidden=true" aria-label="关闭"><i class="ic" data-ic="x"></i></button>
+      </div>
+
+      <div class="theme-presets" id="themePresets"></div>
+
+      <div class="pp-divider"></div>
+      <h4 class="pp-h4" data-zh="自定义主色" data-en="Custom accent">自定义主色</h4>
+      <p class="pp-sheet-sub" data-zh="主色决定按钮、标签与小蓝条下方 6px 色条的颜色。" data-en="The accent drives buttons, tags, and the 6px strip under the bar.">主色决定按钮、标签与小蓝条下方 6px 色条的颜色。</p>
+      <div class="theme-row">
+        <input type="color" id="themeColorInput" value="#0078d4" />
+        <input class="edit-input" id="themeHexInput" placeholder="#0078d4" maxlength="7" />
+      </div>
+      <div class="theme-swatches" id="themeSwatches"></div>
+
+      <div class="pp-sheet-actions">
+        <button class="pp-btn pp-btn--danger" id="themeClear" type="button"><span data-zh="恢复默认" data-en="Reset">恢复默认</span></button>
+        <button class="pp-btn pp-btn--ghost" id="themeCancel" type="button"><span data-zh="取消" data-en="Cancel">取消</span></button>
+        <button class="pp-btn" id="themeSave" type="button"><span data-zh="保存" data-en="Save">保存</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../language.html" aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../settings/homepage.html" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+
+<script src="/assets/toast.js?v=20261030a" defer></script>

@@ -1,0 +1,317 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script>
+  // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
+  // pages.dev 域名下不触发，避免循环。
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+  </script>
+  <script src="../../boot.js?v=20261014b"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>书栈 BookStation · 文档</title>
+<meta name="description" content="书栈产品文档：书架浏览、内置阅读器、章节管理、创作者中心、收藏夹与兑换赞助码。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="书栈 BookStation · 文档" />
+<meta property="og:description" content="书栈产品文档：书架浏览、内置阅读器、章节管理、创作者中心、收藏夹与兑换赞助码。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="书栈 BookStation · 文档" />
+<meta name="twitter:description" content="书栈产品文档：书架浏览、内置阅读器、章节管理、创作者中心、收藏夹与兑换赞助码。" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=20260926" />
+<style>  
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a {
+    color: var(--bar-fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 0;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
+
+  /* ---- 内容区（目前留空，只保留 UI） ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 36px; }
+  .hero h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+  }
+  .card {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .empty-tip {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ---- 文档正文 ---- */
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 0 0 10px; }
+  .card ul { list-style: disc; margin: 6px 0 0; padding-left: 22px; }
+  .card ul li { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 7px 0; }
+  .card ul li b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .card .hint { color: var(--muted); margin-top: 12px; }
+  .card .doc-link a { color: var(--accent); }
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+
+  /* ---- 页脚 ---- */
+  .site-footer {
+    border-top: 1px solid var(--card-border);
+    margin-top: 48px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
+        <a id="bcMain" href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep" id="bcSep">›</span>
+        <a href="../" data-zh="帮助中心" data-en="Help Center">帮助中心</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" id="bcSub" data-zh="书栈 BookStation" data-en="BookStation">书栈 BookStation</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="书栈 BookStation" data-en="BookStation">书栈 BookStation</h1>
+      <p data-zh="一个独立的小说站：书架、内置阅读器、章节管理；登录就能开书，正文纯文本渲染零 XSS。" data-en="An independent novel site: bookshelf, built-in reader and chapter management. Sign in to publish — the text renders as plain text, so zero XSS.">一个独立的小说站：书架、内置阅读器、章节管理；登录就能开书，正文纯文本渲染零 XSS。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="能做什么" data-en="What It Can Do">能做什么</h2>
+      <ul>
+        <li><b data-zh="书架浏览" data-en="Browse the shelf">书架浏览</b><span data-zh="在 bookshelf.html 按分类和热度找书。" data-en="Find books by category and popularity on bookshelf.html.">在 bookshelf.html 按分类和热度找书。</span></li>
+        <li><b data-zh="内置阅读器" data-en="Built-in reader">内置阅读器</b><span data-zh="在 read.html 直接读，章节连续、不用跳来跳去。" data-en="Read straight in read.html — chapters run on without hunting for the next one.">在 read.html 直接读，章节连续、不用跳来跳去。</span></li>
+        <li><b data-zh="章节管理" data-en="Chapter management">章节管理</b><span data-zh="给作品增删改章节、调整顺序。" data-en="Add, edit, delete and reorder the chapters of a work.">给作品增删改章节、调整顺序。</span></li>
+        <li><b data-zh="创作者中心" data-en="Creator centre">创作者中心</b><span data-zh="在 admin/ 管理自己的书。" data-en="Manage your own books from admin/ .">在 admin/ 管理自己的书。</span></li>
+        <li><b data-zh="收藏夹" data-en="Favourites">收藏夹</b><span data-zh="把想读的书收起来，随时回来接着读。" data-en="Keep the books you want to read and come back to them later.">把想读的书收起来，随时回来接着读。</span></li>
+        <li><b data-zh="兑换赞助码" data-en="Redeem sponsor codes">兑换赞助码</b><span data-zh="在 redeem.html 输入赞助码即可兑换相应权益。" data-en="Enter a sponsor code on redeem.html to claim the matching benefits.">在 redeem.html 输入赞助码即可兑换相应权益。</span></li>
+        <li><b data-zh="纯文本渲染" data-en="Plain-text rendering">纯文本渲染</b><span data-zh="正文一律按纯文本渲染，从根子上杜绝 XSS。" data-en="Body text is always rendered as plain text, which rules out XSS at the root.">正文一律按纯文本渲染，从根子上杜绝 XSS。</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="怎么登录" data-en="How to Sign In">怎么登录</h2>
+      <p data-zh="书栈与小蓝页共用一套账户：用小蓝页账户登录，身份在各站之间互通。" data-en="BookStation shares one account with Xiaolan: sign in with your Xiaolan account and your identity carries across every site.">书栈与小蓝页共用一套账户：用小蓝页账户登录，身份在各站之间互通。</p>
+      <ul>
+        <li><b data-zh="用小蓝页账户登录" data-en="Sign in with your Xiaolan account">用小蓝页账户登录</b><span data-zh="邮箱验证码或 GitHub 登录都行。" data-en="An email code or GitHub both work.">邮箱验证码或 GitHub 登录都行。</span></li>
+        <li><b data-zh="登录后普通用户即为创作者" data-en="Every signed-in reader is a creator">登录后普通用户即为创作者</b><span data-zh="登录后自动获得创作者角色，可直接管理自己的书。" data-en="Signing in automatically grants you the creator role, so you can manage your own books straight away.">登录后自动获得创作者角色，可直接管理自己的书。</span></li>
+        <li><b data-zh="管理员自动拥有全站权限" data-en="Admins get full site rights">管理员自动拥有全站权限</b><span data-zh="小蓝页管理员登录后自动获得书栈全站管理权限。" data-en="Xiaolan admins automatically get full BookStation administration rights.">小蓝页管理员登录后自动获得书栈全站管理权限。</span></li>
+        <li><b data-zh="身份互通" data-en="One identity everywhere">身份互通</b><span data-zh="在任一站点登录，其余站点自动识别同一身份。" data-en="Sign in anywhere and the other sites recognise the same identity.">在任一站点登录，其余站点自动识别同一身份。</span></li>
+      </ul>
+      <p class="hint" data-zh="提示：赞助码的兑换入口是 redeem.html；兑换后的权益与账号绑定。" data-en="Tip: sponsor codes are redeemed on redeem.html, and the benefits stay tied to your account.">提示：赞助码的兑换入口是 redeem.html；兑换后的权益与账号绑定。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="主要功能速查" data-en="Feature Quick Reference">主要功能速查</h2>
+      <ul>
+        <li><b data-zh="bookshelf.html" data-en="Bookshelf">bookshelf.html</b><span data-zh="按分类和热度浏览书库。" data-en="Browse the library by category and popularity.">按分类和热度浏览书库。</span></li>
+        <li><b data-zh="read.html" data-en="Reader">read.html</b><span data-zh="站内阅读器，连续翻章。" data-en="The in-site reader, chapter after chapter.">站内阅读器，连续翻章。</span></li>
+        <li><b data-zh="admin/" data-en="Creator centre">admin/</b><span data-zh="管理自己的书与章节。" data-en="Manage your books and their chapters.">管理自己的书与章节。</span></li>
+        <li><b data-zh="章节管理" data-en="Chapter management">章节管理</b><span data-zh="增删改章节并排序。" data-en="Add, edit, delete and reorder chapters.">增删改章节并排序。</span></li>
+        <li><b data-zh="收藏夹" data-en="Favourites">收藏夹</b><span data-zh="收藏想读的书。" data-en="Keep the books you want to read.">收藏想读的书。</span></li>
+        <li><b data-zh="redeem.html" data-en="Redeem">redeem.html</b><span data-zh="兑换赞助码。" data-en="Redeem a sponsor code.">兑换赞助码。</span></li>
+      </ul>
+      <p class="hint doc-link"><span data-zh="站点地址：" data-en="Site: ">站点地址：</span><a href="https://jerrybookstation.pages.dev/" target="_blank" rel="noopener" data-zh="打开书栈" data-en="open BookStation">打开书栈</a></p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+        <details class="faq">
+          <summary data-zh="我该怎么发布自己的书？" data-en="How do I publish my own book?">我该怎么发布自己的书？</summary>
+          <div class="faq-body" data-zh="登录后普通用户即为「创作者」，在创作者中心 admin/ 建书，再逐章添加内容即可。" data-en="Signing in makes you a creator: open the creator centre at admin/ , create a book, then add its chapters one by one.">登录后普通用户即为「创作者」，在创作者中心 admin/ 建书，再逐章添加内容即可。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="管理员和我有什么不同？" data-en="What is different about the admin?">管理员和我有什么不同？</summary>
+          <div class="faq-body" data-zh="小蓝页管理员登录后自动获得书栈的全站管理权限，普通用户则只能管理自己的书。" data-en="A Xiaolan admin automatically gets full BookStation administration rights; everyone else manages only their own books.">小蓝页管理员登录后自动获得书栈的全站管理权限，普通用户则只能管理自己的书。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="阅读器安全吗？" data-en="Is the reader safe?">阅读器安全吗？</summary>
+          <div class="faq-body" data-zh="正文一律按纯文本渲染，不解析任何 HTML 或脚本，所以不存在 XSS。" data-en="Body text is always rendered as plain text with no HTML or script parsing, so XSS is impossible.">正文一律按纯文本渲染，不解析任何 HTML 或脚本，所以不存在 XSS。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="赞助码怎么用？" data-en="How do I use a sponsor code?">赞助码怎么用？</summary>
+          <div class="faq-body" data-zh="打开 redeem.html，输入赞助码兑换，权益立即到账并绑定当前账号。" data-en="Open redeem.html, enter the code, and the benefits land on your account immediately.">打开 redeem.html，输入赞助码兑换，权益立即到账并绑定当前账号。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="在书栈需要另外注册吗？" data-en="Do I need a separate BookStation account?">在书栈需要另外注册吗？</summary>
+          <div class="faq-body" data-zh="不需要，用小蓝页账户登录即可，身份在各站之间互通。" data-en="No. Sign in with your Xiaolan account — your identity carries across every site.">不需要，用小蓝页账户登录即可，身份在各站之间互通。</div>
+        </details>
+    </section>  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  <span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../../language.html"  aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../../settings/homepage.html"  aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      applyAll();
+    })();
+  </script>
+  <script src="../../auth.js?v=20261103a"></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Jerry 网站启动台">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a6fb5"/>
+      <stop offset="1" stop-color="#2bb3ed"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <g>
+    <path d="M9 9 L56 22 L38 34 Z" fill="#ffffff"/>
+    <path d="M9 9 L38 34 L23 56 Z" fill="#ffffff" opacity="0.72"/>
+  </g>
+</svg>

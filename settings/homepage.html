@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>设置 · Jerry's webpage</title>
   <meta name="description" content="小蓝页设置：小蓝条显示、语言、主题、字号、圆角。" />
 <meta name="author" content="Jerry" />
@@ -105,6 +105,18 @@
   .bar-preview-frame .bp-bar.xl-bar-icon .bp-btn svg { width: 18px; height: 18px; }
   /* 长（默认）：横排文字按钮 */
   .bar-preview-frame .bp-bar.xl-bar-long .bp-btn svg { display: none; }
+  /* 头像显示预览：小蓝条最右侧的头像胶囊 */
+  .bar-preview-frame .bp-av {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex: 0 0 auto;
+    width: 34px; height: 34px; border-radius: 50%; padding: 0; overflow: hidden;
+    background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.7); box-sizing: border-box;
+  }
+  .bar-preview-frame .bp-av img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+  .bar-preview-frame .bp-av-pill { width: auto; border-radius: 999px; }
+  .bar-preview-frame .bp-av-pill img { width: 26px; height: 26px; flex: 0 0 auto; }
+  .bar-preview-frame .bp-av-name { font-size: 0.78rem; font-weight: 700; color: #fff; line-height: 1; white-space: nowrap; }
+  .bar-preview-frame .bp-av-na { padding: 0 5px 0 12px; }
+  .bar-preview-frame .bp-av-an { padding: 0 12px 0 5px; }
   .site-footer { border-top: 1px solid var(--card-border); margin-top: 40px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
   .site-footer a { color: var(--accent); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
@@ -159,7 +171,16 @@
     .bar-preview-frame .bp-bar.xl-bar-tile .bp-btn { min-width: 46px; }
   }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -172,11 +193,11 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -199,6 +220,11 @@
         <div class="set-opts" id="optLang">
           <button class="seg" data-val="zh">中文</button>
           <button class="seg" data-val="en">English</button>
+          <button class="seg" data-val="zh-TW">繁體中文</button>
+          <button class="seg" data-val="ja">日本語</button>
+          <button class="seg" data-val="ko">한국어</button>
+          <button class="seg" data-val="de">Deutsch</button>
+          <button class="seg" data-val="fr">Français</button>
         </div>
       </div>
       <div class="set-row">
@@ -262,7 +288,7 @@
         </div>
       </div>
       <div class="set-row bar-preview" id="barPreviewIcon">
-        <div class="bar-preview-label" data-zh="仅图标" data-en="Icon only">仅图标</div>
+        <div class="bar-preview-label" data-zh="仅图标" data-en="Icon only" data-zh-TW="僅圖示" data-ja="アイコンのみ" data-ko="아이콘만" data-de="Nur Symbol" data-fr="Icône seule">仅图标</div>
         <div class="bar-preview-frame">
           <div class="bp-bar xl-bar-icon">
             <span class="bp-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="bp-text" data-zh="消息中心" data-en="Messages">消息中心</span></span>
@@ -270,8 +296,84 @@
           </div>
         </div>
       </div>
+      <div class="set-row" style="margin-top:22px;">
+        <span class="set-label" data-zh="头像显示" data-en="Avatar display" data-zh-TW="頭像顯示" data-ja="アバター表示" data-ko="아바타 표시" data-de="Avatar-Anzeige" data-fr="Affichage de l'avatar">头像显示</span>
+        <div class="set-opts bar-mode-opts" id="optAvatarMode">
+          <button class="seg" type="button" data-val="avatar" data-zh="仅头像" data-en="Avatar only" data-zh-TW="僅頭像" data-ja="アバターのみ" data-ko="아바타만" data-de="Nur Avatar" data-fr="Avatar seul">仅头像</button>
+          <button class="seg" type="button" data-val="name-avatar" data-zh="名字+头像" data-en="Name + avatar" data-zh-TW="名字+頭像" data-ja="名前+アバター" data-ko="이름+아바타" data-de="Name + Avatar" data-fr="Nom + avatar">名字+头像</button>
+          <button class="seg" type="button" data-val="avatar-name" data-zh="头像+名字" data-en="Avatar + name" data-zh-TW="頭像+名字" data-ja="アバター+名前" data-ko="아바타+이름" data-de="Avatar + Name" data-fr="Avatar + nom">头像+名字</button>
+        </div>
+        <span class="set-hint" data-zh="登录后小蓝条最右侧的头像显示方式，名字为你账户的昵称。修改立即生效。" data-en="How your avatar shows on the right of the top bar after sign-in. The name is your account nickname. Changes apply instantly.">登录后小蓝条最右侧的头像显示方式，名字为你账户的昵称。修改立即生效。</span>
+      </div>
+      <div class="set-row bar-preview" id="avatarPreviewOnly">
+        <div class="bar-preview-label" data-zh="仅头像" data-en="Avatar only" data-zh-TW="僅頭像" data-ja="アバターのみ" data-ko="아바타만" data-de="Nur Avatar" data-fr="Avatar seul">仅头像</div>
+        <div class="bar-preview-frame">
+          <div class="bp-bar">
+            <span class="bp-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="bp-text" data-zh="消息中心" data-en="Messages">消息中心</span></span>
+            <span class="bp-av"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%234a8fd4'/%3E%3Ccircle cx='12' cy='9.5' r='3.6' fill='%23fff'/%3E%3Cpath d='M12 14.4c-3.6 0-6.4 1.9-6.4 4.3v.9h12.8v-.9c0-2.4-2.8-4.3-6.4-4.3z' fill='%23fff'/%3E%3C/svg%3E" alt=""></span>
+          </div>
+        </div>
+      </div>
+      <div class="set-row bar-preview" id="avatarPreviewNameAvatar">
+        <div class="bar-preview-label" data-zh="名字+头像" data-en="Name + avatar" data-zh-TW="名字+頭像" data-ja="名前+アバター" data-ko="이름+아바타" data-de="Name + Avatar" data-fr="Nom + avatar">名字+头像</div>
+        <div class="bar-preview-frame">
+          <div class="bp-bar">
+            <span class="bp-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="bp-text" data-zh="消息中心" data-en="Messages">消息中心</span></span>
+            <span class="bp-av bp-av-pill bp-av-na"><span class="bp-av-name" data-zh="名字" data-en="Name">名字</span><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%234a8fd4'/%3E%3Ccircle cx='12' cy='9.5' r='3.6' fill='%23fff'/%3E%3Cpath d='M12 14.4c-3.6 0-6.4 1.9-6.4 4.3v.9h12.8v-.9c0-2.4-2.8-4.3-6.4-4.3z' fill='%23fff'/%3E%3C/svg%3E" alt=""></span>
+          </div>
+        </div>
+      </div>
+      <div class="set-row bar-preview" id="avatarPreviewAvatarName">
+        <div class="bar-preview-label" data-zh="头像+名字" data-en="Avatar + name" data-zh-TW="頭像+名字" data-ja="アバター+名前" data-ko="아바타+이름" data-de="Avatar + Name" data-fr="Avatar + nom">头像+名字</div>
+        <div class="bar-preview-frame">
+          <div class="bp-bar">
+            <span class="bp-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="bp-text" data-zh="消息中心" data-en="Messages">消息中心</span></span>
+            <span class="bp-av bp-av-pill bp-av-an"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%234a8fd4'/%3E%3Ccircle cx='12' cy='9.5' r='3.6' fill='%23fff'/%3E%3Cpath d='M12 14.4c-3.6 0-6.4 1.9-6.4 4.3v.9h12.8v-.9c0-2.4-2.8-4.3-6.4-4.3z' fill='%23fff'/%3E%3C/svg%3E" alt=""><span class="bp-av-name" data-zh="名字" data-en="Name">名字</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="set-row" style="margin-top:22px;" id="profileAvatarRow" hidden>
+        <span class="set-label" data-zh="个人主页头像" data-en="Profile avatar" data-zh-TW="個人主頁頭像" data-ja="プロフィールアバター" data-ko="프로필 아바타" data-de="Profil-Avatar" data-fr="Avatar de profil">个人主页头像</span>
+        <div class="set-opts bar-mode-opts" id="optProfileAvatar">
+          <button class="seg" type="button" data-val="image" data-zh="图片头像" data-en="Image avatar" data-zh-TW="圖片頭像" data-ja="画像アバター" data-ko="이미지 아바타" data-de="Bild-Avatar" data-fr="Avatar image">图片头像</button>
+          <button class="seg" type="button" data-val="text" data-zh="文字头像" data-en="Text avatar" data-zh-TW="文字頭像" data-ja="文字アバター" data-ko="텍스트 아바타" data-de="Text-Avatar" data-fr="Avatar texte">文字头像</button>
+          <button class="seg" type="button" data-val="none" data-zh="不使用头像" data-en="No avatar" data-zh-TW="不使用頭像" data-ja="アバターなし" data-ko="아바타 없음" data-de="Kein Avatar" data-fr="Sans avatar">不使用头像</button>
+        </div>
+        <span class="set-hint" data-zh="个人主页左上角头像的显示方式。修改后刷新个人主页生效。" data-en="How the avatar shows on your profile page. Refresh the profile page to see changes.">个人主页左上角头像的显示方式。修改后刷新个人主页生效。</span>
+      </div>
+      <div class="set-row" style="margin-top:22px;">
+        <span class="set-label" data-zh="搜索框" data-en="Search box" data-zh-TW="搜尋框" data-ja="検索ボックス" data-ko="검색창" data-de="Suchfeld" data-fr="Barre de recherche">搜索框</span>
+        <div class="set-opts bar-mode-opts" id="optSearchBox">
+          <button class="seg" type="button" data-val="icon" data-zh="仅搜索图标" data-en="Icon only" data-zh-TW="僅搜尋圖示" data-ja="アイコンのみ" data-ko="아이콘만" data-de="Nur Symbol" data-fr="Icône seule">仅搜索图标</button>
+          <button class="seg" type="button" data-val="left" data-zh="靠左" data-en="Left">靠左</button>
+          <button class="seg" type="button" data-val="center" data-zh="靠中" data-en="Center">靠中</button>
+          <button class="seg" type="button" data-val="right" data-zh="靠右" data-en="Right">靠右</button>
+        </div>
+        <span class="set-hint" data-zh="顶栏搜索框的呈现方式。修改立即生效。" data-en="How the top-bar search box appears. Changes apply instantly.">顶栏搜索框的呈现方式。修改立即生效。</span>
+      </div>
     </section>
 
+
+    <section class="card" id="notifPrefsCard">
+      <h2 data-zh="通知偏好" data-en="Notification preferences">通知偏好</h2>
+      <p class="set-hint" data-zh="控制「关注的人发帖」与「评论/@提及」如何通知你。修改后自动保存。" data-en="Choose how followed posts and mentions notify you. Saved automatically.">控制「关注的人发帖」与「评论 / @提及」如何通知你。修改后自动保存。</p>
+      <div id="notifPrefsBox" style="display:grid;gap:10px;margin-top:14px"></div>
+      <div class="set-hint" id="notifPrefsStatus" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card" id="myDataCard">
+      <h2 data-zh="我的数据" data-en="My data">我的数据</h2>
+      <p class="set-hint">导出你在小蓝页的全部个人数据（含偏好、档案、站内消息、关注与登录记录），或订阅浏览器推送。</p>
+      <div class="set-opts" style="margin-top:14px;gap:10px;flex-wrap:wrap">
+        <a class="seg" href="/api/export" download data-zh="导出我的数据 (JSON)" data-en="Export my data (JSON)">导出我的数据 (JSON)</a>
+        <button class="seg" id="pushBtn" type="button">开启浏览器推送</button>
+        <a class="seg" href="../achievements/" data-zh="我的勋章" data-en="My badges">我的勋章</a>
+        <a class="seg" href="../globalsearch/" data-zh="全站搜索" data-en="Global search">全站搜索</a>
+        <a class="seg" href="/feed.xml" data-zh="RSS 订阅" data-en="RSS feed">RSS 订阅</a>
+        <a class="seg" id="auditLink" href="/api/audit" hidden data-zh="操作日志" data-en="Audit log">操作日志（站长）</a>
+      </div>
+      <div class="set-hint" id="pushStatus" style="margin-top:12px"></div>
+    </section>
     <section class="card" id="authCard">
       <h2 data-zh="账户" data-en="Account">账户</h2>
       <button class="seg" id="settingsAuthBtn" type="button">登录</button>
@@ -307,6 +409,34 @@
       <div class="set-opts" id="bindActions" style="margin-top:12px;gap:10px">
         <button class="seg" id="bindEmailBtn" type="button" data-zh="绑定邮箱" data-en="Link email">绑定邮箱</button>
         <button class="seg" id="bindGhBtn" type="button" data-zh="用 GitHub 绑定" data-en="Link with GitHub">用 GitHub 绑定</button>
+        <button class="seg" id="pwdBtn" type="button" hidden data-zh="修改密码" data-en="Change password">修改密码</button>
+      </div>
+      <div class="account-manage" id="pwdPanel" hidden style="margin-top:14px">
+        <div class="set-hint" id="pwdStep" data-zh="第一步 · 验证登录为本人" data-en="Step 1 · verify it's you">第一步 · 验证登录为本人</div>
+        <div id="pwdStep1">
+          <div class="set-row" id="pwdCurRow" hidden>
+            <span class="set-label" data-zh="当前密码" data-en="Current password">当前密码</span>
+            <input type="password" id="pwdCurrent" placeholder="输入当前密码" style="width:100%;padding:10px 12px;border:1px solid var(--card-border);border-radius:9px;box-sizing:border-box;font-size:.95rem" />
+          </div>
+          <div id="pwdOtpRow" hidden>
+            <p class="set-hint" id="pwdOtpHint"></p>
+            <button class="seg" id="pwdSendCode" type="button" data-zh="发送验证码" data-en="Send code">发送验证码</button>
+            <div class="set-row">
+              <span class="set-label" data-zh="验证码" data-en="Code">验证码</span>
+              <input type="text" id="pwdCode" placeholder="6 位" maxlength="6" inputmode="numeric" style="width:100%;padding:10px 12px;border:1px solid var(--card-border);border-radius:9px;box-sizing:border-box;font-size:.95rem" />
+            </div>
+          </div>
+        </div>
+        <div class="set-row">
+          <span class="set-label" data-zh="新密码" data-en="New password">新密码</span>
+          <input type="password" id="pwdNew" placeholder="至少8位，含大写字母+数字" style="width:100%;padding:10px 12px;border:1px solid var(--card-border);border-radius:9px;box-sizing:border-box;font-size:.95rem" />
+        </div>
+        <div class="set-row">
+          <span class="set-label" data-zh="确认新密码" data-en="Confirm password">确认新密码</span>
+          <input type="password" id="pwdConfirm" placeholder="再次输入" style="width:100%;padding:10px 12px;border:1px solid var(--card-border);border-radius:9px;box-sizing:border-box;font-size:.95rem" />
+        </div>
+        <div class="account-status" id="pwdMsg"></div>
+        <button class="neutral-btn" id="pwdSubmit" type="button" data-zh="确认修改" data-en="Confirm change">确认修改</button>
       </div>
     </section>
 
@@ -321,7 +451,8 @@
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   
   <div class="float-actions">
@@ -335,7 +466,7 @@
 
   <script>
     (function () {
-      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave', barmode: 'xl_barmode' };
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius', autosave: 'xl_autosave', barmode: 'xl_barmode', avatarmode: 'xl_avatarmode', searchbox: 'xl_searchbox' };
       function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
       function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
@@ -345,22 +476,25 @@
         font: get(K.font, '1'),
         radius: get(K.radius, '14'),
         autosave: get(K.autosave, 'on'),
-        barmode: get(K.barmode, 'long')
+        barmode: get(K.barmode, 'long'),
+        avatarmode: get(K.avatarmode, 'avatar'),
+        searchbox: get(K.searchbox, 'right')
       };
 
       function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
       function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
       function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
           // 跳过含子元素的节点：直接赋值 textContent 会连子元素（图标、徽标、按钮等）一起删掉，
           // 与 prefs.js 的 applyLang 行为对齐，防止小蓝条/卡片里的图标被抹掉。
           if (n.children && n.children.length > 0) continue;
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
@@ -384,6 +518,8 @@
       segActive('optLang', cur.lang);
       segActive('optTheme', cur.theme);
       segActive('optBarMode', cur.barmode);
+      segActive('optAvatarMode', cur.avatarmode);
+      segActive('optSearchBox', cur.searchbox);
       document.getElementById('optFont').value = cur.font;
       document.getElementById('optRadius').value = cur.radius;
       document.getElementById('fontHint').textContent = (parseFloat(cur.font)).toFixed(2) + '×';
@@ -429,6 +565,25 @@
         set(K.barmode, cur.barmode);
         segActive('optBarMode', cur.barmode);
         applyBarMode();
+        syncCloud();
+      });
+
+      document.getElementById('optAvatarMode').addEventListener('click', function (e) {
+        var b = e.target.closest('.seg'); if (!b) return;
+        cur.avatarmode = b.getAttribute('data-val');
+        set(K.avatarmode, cur.avatarmode);
+        segActive('optAvatarMode', cur.avatarmode);
+        // 设置页自己的小蓝条也带头像按钮，立即重应用（登录态下可见）
+        if (window.__xlApplyAvatarMode) window.__xlApplyAvatarMode();
+        syncCloud();
+      });
+
+      document.getElementById('optSearchBox').addEventListener('click', function (e) {
+        var b = e.target.closest('.seg'); if (!b) return;
+        cur.searchbox = b.getAttribute('data-val');
+        set(K.searchbox, cur.searchbox);
+        segActive('optSearchBox', cur.searchbox);
+        if (window.__xlApplySearchBox) window.__xlApplySearchBox();
         syncCloud();
       });
 
@@ -492,8 +647,9 @@
         fetch('/api/account/status')
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (d) {
-            if (!d || !d.login) { accountManage.hidden = true; return; }
+            if (!d || !d.login) { accountManage.hidden = true; var _pb = document.getElementById('pwdBtn'); if (_pb) _pb.hidden = true; var _pp = document.getElementById('pwdPanel'); if (_pp) _pp.hidden = true; return; }
             accountManage.hidden = false;
+            var _pb = document.getElementById('pwdBtn'); if (_pb) _pb.hidden = false;
             accountLocked = !!d.locked;
             var en = document.documentElement.lang === 'en';
             if (accountLocked) {
@@ -555,6 +711,122 @@
         });
       });
 
+      // —— 修改密码 / 加入密码 ——
+      var pwdBtn = document.getElementById('pwdBtn');
+      var pwdPanel = document.getElementById('pwdPanel');
+      var pwdCurRow = document.getElementById('pwdCurRow');
+      var pwdOtpRow = document.getElementById('pwdOtpRow');
+      var pwdOtpHint = document.getElementById('pwdOtpHint');
+      var pwdSendCode = document.getElementById('pwdSendCode');
+      var pwdStep = document.getElementById('pwdStep');
+      var pwdCurrent = document.getElementById('pwdCurrent');
+      var pwdCode = document.getElementById('pwdCode');
+      var pwdNew = document.getElementById('pwdNew');
+      var pwdConfirm = document.getElementById('pwdConfirm');
+      var pwdMsg = document.getElementById('pwdMsg');
+      var pwdSubmit = document.getElementById('pwdSubmit');
+      var pwdMe = null;
+      function pwdLang() { return document.documentElement.lang === 'en'; }
+
+      if (pwdBtn) {
+        pwdBtn.addEventListener('click', function () {
+          var en = pwdLang();
+          pwdPanel.hidden = !pwdPanel.hidden;
+          if (pwdPanel.hidden) return;
+          pwdMsg.textContent = '';
+          pwdNew.value = ''; pwdConfirm.value = ''; pwdCurrent.value = ''; pwdCode.value = '';
+          fetch('/api/me', { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (me) {
+              pwdMe = me;
+              if (!me || !me.login) { pwdMsg.textContent = en ? 'Please sign in first' : '请先登录'; pwdPanel.hidden = true; return; }
+              if (me.has_password) {
+                pwdCurRow.hidden = false;
+                pwdOtpRow.hidden = true;
+                pwdStep.textContent = en ? 'Step 1 · verify with current password' : '第一步 · 用当前密码验证';
+              } else {
+                pwdCurRow.hidden = true;
+                pwdOtpRow.hidden = false;
+                pwdStep.textContent = en ? 'Step 1 · verify via email code' : '第一步 · 邮箱验证码验证';
+                if (!me.email_verified) {
+                  pwdOtpHint.textContent = en ? 'Link & verify an email first (in “Link email / GitHub”).' : '请先在「绑定邮箱 / GitHub」中绑定并验证邮箱。';
+                  pwdSendCode.disabled = true;
+                } else {
+                  pwdSendCode.disabled = false;
+                  sendPwdCode();
+                }
+              }
+            })
+            .catch(function () { pwdMsg.textContent = en ? 'Load failed, retry' : '加载失败，请重试'; });
+        });
+      }
+
+      function sendPwdCode() {
+        if (!pwdMe || !pwdMe.email_verified) return;
+        var en = pwdLang();
+        pwdSendCode.disabled = true;
+        pwdSendCode.textContent = en ? 'Sending…' : '发送中…';
+        fetch('/api/email/send', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email: pwdMe.email, intent: 'pw' })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.ok) pwdOtpHint.textContent = (en ? 'Code sent to ' : '验证码已发送至 ') + pwdMe.email;
+            else if (d.error === 'too_frequent') pwdOtpHint.textContent = (en ? 'Too frequent, wait ' : '发送过密，请等待 ') + (d.retryAfter || 60) + (en ? 's' : ' 秒');
+            else pwdOtpHint.textContent = en ? 'Send failed, retry later' : '发送失败，请稍后重试';
+          })
+          .catch(function () { pwdOtpHint.textContent = en ? 'Network error' : '网络错误'; })
+          .then(function () { pwdSendCode.disabled = false; pwdSendCode.textContent = en ? 'Resend' : '重新发送'; });
+      }
+      if (pwdSendCode) pwdSendCode.addEventListener('click', sendPwdCode);
+
+      if (pwdSubmit) {
+        pwdSubmit.addEventListener('click', function () {
+          var en = pwdLang();
+          pwdMsg.textContent = '';
+          var np = pwdNew.value, cf = pwdConfirm.value;
+          if (np.length < 8) { pwdMsg.textContent = en ? 'Password too short (min 8)' : '密码太短（至少 8 位）'; return; }
+          if (!/[A-Z]/.test(np) || !/[0-9]/.test(np)) { pwdMsg.textContent = en ? 'Need at least one uppercase letter and one digit' : '需至少 1 个大写字母和 1 个数字'; return; }
+          if (np !== cf) { pwdMsg.textContent = en ? 'Passwords do not match' : '两次输入的密码不一致'; return; }
+          var body = { newPassword: np, confirmPassword: cf };
+          if (pwdMe && pwdMe.has_password) {
+            body.currentPassword = pwdCurrent.value;
+            if (!body.currentPassword) { pwdMsg.textContent = en ? 'Enter current password' : '请输入当前密码'; return; }
+          } else {
+            if (!pwdMe || !pwdMe.email_verified) { pwdMsg.textContent = en ? 'Email not verified' : '邮箱未验证'; return; }
+            body.email = pwdMe.email;
+            body.code = pwdCode.value;
+            if (!/^\d{6}$/.test(body.code)) { pwdMsg.textContent = en ? 'Enter 6-digit code' : '请输入 6 位验证码'; return; }
+          }
+          pwdSubmit.disabled = true;
+          fetch('/api/password', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(body)
+          })
+            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+            .then(function (res) {
+              var d = res.d;
+              if (res.ok && d.ok) {
+                pwdMsg.textContent = en ? 'Password updated. You are still signed in.' : '密码已更新，仍为登录状态。';
+                pwdPanel.hidden = true;
+                if (pwdBtn) { pwdBtn.setAttribute('data-zh', '修改密码'); pwdBtn.setAttribute('data-en', 'Change password'); pwdBtn.textContent = en ? 'Change password' : '修改密码'; }
+              } else if (d.error === 'bad_current') { pwdMsg.textContent = en ? 'Current password is incorrect' : '当前密码不正确'; }
+              else if (d.error === 'expired' || d.error === 'invalid_code') { pwdMsg.textContent = en ? 'Code expired or incorrect' : '验证码已过期或不正确'; }
+              else if (d.error === 'no_email') { pwdMsg.textContent = en ? 'No verified email' : '没有已验证的邮箱'; }
+              else if (d.error === 'mismatch') { pwdMsg.textContent = en ? 'Passwords do not match' : '两次密码不一致'; }
+              else if (d.error === 'weak' && d.rule === 'length') { pwdMsg.textContent = en ? 'Password too short (min 8)' : '密码太短（至少 8 位）'; }
+              else if (d.error === 'weak') { pwdMsg.textContent = en ? 'Need at least one uppercase letter and one digit' : '需至少 1 个大写字母和 1 个数字'; }
+              else { pwdMsg.textContent = (en ? 'Failed: ' : '失败：') + (d.error || 'unknown'); }
+            })
+            .catch(function () { pwdMsg.textContent = en ? 'Network error' : '网络错误'; })
+            .then(function () { pwdSubmit.disabled = false; });
+        });
+      }
+
       // 升级状态（茶馆·发布功能升级 + 小蓝页会员），数据来自 /api/me
       var upgradeCard = document.getElementById('upgradeCard');
       var upgradeStatus = document.getElementById('upgradeStatus');
@@ -590,13 +862,56 @@
               rows.push((en ? 'Xiaolan membership: ' : '小蓝页会员：') + esc(me.sponsor.label) + ' · ' + (en ? 'expires ' : '到期 ') + fmtDate(me.sponsor.exp));
             }
             upgradeStatus.innerHTML = rows.join('<br>');
-            if (upgradeBtn) upgradeBtn.hidden = !!tp;
+            if (upgradeBtn) {
+              // 已开通也保留入口：链接到 support 页做「管理订阅 / 续费」，不再凭空消失
+              upgradeBtn.hidden = false;
+              var upZh = tp ? '管理订阅 / 续费' : '去升级 / 续费';
+              var upEn = tp ? 'Manage / renew' : 'Upgrade / renew';
+              upgradeBtn.setAttribute('data-zh', upZh);
+              upgradeBtn.setAttribute('data-en', upEn);
+              upgradeBtn.textContent = en ? upEn : upZh;
+            }
+            // 密码按钮文案：有密码 -> 修改密码；无密码 -> 加入密码
+            var _pb = document.getElementById('pwdBtn');
+            if (_pb && me && me.login) {
+              var pz = me.has_password ? '修改密码' : '加入密码';
+              var pe = me.has_password ? 'Change password' : 'Set password';
+              _pb.setAttribute('data-zh', pz);
+              _pb.setAttribute('data-en', pe);
+              _pb.textContent = en ? pe : pz;
+              _pb.hidden = false;
+            }
           })
           .catch(function () { /* ignore */ });
       }
 
+      // 个人主页头像显示（xl_avatar_mode:<login>：image / text / none，从个人主页迁入）
+      var profAvRow = document.getElementById('profileAvatarRow');
+      var profAvOpts = document.getElementById('optProfileAvatar');
+      function applyProfAv(login) {
+        if (!profAvOpts || !login) return;
+        var v = 'image';
+        try { v = localStorage.getItem('xl_avatar_mode:' + login) || 'image'; } catch (e) {}
+        if (v !== 'text' && v !== 'none' && v !== 'image') v = 'image';
+        var btns = profAvOpts.querySelectorAll('.seg');
+        for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-val') === v);
+      }
+      if (profAvOpts) profAvOpts.addEventListener('click', function (e) {
+        var b = e.target && e.target.closest ? e.target.closest('.seg') : null;
+        if (!b) return;
+        var u = window.JW_AUTH && window.JW_AUTH.user;
+        if (!u || !u.login) return;
+        var v = b.getAttribute('data-val');
+        try { localStorage.setItem('xl_avatar_mode:' + u.login, v); } catch (err) {}
+        cur.profileAvatar = v;   // 纳入 cur，使自动保存开关能将其同步到云端
+        syncCloud();
+        applyProfAv(u.login);
+      });
+
       window.onAuthState = function (auth) {
         if (!settingsAuthBtn) return;
+        if (profAvRow) profAvRow.hidden = !(auth && auth.user);
+        if (auth && auth.user && auth.user.login) applyProfAv(auth.user.login);
         var en = document.documentElement.lang === 'en';
         if (auth && auth.user) {
           settingsAuthBtn.textContent = en ? 'Sign out' : '退出登录';
@@ -607,6 +922,8 @@
           settingsAuthBtn.textContent = en ? 'Sign in' : '登录';
           settingsAuthBtn.onclick = function () { if (window.JW_LOGIN) window.JW_LOGIN(); };
           accountManage.hidden = true;
+          var _pb = document.getElementById('pwdBtn'); if (_pb) _pb.hidden = true;
+          var _pp = document.getElementById('pwdPanel'); if (_pp) _pp.hidden = true;
           if (upgradeCard) upgradeCard.hidden = true;
         }
       };
@@ -649,7 +966,7 @@
               var parts = [];
               if (d.email) parts.push((en() ? 'Email: ' : '邮箱：') + d.email + (d.email_verified ? '' : (' (' + (en() ? 'unverified' : '未验证') + ')')));
               else parts.push((en() ? 'Email: not linked' : '邮箱：未绑定'));
-              parts.push((en() ? 'GitHub: ' : 'GitHub：') + (d.github_linked ? (d.github_login || '✓') : (en() ? 'not linked' : '未绑定')));
+              parts.push((en() ? 'GitHub: ' : 'GitHub：') + (d.github_linked ? (d.github_login || (en() ? 'linked' : '已绑定')) : (en() ? 'not linked' : '未绑定')));
               statusEl.textContent = parts.join('　·　');
               applyBound(emailBtn, !!d.email, '已绑定邮箱', 'Email linked', '绑定邮箱', 'Link email');
               applyBound(ghBtn, !!d.github_linked, '已绑定 GitHub', 'GitHub linked', '用 GitHub 绑定', 'Link with GitHub');
@@ -707,9 +1024,105 @@
       })();
     })();
   </script>
-<script src="../auth.js?v=20260925c"></script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+<script src="../auth.js?v=20261103a"></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
+
+  <script>
+  /* P1-P4 新增设置（2026-11-09，内联脚本不受 immutable 缓存影响） */
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var status = $('notifPrefsStatus');
+    var LABELS = {
+      followed_post_inapp: ['关注的人发帖 · 站内通知', '在消息中心收到提醒'],
+      followed_post_email: ['关注的人发帖 · 邮件', '同时发一封邮件（每小时最多一次）'],
+      comment_inapp: ['评论 / @提及 · 站内通知', '在消息中心收到提醒'],
+      comment_email: ['评论 / @提及 · 邮件', '同时发一封邮件'],
+      digest: ['每周摘要（即将推出）', '预留开关']
+    };
+    fetch('/api/notif/prefs', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var box = $('notifPrefsBox');
+        if (!box || !d || !d.prefs) return;
+        Object.keys(LABELS).forEach(function (k) {
+          var lab = document.createElement('label');
+          lab.style.cssText = 'display:flex;align-items:flex-start;gap:10px;cursor:pointer';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox'; cb.checked = d.prefs[k] !== false;
+          cb.setAttribute('data-pref', k);
+          cb.style.cssText = 'margin-top:4px;width:16px;height:16px';
+          var tx = document.createElement('span');
+          tx.innerHTML = '<b>' + LABELS[k][0] + '</b><br><small style="opacity:.7">' + LABELS[k][1] + '</small>';
+          lab.appendChild(cb); lab.appendChild(tx); box.appendChild(lab);
+          cb.addEventListener('change', function () {
+            var out = {};
+            box.querySelectorAll('[data-pref]').forEach(function (x) { out[x.getAttribute('data-pref')] = x.checked; });
+            if (status) status.textContent = '保存中…';
+            fetch('/api/notif/prefs', {
+              method: 'POST', credentials: 'same-origin',
+              headers: { 'content-type': 'application/json' }, body: JSON.stringify(out)
+            }).then(function (r) { return r.json(); }).then(function () {
+              if (status) status.textContent = '已保存';
+            }).catch(function () { if (status) status.textContent = '保存失败，请重试'; });
+          });
+        });
+        if (!d.loggedIn && status) status.textContent = '登录后可保存个人偏好（当前显示默认值）。';
+      }).catch(function () {});
+
+    /* Web Push 订阅 */
+    function b64u(s) {
+      var pad = '='.repeat((4 - s.length % 4) % 4);
+      var raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+      var out = new Uint8Array(raw.length);
+      for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+      return out;
+    }
+    function ab2b64(buf) {
+      var b = new Uint8Array(buf), s = '';
+      for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+      return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    var pushSt = $('pushStatus');
+    var pushBtn = $('pushBtn');
+    if (pushBtn) pushBtn.addEventListener('click', function () {
+      if (!('PushManager' in window) || !('serviceWorker' in navigator)) {
+        pushSt.textContent = '当前浏览器不支持推送。'; return;
+      }
+      pushBtn.disabled = true; pushSt.textContent = '正在申请通知权限…';
+      Notification.requestPermission().then(function (perm) {
+        if (perm !== 'granted') { pushSt.textContent = '未获得通知权限。'; pushBtn.disabled = false; return; }
+        return fetch('/api/notif/push').then(function (r) { return r.json(); }).then(function (d) {
+          if (!d.configured) { pushSt.textContent = '服务端尚未配置推送密钥。'; pushBtn.disabled = false; return; }
+          return navigator.serviceWorker.ready.then(function (reg) {
+            return reg.pushManager.getSubscription().then(function (old) {
+              return old || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(d.publicKey) });
+            });
+          }).then(function (sub) {
+            return fetch('/api/notif/push', {
+              method: 'POST', credentials: 'same-origin',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.getKey('p256dh') ? ab2b64(sub.getKey('p256dh')) : '', auth: sub.getKey('auth') ? ab2b64(sub.getKey('auth')) : '' }
+              })
+            });
+          }).then(function () { pushSt.textContent = '已开启：有新消息时会收到系统通知。'; pushBtn.textContent = '已开启推送'; });
+        });
+      }).catch(function (e) { pushSt.textContent = '订阅失败：' + (e && e.message ? e.message : '未知错误'); pushBtn.disabled = false; });
+    });
+
+    /* 站长显示审计日志入口 */
+    fetch('/api/me', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (me) { if (me && me.isAdmin && $('auditLink')) $('auditLink').hidden = false; })
+      .catch(function () {});
+  })();
+  </script>
+
 </body>
 </html>
+
 

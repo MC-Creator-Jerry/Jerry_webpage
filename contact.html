@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="boot.js?v=20260921c"></script>
+  <script src="boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>联系与建议 · Jerry's webpage</title>
 <meta name="description" content="联系与建议：通过邮件 jerryprdservice@163.com 与我联系。" />
 <meta name="author" content="Jerry" />
@@ -190,7 +190,8 @@
   }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="common.css?v=20260921a" />
+  <link rel="stylesheet" href="common.css?v=20261103a" />
+  <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
   <header class="topbar">
@@ -203,11 +204,11 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -223,14 +224,14 @@
     </section>
 
     <section class="card">
-      <h2 data-zh="📝 给我留言 / 提建议" data-en="📝 Leave a message / suggestion">📝 给我留言 / 提建议</h2>
+      <h2><i class="ic" data-ic="edit" aria-hidden="true"></i><span data-zh="给我留言 / 提建议" data-en="Leave a message / suggestion">给我留言 / 提建议</span></h2>
       <p data-zh="填写后我会收到邮件，同时你也会收到一封自动回复确认信。" data-en="I'll get an email, and you'll receive an automatic confirmation.">填写后我会收到邮件，同时你也会收到一封自动回复确认信。</p>
       <form id="contactForm" class="contact-form" novalidate onsubmit="return false;">
         <select class="c-input" name="category" aria-label="分类">
-          <option value="建议" data-zh="💡 建议 / 意见" data-en="💡 Suggestion">💡 建议 / 意见</option>
-          <option value="Bug" data-zh="🐞 Bug 反馈" data-en="🐞 Bug report">🐞 Bug 反馈</option>
-          <option value="功能" data-zh="🧩 功能需求" data-en="🧩 Feature request">🧩 功能需求</option>
-          <option value="其他" data-zh="💬 其他" data-en="💬 Other">💬 其他</option>
+          <option value="建议" data-zh="建议 / 意见" data-en="Suggestion"> 建议 / 意见</option>
+          <option value="Bug" data-zh="Bug 反馈" data-en="Bug report"> Bug 反馈</option>
+          <option value="功能" data-zh="功能需求" data-en="Feature request"> 功能需求</option>
+          <option value="其他" data-zh="其他" data-en="Other"> 其他</option>
         </select>
         <input class="c-input" type="text" name="name" data-ph-zh="姓名" data-ph-en="Name" placeholder="姓名" />
         <input class="c-input" type="email" name="email" data-ph-zh="邮箱" data-ph-en="Email" placeholder="邮箱" />
@@ -244,19 +245,20 @@
           .bug-trial-btns { display: flex; gap: 10px; flex-wrap: wrap; }
           .bug-trial-login { margin: 10px 0 0; font-size: .85rem; color: var(--danger, #e5484d); }
         </style>
-        <p class="bug-trial-note" data-zh="确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 🎁" data-en="Sure it's a bug? Click “Yes, it's a bug” to submit and enter the draw: 50% chance each day to win 1-hour Level-1 Member 🎁">确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 🎁</p>
+        <p class="bug-trial-note"><i class="ic" data-ic="gift" aria-hidden="true"></i><span data-zh="确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 " data-en="Sure it's a bug? Click “Yes, it's a bug” to submit and enter the draw: 50% chance each day to win 1-hour Level-1 Member ">确认这是 Bug？点「是 Bug」提交并参与抽奖：当天 50% 概率得 1 小时小蓝页·1级成员 </span></p>
         <div class="bug-trial-btns">
-          <button type="button" id="bugYesBtn" class="btn" data-zh="🐞 是 Bug（提交并抽奖）" data-en="🐞 Yes, it's a bug (submit &amp; draw)">🐞 是 Bug（提交并抽奖）</button>
+          <button type="button" id="bugYesBtn" class="btn"><i class="ic" data-ic="bug" aria-hidden="true"></i><span data-zh="是 Bug（提交并抽奖）" data-en="Yes, it's a bug (submit &amp; draw)">是 Bug（提交并抽奖）</span></button>
           <button type="button" id="bugNoBtn" class="btn btn-ghost" data-zh="这不是 Bug（仅留言）" data-en="Not a bug (just a note)">这不是 Bug（仅留言）</button>
         </div>
-        <p class="bug-trial-login" id="bugTrialLogin" hidden data-zh="🔒 需登录后才能抽奖，请先登录。" data-en="🔒 Log in first to join the draw.">🔒 需登录后才能抽奖，请先登录。</p>
+        <p class="bug-trial-login" id="bugTrialLogin" hidden><i class="ic" data-ic="lock" aria-hidden="true"></i><span data-zh="需登录后才能抽奖，请先登录。" data-en="Log in first to join the draw.">需登录后才能抽奖，请先登录。</span></p>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="index.html">返回主页</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   
   <div class="float-actions">
@@ -291,12 +293,13 @@
         document.documentElement.style.setProperty('--radius', cur.radius + 'px');
       }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
@@ -307,10 +310,13 @@
       applyAll();
     })();
   </script>
-<script src="auth.js?v=20260925c"></script>
-  <script src="common.js?v=20260926b"></script>
+<script src="auth.js?v=20261103a"></script>
+  <script src="common.js?v=20261111a"></script>
   <div id="toast"></div>
-  <script src="scroll-keys.js?v=20260926c" defer></script>
+  <script src="scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script>
+  // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
+  // pages.dev 域名下不触发，避免循环。
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+  </script>
+  <script src="../../boot.js?v=20261014b"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>片屿 Pianyu · 文档</title>
+<meta name="description" content="片屿产品文档：上新、看片、屿论与定点屿论、岛图、创作岛、收藏夹与设置页。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="片屿 Pianyu · 文档" />
+<meta property="og:description" content="片屿产品文档：上新、看片、屿论与定点屿论、岛图、创作岛、收藏夹与设置页。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="片屿 Pianyu · 文档" />
+<meta name="twitter:description" content="片屿产品文档：上新、看片、屿论与定点屿论、岛图、创作岛、收藏夹与设置页。" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=20260926" />
+<style>  
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a {
+    color: var(--bar-fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 0;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
+
+  /* ---- 内容区（目前留空，只保留 UI） ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 36px; }
+  .hero h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+  }
+  .card {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .empty-tip {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ---- 文档正文 ---- */
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 0 0 10px; }
+  .card ul { list-style: disc; margin: 6px 0 0; padding-left: 22px; }
+  .card ul li { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 7px 0; }
+  .card ul li b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .card .hint { color: var(--muted); margin-top: 12px; }
+  .card .doc-link a { color: var(--accent); }
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+
+  /* ---- 页脚 ---- */
+  .site-footer {
+    border-top: 1px solid var(--card-border);
+    margin-top: 48px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
+        <a id="bcMain" href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep" id="bcSep">›</span>
+        <a href="../" data-zh="帮助中心" data-en="Help Center">帮助中心</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" id="bcSub" data-zh="片屿 Pianyu" data-en="Pianyu">片屿 Pianyu</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="片屿 Pianyu" data-en="Pianyu">片屿 Pianyu</h1>
+      <p data-zh="一个独立的视频站：上新、看片、聊屿论，也可以把作品发到自己的创作岛。" data-en="An independent video site: publish, watch, chat in the comments — and push your own work to your own creator island.">一个独立的视频站：上新、看片、聊屿论，也可以把作品发到自己的创作岛。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="能做什么" data-en="What It Can Do">能做什么</h2>
+      <ul>
+        <li><b data-zh="上新" data-en="Publish new releases">上新</b><span data-zh="在 admin.html 上新，把新的内容放上片屿。" data-en="Publish new releases from admin.html.">在 admin.html 上新，把新的内容放上片屿。</span></li>
+        <li><b data-zh="看片" data-en="Watch">看片</b><span data-zh="在 watch.html 播放内容，进度与清晰度都在这里调。" data-en="Watch in watch.html, with playback speed and quality right there.">在 watch.html 播放内容，进度与清晰度都在这里调。</span></li>
+        <li><b data-zh="屿论与定点屿论" data-en="Comments and pinned comments">屿论与定点屿论</b><span data-zh="边看边聊；把某条屿论钉在特定时间点，它就会在那一刻出现。" data-en="Chat while you watch, or pin a comment to a moment so it shows up exactly there.">边看边聊；把某条屿论钉在特定时间点，它就会在那一刻出现。</span></li>
+        <li><b data-zh="岛图" data-en="Island map">岛图</b><span data-zh="在 map.html 用地图的方式浏览片库。" data-en="Browse the library as a map in map.html.">在 map.html 用地图的方式浏览片库。</span></li>
+        <li><b data-zh="创作岛" data-en="Creator island">创作岛</b><span data-zh="在 creator.html 发布自己的作品。" data-en="Publish your own work on creator.html.">在 creator.html 发布自己的作品。</span></li>
+        <li><b data-zh="收藏夹与设置" data-en="Favourites and settings">收藏夹与设置</b><span data-zh="收藏喜欢的片子，在设置页调整个人偏好。" data-en="Keep the films you like and tune your preferences on the settings page.">收藏喜欢的片子，在设置页调整个人偏好。</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="怎么登录" data-en="How to Sign In">怎么登录</h2>
+      <p data-zh="片屿与小蓝页共用一套账户：用小蓝页账户登录，身份在各站之间互通。" data-en="Pianyu shares one account with Xiaolan: sign in with your Xiaolan account and your identity carries across every site.">片屿与小蓝页共用一套账户：用小蓝页账户登录，身份在各站之间互通。</p>
+      <ul>
+        <li><b data-zh="用小蓝页账户登录" data-en="Sign in with your Xiaolan account">用小蓝页账户登录</b><span data-zh="邮箱验证码或 GitHub 登录都行。" data-en="An email code or GitHub both work.">邮箱验证码或 GitHub 登录都行。</span></li>
+        <li><b data-zh="登录后自动获得创作者角色" data-en="Creator role comes with the sign-in">登录后自动获得创作者角色</b><span data-zh="上新、创作岛发布等创作者功能，登录后自动开放。" data-en="Publishing releases and posting on your creator island unlock as soon as you sign in.">上新、创作岛发布等创作者功能，登录后自动开放。</span></li>
+        <li><b data-zh="身份互通" data-en="One identity everywhere">身份互通</b><span data-zh="收藏夹等个人数据跟着你的账号走，在各站之间互通。" data-en="Your favourites follow your account, and your identity carries across every site.">收藏夹等个人数据跟着你的账号走，在各站之间互通。</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="主要功能速查" data-en="Feature Quick Reference">主要功能速查</h2>
+      <ul>
+        <li><b data-zh="admin.html" data-en="Publish">admin.html</b><span data-zh="上新，把新内容放上片屿。" data-en="Put new releases on Pianyu.">上新，把新内容放上片屿。</span></li>
+        <li><b data-zh="watch.html" data-en="Watch">watch.html</b><span data-zh="播放与观看页。" data-en="The player page.">播放与观看页。</span></li>
+        <li><b data-zh="屿论 / 定点屿论" data-en="Comments and pins">屿论 / 定点屿论</b><span data-zh="边看边聊，或把评论钉在某一刻。" data-en="Chat as you watch, or pin a comment to a moment.">边看边聊，或把评论钉在某一刻。</span></li>
+        <li><b data-zh="map.html" data-en="Island map">map.html</b><span data-zh="用地图浏览片库。" data-en="Browse the library as a map.">用地图浏览片库。</span></li>
+        <li><b data-zh="creator.html" data-en="Creator island">creator.html</b><span data-zh="发布自己的作品。" data-en="Publish your own work.">发布自己的作品。</span></li>
+        <li><b data-zh="收藏夹 / 设置页" data-en="Favourites and settings">收藏夹 / 设置页</b><span data-zh="收藏与管理个人偏好。" data-en="Save films and manage your preferences.">收藏与管理个人偏好。</span></li>
+      </ul>
+      <p class="hint doc-link"><span data-zh="站点地址：" data-en="Site: ">站点地址：</span><a href="https://jerrypianyu.pages.dev/" target="_blank" rel="noopener" data-zh="打开片屿" data-en="open Pianyu">打开片屿</a></p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+        <details class="faq">
+          <summary data-zh="屿论和定点屿论有什么区别？" data-en="What is the difference between a comment and a pinned comment?">屿论和定点屿论有什么区别？</summary>
+          <div class="faq-body" data-zh="普通屿论跟着播放进度往下滚；定点屿论被钉在某个时间点，播到那一刻必定出现。" data-en="A normal comment scrolls with playback; a pinned comment is tied to a moment and always reappears there.">普通屿论跟着播放进度往下滚；定点屿论被钉在某个时间点，播到那一刻必定出现。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="怎么发布自己的作品？" data-en="How do I publish my own work?">怎么发布自己的作品？</summary>
+          <div class="faq-body" data-zh="登录后到创作岛 creator.html 发布即可。" data-en="Sign in and publish from the creator island at creator.html.">登录后到创作岛 creator.html 发布即可。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="上新和创作岛有什么区别？" data-en="What is the difference between publishing and the creator island?">上新和创作岛有什么区别？</summary>
+          <div class="faq-body" data-zh="上新 admin.html 用于放上新内容；创作岛 creator.html 是放你自己作品的地方。" data-en="Publishing at admin.html adds new releases to the site; the creator island at creator.html is where your own work lives.">上新 admin.html 用于放上新内容；创作岛 creator.html 是放你自己作品的地方。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="收藏在哪里看？" data-en="Where do I find my favourites?">收藏在哪里看？</summary>
+          <div class="faq-body" data-zh="登录后进入收藏夹；因为身份在各站之间互通，换设备登录也是同一份收藏。" data-en="Your favourites live behind the sign-in, and since your identity carries across sites, they are the same list on any device.">登录后进入收藏夹；因为身份在各站之间互通，换设备登录也是同一份收藏。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="看片需要额外安装什么吗？" data-en="Do I need to install anything to watch?">看片需要额外安装什么吗？</summary>
+          <div class="faq-body" data-zh="不需要，浏览器直接打开网页即可播放。" data-en="No — a browser and the page are all you need.">不需要，浏览器直接打开网页即可播放。</div>
+        </details>
+    </section>  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  <span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../../language.html"  aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../../settings/homepage.html"  aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      applyAll();
+    })();
+  </script>
+  <script src="../../auth.js?v=20261103a"></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
+</body>
+</html>
+
+

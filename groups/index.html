@@ -1,14 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
 </script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>群组 · Jerry's webpage</title>
 <meta name="description" content="站内社群群组。" />
 <meta name="author" content="Jerry" />
@@ -64,7 +64,16 @@
   [hidden] { display: none !important; }
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 48px; } .hero h1 { font-size: 1.6rem; } }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -103,7 +112,8 @@
     </section>
   </main>
 
-  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div></footer>
+  <footer class="site-footer"><div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div><span class="uikit-foot"><a href="../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
   <div class="toast" id="toast"></div>
 
   <div class="float-actions">
@@ -115,8 +125,8 @@
     </a>
   </div>
 
-  <script src="../prefs.js?v=20260909a"></script>
-  <script src="../auth.js?v=20260925c"></script>
+  <script src="../prefs.js?v=20261027a"></script>
+  <script src="../auth.js?v=20261103a"></script>
   <script>
     (function () {
       var toastEl = document.getElementById('toast');
@@ -170,7 +180,7 @@
         }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
           .then(function (res) {
             createBtn.disabled = false;
-            if (res.ok && res.body.id) { toast('已创建 ✓'); location.href = 'detail/?group=' + encodeURIComponent(res.body.id); }
+            if (res.ok && res.body.id) { toast('已创建 '); location.href = 'detail/?group=' + encodeURIComponent(res.body.id); }
             else if (res.body && res.body.error === 'unauthorized') { toast('请先登录', true); }
             else if (res.body && res.body.error === 'forbidden') { toast('含违禁词', true); }
             else { toast('创建失败', true); }
@@ -184,8 +194,11 @@
       load();
     })();
   </script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

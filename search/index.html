@@ -1,14 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <script>
   if (location.hostname.indexOf('github.io') !== -1) {
     location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
   }
 </script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>搜索 · Jerry's webpage</title>
 <meta name="description" content="全站搜索：用户。" />
 <meta name="author" content="Jerry" />
@@ -50,6 +50,14 @@
   .topic-chip { display: inline-flex; align-items: center; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: 0.9rem; cursor: pointer; margin: 0 8px 8px 0; text-decoration: none; }
   .topic-chip:hover { border-color: var(--accent); color: var(--accent); }
   .empty { color: var(--muted); opacity: 0.8; font-style: italic; padding: 14px 0; }
+  .qk-hl { background: rgba(255,196,0,0.5); border-radius: 3px; padding: 0 1px; }
+  .prod-item { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+  .prod-ico { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: color-mix(in srgb, var(--accent) 14%, transparent); flex: none; }
+  .prod-ico.has-img { background: transparent; padding: 0; }
+  .prod-ico img { width: 42px; height: 42px; border-radius: 11px; object-fit: contain; display: block; }
+  .prod-ico.prod-ico-round img { border-radius: 50%; }
+  .prod-item .pn { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .prod-item .pd { font-size: 0.88rem; color: var(--muted); margin-top: 3px; line-height: 1.5; }
   .toast { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); z-index: 300; background: #1c2733; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.25s; pointer-events: none; }
   .toast.show { opacity: 1; }
   .site-footer { border-top: 1px solid var(--card-border); margin-top: 40px; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; }
@@ -57,7 +65,16 @@
   @media (max-width: 560px) { .topbar { padding: 0 14px; min-height: 56px; } .site-name { font-size: 1.05rem; } .content { padding: 28px 16px 80px; } }
   [hidden] { display: none !important; }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:description" content="小蓝页 · Jerry 的主页 — Jerry 的个人站点" />
+  <meta property="og:url" content="https://mc-creator-jerry-webpage.pages.dev/" />
+  <meta property="og:site_name" content="小蓝页 · Jerry 的主页" />
+  <meta property="og:image" content="https://mc-creator-jerry-webpage.pages.dev/favicon.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -70,10 +87,10 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -82,7 +99,7 @@
       <h1 data-zh="全站搜索" data-en="Search">全站搜索</h1>
     </section>
     <div class="search-bar">
-      <input class="search-input" id="q" placeholder="搜索用户……" maxlength="80" />
+      <input class="search-input" id="q" placeholder="搜索用户或产品……" maxlength="80" />
       <button class="search-btn" id="go" data-zh="搜索" data-en="Search">搜索</button>
     </div>
     <div id="results"></div>
@@ -91,7 +108,8 @@
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html">返回主页</a> · <a href="../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <div class="toast" id="toast"></div>
 
@@ -104,8 +122,8 @@
     </a>
   </div>
 
-  <script src="../prefs.js?v=20260909a"></script>
-  <script src="../auth.js?v=20260925c"></script>
+  <script src="../prefs.js?v=20261027a"></script>
+  <script src="../auth.js?v=20261103a"></script>
   <script>
     (function () {
       var qEl = document.getElementById('q');
@@ -122,17 +140,27 @@
       }
       function stripTags(html){ var d = document.createElement('div'); d.innerHTML = html || ''; return (d.textContent||'').replace(/\s+/g,' ').trim(); }
 
+      function hl(text, q) {
+        text = String(text == null ? '' : text);
+        q = (q || '').trim();
+        if (!q) return esc(text);
+        try {
+          var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+          return esc(text).replace(re, '<span class="qk-hl">$1</span>');
+        } catch (e) { return esc(text); }
+      }
       function doSearch(q) {
         q = (q || '').trim();
         if (!q) { hint.hidden = false; results.innerHTML = ''; return; }
         hint.hidden = true;
         results.innerHTML = '<div class="empty">搜索中……</div>';
         fetch('/api/search?q=' + encodeURIComponent(q))
-          .then(function (r) { return r.ok ? r.json() : { users: [] }; })
+          .then(function (r) { return r.ok ? r.json() : { users: [], products: [] }; })
           .then(function (d) {
             results.innerHTML = '';
             var users = d.users || [];
-            if (!users.length) {
+            var products = d.products || [];
+            if (!users.length && !products.length) {
               results.innerHTML = '<div class="empty">没有找到与「' + esc(q) + '」相关的内容。</div>';
               return;
             }
@@ -140,8 +168,19 @@
               var h2 = document.createElement('div'); h2.className = 'sec-title'; h2.textContent = '用户'; results.appendChild(h2);
               users.forEach(function (u) {
                 var a = document.createElement('a'); a.className = 'card user-item'; a.href = '../personal_profile/?user=' + encodeURIComponent(u.login);
-                a.innerHTML = '<img src="https://github.com/' + encodeURIComponent(u.login) + '.png" onerror="this.onerror=null;this.src=initialAvatar(\'' + u.login + '\')"><div><div class="un">@' + esc(u.login) + '</div><div class="ub"></div></div>';
+                a.innerHTML = '<img src="https://github.com/' + encodeURIComponent(u.login) + '.png" onerror="this.onerror=null;this.src=initialAvatar(\'' + u.login + '\')"><div><div class="un">@' + hl(u.login, q) + '</div><div class="ub"></div></div>';
                 a.querySelector('.ub').textContent = u.name !== u.login ? (u.name + (u.bio ? ' · ' + u.bio : '')) : (u.bio || '');
+                results.appendChild(a);
+              });
+            }
+            if (products.length) {
+              var h3 = document.createElement('div'); h3.className = 'sec-title'; h3.textContent = '产品'; results.appendChild(h3);
+              products.forEach(function (p) {
+                var a = document.createElement('a'); a.className = 'card prod-item'; a.href = p.url || ('products/' + p.id + '/');
+                a.innerHTML = (p.img
+                  ? '<div class="prod-ico has-img' + (p.shape === 'round' ? ' prod-ico-round' : '') + '"><img src="' + esc(p.img) + '" alt="" loading="lazy"></div>'
+                  : '<div class="prod-ico">' + esc(p.icon || '<i class="ic" data-ic="package" aria-hidden="true"></i>') + '</div>') +
+                  '<div><div class="pn">' + hl(p.name, q) + '</div><div class="pd">' + hl(p.desc, q) + '</div></div>';
                 results.appendChild(a);
               });
             }
@@ -159,8 +198,11 @@
       fromUrl();
     })();
   </script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

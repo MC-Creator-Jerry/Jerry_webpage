@@ -13,8 +13,8 @@
     document.head.appendChild(b);
   })();
 </script>
-<script src="boot.js?v=20260921c"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script src="boot.js?v=20261014b"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>404 · 页面未找到 · Jerry's webpage</title>
 <meta name="description" content="404 — 您访问的页面不存在。" />
 <meta name="author" content="Jerry" />
@@ -200,7 +200,8 @@
     .btn { justify-content: center; }
   }
 </style>
-<link rel="stylesheet" href="common.css?v=20260921a" />
+<link rel="stylesheet" href="common.css?v=20261103a" />
+  <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
   <header class="topbar">
@@ -213,11 +214,11 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
@@ -256,7 +257,8 @@
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="index.html">返回主页</a> · <a href="contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <div class="float-actions">
     <a class="fab" id="langBtn" href="language.html"  aria-label="语言" title="语言">
@@ -283,12 +285,13 @@
       function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
       function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
@@ -306,9 +309,12 @@
       });
     })();
   </script>
-  <script src="auth.js?v=20260925c"></script>
-  <script src="common.js?v=20260926a"></script>
-  <script src="scroll-keys.js?v=20260926c" defer></script>
+  <script src="auth.js?v=20261103a"></script>
+  <script src="common.js?v=20261111a"></script>
+  <script src="scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+
 

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
-  <script src="../boot.js?v=20260921c"></script>
+  <script src="../boot.js?v=20261014b"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>支持与付款 · Jerry's webpage</title>
 <meta name="description" content="支持小蓝页：赞助方式、价格档位与常见问题。" />
 <meta name="author" content="Jerry" />
@@ -139,7 +139,10 @@
   }
   .btn-ghost:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 </style>
-  <link rel="stylesheet" href="../common.css?v=20260921a" />
+  <link rel="stylesheet" href="../common.css?v=20261103a" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="小蓝页 · Jerry 的主页" />
 </head>
 <body>
   <header class="topbar">
@@ -152,17 +155,17 @@
       </nav>
     </div>
     <div class="bar-right">
-      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      <a class="bar-btn" id="noticeBtn" href="../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
       
-      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products">产品</a>
-      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in">登录</a>
-      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none">退出</a>
+      <a class="bar-btn" href="../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
     </div>
   </header>
 
   <main class="content">
     <section class="hero">
-      <h1 data-zh="💙 支持小蓝页" data-en="💙 Support My Site">💙 支持小蓝页</h1>
+      <h1><i class="ic" data-ic="heart" aria-hidden="true"></i><span data-zh="支持小蓝页" data-en="Support My Site">支持小蓝页</span></h1>
       <p data-zh="小蓝页一直是个人项目，服务器、域名和开发时间都靠我自己出。如果你觉得这里的内容或工具对你有用，可以通过下面的方式支持我——每一份支持都会直接变成更多可用的功能。"
          data-en="This site is a solo project — hosting, domains and development time all come out of my own pocket. If something here has been useful to you, you can support me below. Every bit goes straight back into more features.">小蓝页一直是个人项目，服务器、域名和开发时间都靠我自己出。如果你觉得这里的内容或工具对你有用，可以通过下面的方式支持我——每一份支持都会直接变成更多可用的功能。</p>
     </section>
@@ -171,17 +174,17 @@
       <h2 data-zh="我在做什么" data-en="What I build">我在做什么</h2>
       <div class="grid3">
         <div class="mini">
-          <div class="mini-emoji">🌐</div>
+          <div class="mini-emoji"><i class="ic" data-ic="globe" aria-hidden="true"></i></div>
           <div class="mini-name" data-zh="小蓝页社区" data-en="The community">小蓝页社区</div>
           <div class="mini-desc" data-zh="帖子 / 话题 / 评论 / 消息中心 / 群组" data-en="Posts, topics, comments, messages, groups">帖子 / 话题 / 评论 / 消息中心 / 群组</div>
         </div>
         <div class="mini">
-          <div class="mini-emoji">🧰</div>
+          <div class="mini-emoji"><i class="ic" data-ic="toolbox" aria-hidden="true"></i></div>
           <div class="mini-name" data-zh="CleanOpt 工具箱" data-en="CleanOpt toolkit">CleanOpt 工具箱</div>
           <div class="mini-desc" data-zh="Windows 清理与优化工具，免费发布" data-en="A free Windows cleanup & optimization tool">Windows 清理与优化工具，免费发布</div>
         </div>
         <div class="mini">
-          <div class="mini-emoji">📰</div>
+          <div class="mini-emoji"><i class="ic" data-ic="newspaper" aria-hidden="true"></i></div>
           <div class="mini-name" data-zh="每日全球要闻" data-en="Daily world news">每日全球要闻</div>
           <div class="mini-desc" data-zh="每天自动聚合、分类整理的要闻" data-en="A daily curated, categorised news digest">每天自动聚合、分类整理的要闻</div>
         </div>
@@ -229,18 +232,22 @@
             <td class="plan-act"><a class="btn-ghost plan-buy" data-tier="teahouse_plus" data-zh="去赞助" data-en="Sponsor" href="#" target="_blank" rel="noopener">去赞助</a></td>
           </tr>
           <tr>
-            <td class="plan-name" data-zh="茶馆 · 片屿 · 书栈 捆绑包" data-en="Teahouse + Pianyu + BookStation Bundle">茶馆 · 片屿 · 书栈 捆绑包</td>
-            <td class="price" data-zh="¥38 / 月" data-en="¥38 / mo">¥38 / 月</td>
-            <td data-zh="一次订阅同时解锁茶馆、片屿、书栈三站的发布功能升级，比三站分别订阅更省、也更方便。与小蓝页档位互相独立、可叠加。"
-                data-en="One subscription unlocks post boosts across the Teahouse, Pianyu and BookStation — cheaper and simpler than subscribing to each separately. Independent of, and stacks with, any Xiaolan tier.">一次订阅同时解锁茶馆、片屿、书栈三站的发布功能升级，比三站分别订阅更省、也更方便。与小蓝页档位互相独立、可叠加。</td>
+            <td class="plan-name" data-zh="音乐电台·发布功能升级" data-en="MusicRadio Publish Boost">音乐电台·发布功能升级</td>
+            <td class="price" data-zh="¥13.25 / 月" data-en="¥13.25 / mo">¥13.25 / 月</td>
+            <td data-zh="音乐电台每日发布上限 +10（普通用户 6 → 16），并解锁高级版功能。与小蓝页档位互相独立、可叠加。" data-en="+10 daily uploads on MusicRadio (6 → 16 for regular users), plus premium features. Independent of, and stacks with, any Xiaolan tier.">音乐电台每日发布上限 +10（普通用户 6 → 16），并解锁高级版功能。与小蓝页档位互相独立、可叠加。</td>
+            <td class="plan-act"><a class="btn-ghost plan-buy" data-tier="music_plus" data-zh="去赞助" data-en="Sponsor" href="#" target="_blank" rel="noopener">去赞助</a></td>
+          </tr>
+          <tr>
+            <td class="plan-name" data-zh="茶馆 · 片屿 · 书栈 · 音乐电台 捆绑包" data-en="Teahouse + Pianyu + BookStation + MusicRadio Bundle">茶馆 · 片屿 · 书栈 · 音乐电台 捆绑包</td>
+            <td class="price" data-zh="¥40 / 月" data-en="¥40 / mo">¥40 / 月</td>
+            <td data-zh="一次订阅同时解锁茶馆、片屿、书栈、音乐电台四站的发布功能升级，比四站分别订阅更省、也更方便。与小蓝页档位互相独立、可叠加。"
+                data-en="One subscription unlocks publish boosts across the Teahouse, Pianyu, BookStation and MusicRadio — cheaper and simpler than subscribing to each separately. Independent of, and stacks with, any Xiaolan tier.">一次订阅同时解锁茶馆、片屿、书栈、音乐电台四站的发布功能升级，比四站分别订阅更省、也更方便。与小蓝页档位互相独立、可叠加。</td>
             <td class="plan-act"><a class="btn-ghost plan-buy" data-tier="bundle" data-zh="去赞助" data-en="Sponsor" href="#" target="_blank" rel="noopener">去赞助</a></td>
           </tr>
         </tbody>
       </table>
-      <p class="note" data-zh="💡 点「去赞助」会跳到爱发电对应档位的下单页。付款时请在「订单留言」里写上你的站内用户名（例如 MC-Creator-Jerry），权益就会在付款后自动到账，不用再走兑换流程。"
-         data-en="💡 “Sponsor” opens the matching Afdian checkout page. Put your site username in the order note (your site username, e.g. MC-Creator-Jerry) — benefits then activate automatically, no redeem step needed.">💡 点「去赞助」会跳到爱发电对应档位的下单页。付款时请在「订单留言」里写上你的站内用户名（例如 MC-Creator-Jerry），权益就会在付款后自动到账，不用再走兑换流程。</p>
-      <p class="note" data-zh="⚠️ 价格仍在试水阶段，随时可能调整；调整前已付款的档位按付款时的约定执行。也欢迎到留言页告诉我你觉得什么更值。"
-         data-en="⚠️ Pricing is still being tested and may change. Existing purchases keep the terms agreed at checkout. Tell me what you'd find valuable via the contact page.">⚠️ 价格仍在试水阶段，随时可能调整；调整前已付款的档位按付款时的约定执行。也欢迎到留言页告诉我你觉得什么更值。</p>
+      <p class="note"><i class="ic" data-ic="bulb" aria-hidden="true"></i><span data-zh="点「去赞助」会跳到爱发电对应档位的下单页。付款时请在「订单留言」里写上你的站内用户名（例如 MC-Creator-Jerry），权益就会在付款后自动到账，不用再走兑换流程。" data-en="“Sponsor” opens the matching Afdian checkout page. Put your site username in the order note (your site username, e.g. MC-Creator-Jerry) — benefits then activate automatically, no redeem step needed.">点「去赞助」会跳到爱发电对应档位的下单页。付款时请在「订单留言」里写上你的站内用户名（例如 MC-Creator-Jerry），权益就会在付款后自动到账，不用再走兑换流程。</span></p>
+      <p class="note"><i class="ic" data-ic="alert" aria-hidden="true"></i><span data-zh="价格仍在试水阶段，随时可能调整；调整前已付款的档位按付款时的约定执行。也欢迎到留言页告诉我你觉得什么更值。" data-en="Pricing is still being tested and may change. Existing purchases keep the terms agreed at checkout. Tell me what you'd find valuable via the contact page.">价格仍在试水阶段，随时可能调整；调整前已付款的档位按付款时的约定执行。也欢迎到留言页告诉我你觉得什么更值。</span></p>
     </section>
 
     <section class="card">
@@ -300,10 +307,11 @@
 
   <footer class="site-footer">
     <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../index.html" data-zh="返回主页" data-en="Home">返回主页</a> · <a href="../privacy/" data-zh="隐私政策" data-en="Privacy">隐私政策</a> · <a href="../contact.html" data-zh="留言 / 建议" data-en="Contact">留言 / 建议</a></div>
-  </footer>
+  <span class="uikit-foot"><a href="../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
 
   <!-- ==================================================================
-       ★ 收款链接配置：Jerry 只需要改这一段。
+        收款链接配置：Jerry 只需要改这一段。
        把对应平台的链接填进引号里即可；留空('')则按钮显示为「即将开放」。
        填好后保存 → 部署（deploy-cf.ps1 + deploy-xiaolan.ps1）就生效。
        ================================================================== -->
@@ -316,7 +324,9 @@
         member1:   '700bd638b37411f19f0a52540025c377',         // 小蓝页·1级成员 ¥32.50/月
         member1yr: '07d51df0b37811f1a7ea52540025c377',         // 小蓝页·1级成员 ¥360/年（更划算）
         teahouse_plus: '7005d7d6b73b11f1be2d5254001e7c00',     // 茶馆·发布功能升级 ¥13.25/月（爱发电 plan_id）
-        bundle:        '518675d8b93711f1a49352540025c377'      // 茶馆·片屿·书栈 捆绑包 ¥38/月（爱发电 plan_id）
+        music_plus:    'a5389f56bf8311f1a71252540025c377',     // 音乐电台·发布功能升级 ¥13.25/月（爱发电 plan_id）
+        bundle:        '518675d8b93711f1a49352540025c377',     // 茶馆·片屿·书栈·音乐电台 捆绑包 ¥40/月（爱发电 plan_id）
+        pianyu_upload: 'f28a2c8cdcf911f1820f52540025c377'      // 片屿·视频上传独立方案 ¥200/年（不公开挂价目表，仅片屿上传面板引导）
       },
       wechat:  '',   // 微信收款链接（点链接/扫码直接付款）
       alipay: '',   // 支付宝收款链接
@@ -348,12 +358,13 @@
       function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
       function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
       function applyLang() {
-        var en = cur.lang === 'en';
-        document.documentElement.lang = en ? 'en' : 'zh-CN';
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
         var nodes = document.querySelectorAll('[data-zh]');
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var txt = en ? (n.getAttribute('data-en') || n.textContent) : n.getAttribute('data-zh');
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
           if (txt != null) n.textContent = txt;
         }
       }
@@ -362,12 +373,12 @@
       var isEn = cur.lang === 'en';
       function L(zh, en) { return isEn ? en : zh; }
       var DEFS = [
-        { k: 'afdian',  emoji: '💙', zh: '爱发电',            en: 'Afdian',        zh2: '按月赞助或一次性打赏（国内推荐）', en2: 'Monthly or one-off support (best for CN)' },
-        { k: 'wechat',  emoji: '💚', zh: '微信赞赏',          en: 'WeChat Pay',    zh2: '扫码或点链接直接付款（国内推荐）', en2: 'Scan or tap to pay (CN)' },
-        { k: 'alipay',  emoji: '🔵', zh: '支付宝',            en: 'Alipay',        zh2: '扫码或点链接直接付款',            en2: 'Scan or tap to pay' },
-        { k: 'zsxq',    emoji: '🟠', zh: '知识星球',          en: 'Zsxq',          zh2: '付费社群，长期交流',            en2: 'Paid community for ongoing discussion' },
-        { k: 'xiaobt',  emoji: '📘', zh: '小报童专栏',        en: 'Xiaobot',       zh2: '付费专栏 / 连载',               en2: 'Paid column / series' },
-        { k: 'gumroad', emoji: '🌍', zh: 'Gumroad / 海外',    en: 'Gumroad',       zh2: '国际支付，适合海外用户',        en2: 'International cards, for overseas users' }
+        { k: 'afdian',  emoji: '<i class="ic" data-ic="heart"></i>', zh: '爱发电',            en: 'Afdian',        zh2: '按月赞助或一次性打赏（国内推荐）', en2: 'Monthly or one-off support (best for CN)' },
+        { k: 'wechat',  emoji: '<i class="ic" data-ic="heart"></i>', zh: '微信赞赏',          en: 'WeChat Pay',    zh2: '扫码或点链接直接付款（国内推荐）', en2: 'Scan or tap to pay (CN)' },
+        { k: 'alipay',  emoji: '<i class="ic" data-ic="dot"></i>', zh: '支付宝',            en: 'Alipay',        zh2: '扫码或点链接直接付款',            en2: 'Scan or tap to pay' },
+        { k: 'zsxq',    emoji: '<i class="ic" data-ic="dot"></i>', zh: '知识星球',          en: 'Zsxq',          zh2: '付费社群，长期交流',            en2: 'Paid community for ongoing discussion' },
+        { k: 'xiaobt',  emoji: '<i class="ic" data-ic="book-open"></i>', zh: '小报童专栏',        en: 'Xiaobot',       zh2: '付费专栏 / 连载',               en2: 'Paid column / series' },
+        { k: 'gumroad', emoji: '<i class="ic" data-ic="globe"></i>', zh: 'Gumroad / 海外',    en: 'Gumroad',       zh2: '国际支付，适合海外用户',        en2: 'International cards, for overseas users' }
       ];
       function renderPay() {
         var cfg = window.XL_SUPPORT || {};
@@ -421,8 +432,11 @@
       applyTheme(); applyFont(); applyRadius(); applyLang(); renderPay(); wirePlanButtons();
     })();
   </script>
-<script src="../auth.js?v=20260925c"></script>
-  <script src="../common.js?v=20260926a"></script>
-  <script src="../scroll-keys.js?v=20260926c" defer></script>
+<script src="../auth.js?v=20261103a"></script>
+  <script src="../common.js?v=20261111a"></script>
+  <script src="../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
 </body>
 </html>
+

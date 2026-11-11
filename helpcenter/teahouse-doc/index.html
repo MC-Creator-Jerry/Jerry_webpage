@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <script>
+  // 旧 GitHub Pages 站仅作静态镜像；登录版部署在 Cloudflare，自动跳转过去。
+  // pages.dev 域名下不触发，避免循环。
+  if (location.hostname.indexOf('github.io') !== -1) {
+    location.replace('https://mc-creator-jerry-webpage.pages.dev' + location.pathname.replace(/^\/Jerry_webpage/, ''));
+  }
+  </script>
+  <script src="../../boot.js?v=20261014b"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>茶馆 JerryTeahouse · 文档</title>
+<meta name="description" content="茶馆产品文档：发帖、帖子中心、@提及与转发、评论回复、收藏关注、通知与调度券打赏。" />
+<meta name="author" content="Jerry" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="茶馆 JerryTeahouse · 文档" />
+<meta property="og:description" content="茶馆产品文档：发帖、帖子中心、@提及与转发、评论回复、收藏关注、通知与调度券打赏。" />
+<meta property="og:site_name" content="Jerry's webpage" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="茶馆 JerryTeahouse · 文档" />
+<meta name="twitter:description" content="茶馆产品文档：发帖、帖子中心、@提及与转发、评论回复、收藏关注、通知与调度券打赏。" />
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=20260926" />
+<style>  
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: calc(16px * var(--font-scale)); }
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ---- 上方蓝条（渐变 + 面包屑） ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--bar-top);
+    background-image: linear-gradient(180deg, var(--bar-top) 0%, var(--bar-top) 45%, var(--bar-bottom) 100%);
+    color: var(--bar-fg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    border-radius: 0;
+  }
+  .bar-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .site-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .site-name:hover { opacity: 0.9; }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--bar-fg);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+  .breadcrumb .bc-sep { opacity: 0.6; }
+  .breadcrumb .bc-sub { opacity: 0.85; }
+  .breadcrumb a {
+    color: var(--bar-fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; opacity: 1; }
+  .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bar-fg);
+    border-radius: 0;
+    padding: 6px 11px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .bar-btn.icon { font-size: 1.05rem; padding: 6px 9px; }
+
+  /* ---- 内容区（目前留空，只保留 UI） ---- */
+  .content { max-width: 920px; margin: 0 auto; padding: 56px 24px 64px; }
+  .hero { margin-bottom: 36px; }
+  .hero h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+  }
+  .card {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .empty-tip {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ---- 文档正文 ---- */
+  .card p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 0 0 10px; }
+  .card ul { list-style: disc; margin: 6px 0 0; padding-left: 22px; }
+  .card ul li { font-size: 0.95rem; line-height: 1.8; color: var(--muted); margin: 7px 0; }
+  .card ul li b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .card .hint { color: var(--muted); margin-top: 12px; }
+  .card .doc-link a { color: var(--accent); }
+  details.faq { border-top: 1px solid var(--card-border); padding: 13px 0; }
+  details.faq:first-of-type { border-top: none; }
+  details.faq summary { cursor: pointer; font-weight: 700; font-size: 0.98rem; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.faq summary::-webkit-details-marker { display: none; }
+  details.faq summary:before { content: "＋"; color: var(--accent); font-weight: 800; }
+  details.faq[open] summary:before { content: "－"; }
+  details.faq .faq-body { font-size: 0.93rem; line-height: 1.8; color: var(--muted); padding: 8px 0 2px 22px; }
+
+  /* ---- 页脚 ---- */
+  .site-footer {
+    border-top: 1px solid var(--card-border);
+    margin-top: 48px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+  .site-footer a { color: var(--accent); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 14px; min-height: 56px; }
+    .site-name { font-size: 1.05rem; }
+    .breadcrumb { font-size: 0.85rem; }
+    .content { padding: 36px 16px 48px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+</style>
+  <link rel="stylesheet" href="../../common.css?v=20261103a" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="bar-left">
+      <a class="site-name" href="../../index.html">Jerry's webpage</a>
+      <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb">
+        <a id="bcMain" href="../../index.html" data-zh="主页" data-en="Home">主页</a>
+        <span class="bc-sep" id="bcSep">›</span>
+        <a href="../" data-zh="帮助中心" data-en="Help Center">帮助中心</a>
+        <span class="bc-sep">›</span>
+        <span class="bc-sub" id="bcSub" data-zh="茶馆 JerryTeahouse" data-en="JerryTeahouse">茶馆 JerryTeahouse</span>
+      </nav>
+    </div>
+    <div class="bar-right">
+      <a class="bar-btn" id="noticeBtn" href="../../notice/" data-zh="消息中心" data-en="Messages" data-zh-TW="消息中心" data-ja="メッセージ" data-ko="메시지" data-de="Nachrichten" data-fr="Messages">消息中心<span class="badge" id="noticeBadge" hidden></span></a>
+      
+      <a class="bar-btn" href="../../products.html" data-zh="产品" data-en="Products" data-zh-TW="產品" data-ja="製品" data-ko="제품" data-de="Produkte" data-fr="Produits">产品</a>
+      <a class="bar-btn" id="loginBtn" href="#" data-zh="登录" data-en="Sign in" data-zh-TW="登入" data-ja="ログイン" data-ko="로그인" data-de="Anmelden" data-fr="Se connecter">登录</a>
+      <a class="bar-btn" id="logoutBtn" href="#" data-zh="退出" data-en="Sign out" style="display:none" data-zh-TW="登出" data-ja="ログアウト" data-ko="로그아웃" data-de="Abmelden" data-fr="Se déconnecter">退出</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <h1 data-zh="茶馆 JerryTeahouse" data-en="JerryTeahouse">茶馆 JerryTeahouse</h1>
+      <p data-zh="一间独立的论坛茶室：慢慢泡茶、慢慢写字。小蓝页单点登录，进门就能发帖。" data-en="An independent tea room: brew slowly, write slowly. Single sign-on via Xiaolan — walk in and start posting.">一间独立的论坛茶室：慢慢泡茶、慢慢写字。小蓝页单点登录，进门就能发帖。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="能做什么" data-en="What It Can Do">能做什么</h2>
+      <ul>
+        <li><b data-zh="发帖" data-en="Post">发帖</b><span data-zh="在 /new/ 写新帖：提问、分享、随手记。" data-en="Write a new thread in /new/ — a question, a share, a note.">在 /new/ 写新帖：提问、分享、随手记。</span></li>
+        <li><b data-zh="帖子中心" data-en="Post centre">帖子中心</b><span data-zh="/posts/ 汇总全部帖子，按时间浏览。" data-en="/posts/ gathers every thread for browsing by time.">/posts/ 汇总全部帖子，按时间浏览。</span></li>
+        <li><b data-zh="@提及与转发" data-en="Mentions and reposts">@提及与转发</b><span data-zh="在正文里 @ 某人，或把帖子转发出去。" data-en="Mention someone with @ in the body, or repost a thread.">在正文里 @ 某人，或把帖子转发出去。</span></li>
+        <li><b data-zh="评论与回复" data-en="Comments and replies">评论与回复</b><span data-zh="对帖子下评论，并在评论下继续回复。" data-en="Comment on a thread and keep replying below the comment.">对帖子下评论，并在评论下继续回复。</span></li>
+        <li><b data-zh="收藏夹与关注" data-en="Favourites and follows">收藏夹与关注</b><span data-zh="收藏帖子、关注感兴趣的成员。" data-en="Save threads and follow the members you like.">收藏帖子、关注感兴趣的成员。</span></li>
+        <li><b data-zh="通知与打赏" data-en="Notices and tipping">通知与打赏</b><span data-zh="站内通知实时提醒回复与@提及；调度券可用于给喜欢的帖子打赏。" data-en="Site notices tell you about replies and mentions; scheduling vouchers let you tip the threads you enjoy.">站内通知实时提醒回复与@提及；调度券可用于给喜欢的帖子打赏。</span></li>
+        <li><b data-zh="档案页与管理台" data-en="Profile pages and admin console">档案页与管理台</b><span data-zh="/profile/?user=xxx 查看他人档案；管理员有专门的管理台。" data-en="Open /profile/?user=xxx to see someone's profile; admins get a dedicated console.">/profile/?user=xxx 查看他人档案；管理员有专门的管理台。</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="怎么登录" data-en="How to Sign In">怎么登录</h2>
+      <p data-zh="茶馆与小蓝页共用一套账户：用小蓝页账户登录，身份在各站之间互通。" data-en="JerryTeahouse shares one account with Xiaolan: sign in with your Xiaolan account and your identity carries across every site.">茶馆与小蓝页共用一套账户：用小蓝页账户登录，身份在各站之间互通。</p>
+      <ul>
+        <li><b data-zh="用小蓝页账户登录" data-en="Sign in with your Xiaolan account">用小蓝页账户登录</b><span data-zh="邮箱验证码或 GitHub 登录都行。" data-en="An email code or GitHub both work.">邮箱验证码或 GitHub 登录都行。</span></li>
+        <li><b data-zh="登录后自动获得创作者角色" data-en="Creator role comes with the sign-in">登录后自动获得创作者角色</b><span data-zh="发帖、评论、转发、收藏、打赏等创建者功能，登录后自动开放。" data-en="Posting, commenting, reposting, favouriting and tipping all unlock as soon as you sign in.">发帖、评论、转发、收藏、打赏等创建者功能，登录后自动开放。</span></li>
+        <li><b data-zh="身份互通" data-en="One identity everywhere">身份互通</b><span data-zh="在茶馆登录，其它站点自动识别同一身份，无需重复注册。" data-en="Sign in here and the other sites recognise the same identity — no repeat registration.">在茶馆登录，其它站点自动识别同一身份，无需重复注册。</span></li>
+      </ul>
+      <p class="hint" data-zh="提示：调度券在小蓝页每日签到获得，可以直接在茶馆给喜欢的帖子打赏。" data-en="Tip: scheduling vouchers come from the daily check-in on Xiaolan and can be spent tipping threads here.">提示：调度券在小蓝页每日签到获得，可以直接在茶馆给喜欢的帖子打赏。</p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="主要功能速查" data-en="Feature Quick Reference">主要功能速查</h2>
+      <ul>
+        <li><b data-zh="/new/" data-en="New post">/new/</b><span data-zh="写新帖。" data-en="Start a thread.">写新帖。</span></li>
+        <li><b data-zh="/posts/" data-en="Post centre">/posts/</b><span data-zh="浏览全部帖子。" data-en="Browse every thread.">浏览全部帖子。</span></li>
+        <li><b data-zh="@提及 / 转发" data-en="Mentions and reposts">@提及 / 转发</b><span data-zh="点名某人或把帖子分享出去。" data-en="Call someone out or share a thread.">点名某人或把帖子分享出去。</span></li>
+        <li><b data-zh="评论与回复" data-en="Comments and replies">评论与回复</b><span data-zh="帖子下评论并层层回复。" data-en="Comment and keep the thread going.">帖子下评论并层层回复。</span></li>
+        <li><b data-zh="收藏夹 / 关注" data-en="Favourites and follows">收藏夹 / 关注</b><span data-zh="收藏帖子、关注成员。" data-en="Save threads, follow members.">收藏帖子、关注成员。</span></li>
+        <li><b data-zh="/profile/?user=xxx" data-en="Member profile">/profile/?user=xxx</b><span data-zh="查看他人的档案页。" data-en="Open someone's profile page.">查看他人的档案页。</span></li>
+      </ul>
+      <p class="hint doc-link"><span data-zh="站点地址：" data-en="Site: ">站点地址：</span><a href="https://jerryteahouse.pages.dev/" target="_blank" rel="noopener" data-zh="打开茶馆" data-en="open JerryTeahouse">打开茶馆</a></p>
+    </section>
+
+    <section class="card">
+      <h2 data-zh="常见问题" data-en="FAQ">常见问题</h2>
+        <details class="faq">
+          <summary data-zh="怎么查看别人的主页？" data-en="How do I see someone else's profile?">怎么查看别人的主页？</summary>
+          <div class="faq-body" data-zh="打开 /profile/?user=用户名，把用户名换成对方即可。" data-en="Open /profile/?user=username and swap in their name.">打开 /profile/?user=用户名，把用户名换成对方即可。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="调度券怎么用？" data-en="How do I use a scheduling voucher?">调度券怎么用？</summary>
+          <div class="faq-body" data-zh="在帖子下用调度券打赏作者；调度券来自小蓝页每日签到。" data-en="Tip the author from under the thread; the vouchers come from the daily check-in on Xiaolan.">在帖子下用调度券打赏作者；调度券来自小蓝页每日签到。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="@提及对方会收到什么？" data-en="What does a mention do?">@提及对方会收到什么？</summary>
+          <div class="faq-body" data-zh="对方会在站内通知里看到提醒，点进去就能回到那条帖子。" data-en="They get a site notice, and tapping it takes them straight back to the thread.">对方会在站内通知里看到提醒，点进去就能回到那条帖子。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="在茶馆需要再注册一次吗？" data-en="Do I have to register again here?">在茶馆需要再注册一次吗？</summary>
+          <div class="faq-body" data-zh="不需要。用小蓝页账户登录即可，身份在各站之间互通。" data-en="No. Sign in with your Xiaolan account — your identity carries across every site.">不需要。用小蓝页账户登录即可，身份在各站之间互通。</div>
+        </details>
+        <details class="faq">
+          <summary data-zh="管理员有什么不同？" data-en="What is different for admins?">管理员有什么不同？</summary>
+          <div class="faq-body" data-zh="管理员登录后会多出管理台入口，可以处理站内的帖子与内容。" data-en="Admins get an extra console for handling posts and site content.">管理员登录后会多出管理台入口，可以处理站内的帖子与内容。</div>
+        </details>
+    </section>  </main>
+
+  <footer class="site-footer">
+    <div>© 2026 Jerry's webpage · 小蓝页 · <a href="../../index.html">返回主页</a> · <a href="../../contact.html" data-zh="联系与建议" data-en="Contact">联系与建议</a></div>
+  <span class="uikit-foot"><a href="../../sitemap.xml">站点地图</a> · <a href="https://mc-creator-jerry-webpage.pages.dev/feed.xml">RSS 订阅</a></span>
+</footer>
+
+  <div class="float-actions">
+    <a class="fab" id="langBtn" href="../../language.html"  aria-label="语言" title="语言">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+    </a>
+    <a class="fab" id="settingsBtn" href="../../settings/homepage.html"  aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      var K = { lang: 'xl_lang', theme: 'xl_theme', font: 'xl_font', radius: 'xl_radius' };
+      function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+
+      var cur = {
+        lang: get(K.lang, 'zh'),
+        theme: get(K.theme, 'light'),
+        font: get(K.font, '1'),
+        radius: get(K.radius, '14')
+      };
+
+      function applyTheme() { document.documentElement.setAttribute('data-theme', cur.theme); }
+      function applyFont() { document.documentElement.style.setProperty('--font-scale', cur.font); }
+      function applyRadius() { document.documentElement.style.setProperty('--radius', cur.radius + 'px'); }
+      function applyLang() {
+        var xlL = cur.lang; var L = (xlL === 'zh' || xlL === 'en' || xlL === 'zh-TW' || xlL === 'ja' || xlL === 'ko' || xlL === 'de' || xlL === 'fr') ? xlL : 'zh';
+        document.documentElement.lang = (L === 'zh' ? 'zh-CN' : L);
+        var nodes = document.querySelectorAll('[data-zh]');
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          var spec = n.getAttribute('data-' + L);
+          var txt = spec != null ? spec : (n.getAttribute('data-en') || n.getAttribute('data-zh'));
+          if (txt != null) n.textContent = txt;
+        }
+      }
+      function applyAll() { applyTheme(); applyFont(); applyRadius(); applyLang(); }
+      applyAll();
+    })();
+  </script>
+  <script src="../../auth.js?v=20261103a"></script>
+  <script src="../../common.js?v=20261111a"></script>
+  <script src="../../scroll-keys.js?v=20261014b" defer></script>
+<script src="/assets/toast.js?v=20261030a" defer></script>
+  <script src="../../assets/ui-kit.js?v=20261109a" data-uikit="lazy,keys,skeleton,sw"></script>
+</body>
+</html>
+
+
